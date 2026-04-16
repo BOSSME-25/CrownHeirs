@@ -1,0 +1,1474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Crown Heirs Hair Den — Find Your Service</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Cinzel:wght@400;500&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+
+/* ═══════════════════════════════════════════
+   DESIGN TOKENS — matched to crownheirs.com
+═══════════════════════════════════════════ */
+:root {
+  /* Backgrounds — warm greige, same as the site */
+  --bg:          #ece8e2;
+  --bg-section:  #e6e1da;
+  --surface:     #ffffff;
+  --surface-dim: #f5f2ee;
+
+  /* Primary action — terracotta/clay, exact match */
+  --terra:       #a0624a;
+  --terra-hi:    #b8714f;
+  --terra-lo:    #c8a898;
+
+  /* Gold — used sparingly, logo + accents only */
+  --gold:        #c8952a;
+  --gold-hi:     #e0aa35;
+  --gold-star:   #d4a017;
+
+  /* Text */
+  --ink:         #1a1816;
+  --ink-mid:     #4a4540;
+  --ink-dim:     #8a837a;
+  --ink-faint:   #b8b0a8;
+
+  /* Borders */
+  --border:      rgba(26,24,22,0.10);
+  --border-mid:  rgba(26,24,22,0.20);
+
+  /* Typography */
+  --font-ui:     'Jost', sans-serif;
+  --font-serif:  'Cormorant Garamond', serif;
+  --font-display:'Cinzel', serif;
+
+  /* Sizing */
+  --r-s:   6px;
+  --r-m:   12px;
+  --r-l:   18px;
+  --r-pill:100px;
+
+  --space-xs: 8px;
+  --space-s:  16px;
+  --space-m:  28px;
+  --space-l:  48px;
+}
+
+/* ═══════════════════════════════════════════
+   BASE
+═══════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-weight: 300;
+  font-size: 16px;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ═══════════════════════════════════════════
+   SCREEN SYSTEM
+═══════════════════════════════════════════ */
+.screen { display: none; min-height: 100vh; flex-direction: column; }
+.screen.active { display: flex; }
+
+.subscreen { display: none; }
+.subscreen.active { display: block; animation: fadeUp 0.35s ease; }
+@keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+
+/* ═══════════════════════════════════════════
+   SITE HEADER — matches crownheirs.com exactly
+═══════════════════════════════════════════ */
+.site-header {
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  padding: 0 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+  position: sticky; top: 0; z-index: 200;
+}
+.site-logo {
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink);
+  display: flex; align-items: center; gap: 8px;
+  text-decoration: none;
+}
+.logo-mark {
+  height: 32px;
+  width: auto;
+  display: block;
+}
+.site-nav {
+  display: flex; align-items: center; gap: 28px;
+}
+.site-nav a {
+  font-family: var(--font-ui);
+  font-size: 0.82rem;
+  font-weight: 400;
+  color: var(--ink-mid);
+  text-decoration: none;
+  letter-spacing: 0.04em;
+  transition: color 0.2s;
+}
+.site-nav a:hover { color: var(--ink); }
+.site-nav .nav-cta {
+  background: var(--terra);
+  color: #fff;
+  padding: 9px 22px;
+  border-radius: var(--r-pill);
+  font-weight: 400;
+  font-size: 0.82rem;
+  transition: background 0.2s;
+}
+.site-nav .nav-cta:hover { background: var(--terra-hi); color: #fff; }
+@media(max-width:680px) {
+  .site-nav { display: none; }
+  .site-header { justify-content: center; }
+}
+
+/* ═══════════════════════════════════════════
+   PROGRESS BAR — light, subtle
+═══════════════════════════════════════════ */
+.progress-bar-wrap {
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 32px;
+}
+.progress-bar-inner {
+  max-width: 440px;
+  margin: 0 auto;
+}
+.progress-rail {
+  height: 2px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+.progress-fill {
+  height: 100%;
+  background: var(--terra);
+  transition: width 0.45s cubic-bezier(0.4,0,0.2,1);
+}
+.progress-labels {
+  display: flex; justify-content: space-between;
+}
+.progress-labels span {
+  font-size: 0.6rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  font-weight: 400;
+  transition: color 0.3s;
+}
+.progress-labels span.act { color: var(--terra); }
+.progress-labels span.dn  { color: var(--ink-dim); }
+
+/* ═══════════════════════════════════════════
+   AGENT VOICE BLOCK
+   Warm, light — feels like a chat bubble on the site
+═══════════════════════════════════════════ */
+.agent-block {
+  max-width: 660px;
+  margin: var(--space-m) auto var(--space-xs);
+  padding: 0 var(--space-m);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-s);
+}
+.agent-id {
+  display: flex; flex-direction: column;
+  align-items: center; gap: 4px; flex-shrink: 0;
+}
+.agent-ring {
+  width: 38px; height: 38px; border-radius: 50%;
+  background: var(--ink); color: var(--gold);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.9rem;
+  border: 2px solid var(--ink);
+}
+.agent-ring.bethany { background: var(--surface-dim); color: var(--ink-mid); border-color: var(--border-mid); }
+.agent-name {
+  font-size: 0.52rem; letter-spacing: 0.14em;
+  text-transform: uppercase; font-weight: 500;
+  color: var(--ink-dim);
+}
+.agent-bubble {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 2px var(--r-l) var(--r-l) var(--r-l);
+  padding: 14px 18px;
+  flex: 1;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.agent-bubble p {
+  font-family: var(--font-serif);
+  font-size: 1.08rem;
+  line-height: 1.7;
+  color: var(--ink);
+}
+
+/* ═══════════════════════════════════════════
+   SECTION HEADING
+═══════════════════════════════════════════ */
+.sec-head {
+  text-align: center;
+  margin: var(--space-m) var(--space-s) var(--space-s);
+}
+.sec-head h2 {
+  font-family: var(--font-ui);
+  font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+  font-weight: 400;
+  color: var(--ink);
+  letter-spacing: 0.01em;
+  margin-bottom: 5px;
+}
+.sec-head p {
+  font-size: 0.88rem;
+  color: var(--ink-dim);
+  font-weight: 300;
+}
+
+/* ═══════════════════════════════════════════
+   CARDS — white, clean, like site service cards
+═══════════════════════════════════════════ */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-m);
+  transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+.card:hover {
+  border-color: var(--border-mid);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 28px rgba(0,0,0,0.08);
+}
+.card.sel {
+  border-color: var(--terra);
+  box-shadow: 0 0 0 2px rgba(160,98,74,0.18), 0 6px 20px rgba(0,0,0,0.07);
+}
+.card.sel::after {
+  content: '✓';
+  position: absolute; top: 10px; right: 10px;
+  width: 22px; height: 22px;
+  background: var(--terra); color: #fff;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.65rem; font-weight: 600; z-index: 3;
+}
+.card.locked {
+  opacity: 0.3;
+  pointer-events: none;
+  transform: none !important;
+}
+
+/* Card visual area */
+.card-vis {
+  width: 100%;
+  display: flex; align-items: center; justify-content: center;
+  position: relative; overflow: hidden;
+  font-size: 2rem;
+}
+
+/* Warm photo-style placeholders */
+.ph1 { background: linear-gradient(145deg,#e8d8c8,#d4c0a8,#c8b090); }
+.ph2 { background: linear-gradient(145deg,#c8d8c0,#b0c4a0,#98b080); }
+.ph3 { background: linear-gradient(145deg,#d8c8e0,#c0a8d0,#a890b8); }
+.ph4 { background: linear-gradient(145deg,#e0d0b0,#ccc090,#b8a870); }
+.ph5 { background: linear-gradient(145deg,#b8d4c0,#98c0a8,#78a888); }
+.ph6 { background: linear-gradient(145deg,#d8b8b0,#c8a098,#b88878); }
+.ph7 { background: linear-gradient(145deg,#c8c8d8,#b0b0c8,#9898b0); }
+.ph8 { background: linear-gradient(145deg,#d8d0b8,#c8c0a0,#b8b088); }
+
+.card-body { padding: 14px 16px 16px; }
+.card-body h3 {
+  font-family: var(--font-ui);
+  font-size: 0.82rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--ink);
+  margin-bottom: 5px;
+}
+.card-body p {
+  font-size: 0.78rem;
+  color: var(--ink-dim);
+  line-height: 1.5;
+  font-weight: 300;
+}
+
+/* ═══════════════════════════════════════════
+   PILLS — match site's clean input style
+═══════════════════════════════════════════ */
+.pill-row { display: flex; flex-wrap: wrap; gap: var(--space-xs); }
+.pill {
+  background: var(--surface);
+  border: 1px solid var(--border-mid);
+  color: var(--ink-mid);
+  padding: 9px 18px;
+  border-radius: var(--r-pill);
+  font-size: 0.82rem;
+  font-family: var(--font-ui); font-weight: 300;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s, background 0.2s;
+}
+.pill:hover { border-color: var(--terra-lo); color: var(--ink); }
+.pill.sel {
+  background: var(--terra);
+  border-color: var(--terra);
+  color: #fff;
+}
+
+/* ═══════════════════════════════════════════
+   BUTTONS — terracotta pill (exact site match)
+   and outlined variant
+═══════════════════════════════════════════ */
+.btn-terra {
+  background: var(--terra);
+  border: none; color: #fff;
+  font-family: var(--font-ui); font-weight: 400;
+  font-size: 0.82rem; letter-spacing: 0.04em;
+  padding: 12px 28px; border-radius: var(--r-pill);
+  cursor: pointer; transition: background 0.2s, transform 0.15s;
+  display: inline-block; text-decoration: none; text-align: center;
+}
+.btn-terra:hover { background: var(--terra-hi); transform: translateY(-1px); }
+.btn-terra:disabled { background: var(--ink-faint); cursor: not-allowed; transform: none; }
+
+.btn-outline {
+  background: var(--surface);
+  border: 1px solid var(--ink); color: var(--ink);
+  font-family: var(--font-ui); font-weight: 400;
+  font-size: 0.82rem; letter-spacing: 0.04em;
+  padding: 12px 28px; border-radius: var(--r-pill);
+  cursor: pointer; transition: all 0.2s;
+  display: inline-block; text-decoration: none; text-align: center;
+}
+.btn-outline:hover { background: var(--ink); color: #fff; }
+
+.btn-text-link {
+  background: none; border: none;
+  color: var(--ink-dim); font-family: var(--font-serif);
+  font-style: italic; font-size: 0.9rem;
+  cursor: pointer; text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 0.2s;
+}
+.btn-text-link:hover { color: var(--ink); }
+
+/* ═══════════════════════════════════════════
+   NAV ROW
+═══════════════════════════════════════════ */
+.nav-row {
+  max-width: 780px; margin: 0 auto;
+  padding: var(--space-s) var(--space-m) var(--space-l);
+  display: flex; justify-content: space-between; align-items: center;
+}
+.btn-back {
+  background: none; border: none;
+  color: var(--ink-dim); font-family: var(--font-ui);
+  font-size: 0.8rem; font-weight: 300;
+  cursor: pointer; transition: color 0.2s;
+  padding: 0;
+}
+.btn-back::before { content: '← '; }
+.btn-back:hover { color: var(--ink); }
+
+/* ═══════════════════════════════════════════
+   SERVICE RESULT CARDS — match site service menu
+═══════════════════════════════════════════ */
+.scard {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-m);
+  overflow: hidden;
+  transition: box-shadow 0.25s, transform 0.25s;
+  cursor: pointer;
+}
+.scard:hover {
+  box-shadow: 0 6px 24px rgba(0,0,0,0.08);
+  transform: translateY(-3px);
+}
+.scard-vis {
+  width: 100%; aspect-ratio: 16/9;
+  display: flex; align-items: center; justify-content: center;
+  position: relative; font-size: 2.4rem;
+}
+.sbadge {
+  position: absolute; top: 10px; left: 10px;
+  background: var(--terra); color: #fff;
+  font-size: 0.58rem; font-weight: 500;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 4px 10px; border-radius: var(--r-pill);
+}
+.scard-body { padding: 16px; }
+.scard-body h3 {
+  font-family: var(--font-ui); font-weight: 500;
+  font-size: 0.9rem; color: var(--ink);
+  margin-bottom: 6px;
+}
+.scard-body p {
+  font-size: 0.8rem; color: var(--ink-dim);
+  line-height: 1.55; margin-bottom: 12px; font-weight: 300;
+}
+.scard-meta {
+  display: flex; justify-content: space-between;
+  align-items: center; padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+.scard-meta .dur { font-size: 0.75rem; color: var(--ink-faint); }
+.scard-meta .price { font-weight: 500; font-size: 0.85rem; color: var(--ink); }
+.book-now-btn {
+  display: block;
+  width: calc(100% - 32px); margin: 0 16px 16px;
+  background: var(--terra); color: #fff;
+  font-family: var(--font-ui); font-weight: 400;
+  font-size: 0.78rem; letter-spacing: 0.04em;
+  text-align: center; padding: 11px;
+  border-radius: var(--r-pill); border: none;
+  cursor: pointer; text-decoration: none;
+  transition: background 0.2s;
+}
+.book-now-btn:hover { background: var(--terra-hi); }
+
+/* ═══════════════════════════════════════════
+   CHAT MODULE
+═══════════════════════════════════════════ */
+.chat-module {
+  max-width: 620px; margin: 0 auto var(--space-s);
+  padding: 0 var(--space-m);
+}
+.chat-log {
+  display: flex; flex-direction: column; gap: 10px;
+  max-height: 200px; overflow-y: auto; margin-bottom: 12px;
+}
+.chat-log:empty { display: none; }
+.chat-row { display: flex; gap: 10px; }
+.chat-input {
+  flex: 1; background: var(--surface);
+  border: 1px solid var(--border-mid);
+  border-radius: var(--r-pill);
+  padding: 11px 18px;
+  font-family: var(--font-ui); font-size: 0.82rem;
+  color: var(--ink); outline: none;
+  transition: border-color 0.2s;
+}
+.chat-input:focus { border-color: var(--terra-lo); }
+.chat-input::placeholder { color: var(--ink-faint); }
+.chat-send {
+  background: var(--terra); border: none;
+  border-radius: var(--r-pill);
+  width: 44px; height: 44px; flex-shrink: 0;
+  cursor: pointer; font-size: 0.9rem; color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.2s;
+}
+.chat-send:hover { background: var(--terra-hi); }
+.msg {
+  font-family: var(--font-serif); font-size: 1rem;
+  padding: 10px 16px; border-radius: 10px;
+  line-height: 1.55; animation: fadeUp 0.3s ease;
+}
+.msg.u {
+  background: var(--bg-section); border: 1px solid var(--border);
+  color: var(--ink); align-self: flex-end; max-width: 84%;
+  border-radius: 14px 14px 2px 14px;
+}
+.msg.a {
+  background: var(--surface); border: 1px solid var(--border);
+  color: var(--ink); align-self: flex-start; max-width: 90%;
+  border-radius: 2px 14px 14px 14px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.msg.a::before { content: '👑 '; font-size: 0.82em; }
+
+/* ═══════════════════════════════════════════
+   LAYOUT CONTAINERS
+═══════════════════════════════════════════ */
+.container {
+  max-width: 780px; margin: 0 auto;
+  padding: 0 var(--space-m);
+  position: relative;
+}
+.grid-2up { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px,1fr)); gap: 14px; }
+.grid-4up { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; }
+.grid-3up { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
+.grid-goals { display: grid; grid-template-columns: repeat(auto-fill, minmax(148px,1fr)); gap: 10px; }
+.grid-inspo { display: grid; grid-template-columns: repeat(auto-fill, minmax(172px,1fr)); gap: 12px; }
+@media(max-width:520px) { .grid-4up { grid-template-columns: repeat(2,1fr); } }
+@media(max-width:500px) { .grid-3up { grid-template-columns: 1fr; } }
+
+/* ═══════════════════════════════════════════
+   FOOTER
+═══════════════════════════════════════════ */
+footer {
+  background: var(--bg-section);
+  border-top: 1px solid var(--border);
+  text-align: center; padding: var(--space-m) var(--space-s);
+  margin-top: auto;
+}
+footer p { font-size: 0.72rem; color: var(--ink-faint); }
+footer a { color: var(--ink-dim); text-decoration: none; }
+footer a:hover { color: var(--ink); }
+
+/* ═══════════════════════════════════════════
+   ①  WELCOME — HERO + THREE DOORS
+═══════════════════════════════════════════ */
+#welcome { background: var(--bg); }
+
+/* Hero — mimics the site's full-bleed photo header */
+.hero {
+  position: relative;
+  height: 340px;
+  background: var(--ink);
+  overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+  padding: var(--space-m) 0;
+}
+.hero-bg {
+  position: absolute; inset: 0;
+  background: linear-gradient(160deg, #2a221a 0%, #1e1810 50%, #2e2418 100%);
+}
+.hero-content {
+  position: relative; z-index: 1;
+  text-align: center;
+}
+.hero-logo-mark {
+  width: 220px;
+  margin: 0 auto 0;
+  display: block;
+  mix-blend-mode: lighten;
+  filter: drop-shadow(0 4px 24px rgba(0,0,0,0.3));
+}
+.hero-wordmark { display: none; }
+.hero-tagline { display: none; }
+
+/* Welcome dialogue */
+.welcome-body {
+  max-width: 680px; margin: 0 auto;
+  padding: var(--space-l) var(--space-m) var(--space-m);
+  text-align: center;
+}
+.welcome-dialogue {
+  min-height: 80px;
+  margin-bottom: var(--space-m);
+}
+.w-line {
+  font-family: var(--font-serif);
+  font-size: clamp(1.5rem, 4vw, 2.2rem);
+  font-weight: 300; line-height: 1.3;
+  color: var(--ink);
+  opacity: 0; transform: translateY(8px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+  display: block;
+}
+.w-line.show { opacity: 1; transform: translateY(0); }
+
+.welcome-divider {
+  width: 36px; height: 1px;
+  background: var(--terra);
+  margin: var(--space-s) auto;
+  opacity: 0; transition: opacity 0.5s ease;
+}
+.welcome-divider.show { opacity: 1; }
+
+.welcome-prompt {
+  font-size: 0.8rem; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--ink-dim);
+  margin-bottom: var(--space-m); font-weight: 400;
+  opacity: 0; transition: opacity 0.4s ease;
+}
+.welcome-prompt.show { opacity: 1; }
+
+/* Three door cards */
+.doors {
+  display: grid; grid-template-columns: repeat(3,1fr); gap: 12px;
+  opacity: 0; transform: translateY(14px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.doors.show { opacity: 1; transform: translateY(0); }
+@media(max-width:620px) { .doors { grid-template-columns: 1fr; } }
+
+.door {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-l);
+  padding: 22px 18px 20px;
+  cursor: pointer; text-align: left;
+  transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s;
+}
+.door:hover {
+  border-color: var(--terra-lo);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.08);
+}
+.door-num {
+  font-size: 0.58rem; letter-spacing: 0.2em;
+  text-transform: uppercase; color: var(--ink-faint);
+  display: block; margin-bottom: 12px; font-weight: 400;
+}
+.door-icon { font-size: 1.7rem; display: block; margin-bottom: 10px; }
+.door-title {
+  font-family: var(--font-ui); font-weight: 500;
+  font-size: 0.85rem; color: var(--ink);
+  margin-bottom: 8px; line-height: 1.4;
+}
+.door-desc {
+  font-family: var(--font-serif); font-size: 0.95rem;
+  color: var(--ink-dim); line-height: 1.55;
+  margin-bottom: 16px;
+}
+.door-cta {
+  font-size: 0.72rem; font-weight: 500;
+  color: var(--terra); letter-spacing: 0.04em;
+  display: inline-flex; align-items: center; gap: 4px;
+  transition: gap 0.2s;
+}
+.door:hover .door-cta { gap: 8px; }
+
+/* ═══════════════════════════════════════════
+   INSPO CARDS — Door 3
+═══════════════════════════════════════════ */
+.inspo-card {
+  border-radius: var(--r-m); overflow: hidden;
+  border: 2px solid transparent; cursor: pointer;
+  position: relative; aspect-ratio: 3/4;
+  background: var(--surface);
+  transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s;
+}
+.inspo-card:hover {
+  border-color: var(--terra-lo);
+  transform: scale(1.02);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+.inspo-card.sel {
+  border-color: var(--terra);
+  box-shadow: 0 0 0 3px rgba(160,98,74,0.18);
+}
+.inspo-card.sel::after {
+  content: '✓'; position: absolute; top: 10px; right: 10px;
+  width: 26px; height: 26px; background: var(--terra); color: #fff;
+  border-radius: 50%; display: flex; align-items: center;
+  justify-content: center; font-size: 0.72rem; font-weight: 700; z-index: 4;
+}
+.inspo-img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+  transition: transform 0.4s ease;
+}
+.inspo-card:hover .inspo-img { transform: scale(1.04); }
+.inspo-ph {
+  width: 100%; height: 100%;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 10px;
+}
+.inspo-ph-icon { font-size: 2.8rem; }
+.inspo-ph-label {
+  font-size: 0.65rem; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--ink-faint); font-weight: 400;
+}
+.inspo-overlay {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: linear-gradient(transparent, rgba(20,16,12,0.78));
+  padding: 28px 12px 12px;
+}
+.inspo-overlay h3 {
+  font-size: 0.72rem; font-weight: 500; color: #fff;
+  letter-spacing: 0.04em; margin-bottom: 2px;
+}
+.inspo-overlay p { font-size: 0.68rem; color: rgba(255,255,255,0.72); }
+
+/* Face/skin match cards */
+.mcard { padding: 18px 12px; text-align: center; }
+.mcard-icon { font-size: 1.7rem; display: block; margin-bottom: 8px; }
+.mcard .card-body h3 { font-size: 0.72rem; }
+
+/* Try-on module */
+.tryon-box { max-width: 600px; margin: 0 auto var(--space-m); padding: 0 var(--space-m); }
+.tryon-inner {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-l); padding: var(--space-m) 28px;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+}
+.tryon-badge {
+  display: inline-block; margin-bottom: var(--space-s);
+  background: var(--bg-section); border: 1px solid var(--border-mid);
+  color: var(--ink-mid); font-size: 0.6rem;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  padding: 5px 14px; border-radius: var(--r-pill); font-weight: 400;
+}
+.tryon-inner h3 {
+  font-family: var(--font-ui); font-weight: 400;
+  font-size: 1.2rem; color: var(--ink); margin-bottom: 10px;
+}
+.tryon-inner > p {
+  font-family: var(--font-serif); font-size: 1rem;
+  color: var(--ink-dim); line-height: 1.65;
+  margin-bottom: var(--space-m); max-width: 400px;
+  margin-left: auto; margin-right: auto;
+}
+
+/* Match results */
+.match-results-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(200px,1fr));
+  gap: 14px; max-width: 780px;
+  margin: 0 auto; padding: 0 var(--space-m) var(--space-m);
+}
+.mresult {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r-m); overflow: hidden;
+  transition: box-shadow 0.25s, transform 0.25s;
+}
+.mresult:hover { box-shadow: 0 6px 22px rgba(0,0,0,0.07); transform: translateY(-3px); }
+.mresult-vis { width: 100%; aspect-ratio: 3/4; display: flex; align-items: center; justify-content: center; font-size: 3rem; }
+.mresult-body { padding: 14px; }
+.mresult-body h3 { font-weight: 500; font-size: 0.88rem; color: var(--ink); margin-bottom: 5px; }
+.mresult-body p { font-size: 0.78rem; color: var(--ink-dim); line-height: 1.45; margin-bottom: 12px; font-weight: 300; }
+.mresult-meta { display: flex; justify-content: space-between; border-top: 1px solid var(--border); padding-top: 10px; margin-bottom: 12px; }
+.mresult-meta span { font-size: 0.72rem; color: var(--ink-faint); }
+.mresult-meta strong { font-weight: 500; font-size: 0.82rem; color: var(--ink); }
+
+/* Profile section */
+.profile-sec { max-width: 560px; margin: 0 auto; padding: 0 var(--space-m); }
+.pq { margin-bottom: 24px; }
+.pq > label {
+  display: block; font-size: 0.7rem; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--ink-dim);
+  font-weight: 400; margin-bottom: 12px;
+}
+
+/* Length cards */
+.length-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; max-width: 660px; margin: 0 auto; padding: 0 var(--space-m); }
+@media(max-width:520px) { .length-grid { grid-template-columns: repeat(2,1fr); } }
+.lcard { text-align: center; padding-bottom: 14px; }
+.lcard-vis { padding: 18px 0 10px; display: flex; flex-direction: column; align-items: center; }
+.l-head { width: 26px; height: 26px; background: var(--ink); border-radius: 50%; opacity: 0.5; }
+.l-strand { width: 8px; margin-top: 2px; background: linear-gradient(180deg, var(--ink) 0%, transparent 100%); border-radius: 0 0 4px 4px; opacity: 0.35; }
+.lcard .card-body { padding: 0 10px 0; }
+
+/* ═══════════════════════════════════════════
+   SECTION BG ALTERNATION — matches site rhythm
+═══════════════════════════════════════════ */
+.bg-alt { background: var(--bg-section); padding: var(--space-m) 0; }
+
+
+/* ═══════════════════════════════════════════
+   SPLASH — full screen cinematic entrance
+═══════════════════════════════════════════ */
+.splash {
+  position: fixed; inset: 0; z-index: 1000;
+  display: flex; align-items: center; justify-content: center;
+  background: #ece8e2;
+  transition: opacity 0.8s ease;
+}
+.splash.fade-out { opacity: 0; pointer-events: none; }
+.splash-bg {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 60% 50% at 50% 35%, rgba(200,149,42,0.10), transparent);
+}
+.splash-inner {
+  position: relative; z-index: 1;
+  text-align: center;
+  display: flex; flex-direction: column;
+  align-items: center; gap: 0;
+  padding: 20px;
+}
+.splash-logo {
+  width: min(300px, 68vw);
+  animation: splashFloat 4s ease-in-out infinite;
+  filter: drop-shadow(0 8px 20px rgba(0,0,0,0.12));
+}
+@keyframes splashFloat {
+  0%,100% { transform: translateY(0px); }
+  50%      { transform: translateY(-10px); }
+}
+.splash-dialogue {
+  min-height: 56px;
+  margin: 4px 0 20px;
+}
+.splash-line {
+  font-family: var(--font-serif);
+  font-size: clamp(1.4rem, 4vw, 2rem);
+  color: var(--ink);
+  font-weight: 300;
+  opacity: 0; transform: translateY(6px);
+  transition: opacity 0.55s ease, transform 0.55s ease;
+  display: block;
+}
+.splash-line.show { opacity: 1; transform: translateY(0); }
+.splash-enter {
+  background: var(--terra); color: #fff;
+  border: none; font-family: var(--font-ui);
+  font-size: 0.82rem; font-weight: 400;
+  letter-spacing: 0.08em;
+  padding: 13px 36px; border-radius: var(--r-pill);
+  cursor: pointer;
+  transition: background 0.2s, opacity 0.6s ease, transform 0.2s;
+}
+.splash-enter:hover { background: var(--terra-hi); transform: translateY(-1px); }
+
+/* ═══════════════════════════════════════════
+   PORTAL — three doors with floating logo
+═══════════════════════════════════════════ */
+.portal {
+  max-width: 780px; margin: 0 auto;
+  padding: 40px var(--space-m) var(--space-l);
+  animation: fadeUp 0.6s ease;
+}
+.portal-floater-wrap {
+  display: flex; justify-content: center;
+  margin-bottom: 24px;
+  position: relative; z-index: 2;
+}
+.portal-floater {
+  width: min(200px, 45vw);
+  animation: splashFloat 4s ease-in-out infinite;
+  filter: drop-shadow(0 6px 16px rgba(0,0,0,0.12));
+}
+.portal-prompt {
+  text-align: center;
+  font-size: 0.78rem; letter-spacing: 0.2em;
+  text-transform: uppercase; color: var(--ink-dim);
+  font-weight: 400; margin-bottom: var(--space-m);
+}
+.portal-doors {
+  display: grid; grid-template-columns: repeat(3,1fr); gap: 12px;
+}
+@media(max-width:620px) { .portal-doors { grid-template-columns: 1fr; } }
+
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════
+     WELCOME
+════════════════════════════════════════ -->
+<div class="screen active" id="welcome">
+
+  <!-- Site nav — matches crownheirs.com header -->
+  <header class="site-header">
+    <a class="site-logo" href="#"><svg class="logo-mark" viewBox="0 0 48 40" xmlns="http://www.w3.org/2000/svg" aria-label="Crown Heirs">
+  <!-- base arc of crown -->
+  <path d="M4 30 Q6 28 8 30 L10 14 L16 24 L24 6 L32 24 L38 14 L40 30 Q42 28 44 30" 
+        fill="none" stroke="#c8952a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- small loop detail at right base (matches brand) -->
+  <circle cx="44" cy="30" r="1.8" fill="none" stroke="#c8952a" stroke-width="1.8"/>
+  <!-- crown base band -->
+  <path d="M4 30 Q24 34 44 30" fill="none" stroke="#c8952a" stroke-width="2.2" stroke-linecap="round"/>
+</svg></a>
+    <nav class="site-nav">
+      <a href="#">Home</a>
+      <a href="#">About Us</a>
+      <a href="#">Shop All</a>
+      <a href="#">Memberships</a>
+      <a href="https://crownheirs.com" class="nav-cta" target="_blank">Book</a>
+    </nav>
+  </header>
+
+  <!-- SPLASH SCREEN (full-screen cinematic entrance) -->
+  <div class="splash" id="splash">
+    <div class="splash-bg"></div>
+    <div class="splash-inner">
+      <img class="splash-logo" src="/images/logo-1.png" alt="Crown Heirs Hair Den">
+      <div class="splash-dialogue" id="splashDialogue"></div>
+      <button class="splash-enter" id="splashEnter" onclick="enterDen()" style="opacity:0">
+        Enter The Den
+      </button>
+    </div>
+  </div>
+
+  <!-- PORTAL (three doors — shown after splash) -->
+  <div class="portal" id="portal" style="display:none">
+    <div class="portal-floater-wrap">
+      <img class="portal-floater" src="/images/logo-1.png" alt="Crown Heirs Hair Den">
+    </div>
+    <div class="portal-prompt" id="portalPrompt">How can we help you today?</div>
+    <div class="portal-doors" id="portalDoors">
+      <div class="door" onclick="openDoor(1)">
+        <span class="door-num">Option One</span>
+        <span class="door-icon">📅</span>
+        <div class="door-title">I know exactly what I need</div>
+        <div class="door-desc">Skip everything — take me straight to booking.</div>
+        <span class="door-cta">Book Now →</span>
+      </div>
+      <div class="door" onclick="openDoor(2)">
+        <span class="door-num">Option Two</span>
+        <span class="door-icon">💬</span>
+        <div class="door-title">I know my style, not the name</div>
+        <div class="door-desc">Answer a few questions and we'll match you to the right service.</div>
+        <span class="door-cta">Guide Me →</span>
+      </div>
+      <div class="door" onclick="openDoor(3)">
+        <span class="door-num">Option Three</span>
+        <span class="door-icon">✨</span>
+        <div class="door-title">Show me — I'll know it when I see it</div>
+        <div class="door-desc">Browse inspiration photos and find your look.</div>
+        <span class="door-cta">Inspire Me →</span>
+      </div>
+    </div>
+  </div>
+
+
+
+  <footer><p>Crown Heirs Hair Den · Phoenix, Arizona · <a href="mailto:info@crownheirs.com">info@crownheirs.com</a> · <a href="https://crownheirs.com">crownheirs.com</a></p></footer>
+</div>
+
+<!-- ═══════════════════════════════════════
+     DOOR 2 — GUIDED QUIZ
+════════════════════════════════════════ -->
+<div class="screen" id="door2">
+  <header class="site-header">
+    <a class="site-logo" href="#"><svg class="logo-mark" viewBox="0 0 48 40" xmlns="http://www.w3.org/2000/svg" aria-label="Crown Heirs">
+  <!-- base arc of crown -->
+  <path d="M4 30 Q6 28 8 30 L10 14 L16 24 L24 6 L32 24 L38 14 L40 30 Q42 28 44 30" 
+        fill="none" stroke="#c8952a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- small loop detail at right base (matches brand) -->
+  <circle cx="44" cy="30" r="1.8" fill="none" stroke="#c8952a" stroke-width="1.8"/>
+  <!-- crown base band -->
+  <path d="M4 30 Q24 34 44 30" fill="none" stroke="#c8952a" stroke-width="2.2" stroke-linecap="round"/>
+</svg></a>
+    <nav class="site-nav">
+      <a href="#">Home</a>
+      <a href="https://crownheirs.com" class="nav-cta" target="_blank">Book</a>
+    </nav>
+  </header>
+  <div class="progress-bar-wrap">
+    <div class="progress-bar-inner">
+      <div class="progress-rail"><div class="progress-fill" id="d2fill" style="width:0%"></div></div>
+      <div class="progress-labels">
+        <span id="d2s0">Length</span><span id="d2s1">Vision</span>
+        <span id="d2s2">Goal</span><span id="d2s3">Texture</span><span id="d2s4">Results</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q1 LENGTH -->
+  <div class="subscreen active" id="q1">
+    <div class="agent-block">
+      <div class="agent-id"><div class="agent-ring bethany">B</div><span class="agent-name">Bethany</span></div>
+      <div class="agent-bubble"><p id="q1txt">Let's start simple. How long is your hair right now? Just pick the closest — no wrong answer.</p></div>
+    </div>
+    <div class="sec-head"><h2>How long is your hair?</h2><p>Pick the closest match</p></div>
+    <div class="length-grid">
+      <div class="card lcard" onclick="pickLen('twa',this)">
+        <div class="lcard-vis"><div class="l-head"></div><div class="l-strand" style="height:5px"></div></div>
+        <div class="card-body"><h3>Very Short</h3><p>Close to scalp</p></div>
+      </div>
+      <div class="card lcard" onclick="pickLen('short',this)">
+        <div class="lcard-vis"><div class="l-head"></div><div class="l-strand" style="height:16px"></div></div>
+        <div class="card-body"><h3>Short</h3><p>Ear to chin</p></div>
+      </div>
+      <div class="card lcard" onclick="pickLen('medium',this)">
+        <div class="lcard-vis"><div class="l-head"></div><div class="l-strand" style="height:32px"></div></div>
+        <div class="card-body"><h3>Medium</h3><p>Shoulder area</p></div>
+      </div>
+      <div class="card lcard" onclick="pickLen('long',this)">
+        <div class="lcard-vis"><div class="l-head"></div><div class="l-strand" style="height:50px"></div></div>
+        <div class="card-body"><h3>Long</h3><p>Past the shoulder</p></div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="btn-back" onclick="goHome()">Back to entrance</button>
+      <button class="btn-terra" id="q1next" onclick="d2go(2)" disabled>Continue</button>
+    </div>
+  </div>
+
+  <!-- Q2 INTENT -->
+  <div class="subscreen" id="q2">
+    <div class="agent-block">
+      <div class="agent-id"><div class="agent-ring bethany">B</div><span class="agent-name">Bethany</span></div>
+      <div class="agent-bubble"><p id="q2txt">Are you open to adding hair, cutting hair, or do you want to work with exactly what you have?</p></div>
+    </div>
+    <div class="sec-head"><h2>What are you open to?</h2><p>This shapes all the options that follow</p></div>
+    <div class="container" style="margin-bottom:0">
+      <div class="grid-3up">
+        <div class="card" style="padding:20px 16px;text-align:center" onclick="pickIntent('add',this)">
+          <span style="font-size:1.8rem;display:block;margin-bottom:10px">➕</span>
+          <div class="card-body" style="padding:0"><h3>Add Hair</h3><p>Open to extensions to build my look</p></div>
+        </div>
+        <div class="card" style="padding:20px 16px;text-align:center" onclick="pickIntent('cut',this)">
+          <span style="font-size:1.8rem;display:block;margin-bottom:10px">✂️</span>
+          <div class="card-body" style="padding:0"><h3>Cut or Shape</h3><p>A trim, cut, or whole new shape</p></div>
+        </div>
+        <div class="card" style="padding:20px 16px;text-align:center" onclick="pickIntent('keep',this)">
+          <span style="font-size:1.8rem;display:block;margin-bottom:10px">🌿</span>
+          <div class="card-body" style="padding:0"><h3>Keep What I Have</h3><p>Work with my natural length</p></div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="btn-back" onclick="d2go(1)">Back</button>
+      <button class="btn-terra" id="q2next" onclick="buildGoals()" disabled>Continue</button>
+    </div>
+  </div>
+
+  <!-- Q3 GOALS -->
+  <div class="subscreen" id="q3">
+    <div class="agent-block">
+      <div class="agent-id"><div class="agent-ring">E</div><span class="agent-name">Emily</span></div>
+      <div class="agent-bubble"><p id="q3txt">Now the real question — what do you want to walk out feeling? Select everything that resonates.</p></div>
+    </div>
+    <div class="sec-head"><h2>What's your goal?</h2><p>Select all that speak to you</p></div>
+    <div class="container" style="margin-bottom:0">
+      <div class="grid-goals" id="goalGrid"></div>
+    </div>
+    <div class="nav-row">
+      <button class="btn-back" onclick="d2go(2)">Back</button>
+      <button class="btn-terra" id="q3next" onclick="d2go(4)" disabled>Continue</button>
+    </div>
+  </div>
+
+  <!-- Q4 TEXTURE -->
+  <div class="subscreen" id="q4">
+    <div class="agent-block">
+      <div class="agent-id"><div class="agent-ring bethany">B</div><span class="agent-name">Bethany</span></div>
+      <div class="agent-bubble"><p>One last thing — your texture. Helps me match you to the right stylist. Pick the closest; we'll confirm at your appointment.</p></div>
+    </div>
+    <div class="profile-sec">
+      <div class="pq">
+        <label>Your curl or texture</label>
+        <div class="pill-row">
+          <button class="pill" onclick="pickProf('texture','straight',this)">Straight / Relaxed</button>
+          <button class="pill" onclick="pickProf('texture','wavy',this)">Wavy</button>
+          <button class="pill" onclick="pickProf('texture','curly',this)">Curly</button>
+          <button class="pill" onclick="pickProf('texture','coily',this)">Tightly Coiled / 4C</button>
+          <button class="pill" onclick="pickProf('texture','locs',this)">I already have locs</button>
+        </div>
+      </div>
+      <div class="pq">
+        <label>How much daily styling time works for you?</label>
+        <div class="pill-row">
+          <button class="pill" onclick="pickProf('lifestyle','minimal',this)">As little as possible</button>
+          <button class="pill" onclick="pickProf('lifestyle','moderate',this)">A little effort is fine</button>
+          <button class="pill" onclick="pickProf('lifestyle','invested',this)">I love doing my hair</button>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="btn-back" onclick="d2go(3)">Back</button>
+      <button class="btn-terra" id="q4next" onclick="buildD2Results()" disabled>Show my matches</button>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="subscreen" id="q5">
+    <div class="agent-block">
+      <div class="agent-id"><div class="agent-ring">E</div><span class="agent-name">Emily</span></div>
+      <div class="agent-bubble"><p id="d2rTxt">Here are your Crown matches — curated for your hair, your goals, your life. Questions? Ask me below.</p></div>
+    </div>
+    <div class="chat-module">
+      <div class="chat-log" id="d2log"></div>
+      <div class="chat-row">
+        <input class="chat-input" id="d2in" type="text" placeholder="Ask Emily anything about these services…" onkeydown="if(event.key==='Enter')chat('d2')">
+        <button class="chat-send" onclick="chat('d2')">→</button>
+      </div>
+    </div>
+    <div class="container" style="margin-bottom:0">
+      <div class="grid-2up" id="d2grid"></div>
+    </div>
+    <div class="nav-row">
+      <button class="btn-back" onclick="resetD2()">Start over</button>
+      <a class="btn-terra" href="https://crownheirs.com" target="_blank">Book Now</a>
+    </div>
+  </div>
+
+  <footer><p>Crown Heirs Hair Den · <a href="https://crownheirs.com">crownheirs.com</a> · <a href="mailto:info@crownheirs.com">info@crownheirs.com</a></p></footer>
+</div>
+
+<!-- ═══════════════════════════════════════
+     DOOR 3 — INSPIRATION
+════════════════════════════════════════ -->
+<div class="screen" id="door3">
+  <header class="site-header">
+    <a class="site-logo" href="#"><svg class="logo-mark" viewBox="0 0 48 40" xmlns="http://www.w3.org/2000/svg" aria-label="Crown Heirs">
+  <!-- base arc of crown -->
+  <path d="M4 30 Q6 28 8 30 L10 14 L16 24 L24 6 L32 24 L38 14 L40 30 Q42 28 44 30" 
+        fill="none" stroke="#c8952a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- small loop detail at right base (matches brand) -->
+  <circle cx="44" cy="30" r="1.8" fill="none" stroke="#c8952a" stroke-width="1.8"/>
+  <!-- crown base band -->
+  <path d="M4 30 Q24 34 44 30" fill="none" stroke="#c8952a" stroke-width="2.2" stroke-linecap="round"/>
+</svg></a>
+    <nav class="site-nav">
+      <a href="#">Home</a>
+      <a href="https://crownheirs.com" class="nav-cta" target="_blank">Book</a>
+    </nav>
+  </header>
+  <div class="progress-bar-wrap">
+    <div class="progress-bar-inner">
+      <div class="progress-rail"><div class="progress-fill" id="d3fill" style="width:0%"></div></div>
+      <div class="progress-labels">
+        <span id="d3s0">Inspire</span><span id="d3s1">Your Match</span>
+        <span id="d3s2">Try On</span><span id="d3s3">Results</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- I1 GALLERY -->
+  <div class="subscreen active" id="i1">
+    <div class="agent-block">
+      <div class="agent-id"><div class="agent-ring bethany">B</div><span class="agent-name">Bethany</span></div>
+      <div class="agent-bubble"><p>Let your eyes do the talking. Tap everything that makes you say <em>yes</em> — don't think about names, just what speaks to you.</p></div>
+    </div>
+    <div class="sec-head"><h2>What catches your eye?</h2><p>Select everything that resonates</p></div>
+    <div class="container" style="margin-bottom:0">
+      <div class="grid-inspo">
+        <div class="inspo-card" onclick="toggleInspo(this,'braids')">
+          <img class="inspo-img" src="https://images.unsplash.com/photo-1620325867502-221cfb5faa5f?w=400&q=80&fit=crop&crop=faces" alt="Braids" onerror="this.style.display='none';this.nextSibling.style.display='flex'">
+          <div class="inspo-ph ph2" style="display:none"><span class="inspo-ph-icon">🌿</span><span class="inspo-ph-label">Add Photo</span></div>
+          <div class="inspo-overlay"><h3>Knotless Braids</h3><p>Protective &amp; low maintenance</p></div>
+        </div>
+        <div class="inspo-card" onclick="toggleInspo(this,'silkpress')">
+          <img class="inspo-img" src="https://images.unsplash.com/photo-1595956553066-fe24a8c33395?w=400&q=80&fit=crop&crop=faces" alt="Silk press" onerror="this.style.display='none';this.nextSibling.style.display='flex'">
+          <div class="inspo-ph ph1" style="display:none"><span class="inspo-ph-icon">✨</span><span class="inspo-ph-label">Add Photo</span></div>
+          <div class="inspo-overlay"><h3>Silk Press</h3><p>Sleek, smooth, polished</p></div>
+        </div>
+        <div class="inspo-card" onclick="toggleInspo(this,'locs')">
+          <img class="inspo-img" src="https://images.unsplash.com/photo-1529111290557-82f6d5c6cf85?w=400&q=80&fit=crop&crop=faces" alt="Locs" onerror="this.style.display='none';this.nextSibling.style.display='flex'">
+          <div class="inspo-ph ph4" style="display:none"><span class="inspo-ph-icon">🔱</span><span class="inspo-ph-label">Add Photo</span></div>
+          <div class="inspo-overlay"><h3>Locs</h3><p>Bold, intentional, lasting</p></div>
+        </div>
+        <div class="inspo-card" onclick="toggleInspo(this,'natural')">
+          <img class="inspo-img" src="https://images.unsplash.com/photo-1611432579699-484f7990b127?w=400&q=80&fit=crop&crop=faces" alt="Natural curls" onerror="this.style.display='none';this.nextSibling.style.display='flex'">
+          <div class="inspo-ph ph5" style="display:none"><span class="inspo-ph-icon">🌀</span><span class="inspo-ph-label">Add Photo</span></div>
+          <div class="inspo-overlay"><h3>Natural Curls</h3><p>Defined, voluminous texture</p></div>
+        </div>
+        <div class="inspo-card" onclick="toggleInspo(this,'pixie')">
+          <img class="inspo-img" src="https://images.unsplash.com/photo-1607346256330-dee7af15f7c5?w=400&q=80&fit=crop&crop=faces" alt="Short cut" onerror="this.style.display='none';this.nextSibling.style.display='flex'">
+          <div class="inspo-ph ph7" style="display:none"><span class="inspo-ph-icon">✂️</span><span class="inspo-ph-label">Add Photo</span></div>
+          <div class="inspo-overlay"><h3>Short &amp; Sculpted</h3><p>Bold cut, clean lines</p></div>
+        </div>
+        <div class="inspo-card" onclick="toggleInspo(this,'twists')">
+          <img class="inspo-img" src="https://images.unsplash.com/photo-1600857544200-b2f468e7b1c1?w=400&q=80&fit=crop&crop=faces" alt="Twists" onerror="this.style.display='none';this.nextSibling.style.display='flex'">
+          <div class="inspo-ph ph5" style="display:none"><span class="inspo-ph-icon">🌿</span><span class="inspo-ph-label">Add Photo</span></div>
+          <div class="inspo-overlay"><h3>Twists</h3><p>Protective &amp; versatile</p></div>
+        </div>
+        <div class="inspo-card" onclick="toggleInspo(this,'scalp')">
+          <div class="inspo-ph ph2"><span class="inspo-ph-icon">💧</span><span class="inspo-ph-label">Add Photo</span></div>
+          <div class="inspo-overlay"><h3>Scalp Reset</h3><p>Clean, healthy foundation</p></div>
+        </div>
+        <div class="inspo-card" onclick="toggleInspo(this,'updo')">
+          <div class="inspo-ph ph6"><span class="inspo-ph-icon">👑</span><span class="inspo-ph-label">Add Photo</span></div>
+          <div class="inspo-overlay"><h3>Updo &amp; Styled</h3><p>Elevated occasion looks</p></div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="btn-back" onclick="goHome()">Back to entrance</button>
+      <button class="btn-terra" id="i1next" onclick="d3go(2)" disabled>These speak to me</button>
+    </div>
+  </div>
+
+  <!-- I2 FACE + SKIN -->
+  <div class="subscreen" id="i2">
+    <div class="agent-block">
+      <div class="agent-id"><div class="agent-ring">E</div><span class="agent-name">Emily</span></div>
+      <div class="agent-bubble"><p>Now I want to show you these styles on someone who looks like <em>you</em>. Two quick things so results feel personal, not generic.</p></div>
+    </div>
+    <div class="sec-head"><h2>Help me find your match</h2><p>So we can show you results that actually look like you</p></div>
+    <div class="container" style="margin-bottom:0">
+      <div class="pq" style="margin-bottom:24px">
+        <label style="font-size:0.7rem;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-dim);font-weight:400;display:block;margin-bottom:12px;">Face shape</label>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;">
+          <div class="card mcard" onclick="pickMatch('face','oval',this)"><span class="mcard-icon">🥚</span><div class="card-body"><h3>Oval</h3><p>Balanced, slightly narrower at jaw</p></div></div>
+          <div class="card mcard" onclick="pickMatch('face','round',this)"><span class="mcard-icon">⭕</span><div class="card-body"><h3>Round</h3><p>Full cheeks, similar width and length</p></div></div>
+          <div class="card mcard" onclick="pickMatch('face','heart',this)"><span class="mcard-icon">💜</span><div class="card-body"><h3>Heart</h3><p>Wider forehead, narrower chin</p></div></div>
+          <div class="card mcard" onclick="pickMatch('face','square',this)"><span class="mcard-icon">⬛</span><div class="card-body"><h3>Square</h3><p>Strong jaw, defined angles</p></div></div>
+          <div class="card mcard" onclick="pickMatch('face','long',this)"><span class="mcard-icon">🟥</span><div class="card-body"><h3>Long</h3><p>Length greater than width</p></div></div>
+        </div>
+      </div>
+      <div class="pq">
+        <label style="font-size:0.7rem;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-dim);font-weight:400;display:block;margin-bottom:12px;">Skin tone (closest)</label>
+        <div style="display:flex;flex-wrap:wrap;gap:10px;">
+          <div class="card mcard" style="min-width:90px" onclick="pickMatch('skin','fair',this)"><span class="mcard-icon" style="font-size:1.3rem">🌼</span><div class="card-body"><h3>Fair</h3></div></div>
+          <div class="card mcard" style="min-width:90px" onclick="pickMatch('skin','medium',this)"><span class="mcard-icon" style="font-size:1.3rem">🌻</span><div class="card-body"><h3>Medium</h3></div></div>
+          <div class="card mcard" style="min-width:90px" onclick="pickMatch('skin','tan',this)"><span class="mcard-icon" style="font-size:1.3rem">🍂</span><div class="card-body"><h3>Tan</h3></div></div>
+          <div class="card mcard" style="min-width:90px" onclick="pickMatch('skin','deep',this)"><span class="mcard-icon" style="font-size:1.3rem">🌑</span><div class="card-body"><h3>Deep</h3></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="btn-back" onclick="d3go(1)">Back</button>
+      <button class="btn-terra" id="i2next" onclick="d3go(3)" disabled>Show me</button>
+    </div>
+  </div>
+
+  <!-- I3 TRY-ON -->
+  <div class="subscreen" id="i3">
+    <div class="agent-block">
+      <div class="agent-id"><div class="agent-ring">E</div><span class="agent-name">Emily</span></div>
+      <div class="agent-bubble"><p>Here's where it gets personal. Upload a selfie to see your styles on your actual face — or skip ahead to see real client results matched to your features.</p></div>
+    </div>
+    <div class="tryon-box">
+      <div class="tryon-inner">
+        <span class="tryon-badge">Virtual Try-On — Phase 2</span>
+        <h3>See it on you</h3>
+        <p>Upload a selfie and see your selected styles placed on your actual face — powered by augmented reality. Coming in Phase 2. For now, see real Crown Heirs results matched to your features below.</p>
+        <button class="btn-outline" style="margin-bottom:12px">📸 Upload Selfie (Coming Soon)</button><br>
+        <button class="btn-text-link" onclick="d3go(4)">Skip — show me the results</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- I4 RESULTS -->
+  <div class="subscreen" id="i4">
+    <div class="agent-block">
+      <div class="agent-id"><div class="agent-ring">E</div><span class="agent-name">Emily</span></div>
+      <div class="agent-bubble"><p id="i4txt">These are Crown Heirs results — real clients, real transformations, done right here in The Den. Ready for your seat?</p></div>
+    </div>
+    <div class="sec-head"><h2>Your style match</h2><p>Real Crown Heirs results — curated for you</p></div>
+    <div class="match-results-grid" id="matchGrid"></div>
+    <div class="chat-module" style="margin-top:var(--space-s)">
+      <div class="chat-log" id="i4log"></div>
+      <div class="chat-row">
+        <input class="chat-input" id="i4in" type="text" placeholder="Ask about any of these styles…" onkeydown="if(event.key==='Enter')chat('i4')">
+        <button class="chat-send" onclick="chat('i4')">→</button>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="btn-back" onclick="d3go(1)">Start over</button>
+      <a class="btn-terra" href="https://crownheirs.com" target="_blank">Book Now</a>
+    </div>
+  </div>
+
+  <footer><p>Crown Heirs Hair Den · <a href="https://crownheirs.com">crownheirs.com</a> · <a href="mailto:info@crownheirs.com">info@crownheirs.com</a></p></footer>
+</div>
+
+<script>
+/* ── SPLASH SEQUENCE ── */
+(function(){
+  const lines = ['Welcome to The Den.', 'Your throne awaits.'];
+  const wrap = document.getElementById('splashDialogue');
+  const enterBtn = document.getElementById('splashEnter');
+
+  lines.forEach((txt, i) => {
+    setTimeout(() => {
+      const span = document.createElement('span');
+      span.className = 'splash-line';
+      span.textContent = txt;
+      wrap.appendChild(span);
+      requestAnimationFrame(() => setTimeout(() => span.classList.add('show'), 20));
+    }, 1200 + i * 1200);
+  });
+
+  // Show enter button after dialogue
+  setTimeout(() => {
+    enterBtn.style.transition = 'opacity 0.7s ease, background 0.2s, transform 0.2s';
+    enterBtn.style.opacity = '1';
+  }, 3800);
+})();
+
+function enterDen() {
+  const splash = document.getElementById('splash');
+  const portal = document.getElementById('portal');
+  splash.classList.add('fade-out');
+  setTimeout(() => {
+    splash.style.display = 'none';
+    portal.style.display = 'block';
+  }, 800);
+}
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+function goHome(){ showScreen('welcome'); document.getElementById('portal').style.display='block'; }
+function openDoor(n){
+  if(n===1){window.open('https://crownheirs.com','_blank');return;}
+  if(n===2){showScreen('door2');d2go(1);}
+  if(n===3){showScreen('door3');d3go(1);}
+}
+
+/* ── DOOR 2 ── */
+let d2p=1,hLen=null,hIntent=null,d2Goals=new Set(),d2Prof={texture:null,lifestyle:null};
+function d2go(n){
+  document.getElementById('q'+d2p).classList.remove('active');
+  d2p=n;document.getElementById('q'+n).classList.add('active');
+  const pct=Math.round((n/5)*100);
+  document.getElementById('d2fill').style.width=pct+'%';
+  for(let i=0;i<5;i++){const el=document.getElementById('d2s'+i);el.classList.remove('act','dn');if(i===n-1)el.classList.add('act');else if(i<n-1)el.classList.add('dn');}
+  window.scrollTo(0,0);
+}
+function pickLen(v,el){
+  document.querySelectorAll('.lcard').forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel');hLen=v;
+  document.getElementById('q1next').disabled=false;
+  const m={twa:'Very short — there are strong options here. Let\'s find yours.',short:'Short hair opens up more than people think.',medium:'Great starting point. Lots of flexibility here.',long:'The full menu is open to you.'};
+  document.getElementById('q1txt').textContent=m[v];
+}
+function pickIntent(v,el){
+  document.querySelectorAll('#q2 .card').forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel');hIntent=v;
+  document.getElementById('q2next').disabled=false;
+}
+const GOALS=[
+  {id:'protect',e:'🌿',p:'ph2',l:'Protect & Grow',d:'Give my hair a break and help it grow',intents:['add','keep'],lens:['twa','short','medium','long']},
+  {id:'sleek',e:'✨',p:'ph1',l:'Sleek & Polished',d:'Smooth, straight, professional look',intents:['keep','add'],lens:['short','medium','long']},
+  {id:'cut',e:'✂️',p:'ph7',l:'Fresh Cut or Shape',d:'A trim, cut, or whole new shape',intents:['cut'],lens:['twa','short','medium','long']},
+  {id:'locs',e:'🔱',p:'ph4',l:'Start or Keep Locs',d:'Begin or maintain my loc journey',intents:['keep','add'],lens:['twa','short','medium','long']},
+  {id:'scalp',e:'💧',p:'ph5',l:'Scalp Reset',d:'Dryness, flakes, buildup — my scalp needs relief',intents:['add','keep','cut'],lens:['twa','short','medium','long']},
+  {id:'natural',e:'🌀',p:'ph3',l:'Embrace My Curls',d:'Show off my natural texture',intents:['keep'],lens:['short','medium','long']},
+  {id:'kids',e:'👑',p:'ph6',l:'Tiny Heirs',d:'Services for my child',intents:['add','keep','cut'],lens:['twa','short','medium','long']},
+];
+function buildGoals(){
+  const grid=document.getElementById('goalGrid');
+  grid.innerHTML='';d2Goals.clear();
+  document.getElementById('q3next').disabled=true;
+  GOALS.forEach(g=>{
+    const ok=g.intents.includes(hIntent)&&g.lens.includes(hLen);
+    grid.innerHTML+=`<div class="card${ok?'':' locked'}" style="overflow:hidden;cursor:pointer" onclick="toggleGoal(this,'${g.id}')">
+      <div class="card-vis ${g.p}" style="aspect-ratio:4/3;font-size:1.9rem">${g.e}</div>
+      <div class="card-body"><h3>${g.l}</h3><p>${g.d}</p></div>
+    </div>`;
+  });
+  d2go(3);
+}
+function toggleGoal(card,goal){
+  if(card.classList.contains('locked'))return;
+  card.classList.toggle('sel');
+  d2Goals.has(goal)?d2Goals.delete(goal):d2Goals.add(goal);
+  document.getElementById('q3next').disabled=d2Goals.size===0;
+}
+function pickProf(k,v,btn){
+  btn.closest('.pill-row').querySelectorAll('.pill').forEach(p=>p.classList.remove('sel'));
+  btn.classList.add('sel');d2Prof[k]=v;
+  document.getElementById('q4next').disabled=!d2Prof.texture||!d2Prof.lifestyle;
+}
+const SVCS=[
+  {n:'Pixie & Tapered Cut',d:'Sculpted short cut shaped to your face — soft and feminine or bold and strong.',dur:'1–1.5 hrs',price:'From $65',badge:'Cut',e:'✂️',p:'ph7',goals:['cut','sleek'],tx:['straight','wavy','curly','coily'],ls:['minimal','moderate'],in:['cut'],len:['twa','short','medium']},
+  {n:'Shape Up & Trim',d:'Precision trim or edge-up that gives any existing style a clean, fresh finish.',dur:'45 min',price:'From $35',badge:'Trim',e:'✂️',p:'ph7',goals:['cut'],tx:['straight','wavy','curly','coily','locs'],ls:['minimal','moderate','invested'],in:['cut'],len:['twa','short','medium','long']},
+  {n:'Silk Press',d:'Silky straight hair using heat — no chemicals. Best for medium to long natural hair.',dur:'2–3 hrs',price:'From $85',badge:'Classic',e:'✨',p:'ph1',goals:['sleek'],tx:['curly','coily','wavy'],ls:['moderate','invested'],in:['keep'],len:['medium','long']},
+  {n:'Knotless Braids',d:'Tension-free box braids with added hair. Any natural length. Lasts 6–8 weeks.',dur:'4–6 hrs',price:'From $175',badge:'Best Seller',e:'🌿',p:'ph2',goals:['protect','sleek'],tx:['curly','coily','wavy','straight'],ls:['minimal','moderate'],in:['add'],len:['twa','short','medium','long']},
+  {n:'Two-Strand Twists',d:'Worn as-is or unraveled for a twist-out. No extensions needed.',dur:'2–3 hrs',price:'From $80',badge:'Protective',e:'🌿',p:'ph5',goals:['protect','natural'],tx:['curly','coily'],ls:['minimal','moderate'],in:['keep'],len:['short','medium','long']},
+  {n:'Starter Locs',d:'Begin your loc journey. We choose the best method for your texture and length.',dur:'3–5 hrs',price:'Consult req.',badge:'Journey',e:'🔱',p:'ph4',goals:['locs'],tx:['coily','curly'],ls:['minimal','moderate','invested'],in:['keep','add'],len:['twa','short','medium','long']},
+  {n:'Loc Retwist',d:'Keep locs neat, defined, and thriving. Regular retwists are the foundation.',dur:'1.5–3 hrs',price:'From $65',badge:'Maintenance',e:'🔱',p:'ph4',goals:['locs'],tx:['locs'],ls:['minimal','moderate'],in:['keep'],len:['twa','short','medium','long']},
+  {n:'Scalp Detox & Steam',d:'Removes buildup, soothes irritation, rebalances your scalp. Works at any length.',dur:'1–1.5 hrs',price:'From $60',badge:'Restore',e:'💧',p:'ph5',goals:['scalp','natural'],tx:['straight','wavy','curly','coily','locs'],ls:['minimal','moderate','invested'],in:['add','keep','cut'],len:['twa','short','medium','long']},
+  {n:'Natural Hair Styling',d:'Wash-and-gos, braid-outs, defined sets — your natural texture in full expression.',dur:'1.5–2.5 hrs',price:'From $55',badge:'Natural',e:'🌀',p:'ph3',goals:['natural'],tx:['curly','coily','wavy'],ls:['moderate','invested'],in:['keep'],len:['short','medium','long']},
+  {n:'Tiny Heirs Menu',d:'Gentle, expert care for children. Fun, calm, and crowned.',dur:'Varies',price:'From $35',badge:'Children',e:'👑',p:'ph6',goals:['kids'],tx:['straight','wavy','curly','coily'],ls:['minimal','moderate','invested'],in:['add','keep','cut'],len:['twa','short','medium','long']},
+];
+function buildD2Results(){
+  const scored=SVCS.map(s=>{
+    if(!s.len.includes(hLen)||!s.in.includes(hIntent))return{...s,sc:-1};
+    let sc=0;d2Goals.forEach(g=>{if(s.goals.includes(g))sc+=4;});
+    if(sc===0)return{...s,sc:-1};
+    if(s.tx.includes(d2Prof.texture))sc+=2;
+    if(s.ls.includes(d2Prof.lifestyle))sc+=1;
+    return{...s,sc};
+  }).filter(s=>s.sc>0).sort((a,b)=>b.sc-a.sc).slice(0,4);
+  const grid=document.getElementById('d2grid');
+  grid.innerHTML=scored.length?scored.map(s=>`
+    <div class="scard">
+      <div class="scard-vis ${s.p}"><div class="sbadge">${s.badge}</div><span style="font-size:2.2rem">${s.e}</span></div>
+      <div class="scard-body"><h3>${s.n}</h3><p>${s.d}</p><div class="scard-meta"><span class="dur">⏱ ${s.dur}</span><span class="price">${s.price}</span></div></div>
+      <a class="book-now-btn" href="https://crownheirs.com" target="_blank">Book now</a>
+    </div>`).join('')
+    :`<div style="grid-column:1/-1;text-align:center;padding:40px;font-family:var(--font-serif);font-size:1.1rem;color:var(--ink-dim);">We'd love to build a custom plan. <a href="mailto:info@crownheirs.com" style="color:var(--terra)">Email us</a> or book a free consultation.</div>`;
+  const gNames=[...d2Goals].map(g=>GOALS.find(x=>x.id===g)?.l).filter(Boolean);
+  document.getElementById('d2rTxt').textContent=`Your matches for ${gNames.join(' and ')} — curated for your crown. Questions? Ask me right here.`;
+  d2go(5);
+}
+function resetD2(){
+  hLen=null;hIntent=null;d2Goals.clear();d2Prof={texture:null,lifestyle:null};
+  document.querySelectorAll('#door2 .card, #door2 .lcard').forEach(e=>e.classList.remove('sel'));
+  document.querySelectorAll('#door2 .pill').forEach(e=>e.classList.remove('sel'));
+  document.getElementById('q1next').disabled=true;
+  document.getElementById('q2next').disabled=true;
+  document.getElementById('d2log').innerHTML='';
+  d2go(1);
+}
+
+/* ── DOOR 3 ── */
+let d3p=1,selInspo=new Set(),matchD={face:null,skin:null};
+function d3go(n){
+  document.getElementById('i'+d3p).classList.remove('active');
+  d3p=n;document.getElementById('i'+n).classList.add('active');
+  const pct=Math.round((n/4)*100);
+  document.getElementById('d3fill').style.width=pct+'%';
+  for(let i=0;i<4;i++){const el=document.getElementById('d3s'+i);el.classList.remove('act','dn');if(i===n-1)el.classList.add('act');else if(i<n-1)el.classList.add('dn');}
+  if(n===4)buildMatchResults();
+  window.scrollTo(0,0);
+}
+function toggleInspo(card,style){
+  card.classList.toggle('sel');
+  selInspo.has(style)?selInspo.delete(style):selInspo.add(style);
+  document.getElementById('i1next').disabled=selInspo.size===0;
+}
+function pickMatch(k,v,el){
+  el.closest('div').querySelectorAll('.mcard').forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel');matchD[k]=v;
+  document.getElementById('i2next').disabled=!matchD.face||!matchD.skin;
+}
+const INSPO_MAP={
+  braids:   {n:'Knotless Braids',   d:'Tension-free, protective. Lasts 6–8 weeks.',   e:'🌿',p:'ph2',price:'From $175'},
+  silkpress:{n:'Silk Press',        d:'Sleek, smooth, bouncy. Best for longer hair.',  e:'✨',p:'ph1',price:'From $85'},
+  locs:     {n:'Loc Maintenance',   d:'Defined, intentional, deeply personal.',        e:'🔱',p:'ph4',price:'From $65'},
+  natural:  {n:'Natural Styling',   d:'Defined curls and coils in full expression.',   e:'🌀',p:'ph3',price:'From $55'},
+  pixie:    {n:'Pixie & Tapered Cut',d:'Bold, sculpted, completely you.',              e:'✂️',p:'ph7',price:'From $65'},
+  twists:   {n:'Two-Strand Twists', d:'Protective — wear as-is or unravel for a twist-out.',e:'🌿',p:'ph5',price:'From $80'},
+  scalp:    {n:'Scalp Detox & Steam',d:'The reset your scalp has been waiting for.',  e:'💧',p:'ph5',price:'From $60'},
+  updo:     {n:'Updo & Special Styling',d:'Elevated looks for elevated moments.',     e:'👑',p:'ph6',price:'Consultation'},
+};
+function buildMatchResults(){
+  const grid=document.getElementById('matchGrid');
+  const sel=[...selInspo].filter(s=>INSPO_MAP[s]);
+  grid.innerHTML=sel.map(s=>{
+    const r=INSPO_MAP[s];
+    return `<div class="mresult">
+      <div class="mresult-vis ${r.p}">${r.e}</div>
+      <div class="mresult-body">
+        <h3>${r.n}</h3><p>${r.d}</p>
+        <div class="mresult-meta"><span>Starting price</span><strong>${r.price}</strong></div>
+        <a class="book-now-btn" href="https://crownheirs.com" target="_blank" style="width:100%;margin:0;display:block">Book now</a>
+      </div>
+    </div>`;
+  }).join('');
+  const names=sel.map(s=>INSPO_MAP[s]?.n).filter(Boolean);
+  document.getElementById('i4txt').textContent=`You were drawn to ${names.join(', ')}. These are your Crown Heirs matches — every transformation done right here in The Den.`;
+}
+
+/* ── CHAT ── */
+const KB={
+  'pixie':'A pixie or tapered cut is sculpted and short — feminine and soft or bold and strong. We shape it to your face. Works on very short to medium hair.',
+  'silk press':'A silk press temporarily straightens natural or curly hair using heat — no chemicals. Works best on medium to long hair and lasts until your next wash.',
+  'braids':'Our knotless braids use added hair and can be done on any natural length. They last 6–8 weeks with proper care.',
+  'locs':'You can start locs at almost any length. We choose the best method for your texture. Regular retwists every 4–6 weeks keep them healthy.',
+  'scalp':'Our Scalp Detox uses steam and professional treatments to lift buildup, soothe irritation, and rebalance your scalp.',
+  'cut':'We do precision cuts, tapers, pixies, and shape-ups. We\'ll consult on what shape suits your face at your appointment.',
+  'kids':'Our Tiny Heirs menu makes children feel safe and comfortable. We work with all lengths and textures.',
+  'how long':'Protective styles like braids and twists last 6–8 weeks. A silk press lasts until your next wash. Locs are long-term.',
+  'price':'Starting prices are shown on each service card. Your stylist confirms the exact quote based on your hair at your appointment.',
+  'book':'Book at crownheirs.com. Still deciding? Email info@crownheirs.com and we\'ll help you choose.',
+  'short':'Short hair has plenty of options — cuts, scalp treatments, loc starts, and braids with added hair are all available.',
+  'default':'Great question. Reach us at info@crownheirs.com or book a free consultation at crownheirs.com — we\'re always here for you.'
+};
+function getReply(msg){
+  const l=msg.toLowerCase();
+  for(const[k,r]of Object.entries(KB)){if(l.includes(k))return r;}
+  return KB.default;
+}
+function chat(id){
+  const inEl=document.getElementById(id+'in');
+  const logEl=document.getElementById(id+'log');
+  if(!inEl||!logEl)return;
+  const msg=inEl.value.trim();if(!msg)return;
+  inEl.value='';
+  logEl.innerHTML+=`<div class="msg u">${msg}</div>`;
+  setTimeout(()=>{logEl.innerHTML+=`<div class="msg a">${getReply(msg)}</div>`;logEl.scrollTop=logEl.scrollHeight;},600);
+  logEl.scrollTop=logEl.scrollHeight;
+}
+</script>
+</body>
+</html>
