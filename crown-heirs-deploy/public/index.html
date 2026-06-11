@@ -506,6 +506,10 @@ body {
 .grid-3up { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
 .grid-goals { display: grid; grid-template-columns: repeat(auto-fill, minmax(148px,1fr)); gap: 10px; }
 .grid-inspo { display: grid; grid-template-columns: repeat(auto-fill, minmax(172px,1fr)); gap: 12px; }
+.inspo-section { grid-column: 1/-1; margin: 14px 0 2px; padding: 0 4px;
+  font-family: var(--font-ui); font-size: 0.62rem; letter-spacing: 0.22em;
+  text-transform: uppercase; color: var(--ink-faint); font-weight: 500; }
+.inspo-section:first-child { margin-top: 0; }
 @media(max-width:520px) { .grid-4up { grid-template-columns: repeat(2,1fr); } }
 @media(max-width:500px) { .grid-3up { grid-template-columns: 1fr; } }
 
@@ -618,7 +622,7 @@ footer a:hover { color: var(--ink); }
   text-transform: uppercase; color: var(--ink-faint);
   display: block; margin-bottom: 12px; font-weight: 400;
 }
-.door-icon { font-size: 1.7rem; display: block; margin-bottom: 10px; }
+.door-icon { font-size: 1rem; display: inline-block; margin: 0; line-height: 1; }
 .door-title {
   font-family: var(--font-ui); font-weight: 500;
   font-size: 0.85rem; color: var(--ink);
@@ -873,7 +877,7 @@ footer a:hover { color: var(--ink); }
       <a href="#">About Us</a>
       <a href="#">Shop All</a>
       <a href="#">Memberships</a>
-      <a href="https://crownheirs.com" class="nav-cta" target="_blank">Book</a>
+      <a href="https://book.squareup.com/appointments/a68e133e-8091-4327-b96d-b22ac2c00826/location/2S5981WK4556T" class="nav-cta" target="_blank">Book</a>
     </nav>
   </header>
 
@@ -889,7 +893,7 @@ footer a:hover { color: var(--ink); }
     </div>
   </div>
 
-  <!-- PORTAL (three doors — shown after splash) -->
+  <!-- PORTAL (five doors — shown after splash) -->
   <div class="portal" id="portal" style="display:none">
     <div class="portal-floater-wrap">
       <img class="portal-floater" src="/images/logo-1.png" alt="Crown Heirs Hair Den">
@@ -898,24 +902,33 @@ footer a:hover { color: var(--ink); }
     <div class="portal-doors" id="portalDoors">
       <div class="door" onclick="openDoor(1)">
         <span class="door-num">Option One</span>
-        <span class="door-icon">📅</span>
         <div class="door-title">I know exactly what I need</div>
         <div class="door-desc">Skip everything — take me straight to booking.</div>
-        <span class="door-cta">Book Now →</span>
+        <span class="door-cta">Book Now → <span class="door-icon">📅</span></span>
       </div>
       <div class="door" onclick="openDoor(2)">
         <span class="door-num">Option Two</span>
-        <span class="door-icon">💬</span>
         <div class="door-title">I know my style, not the name</div>
         <div class="door-desc">Answer a few questions and we'll match you to the right service.</div>
-        <span class="door-cta">Guide Me →</span>
+        <span class="door-cta">Guide Me → <span class="door-icon">💬</span></span>
       </div>
       <div class="door" onclick="openDoor(3)">
         <span class="door-num">Option Three</span>
-        <span class="door-icon">✨</span>
         <div class="door-title">Show me — I'll know it when I see it</div>
         <div class="door-desc">Browse inspiration photos and find your look.</div>
-        <span class="door-cta">Inspire Me →</span>
+        <span class="door-cta">Inspire Me → <span class="door-icon">✨</span></span>
+      </div>
+      <div class="door" onclick="openDoor(4)">
+        <span class="door-num">Option Four</span>
+        <div class="door-title">I already have a style</div>
+        <div class="door-desc">Maintenance, removal, refresh, or add-on for what you already have.</div>
+        <span class="door-cta">Refresh Me → <span class="door-icon">🔄</span></span>
+      </div>
+      <div class="door" onclick="openDoor(5)">
+        <span class="door-num">Option Five</span>
+        <div class="door-title">Beauty services</div>
+        <div class="door-desc">Lashes, makeup, waxing. Book directly — no hair questions.</div>
+        <span class="door-cta">Book Beauty → <span class="door-icon">💄</span></span>
       </div>
     </div>
   </div>
@@ -941,21 +954,50 @@ footer a:hover { color: var(--ink); }
 </svg></a>
     <nav class="site-nav">
       <a href="#">Home</a>
-      <a href="https://crownheirs.com" class="nav-cta" target="_blank">Book</a>
+      <a href="https://book.squareup.com/appointments/a68e133e-8091-4327-b96d-b22ac2c00826/location/2S5981WK4556T" class="nav-cta" target="_blank">Book</a>
     </nav>
   </header>
   <div class="progress-bar-wrap">
     <div class="progress-bar-inner">
       <div class="progress-rail"><div class="progress-fill" id="d2fill" style="width:0%"></div></div>
       <div class="progress-labels">
-        <span id="d2s0">Length</span><span id="d2s1">Vision</span>
-        <span id="d2s2">Goal</span><span id="d2s3">Texture</span><span id="d2s4">Results</span>
+        <span id="d2s0">Who</span><span id="d2s1">Length</span><span id="d2s2">Vision</span>
+        <span id="d2s3">Goal</span><span id="d2s4">Texture</span><span id="d2s5">Results</span>
       </div>
     </div>
   </div>
 
+  <!-- Q0 WHO -->
+  <div class="subscreen active" id="q0">
+    <div class="agent-block">
+      <div class="agent-id"><div class="agent-ring">E</div><span class="agent-name">Emily</span></div>
+      <div class="agent-bubble"><p id="q0txt">First, who's this for? Everyone gets crowned at The Den — we just want to start you in the right lane.</p></div>
+    </div>
+    <div class="sec-head"><h2>Who's this for?</h2><p>Pick the one that fits</p></div>
+    <div class="container" style="margin-bottom:0">
+      <div class="grid-3up">
+        <div class="card" style="padding:20px 16px;text-align:center" onclick="pickGender('women',this)">
+          <span style="font-size:1.8rem;display:block;margin-bottom:10px">👑</span>
+          <div class="card-body" style="padding:0"><h3>For Her</h3><p>Women's services</p></div>
+        </div>
+        <div class="card" style="padding:20px 16px;text-align:center" onclick="pickGender('men',this)">
+          <span style="font-size:1.8rem;display:block;margin-bottom:10px">💈</span>
+          <div class="card-body" style="padding:0"><h3>For Him</h3><p>Men's cuts, beards, braids, locs</p></div>
+        </div>
+        <div class="card" style="padding:20px 16px;text-align:center" onclick="pickGender('tiny',this)">
+          <span style="font-size:1.8rem;display:block;margin-bottom:10px">🌱</span>
+          <div class="card-body" style="padding:0"><h3>Tiny Heirs</h3><p>For my child</p></div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="btn-back" onclick="goHome()">Back to entrance</button>
+      <button class="btn-terra" id="q0next" onclick="d2go(1)" disabled>Continue</button>
+    </div>
+  </div>
+
   <!-- Q1 LENGTH -->
-  <div class="subscreen active" id="q1">
+  <div class="subscreen" id="q1">
     <div class="agent-block">
       <div class="agent-id"><div class="agent-ring bethany">B</div><span class="agent-name">Bethany</span></div>
       <div class="agent-bubble"><p id="q1txt">Let's start simple. How long is your hair right now? Just pick the closest — no wrong answer.</p></div>
@@ -980,8 +1022,8 @@ footer a:hover { color: var(--ink); }
       </div>
     </div>
     <div class="nav-row">
-      <button class="btn-back" onclick="goHome()">Back to entrance</button>
-      <button class="btn-terra" id="q1next" onclick="d2go(2)" disabled>Continue</button>
+      <button class="btn-back" onclick="d2go(0)">Back</button>
+      <button class="btn-terra" id="q1next" onclick="proceedAfterLen()" disabled>Continue</button>
     </div>
   </div>
 
@@ -1025,8 +1067,220 @@ footer a:hover { color: var(--ink); }
       <div class="grid-goals" id="goalGrid"></div>
     </div>
     <div class="nav-row">
-      <button class="btn-back" onclick="d2go(2)">Back</button>
-      <button class="btn-terra" id="q3next" onclick="d2go(4)" disabled>Continue</button>
+      <button class="btn-back" onclick="backFromGoals()">Back</button>
+      <button class="btn-terra" id="q3next" onclick="afterGoals()" disabled>Continue</button>
+    </div>
+  </div>
+
+  <!-- QLOC — shown only if 'locs' in goals -->
+  <div class="subscreen" id="qloc">
+    <div class="agent-block">
+      <div class="agent-id"><div class="agent-ring bethany">B</div><span class="agent-name">Bethany</span></div>
+      <div class="agent-bubble"><p>Locs are a journey — and each stage needs something different. Where are you right now?</p></div>
+    </div>
+    <div class="sec-head"><h2>Your loc journey</h2><p>Pick the one that fits</p></div>
+    <div class="container" style="margin-bottom:0">
+      <div class="grid-goals">
+        <div class="card" style="overflow:hidden;cursor:pointer" onclick="pickLocBranch('starting',this)">
+          <div class="card-vis ph4" style="aspect-ratio:4/3;font-size:1.9rem">🌱</div>
+          <div class="card-body"><h3>Starting Locs</h3><p>I'm ready to begin my loc journey</p></div>
+        </div>
+        <div class="card" style="overflow:hidden;cursor:pointer" onclick="pickLocBranch('maintenance',this)">
+          <div class="card-vis ph4" style="aspect-ratio:4/3;font-size:1.9rem">🔱</div>
+          <div class="card-body"><h3>Maintenance</h3><p>Retwist and keep them healthy</p></div>
+        </div>
+        <div class="card" style="overflow:hidden;cursor:pointer" onclick="pickLocBranch('styling',this)">
+          <div class="card-vis ph4" style="aspect-ratio:4/3;font-size:1.9rem">✨</div>
+          <div class="card-body"><h3>Styling</h3><p>Elevated — updo, pinned, designed</p></div>
+        </div>
+        <div class="card" style="overflow:hidden;cursor:pointer" onclick="pickLocBranch('repair',this)">
+          <div class="card-vis ph4" style="aspect-ratio:4/3;font-size:1.9rem">🛠️</div>
+          <div class="card-body"><h3>Repair & Combine</h3><p>Rebuild thinning or damaged locs</p></div>
+        </div>
+        <div class="card" style="overflow:hidden;cursor:pointer" onclick="pickLocBranch('extensions',this)">
+          <div class="card-vis ph4" style="aspect-ratio:4/3;font-size:1.9rem">➕</div>
+          <div class="card-body"><h3>Extensions</h3><p>Add length or fullness to my locs</p></div>
+        </div>
+        <div class="card" style="overflow:hidden;cursor:pointer" onclick="pickLocBranch('freeform',this)">
+          <div class="card-vis ph4" style="aspect-ratio:4/3;font-size:1.9rem">🌿</div>
+          <div class="card-body"><h3>Freeform</h3><p>Going organic — less frequent maintenance</p></div>
+        </div>
+        <div class="card" style="overflow:hidden;cursor:pointer" onclick="pickLocBranch('color',this)">
+          <div class="card-vis ph4" style="aspect-ratio:4/3;font-size:1.9rem">🎨</div>
+          <div class="card-body"><h3>Color</h3><p>Highlights, full color, or toning on locs</p></div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="btn-back" onclick="d2go(3)">Back</button>
+      <button class="btn-terra" id="qlocnext" onclick="d2go(4)" disabled>Continue</button>
+    </div>
+  </div>
+
+  <!-- QPROTECT — shown only if 'protect' in goals -->
+  <div class="subscreen" id="qprotect">
+    <div class="agent-block">
+      <div class="agent-id"><div class="agent-ring">E</div><span class="agent-name">Emily</span></div>
+      <div class="agent-bubble"><p>Protect &amp; Grow has three lanes. Which one fits what you're after?</p></div>
+    </div>
+    <div class="sec-head"><h2>What kind of protect &amp; grow?</h2><p>Pick one</p></div>
+    <div class="container" style="margin-bottom:0">
+      <div class="grid-goals">
+        <div class="card" style="overflow:hidden;cursor:pointer" onclick="pickProtectBranch('individual',this)">
+          <div class="card-vis ph2" style="aspect-ratio:4/3;font-size:1.9rem">🌿</div>
+          <div class="card-body"><h3>Individual Braids</h3><p>Knotless, box, Senegalese, faux locs, feed-in</p></div>
+        </div>
+        <div class="card" style="overflow:hidden;cursor:pointer" onclick="pickProtectBranch('natural-braids',this)">
+          <div class="card-vis ph5" style="aspect-ratio:4/3;font-size:1.9rem">🌀</div>
+          <div class="card-body"><h3>Natural Braids</h3><p>Braided with your own hair — no extensions</p></div>
+        </div>
+        <div class="card" style="overflow:hidden;cursor:pointer" onclick="pickProtectBranch('natural-styles',this)">
+          <div class="card-vis ph3" style="aspect-ratio:4/3;font-size:1.9rem">✨</div>
+          <div class="card-body"><h3>Natural Styles</h3><p>Twist-outs, braid-outs, defined curls, wash-n-go</p></div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="btn-back" onclick="d2go(3)">Back</button>
+      <button class="btn-terra" id="qprotectnext" onclick="d2go(4)" disabled>Continue</button>
+    </div>
+  </div>
+
+  <!-- QCHEM — shown only if 'chemical' in goals -->
+  <div class="subscreen" id="qchem">
+    <div class="agent-block">
+      <div class="agent-id"><div class="agent-ring bethany">B</div><span class="agent-name">Bethany</span></div>
+      <div class="agent-bubble"><p>Chemical services need a quick conversation first. Pick the one you want — we'll confirm your scalp and hair history at your appointment.</p></div>
+    </div>
+    <div class="sec-head"><h2>Which chemical service?</h2><p>Pick one</p></div>
+    <div class="container" style="margin-bottom:0">
+      <div class="grid-goals">
+        <div class="card" style="overflow:hidden;cursor:pointer" onclick="pickChem('relaxer',this)">
+          <div class="card-vis ph1" style="aspect-ratio:4/3;font-size:1.9rem">🧪</div>
+          <div class="card-body"><h3>Relaxer</h3><p>Straighten curly / coiled hair chemically</p></div>
+        </div>
+        <div class="card" style="overflow:hidden;cursor:pointer" onclick="pickChem('perm',this)">
+          <div class="card-vis ph1" style="aspect-ratio:4/3;font-size:1.9rem">🌀</div>
+          <div class="card-body"><h3>Perm</h3><p>Defined curls or waves via rod set</p></div>
+        </div>
+        <div class="card" style="overflow:hidden;cursor:pointer" onclick="pickChem('color',this)">
+          <div class="card-vis ph1" style="aspect-ratio:4/3;font-size:1.9rem">🎨</div>
+          <div class="card-body"><h3>Color</h3><p>Dye for loose hair</p></div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="btn-back" onclick="d2go(3)">Back</button>
+      <button class="btn-terra" id="qchemnext" onclick="d2go(4)" disabled>Continue</button>
+    </div>
+  </div>
+
+  <!-- QTINYAGE — Tiny Heirs: how old -->
+  <div class="subscreen" id="qtinyAge">
+    <div class="agent-block">
+      <div class="agent-id"><div class="agent-ring">E</div><span class="agent-name">Emily</span></div>
+      <div class="agent-bubble"><p>Let's start with their age so we can pair them with the right service and stylist.</p></div>
+    </div>
+    <div class="sec-head"><h2>How old is your child?</h2><p>Pick the closest range</p></div>
+    <div class="container" style="margin-bottom:0">
+      <div class="grid-3up">
+        <div class="card" style="padding:20px 16px;text-align:center" onclick="pickTinyAge('toddler',this)">
+          <span style="font-size:1.8rem;display:block;margin-bottom:10px">🌱</span>
+          <div class="card-body" style="padding:0"><h3>Toddler</h3><p>1–5 years</p></div>
+        </div>
+        <div class="card" style="padding:20px 16px;text-align:center" onclick="pickTinyAge('child',this)">
+          <span style="font-size:1.8rem;display:block;margin-bottom:10px">👧🏾</span>
+          <div class="card-body" style="padding:0"><h3>Child</h3><p>6–12 years</p></div>
+        </div>
+        <div class="card" style="padding:20px 16px;text-align:center" onclick="pickTinyAge('teen',this)">
+          <span style="font-size:1.8rem;display:block;margin-bottom:10px">🧒🏾</span>
+          <div class="card-body" style="padding:0"><h3>Teen</h3><p>13+ years</p></div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="btn-back" onclick="d2go(0)">Back</button>
+      <button class="btn-terra" id="qtinyAgeNext" onclick="showD2Screen('qtinyGender',2)" disabled>Continue</button>
+    </div>
+  </div>
+
+  <!-- QTINYGENDER — Tiny Heirs: girl or boy -->
+  <div class="subscreen" id="qtinyGender">
+    <div class="agent-block">
+      <div class="agent-id"><div class="agent-ring">E</div><span class="agent-name">Emily</span></div>
+      <div class="agent-bubble"><p>Girl or boy? This helps us match them with the right stylist and the right service.</p></div>
+    </div>
+    <div class="sec-head"><h2>Girl or boy?</h2></div>
+    <div class="container" style="margin-bottom:0">
+      <div class="grid-2up">
+        <div class="card" style="padding:20px 16px;text-align:center" onclick="pickTinyGender('girl',this)">
+          <span style="font-size:1.8rem;display:block;margin-bottom:10px">👧🏾</span>
+          <div class="card-body" style="padding:0"><h3>Girl</h3></div>
+        </div>
+        <div class="card" style="padding:20px 16px;text-align:center" onclick="pickTinyGender('boy',this)">
+          <span style="font-size:1.8rem;display:block;margin-bottom:10px">👦🏾</span>
+          <div class="card-body" style="padding:0"><h3>Boy</h3></div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="btn-back" onclick="showD2Screen('qtinyAge',1)">Back</button>
+      <button class="btn-terra" id="qtinyGenderNext" onclick="showD2Screen('qtinyNeed',3)" disabled>Continue</button>
+    </div>
+  </div>
+
+  <!-- QTINYNEED — Tiny Heirs: what does their hair need -->
+  <div class="subscreen" id="qtinyNeed">
+    <div class="agent-block">
+      <div class="agent-id"><div class="agent-ring">E</div><span class="agent-name">Emily</span></div>
+      <div class="agent-bubble"><p>Last question — what are we here for today?</p></div>
+    </div>
+    <div class="sec-head"><h2>What does their hair need?</h2><p>Pick the closest</p></div>
+    <div class="container" style="margin-bottom:0">
+      <div class="grid-goals">
+        <div class="card" style="overflow:hidden;cursor:pointer" onclick="pickTinyNeed('style',this)">
+          <div class="card-vis ph2" style="aspect-ratio:4/3;font-size:1.9rem">🌿</div>
+          <div class="card-body"><h3>Style</h3><p>Braids, twists, a fresh look</p></div>
+        </div>
+        <div class="card" style="overflow:hidden;cursor:pointer" onclick="pickTinyNeed('trim',this)">
+          <div class="card-vis ph7" style="aspect-ratio:4/3;font-size:1.9rem">✂️</div>
+          <div class="card-body"><h3>Trim &amp; Edges</h3><p>Cut, shape-up, line-up</p></div>
+        </div>
+        <div class="card" style="overflow:hidden;cursor:pointer" onclick="pickTinyNeed('natural',this)">
+          <div class="card-vis ph3" style="aspect-ratio:4/3;font-size:1.9rem">🌀</div>
+          <div class="card-body"><h3>Natural Care</h3><p>Wash, condition, detangle</p></div>
+        </div>
+        <div class="card" style="overflow:hidden;cursor:pointer" onclick="pickTinyNeed('locs',this)">
+          <div class="card-vis ph4" style="aspect-ratio:4/3;font-size:1.9rem">🔱</div>
+          <div class="card-body"><h3>Loc Care</h3><p>Retwist or loc maintenance</p></div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="btn-back" onclick="showD2Screen('qtinyGender',2)">Back</button>
+      <button class="btn-terra" id="qtinyNeedNext" onclick="buildTinyResults()" disabled>Show my matches</button>
+    </div>
+  </div>
+
+  <!-- QTINY — Tiny Heirs results -->
+  <div class="subscreen" id="qtiny">
+    <div class="agent-block">
+      <div class="agent-id"><div class="agent-ring">E</div><span class="agent-name">Emily</span></div>
+      <div class="agent-bubble"><p>Our Tiny Heirs menu is crafted just for them — gentle, calm, and full of care. Here's what we offer.</p></div>
+    </div>
+    <div class="chat-module">
+      <div class="chat-log" id="dtinylog"></div>
+      <div class="chat-row">
+        <input class="chat-input" id="dtinyin" type="text" placeholder="Ask Emily about Tiny Heirs services…" onkeydown="if(event.key==='Enter')chat('dtiny')">
+        <button class="chat-send" onclick="chat('dtiny')">→</button>
+      </div>
+    </div>
+    <div class="container" style="margin-bottom:0">
+      <div class="grid-2up" id="dtinygrid"></div>
+    </div>
+    <div class="nav-row">
+      <button class="btn-back" onclick="resetD2()">Start over</button>
+      <a class="btn-terra" href="https://book.squareup.com/appointments/a68e133e-8091-4327-b96d-b22ac2c00826/location/2S5981WK4556T" target="_blank">Browse all services</a>
     </div>
   </div>
 
@@ -1048,7 +1302,7 @@ footer a:hover { color: var(--ink); }
         </div>
       </div>
       <div class="pq">
-        <label>How much daily styling time works for you?</label>
+        <label>How much daily styling time works for you? <span style="color:var(--ink-faint);font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label>
         <div class="pill-row">
           <button class="pill" onclick="pickProf('lifestyle','minimal',this)">As little as possible</button>
           <button class="pill" onclick="pickProf('lifestyle','moderate',this)">A little effort is fine</button>
@@ -1057,7 +1311,7 @@ footer a:hover { color: var(--ink); }
       </div>
     </div>
     <div class="nav-row">
-      <button class="btn-back" onclick="d2go(3)">Back</button>
+      <button class="btn-back" onclick="backFromTexture()">Back</button>
       <button class="btn-terra" id="q4next" onclick="buildD2Results()" disabled>Show my matches</button>
     </div>
   </div>
@@ -1080,7 +1334,7 @@ footer a:hover { color: var(--ink); }
     </div>
     <div class="nav-row">
       <button class="btn-back" onclick="resetD2()">Start over</button>
-      <a class="btn-terra" href="https://crownheirs.com" target="_blank">Book Now</a>
+      <a class="btn-terra" href="https://book.squareup.com/appointments/a68e133e-8091-4327-b96d-b22ac2c00826/location/2S5981WK4556T" target="_blank">Browse all services</a>
     </div>
   </div>
 
@@ -1103,7 +1357,7 @@ footer a:hover { color: var(--ink); }
 </svg></a>
     <nav class="site-nav">
       <a href="#">Home</a>
-      <a href="https://crownheirs.com" class="nav-cta" target="_blank">Book</a>
+      <a href="https://book.squareup.com/appointments/a68e133e-8091-4327-b96d-b22ac2c00826/location/2S5981WK4556T" class="nav-cta" target="_blank">Book</a>
     </nav>
   </header>
   <div class="progress-bar-wrap">
@@ -1125,43 +1379,106 @@ footer a:hover { color: var(--ink); }
     <div class="sec-head"><h2>What catches your eye?</h2><p>Select everything that resonates</p></div>
     <div class="container" style="margin-bottom:0">
       <div class="grid-inspo">
-        <div class="inspo-card" onclick="toggleInspo(this,'braids')">
-          <img class="inspo-img" src="https://images.unsplash.com/photo-1620325867502-221cfb5faa5f?w=400&q=80&fit=crop&crop=faces" alt="Braids" onerror="this.style.display='none';this.nextSibling.style.display='flex'">
+        <!-- WOMEN'S STYLES — category dividers guide the media manager; each card is a placeholder drop-in slot -->
+        <div class="inspo-section">Women's Styles</div>
+        <div class="inspo-card" data-category="women-braids" data-priority="CRITICAL" onclick="toggleInspo(this,'braids')">
+          <img class="inspo-img" src="https://images.unsplash.com/photo-1620325867502-221cfb5faa5f?w=400&q=80&fit=crop&crop=faces" alt="Knotless braids" onerror="this.style.display='none';this.nextSibling.style.display='flex'">
           <div class="inspo-ph ph2" style="display:none"><span class="inspo-ph-icon">🌿</span><span class="inspo-ph-label">Add Photo</span></div>
           <div class="inspo-overlay"><h3>Knotless Braids</h3><p>Protective &amp; low maintenance</p></div>
         </div>
-        <div class="inspo-card" onclick="toggleInspo(this,'silkpress')">
+        <div class="inspo-card" data-category="women-twists-ext" data-priority="HIGH" onclick="toggleInspo(this,'senegalese')">
+          <div class="inspo-ph ph2"><span class="inspo-ph-icon">🌿</span><span class="inspo-ph-label">Add Photo</span></div>
+          <div class="inspo-overlay"><h3>Senegalese Twists</h3><p>Smooth, long, versatile</p></div>
+        </div>
+        <div class="inspo-card" data-category="women-silkpress" data-priority="CRITICAL" onclick="toggleInspo(this,'silkpress')">
           <img class="inspo-img" src="https://images.unsplash.com/photo-1595956553066-fe24a8c33395?w=400&q=80&fit=crop&crop=faces" alt="Silk press" onerror="this.style.display='none';this.nextSibling.style.display='flex'">
           <div class="inspo-ph ph1" style="display:none"><span class="inspo-ph-icon">✨</span><span class="inspo-ph-label">Add Photo</span></div>
           <div class="inspo-overlay"><h3>Silk Press</h3><p>Sleek, smooth, polished</p></div>
         </div>
-        <div class="inspo-card" onclick="toggleInspo(this,'locs')">
-          <img class="inspo-img" src="https://images.unsplash.com/photo-1529111290557-82f6d5c6cf85?w=400&q=80&fit=crop&crop=faces" alt="Locs" onerror="this.style.display='none';this.nextSibling.style.display='flex'">
-          <div class="inspo-ph ph4" style="display:none"><span class="inspo-ph-icon">🔱</span><span class="inspo-ph-label">Add Photo</span></div>
-          <div class="inspo-overlay"><h3>Locs</h3><p>Bold, intentional, lasting</p></div>
-        </div>
-        <div class="inspo-card" onclick="toggleInspo(this,'natural')">
+        <div class="inspo-card" data-category="women-natural" data-priority="CRITICAL" onclick="toggleInspo(this,'natural')">
           <img class="inspo-img" src="https://images.unsplash.com/photo-1611432579699-484f7990b127?w=400&q=80&fit=crop&crop=faces" alt="Natural curls" onerror="this.style.display='none';this.nextSibling.style.display='flex'">
           <div class="inspo-ph ph5" style="display:none"><span class="inspo-ph-icon">🌀</span><span class="inspo-ph-label">Add Photo</span></div>
           <div class="inspo-overlay"><h3>Natural Curls</h3><p>Defined, voluminous texture</p></div>
         </div>
-        <div class="inspo-card" onclick="toggleInspo(this,'pixie')">
-          <img class="inspo-img" src="https://images.unsplash.com/photo-1607346256330-dee7af15f7c5?w=400&q=80&fit=crop&crop=faces" alt="Short cut" onerror="this.style.display='none';this.nextSibling.style.display='flex'">
-          <div class="inspo-ph ph7" style="display:none"><span class="inspo-ph-icon">✂️</span><span class="inspo-ph-label">Add Photo</span></div>
-          <div class="inspo-overlay"><h3>Short &amp; Sculpted</h3><p>Bold cut, clean lines</p></div>
-        </div>
-        <div class="inspo-card" onclick="toggleInspo(this,'twists')">
+        <div class="inspo-card" data-category="women-twists" data-priority="HIGH" onclick="toggleInspo(this,'twists')">
           <img class="inspo-img" src="https://images.unsplash.com/photo-1600857544200-b2f468e7b1c1?w=400&q=80&fit=crop&crop=faces" alt="Twists" onerror="this.style.display='none';this.nextSibling.style.display='flex'">
           <div class="inspo-ph ph5" style="display:none"><span class="inspo-ph-icon">🌿</span><span class="inspo-ph-label">Add Photo</span></div>
-          <div class="inspo-overlay"><h3>Twists</h3><p>Protective &amp; versatile</p></div>
+          <div class="inspo-overlay"><h3>Two-Strand Twists</h3><p>Protective &amp; versatile</p></div>
         </div>
-        <div class="inspo-card" onclick="toggleInspo(this,'scalp')">
+        <div class="inspo-card" data-category="women-pixie" data-priority="HIGH" onclick="toggleInspo(this,'pixie')">
+          <img class="inspo-img" src="https://images.unsplash.com/photo-1607346256330-dee7af15f7c5?w=400&q=80&fit=crop&crop=faces" alt="Pixie cut" onerror="this.style.display='none';this.nextSibling.style.display='flex'">
+          <div class="inspo-ph ph7" style="display:none"><span class="inspo-ph-icon">✂️</span><span class="inspo-ph-label">Add Photo</span></div>
+          <div class="inspo-overlay"><h3>Pixie &amp; Tapered</h3><p>Bold cut, clean lines</p></div>
+        </div>
+        <div class="inspo-card" data-category="women-updo" data-priority="HIGH" onclick="toggleInspo(this,'updo')">
+          <div class="inspo-ph ph6"><span class="inspo-ph-icon">👑</span><span class="inspo-ph-label">Add Photo</span></div>
+          <div class="inspo-overlay"><h3>Updo &amp; Occasion</h3><p>Elevated event styling</p></div>
+        </div>
+        <div class="inspo-card" data-category="scalp" data-priority="NICE" onclick="toggleInspo(this,'scalp')">
           <div class="inspo-ph ph2"><span class="inspo-ph-icon">💧</span><span class="inspo-ph-label">Add Photo</span></div>
           <div class="inspo-overlay"><h3>Scalp Reset</h3><p>Clean, healthy foundation</p></div>
         </div>
-        <div class="inspo-card" onclick="toggleInspo(this,'updo')">
-          <div class="inspo-ph ph6"><span class="inspo-ph-icon">👑</span><span class="inspo-ph-label">Add Photo</span></div>
-          <div class="inspo-overlay"><h3>Updo &amp; Styled</h3><p>Elevated occasion looks</p></div>
+
+        <!-- LOC JOURNEY — multiple cards per brief Section 4C -->
+        <div class="inspo-section">Loc Journey</div>
+        <div class="inspo-card" data-category="locs-starter" data-priority="CRITICAL" onclick="toggleInspo(this,'locs-starter')">
+          <div class="inspo-ph ph4"><span class="inspo-ph-icon">🌱</span><span class="inspo-ph-label">Add Photo</span></div>
+          <div class="inspo-overlay"><h3>Starter Locs</h3><p>Beginning the journey</p></div>
+        </div>
+        <div class="inspo-card" data-category="locs-mature-women" data-priority="CRITICAL" onclick="toggleInspo(this,'locs')">
+          <img class="inspo-img" src="https://images.unsplash.com/photo-1529111290557-82f6d5c6cf85?w=400&q=80&fit=crop&crop=faces" alt="Mature locs" onerror="this.style.display='none';this.nextSibling.style.display='flex'">
+          <div class="inspo-ph ph4" style="display:none"><span class="inspo-ph-icon">🔱</span><span class="inspo-ph-label">Add Photo</span></div>
+          <div class="inspo-overlay"><h3>Mature Locs (Women)</h3><p>Defined &amp; intentional</p></div>
+        </div>
+        <div class="inspo-card" data-category="locs-styled" data-priority="HIGH" onclick="toggleInspo(this,'locs-styled')">
+          <div class="inspo-ph ph4"><span class="inspo-ph-icon">✨</span><span class="inspo-ph-label">Add Photo</span></div>
+          <div class="inspo-overlay"><h3>Styled Locs</h3><p>Updo, pinned, braided</p></div>
+        </div>
+        <div class="inspo-card" data-category="locs-freeform" data-priority="HIGH" onclick="toggleInspo(this,'locs-freeform')">
+          <div class="inspo-ph ph4"><span class="inspo-ph-icon">🌿</span><span class="inspo-ph-label">Add Photo</span></div>
+          <div class="inspo-overlay"><h3>Freeform Locs</h3><p>Organic, free-growing</p></div>
+        </div>
+        <div class="inspo-card" data-category="locs-color" data-priority="NICE" onclick="toggleInspo(this,'locs-color')">
+          <div class="inspo-ph ph4"><span class="inspo-ph-icon">🎨</span><span class="inspo-ph-label">Add Photo</span></div>
+          <div class="inspo-overlay"><h3>Loc Color</h3><p>Highlights or full color</p></div>
+        </div>
+
+        <!-- MEN'S STYLES — brief Section 2A -->
+        <div class="inspo-section">Men's Services</div>
+        <div class="inspo-card" data-category="men-fade" data-priority="CRITICAL" onclick="toggleInspo(this,'men-fade')">
+          <div class="inspo-ph ph7"><span class="inspo-ph-icon">💈</span><span class="inspo-ph-label">Add Photo</span></div>
+          <div class="inspo-overlay"><h3>Cut &amp; Fade</h3><p>Precision barber work</p></div>
+        </div>
+        <div class="inspo-card" data-category="men-beard" data-priority="HIGH" onclick="toggleInspo(this,'men-beard')">
+          <div class="inspo-ph ph7"><span class="inspo-ph-icon">🧔🏾</span><span class="inspo-ph-label">Add Photo</span></div>
+          <div class="inspo-overlay"><h3>Beard &amp; Line-up</h3><p>Crisp hairline, clean shape</p></div>
+        </div>
+        <div class="inspo-card" data-category="men-locs" data-priority="HIGH" onclick="toggleInspo(this,'men-locs')">
+          <div class="inspo-ph ph4"><span class="inspo-ph-icon">🔱</span><span class="inspo-ph-label">Add Photo</span></div>
+          <div class="inspo-overlay"><h3>Men's Locs</h3><p>Fresh retwist, defined</p></div>
+        </div>
+        <div class="inspo-card" data-category="men-braids" data-priority="HIGH" onclick="toggleInspo(this,'men-braids')">
+          <div class="inspo-ph ph2"><span class="inspo-ph-icon">🌿</span><span class="inspo-ph-label">Add Photo</span></div>
+          <div class="inspo-overlay"><h3>Men's Braids</h3><p>Cornrows or designed braids</p></div>
+        </div>
+        <div class="inspo-card" data-category="men-natural" data-priority="NICE" onclick="toggleInspo(this,'men-natural')">
+          <div class="inspo-ph ph3"><span class="inspo-ph-icon">🌀</span><span class="inspo-ph-label">Add Photo</span></div>
+          <div class="inspo-overlay"><h3>Men's Natural</h3><p>Wash-and-go or twist-out</p></div>
+        </div>
+
+        <!-- TINY HEIRS — brief Section 2A -->
+        <div class="inspo-section">Tiny Heirs</div>
+        <div class="inspo-card" data-category="tiny-braids" data-priority="CRITICAL" onclick="toggleInspo(this,'tiny-braids')">
+          <div class="inspo-ph ph2"><span class="inspo-ph-icon">🌱</span><span class="inspo-ph-label">Add Photo</span></div>
+          <div class="inspo-overlay"><h3>Tiny Heirs Braids</h3><p>Gentle protective styles</p></div>
+        </div>
+        <div class="inspo-card" data-category="tiny-cut" data-priority="HIGH" onclick="toggleInspo(this,'tiny-cut')">
+          <div class="inspo-ph ph7"><span class="inspo-ph-icon">✂️</span><span class="inspo-ph-label">Add Photo</span></div>
+          <div class="inspo-overlay"><h3>Tiny Heirs Cut</h3><p>First cuts &amp; fresh shapes</p></div>
+        </div>
+        <div class="inspo-card" data-category="tiny-natural" data-priority="HIGH" onclick="toggleInspo(this,'tiny-natural')">
+          <div class="inspo-ph ph3"><span class="inspo-ph-icon">🌀</span><span class="inspo-ph-label">Add Photo</span></div>
+          <div class="inspo-overlay"><h3>Tiny Heirs Natural</h3><p>Wash, detangle, define</p></div>
         </div>
       </div>
     </div>
@@ -1239,7 +1556,143 @@ footer a:hover { color: var(--ink); }
     </div>
     <div class="nav-row">
       <button class="btn-back" onclick="d3go(1)">Start over</button>
-      <a class="btn-terra" href="https://crownheirs.com" target="_blank">Book Now</a>
+      <a class="btn-terra" href="https://book.squareup.com/appointments/a68e133e-8091-4327-b96d-b22ac2c00826/location/2S5981WK4556T" target="_blank">Browse all services</a>
+    </div>
+  </div>
+
+  <footer><p>Crown Heirs Hair Den · <a href="https://crownheirs.com">crownheirs.com</a> · <a href="mailto:info@crownheirs.com">info@crownheirs.com</a></p></footer>
+</div>
+
+<!-- ═══════════════════════════════════════
+     DOOR 4 — I ALREADY HAVE A STYLE
+════════════════════════════════════════ -->
+<div class="screen" id="door4">
+  <header class="site-header">
+    <a class="site-logo" href="#"><svg class="logo-mark" viewBox="0 0 48 40" xmlns="http://www.w3.org/2000/svg" aria-label="Crown Heirs">
+      <path d="M4 30 Q6 28 8 30 L10 14 L16 24 L24 6 L32 24 L38 14 L40 30 Q42 28 44 30" fill="none" stroke="#c8952a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="44" cy="30" r="1.8" fill="none" stroke="#c8952a" stroke-width="1.8"/>
+      <path d="M4 30 Q24 34 44 30" fill="none" stroke="#c8952a" stroke-width="2.2" stroke-linecap="round"/>
+    </svg></a>
+    <nav class="site-nav">
+      <a href="#">Home</a>
+      <a href="https://book.squareup.com/appointments/a68e133e-8091-4327-b96d-b22ac2c00826/location/2S5981WK4556T" class="nav-cta" target="_blank">Book</a>
+    </nav>
+  </header>
+  <div class="progress-bar-wrap">
+    <div class="progress-bar-inner">
+      <div class="progress-rail"><div class="progress-fill" id="d4fill" style="width:0%"></div></div>
+      <div class="progress-labels">
+        <span id="d4s0">Have</span><span id="d4s1">Needs</span><span id="d4s2">Matches</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- H1 WHAT DO YOU HAVE -->
+  <div class="subscreen active" id="h1">
+    <div class="agent-block">
+      <div class="agent-id"><div class="agent-ring">E</div><span class="agent-name">Emily</span></div>
+      <div class="agent-bubble"><p>Welcome back. What are you working with right now? Just tell me what's already on your head.</p></div>
+    </div>
+    <div class="sec-head"><h2>What do you currently have?</h2><p>Pick the closest match</p></div>
+    <div class="container" style="margin-bottom:0">
+      <div class="grid-goals">
+        <div class="card" style="overflow:hidden;cursor:pointer" onclick="pickHave('braids',this)">
+          <div class="card-vis ph2" style="aspect-ratio:4/3;font-size:1.9rem">🌿</div>
+          <div class="card-body"><h3>Braids</h3><p>Any type of braids or twists</p></div>
+        </div>
+        <div class="card" style="overflow:hidden;cursor:pointer" onclick="pickHave('weave',this)">
+          <div class="card-vis ph2" style="aspect-ratio:4/3;font-size:1.9rem">➰</div>
+          <div class="card-body"><h3>Weave or Sew-In</h3><p>Full or partial install</p></div>
+        </div>
+        <div class="card" style="overflow:hidden;cursor:pointer" onclick="pickHave('locs',this)">
+          <div class="card-vis ph4" style="aspect-ratio:4/3;font-size:1.9rem">🔱</div>
+          <div class="card-body"><h3>Locs</h3><p>Any stage of loc journey</p></div>
+        </div>
+        <div class="card" style="overflow:hidden;cursor:pointer" onclick="pickHave('chemical',this)">
+          <div class="card-vis ph1" style="aspect-ratio:4/3;font-size:1.9rem">🧪</div>
+          <div class="card-body"><h3>Color or Chemical</h3><p>Color, relaxer, or perm</p></div>
+        </div>
+        <div class="card" style="overflow:hidden;cursor:pointer" onclick="pickHave('natural',this)">
+          <div class="card-vis ph3" style="aspect-ratio:4/3;font-size:1.9rem">🌀</div>
+          <div class="card-body"><h3>Natural Hair</h3><p>No extensions, no chemicals</p></div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="btn-back" onclick="goHome()">Back to entrance</button>
+      <button class="btn-terra" id="h1next" onclick="buildNeeds()" disabled>Continue</button>
+    </div>
+  </div>
+
+  <!-- H2 WHAT DOES IT NEED -->
+  <div class="subscreen" id="h2">
+    <div class="agent-block">
+      <div class="agent-id"><div class="agent-ring">E</div><span class="agent-name">Emily</span></div>
+      <div class="agent-bubble"><p id="h2txt">What does it need today?</p></div>
+    </div>
+    <div class="sec-head"><h2>What does it need?</h2><p>Pick the closest</p></div>
+    <div class="container" style="margin-bottom:0">
+      <div class="grid-goals" id="needGrid"></div>
+    </div>
+    <div class="nav-row">
+      <button class="btn-back" onclick="d4go(0)">Back</button>
+      <button class="btn-terra" id="h2next" onclick="buildD4Results()" disabled>Show my match</button>
+    </div>
+  </div>
+
+  <!-- H3 RESULTS -->
+  <div class="subscreen" id="h3">
+    <div class="agent-block">
+      <div class="agent-id"><div class="agent-ring">E</div><span class="agent-name">Emily</span></div>
+      <div class="agent-bubble"><p id="d4rTxt">Here's your match. Book it or ask me anything below.</p></div>
+    </div>
+    <div class="chat-module">
+      <div class="chat-log" id="d4log"></div>
+      <div class="chat-row">
+        <input class="chat-input" id="d4in" type="text" placeholder="Ask Emily about this service…" onkeydown="if(event.key==='Enter')chat('d4')">
+        <button class="chat-send" onclick="chat('d4')">→</button>
+      </div>
+    </div>
+    <div class="container" style="margin-bottom:0">
+      <div class="grid-2up" id="d4grid"></div>
+    </div>
+    <div class="nav-row">
+      <button class="btn-back" onclick="resetD4()">Start over</button>
+      <a class="btn-terra" href="https://book.squareup.com/appointments/a68e133e-8091-4327-b96d-b22ac2c00826/location/2S5981WK4556T" target="_blank">Browse all services</a>
+    </div>
+  </div>
+
+  <footer><p>Crown Heirs Hair Den · <a href="https://crownheirs.com">crownheirs.com</a> · <a href="mailto:info@crownheirs.com">info@crownheirs.com</a></p></footer>
+</div>
+
+<!-- ═══════════════════════════════════════
+     DOOR 5 — BEAUTY SERVICES
+════════════════════════════════════════ -->
+<div class="screen" id="door5">
+  <header class="site-header">
+    <a class="site-logo" href="#"><svg class="logo-mark" viewBox="0 0 48 40" xmlns="http://www.w3.org/2000/svg" aria-label="Crown Heirs">
+      <path d="M4 30 Q6 28 8 30 L10 14 L16 24 L24 6 L32 24 L38 14 L40 30 Q42 28 44 30" fill="none" stroke="#c8952a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="44" cy="30" r="1.8" fill="none" stroke="#c8952a" stroke-width="1.8"/>
+      <path d="M4 30 Q24 34 44 30" fill="none" stroke="#c8952a" stroke-width="2.2" stroke-linecap="round"/>
+    </svg></a>
+    <nav class="site-nav">
+      <a href="#">Home</a>
+      <a href="https://book.squareup.com/appointments/a68e133e-8091-4327-b96d-b22ac2c00826/location/2S5981WK4556T" class="nav-cta" target="_blank">Book</a>
+    </nav>
+  </header>
+
+  <div class="subscreen active" id="beauty">
+    <div class="agent-block">
+      <div class="agent-id"><div class="agent-ring">E</div><span class="agent-name">Emily</span></div>
+      <div class="agent-bubble"><p>No hair questions here — just the beauty menu. Pick what you want and book straight through.</p></div>
+    </div>
+    <div class="sec-head"><h2>Beauty Services</h2><p>Direct booking, no questions asked</p></div>
+    <div class="container" style="margin-bottom:0">
+      <div class="grid-2up" id="beautyGrid"></div>
+    </div>
+    <div class="nav-row">
+      <button class="btn-back" onclick="goHome()">Back to entrance</button>
+      <a class="btn-terra" href="https://book.squareup.com/appointments/a68e133e-8091-4327-b96d-b22ac2c00826/location/2S5981WK4556T" target="_blank">Browse all services</a>
     </div>
   </div>
 
@@ -1286,21 +1739,182 @@ function showScreen(id){
   window.scrollTo(0,0);
 }
 function goHome(){ showScreen('welcome'); document.getElementById('portal').style.display='block'; }
+/* ── BOOKING URLS ── */
+/* Square booking base (merchant + location). Any service without a specific URL falls back here. */
+const SQUARE_BASE='https://book.squareup.com/appointments/a68e133e-8091-4327-b96d-b22ac2c00826/location/2S5981WK4556T';
+/* Per-service Square deep links. Key = service name (exact match to `n` field in SVCS / INSPO_MAP).
+   To wire up a service, paste the full Square URL ending in `/services/{SERVICE_ID}`.
+   Any service not listed here defaults to SQUARE_BASE (general booking page). */
+const BOOKING_URLS={
+  // Women's services
+  'Pixie & Tapered Cut':        SQUARE_BASE+'/services/RUQLGKHDC3YELST4SESHNVGM', // Hair Cut
+  'Shape Up & Trim':             SQUARE_BASE+'/services/N7CH3YO4UESVS7OYKLSJJ3KD', // Trim
+  'Silk Press':                  SQUARE_BASE+'/services/UNBG5JWQFR4JGSU72W2KSXA7', // Silk Press
+  'Knotless Braids':             SQUARE_BASE+'/services/52R5Y2662BBN6J66TGTWKE74', // Braids (Knotless)
+  'Senegalese / Box Twists':     SQUARE_BASE+'/services/CABRWEWQAR4BJU5GYTX64F3R', // Individuals (Singles)
+  'Two-Strand Twists':           SQUARE_BASE+'/services/AGLUZYIE7APYENKWTDP3MQP4', // Mini Twists (Two Strands)
+  'Natural Hair Styling':        SQUARE_BASE+'/services/SNT2JZAFSMSKGU6PRGPM3YBH', // Loose Natural Styles
+  'Updo & Special Occasion':     SQUARE_BASE+'/services/R5GVEIUQ4PII3FPBGXOTNEML', // Consultations
+  // Loc services
+  'Starter Locs':                SQUARE_BASE+'/services/TRHUW23I6S5XKC7TYGYCCOIR', // Loc Starters
+  'Loc Retwist':                 SQUARE_BASE+'/services/WFHT7LLV3DGYRMTWFMWJ5NFQ', // Loc Retwist
+  'Interlocking':                SQUARE_BASE+'/services/QNQZ2EZWJYAVZB7PSHNYD7JZ', // Loc Interlocking
+  'Loc Moisturizing Treatment':  SQUARE_BASE+'/services/VWLVGRSJVKJPRX7VTZVE5MJL', // Loc Detoxes
+  'Loc Styling':                 SQUARE_BASE+'/services/JQ2PQYOT4OEGB3ZRGSR7YKAO', // Loc Styles
+  'Loc Repair & Combine':        SQUARE_BASE+'/services/WFHXWILG5C4THWVVFLOUAKLG', // Loc Repairs
+  'Loc Extensions':              SQUARE_BASE+'/services/UEQQXMFTXTALZ73MWIE4XMO6', // Loc Extensions
+  'Freeform Locs':               SQUARE_BASE+'/services/R5GVEIUQ4PII3FPBGXOTNEML', // Consultations
+  'Loc Color':                   SQUARE_BASE+'/services/MQQP5K3E2FFUMJWTQ463OUBK', // Loc Color
+  // Shared
+  'Scalp Detox & Steam':         SQUARE_BASE+'/services/JOBCOWU6UJOYRBYE523XS37M', // Hair & Scalp Treatments
+  'Hot Towel Treatment':         SQUARE_BASE+'/services/N7QHKREZOH3QGMLKTDXWA6GH', // Luxury Experience Add-Ons
+  // Men's services
+  'Barber Cut & Fade':           SQUARE_BASE+'/services/GLD54OF4UBJ5BXCOTYJY6LW7', // Barber's Corner
+  'Line-up & Beard Sculpt':      SQUARE_BASE+'/services/GLD54OF4UBJ5BXCOTYJY6LW7', // Barber's Corner (incl. razor lining)
+  "Men's Cornrows & Braids":     SQUARE_BASE+'/services/BNBBITI4H5DNN3AHFOFBPSUW', // Natural Hair Braiding
+  "Men's Natural Styling":       SQUARE_BASE+'/services/SNT2JZAFSMSKGU6PRGPM3YBH', // Loose Natural Styles
+  "Men's Silk Press":            SQUARE_BASE+'/services/UNBG5JWQFR4JGSU72W2KSXA7', // Silk Press
+  "Men's Loc Retwist":           SQUARE_BASE+'/services/WFHT7LLV3DGYRMTWFMWJ5NFQ', // Loc Retwist
+  // Tiny Heirs services
+  'Tiny Heirs Wash & Style':     SQUARE_BASE+'/services/GN3TMXXVZPIZYYMMBE64C6CG', // Shampoo and Blow Dry
+  'Tiny Heirs Braids & Twists':  SQUARE_BASE+'/services/BNBBITI4H5DNN3AHFOFBPSUW', // Natural Hair Braiding
+  'Tiny Heirs First Cut':        SQUARE_BASE+'/services/RUQLGKHDC3YELST4SESHNVGM', // Hair Cut
+  'Tiny Heirs Shape-Up & Line-up':SQUARE_BASE+'/services/GLD54OF4UBJ5BXCOTYJY6LW7', // Barber's Corner
+  'Tiny Heirs Trim & Shape':     SQUARE_BASE+'/services/N7CH3YO4UESVS7OYKLSJJ3KD', // Trim
+  'Tiny Heirs Natural Care':     SQUARE_BASE+'/services/7AJRR2YIBWOTODOEIUUB3DLJ', // Curl Definition + Restoration
+  'Tiny Heirs Loc Maintenance':  SQUARE_BASE+'/services/WFHT7LLV3DGYRMTWFMWJ5NFQ', // Loc Retwist
+  // Door 3 inspo-only labels (if different from SVCS names)
+  'Loc Maintenance':             SQUARE_BASE+'/services/WFHT7LLV3DGYRMTWFMWJ5NFQ', // Loc Retwist
+  'Updo & Special Styling':      SQUARE_BASE+'/services/R5GVEIUQ4PII3FPBGXOTNEML', // Consultations
+  // Weave & Extensions family
+  'Sew-In Weave Installation':   SQUARE_BASE+'/services/IIDZZ4TLOQ3LCGZCBF5F2OH6', // Weave Installation
+  'Partial Sew-In':              SQUARE_BASE+'/services/GN4TVGLG6BGD234KRJZBANKP', // Partial Sew In
+  'Quick Weave':                 SQUARE_BASE+'/services/5QT4V43W7D52EAL23I2DCLZE', // Quick Weave
+  'Crochet Styles':              SQUARE_BASE+'/services/RLWS2FSYLVJGSLHHDFONCOBX', // Crochet Styles
+  'Hair Extensions':             SQUARE_BASE+'/services/5FNU6LSYUOSMVEOAN26MQYCV', // Hair Extensions
+  // Braid family additions
+  'Feed-In Style Braids':        SQUARE_BASE+'/services/RUQLGKHDC3YELST4SESHNVGM', // Feed-In Style Braids (per sheet)
+  'Faux Locs — Butterfly':       SQUARE_BASE+'/services/57KHU2HTXZFBTF4C3PC7W7WH', // Faux Locs (Butterfly & Soft)
+  'Faux Locs — Soft':            SQUARE_BASE+'/services/57KHU2HTXZFBTF4C3PC7W7WH', // Faux Locs (Butterfly & Soft)
+  'Individuals Over Locs':       SQUARE_BASE+'/services/KHTG7SQFUVIKVNWRJYB3BL73', // Individuals Over Locs
+  'Mini Twists w/ Added Hair':   SQUARE_BASE+'/services/UG7MVWUBFXU5IF2XXT5RLCQW', // Mini Twists with Added Hair
+  'Mini Twists (Two Strands)':   SQUARE_BASE+'/services/AGLUZYIE7APYENKWTDP3MQP4', // Mini Twists (Two Strands)
+  'Natural Hair Braiding':       SQUARE_BASE+'/services/BNBBITI4H5DNN3AHFOFBPSUW', // Natural Hair Braiding
+  'Curl Definition + Restoration': SQUARE_BASE+'/services/7AJRR2YIBWOTODOEIUUB3DLJ', // Curl Definition + Restoration
+  // Sleek / Shampoo
+  'Sleek Ponytail':              SQUARE_BASE+'/services/XWY3MMXFR2IPYESOYV2XIKLO', // Sleek Ponytail
+  'Shampoo & Style':             SQUARE_BASE+'/services/OSSMSBQBBU4C26EBAB2PNYQH', // Shampoo & Style
+  // Chemical
+  'Chemical Relaxer':            SQUARE_BASE+'/services/ZELMY6NC45OF2HRJRURO5WAW', // Chemical Relaxer
+  'Chemical Perm':               SQUARE_BASE+'/services/P3IVOOFMDEKQZEO2RQZ3UAAV', // Chemical Perm
+  'Color (Loose Hair)':          SQUARE_BASE+'/services/PH45TG6XUNGVNYOQOLMSJPLT', // Color
+  // Locs
+  'Instant Locs':                SQUARE_BASE+'/services/QKL5PAPQQUBMZMGRSF4PJTZT', // Instant Locs
+  'Loc Sparkles':                SQUARE_BASE+'/services/K75MBJJBP33LZJNNWLAGIX6A', // Loc Sparkles
+  // Door 4 supplementary
+  'Braiding Add-Ons':            SQUARE_BASE+'/services/5KIWTVYD6EPCSCCVEINLLOYP', // Braiding Add-Ons
+  'Takedown':                    SQUARE_BASE+'/services/7WPSQBY52AJIMEVGKQLJFRQN', // Takedown
+  'Sew-In Maintenance':          SQUARE_BASE+'/services/ATKUAVPFPX5RNYP46XNSBYLZ', // Sew-In Maintenance
+  'Perimeter Touch Up':          SQUARE_BASE+'/services/QONSSIHUHOWAD5FYTGWPSQ47', // Perimeter Touch Up
+  // Beauty (Door 5)
+  'Lash Extensions — Full Set':  SQUARE_BASE+'/services/XCHGV6CEBVTEQIKGU7PBKXWM', // Lash Extensions Full Sets
+  'Lash 2/3 Week Fill':          SQUARE_BASE+'/services/E6F46UQG7G5Q2QJEAMHNLG5S', // Lash 2/3 Week Fill
+  'Lash Mini Fill':              SQUARE_BASE+'/services/MLS4HKP3B3GGWW45N3WSC5JQ', // Lash Mini Fill
+  'Makeup — Full Face':          SQUARE_BASE+'/services/OQFG2XTMVTJEBLG3SE5FS7MP', // Make Up: Full Face
+  'Makeup — Half Face':          SQUARE_BASE+'/services/EXWG52HCP6P6YEIRYUAGZEUE', // Make Up: Half Face
+  'Waxing — Face':               SQUARE_BASE+'/services/FJXRMFWWU6PRWGNE3PPACJRE', // Waxing (Face)
+  'Waxing — Body':               SQUARE_BASE+'/services/6LIXW7E456RQOTGGXDWSCXT5', // Waxing (Body)
+};
+function getBookingUrl(name){
+  return (BOOKING_URLS[name]&&BOOKING_URLS[name].trim())||SQUARE_BASE;
+}
+
 function openDoor(n){
-  if(n===1){window.open('https://crownheirs.com','_blank');return;}
-  if(n===2){showScreen('door2');d2go(1);}
+  if(n===1){window.open(SQUARE_BASE,'_blank');return;}
+  if(n===2){showScreen('door2');d2go(0);}
   if(n===3){showScreen('door3');d3go(1);}
+  if(n===4){showScreen('door4');d4go(0);}
+  if(n===5){showScreen('door5');initBeauty();}
 }
 
 /* ── DOOR 2 ── */
-let d2p=1,hLen=null,hIntent=null,d2Goals=new Set(),d2Prof={texture:null,lifestyle:null};
+let d2p=0,d2Gender=null,hLen=null,hIntent=null,d2Goals=new Set(),d2LocBranch=null,d2ChemBranch=null,d2ProtectBranch=null,d2Prof={texture:null,lifestyle:null};
+let tinyAge=null,tinyChildGender=null,tinyNeed=null;
+const D2_SCREENS=['q0','q1','q2','q3','q4','q5'];
+const D2_ALL_SCREENS=['q0','q1','q2','q3','qloc','qchem','qprotect','qtinyAge','qtinyGender','qtinyNeed','qtiny','q4','q5'];
 function d2go(n){
-  document.getElementById('q'+d2p).classList.remove('active');
-  d2p=n;document.getElementById('q'+n).classList.add('active');
+  D2_ALL_SCREENS.forEach(id=>{
+    const el=document.getElementById(id); if(el) el.classList.remove('active');
+  });
+  d2p=n;
+  const target=D2_SCREENS[n]; // q0..q5
+  document.getElementById(target).classList.add('active');
   const pct=Math.round((n/5)*100);
   document.getElementById('d2fill').style.width=pct+'%';
-  for(let i=0;i<5;i++){const el=document.getElementById('d2s'+i);el.classList.remove('act','dn');if(i===n-1)el.classList.add('act');else if(i<n-1)el.classList.add('dn');}
+  for(let i=0;i<6;i++){const el=document.getElementById('d2s'+i);if(!el)continue;el.classList.remove('act','dn');if(i===n)el.classList.add('act');else if(i<n)el.classList.add('dn');}
   window.scrollTo(0,0);
+}
+function showD2Screen(id,stepIdx){
+  // Shows a named sub-screen (qloc, qtiny*, etc) while keeping the step index pointer
+  D2_ALL_SCREENS.forEach(sid=>{
+    const el=document.getElementById(sid); if(el) el.classList.remove('active');
+  });
+  document.getElementById(id).classList.add('active');
+  const pct=Math.round((stepIdx/5)*100);
+  document.getElementById('d2fill').style.width=pct+'%';
+  for(let i=0;i<6;i++){const el=document.getElementById('d2s'+i);if(!el)continue;el.classList.remove('act','dn');if(i===stepIdx)el.classList.add('act');else if(i<stepIdx)el.classList.add('dn');}
+  window.scrollTo(0,0);
+}
+const D2_LABELS={
+  women:['Who','Length','Vision','Goal','Texture','Results'],
+  men:  ['Who','Length','','Goal','Texture','Results'],
+  tiny: ['Who','Age','Gender','Need','','Matches']
+};
+function updateProgressLabels(gender){
+  const l=D2_LABELS[gender]||D2_LABELS.women;
+  for(let i=0;i<6;i++){
+    const el=document.getElementById('d2s'+i);
+    if(!el)continue;
+    el.textContent=l[i];
+    el.style.visibility=l[i]?'visible':'hidden';
+  }
+}
+function pickGender(v,el){
+  document.querySelectorAll('#q0 .card').forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel');d2Gender=v;
+  document.getElementById('q0next').disabled=false;
+  const m={women:'For Her — let\'s find the right service for your crown.',men:'For Him — cuts, beards, locs, braids. Three quick questions.',tiny:'Tiny Heirs — gentle, calm care for your little one.'};
+  document.getElementById('q0txt').textContent=m[v];
+  updateProgressLabels(v);
+  // Tiny path: route to age question first, not straight to results
+  document.getElementById('q0next').onclick = v==='tiny' ? ()=>showD2Screen('qtinyAge',1) : ()=>d2go(1);
+}
+function proceedAfterLen(){
+  // Men skip the intent (Vision) step
+  if(d2Gender==='men'){
+    hIntent='any';
+    buildGoals();
+  } else {
+    d2go(2);
+  }
+}
+function backFromGoals(){
+  if(d2Gender==='men'){ d2go(1); } else { d2go(2); }
+}
+function pickTinyAge(v,el){
+  document.querySelectorAll('#qtinyAge .card').forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel');tinyAge=v;
+  document.getElementById('qtinyAgeNext').disabled=false;
+}
+function pickTinyGender(v,el){
+  document.querySelectorAll('#qtinyGender .card').forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel');tinyChildGender=v;
+  document.getElementById('qtinyGenderNext').disabled=false;
+}
+function pickTinyNeed(v,el){
+  document.querySelectorAll('#qtinyNeed .card').forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel');tinyNeed=v;
+  document.getElementById('qtinyNeedNext').disabled=false;
 }
 function pickLen(v,el){
   document.querySelectorAll('.lcard').forEach(c=>c.classList.remove('sel'));
@@ -1314,21 +1928,71 @@ function pickIntent(v,el){
   el.classList.add('sel');hIntent=v;
   document.getElementById('q2next').disabled=false;
 }
+function pickLocBranch(v,el){
+  document.querySelectorAll('#qloc .card').forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel');d2LocBranch=v;
+  document.getElementById('qlocnext').disabled=false;
+}
+function pickChem(v,el){
+  document.querySelectorAll('#qchem .card').forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel');d2ChemBranch=v;
+  document.getElementById('qchemnext').disabled=false;
+}
+function pickProtectBranch(v,el){
+  document.querySelectorAll('#qprotect .card').forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel');d2ProtectBranch=v;
+  document.getElementById('qprotectnext').disabled=false;
+}
+function afterGoals(){
+  // Sub-branches in priority order: chemical > locs > protect
+  if(d2Goals.has('chemical')){
+    showD2Screen('qchem',3);
+  } else if(d2Goals.has('locs')){
+    showD2Screen('qloc',3);
+  } else if(d2Goals.has('protect')){
+    showD2Screen('qprotect',3);
+  } else {
+    d2LocBranch=null; d2ChemBranch=null; d2ProtectBranch=null;
+    d2go(4);
+  }
+}
+function backFromTexture(){
+  if(d2Goals.has('chemical')){
+    showD2Screen('qchem',3);
+  } else if(d2Goals.has('locs')){
+    showD2Screen('qloc',3);
+  } else if(d2Goals.has('protect')){
+    showD2Screen('qprotect',3);
+  } else {
+    d2go(3);
+  }
+}
 const GOALS=[
-  {id:'protect',e:'🌿',p:'ph2',l:'Protect & Grow',d:'Give my hair a break and help it grow',intents:['add','keep'],lens:['twa','short','medium','long']},
-  {id:'sleek',e:'✨',p:'ph1',l:'Sleek & Polished',d:'Smooth, straight, professional look',intents:['keep','add'],lens:['short','medium','long']},
-  {id:'cut',e:'✂️',p:'ph7',l:'Fresh Cut or Shape',d:'A trim, cut, or whole new shape',intents:['cut'],lens:['twa','short','medium','long']},
-  {id:'locs',e:'🔱',p:'ph4',l:'Start or Keep Locs',d:'Begin or maintain my loc journey',intents:['keep','add'],lens:['twa','short','medium','long']},
-  {id:'scalp',e:'💧',p:'ph5',l:'Scalp Reset',d:'Dryness, flakes, buildup — my scalp needs relief',intents:['add','keep','cut'],lens:['twa','short','medium','long']},
-  {id:'natural',e:'🌀',p:'ph3',l:'Embrace My Curls',d:'Show off my natural texture',intents:['keep'],lens:['short','medium','long']},
-  {id:'kids',e:'👑',p:'ph6',l:'Tiny Heirs',d:'Services for my child',intents:['add','keep','cut'],lens:['twa','short','medium','long']},
+  // Women's goals
+  {id:'protect', e:'🌿', p:'ph2', l:'Protect & Grow',     d:'Give my hair a break and help it grow',                intents:['add','keep'],       lens:['twa','short','medium','long'], gender:['women']},
+  {id:'sleek',   e:'✨', p:'ph1', l:'Sleek & Polished',   d:'Smooth, straight, professional look',                  intents:['keep','add'],       lens:['short','medium','long'],       gender:['women']},
+  {id:'cut',     e:'✂️', p:'ph7', l:'Fresh Cut or Shape', d:'A trim, cut, or whole new shape',                      intents:['cut'],              lens:['twa','short','medium','long'], gender:['women']},
+  {id:'locs',    e:'🔱', p:'ph4', l:'Start or Keep Locs', d:'Begin or maintain my loc journey',                     intents:['keep','add'],       lens:['twa','short','medium','long'], gender:['women','men']},
+  {id:'scalp',   e:'💧', p:'ph5', l:'Scalp Reset',        d:'Dryness, flakes, buildup — my scalp needs relief',     intents:['add','keep','cut'], lens:['twa','short','medium','long'], gender:['women','men']},
+  {id:'natural', e:'🌀', p:'ph3', l:'Embrace My Curls',   d:'Show off my natural texture',                          intents:['keep'],             lens:['short','medium','long'],       gender:['women','men']},
+  {id:'occasion',e:'👑', p:'ph6', l:'Special Occasion',   d:'Wedding, prom, event — I want to feel elevated',       intents:['add','keep'],       lens:['short','medium','long'],       gender:['women']},
+  {id:'weave',  e:'➰', p:'ph2', l:'Weave & Extensions', d:'Sew-in, quick weave, crochet, tape-in, microlinks',    intents:['add'],              lens:['twa','short','medium','long'], gender:['women']},
+  {id:'chemical',e:'🧪',p:'ph1', l:'Chemical Service',   d:'Relaxer, perm, or color on loose hair',                intents:['keep'],             lens:['short','medium','long'],       gender:['women']},
+  {id:'shampoo', e:'💧',p:'ph3', l:'Shampoo & Style',    d:'Wash, condition, style — between appointments',        intents:['keep'],             lens:['short','medium','long'],       gender:['women','men']},
+  // Men's goals
+  {id:'barber',  e:'💈', p:'ph7', l:'Cut & Fade',         d:'Fresh cut, taper, fade, or shape-up',                  intents:['cut'],              lens:['twa','short','medium','long'], gender:['men']},
+  {id:'beard',   e:'🧔🏾',p:'ph7', l:'Beard & Line-up',   d:'Crisp hairline and beard sculpt',                      intents:['cut','keep'],       lens:['twa','short','medium','long'], gender:['men']},
+  {id:'braids_m',e:'🌿', p:'ph2', l:'Braids & Cornrows',  d:'Custom cornrows or braids built for you',              intents:['add','keep'],       lens:['short','medium','long'],       gender:['men']},
 ];
 function buildGoals(){
   const grid=document.getElementById('goalGrid');
-  grid.innerHTML='';d2Goals.clear();
+  grid.innerHTML='';d2Goals.clear();d2LocBranch=null;
   document.getElementById('q3next').disabled=true;
-  GOALS.forEach(g=>{
-    const ok=g.intents.includes(hIntent)&&g.lens.includes(hLen);
+  // Reset qloc selection
+  document.querySelectorAll('#qloc .card').forEach(c=>c.classList.remove('sel'));
+  document.getElementById('qlocnext').disabled=true;
+  GOALS.filter(g=>g.gender.includes(d2Gender)).forEach(g=>{
+    const ok=(hIntent==='any'||g.intents.includes(hIntent))&&g.lens.includes(hLen);
     grid.innerHTML+=`<div class="card${ok?'':' locked'}" style="overflow:hidden;cursor:pointer" onclick="toggleGoal(this,'${g.id}')">
       <div class="card-vis ${g.p}" style="aspect-ratio:4/3;font-size:1.9rem">${g.e}</div>
       <div class="card-body"><h3>${g.l}</h3><p>${g.d}</p></div>
@@ -1345,23 +2009,86 @@ function toggleGoal(card,goal){
 function pickProf(k,v,btn){
   btn.closest('.pill-row').querySelectorAll('.pill').forEach(p=>p.classList.remove('sel'));
   btn.classList.add('sel');d2Prof[k]=v;
-  document.getElementById('q4next').disabled=!d2Prof.texture||!d2Prof.lifestyle;
+  // Texture is required; lifestyle is an optional tiebreaker
+  document.getElementById('q4next').disabled=!d2Prof.texture;
 }
 const SVCS=[
-  {n:'Pixie & Tapered Cut',d:'Sculpted short cut shaped to your face — soft and feminine or bold and strong.',dur:'1–1.5 hrs',price:'From $65',badge:'Cut',e:'✂️',p:'ph7',goals:['cut','sleek'],tx:['straight','wavy','curly','coily'],ls:['minimal','moderate'],in:['cut'],len:['twa','short','medium']},
-  {n:'Shape Up & Trim',d:'Precision trim or edge-up that gives any existing style a clean, fresh finish.',dur:'45 min',price:'From $35',badge:'Trim',e:'✂️',p:'ph7',goals:['cut'],tx:['straight','wavy','curly','coily','locs'],ls:['minimal','moderate','invested'],in:['cut'],len:['twa','short','medium','long']},
-  {n:'Silk Press',d:'Silky straight hair using heat — no chemicals. Best for medium to long natural hair.',dur:'2–3 hrs',price:'From $85',badge:'Classic',e:'✨',p:'ph1',goals:['sleek'],tx:['curly','coily','wavy'],ls:['moderate','invested'],in:['keep'],len:['medium','long']},
-  {n:'Knotless Braids',d:'Tension-free box braids with added hair. Any natural length. Lasts 6–8 weeks.',dur:'4–6 hrs',price:'From $175',badge:'Best Seller',e:'🌿',p:'ph2',goals:['protect','sleek'],tx:['curly','coily','wavy','straight'],ls:['minimal','moderate'],in:['add'],len:['twa','short','medium','long']},
-  {n:'Two-Strand Twists',d:'Worn as-is or unraveled for a twist-out. No extensions needed.',dur:'2–3 hrs',price:'From $80',badge:'Protective',e:'🌿',p:'ph5',goals:['protect','natural'],tx:['curly','coily'],ls:['minimal','moderate'],in:['keep'],len:['short','medium','long']},
-  {n:'Starter Locs',d:'Begin your loc journey. We choose the best method for your texture and length.',dur:'3–5 hrs',price:'Consult req.',badge:'Journey',e:'🔱',p:'ph4',goals:['locs'],tx:['coily','curly'],ls:['minimal','moderate','invested'],in:['keep','add'],len:['twa','short','medium','long']},
-  {n:'Loc Retwist',d:'Keep locs neat, defined, and thriving. Regular retwists are the foundation.',dur:'1.5–3 hrs',price:'From $65',badge:'Maintenance',e:'🔱',p:'ph4',goals:['locs'],tx:['locs'],ls:['minimal','moderate'],in:['keep'],len:['twa','short','medium','long']},
-  {n:'Scalp Detox & Steam',d:'Removes buildup, soothes irritation, rebalances your scalp. Works at any length.',dur:'1–1.5 hrs',price:'From $60',badge:'Restore',e:'💧',p:'ph5',goals:['scalp','natural'],tx:['straight','wavy','curly','coily','locs'],ls:['minimal','moderate','invested'],in:['add','keep','cut'],len:['twa','short','medium','long']},
-  {n:'Natural Hair Styling',d:'Wash-and-gos, braid-outs, defined sets — your natural texture in full expression.',dur:'1.5–2.5 hrs',price:'From $55',badge:'Natural',e:'🌀',p:'ph3',goals:['natural'],tx:['curly','coily','wavy'],ls:['moderate','invested'],in:['keep'],len:['short','medium','long']},
-  {n:'Tiny Heirs Menu',d:'Gentle, expert care for children. Fun, calm, and crowned.',dur:'Varies',price:'From $35',badge:'Children',e:'👑',p:'ph6',goals:['kids'],tx:['straight','wavy','curly','coily'],ls:['minimal','moderate','invested'],in:['add','keep','cut'],len:['twa','short','medium','long']},
+  // Women's services
+  {n:'Pixie & Tapered Cut',d:'Sculpted short cut shaped to your face — soft and feminine or bold and strong.',dur:'1–1.5 hrs',price:'From $65',badge:'Cut',e:'✂️',p:'ph7',goals:['cut','sleek'],tx:['straight','wavy','curly','coily'],ls:['minimal','moderate'],in:['cut'],len:['twa','short','medium'],gender:['women']},
+  {n:'Shape Up & Trim',d:'Precision trim or edge-up that gives any existing style a clean, fresh finish.',dur:'45 min',price:'From $35',badge:'Trim',e:'✂️',p:'ph7',goals:['cut'],tx:['straight','wavy','curly','coily','locs'],ls:['minimal','moderate','invested'],in:['cut'],len:['twa','short','medium','long'],gender:['women']},
+  {n:'Silk Press',d:'Silky straight hair using heat — no chemicals. Best for medium to long natural hair.',dur:'2–3 hrs',price:'From $85',badge:'Classic',e:'✨',p:'ph1',goals:['sleek'],tx:['curly','coily','wavy'],ls:['moderate','invested'],in:['keep'],len:['medium','long'],gender:['women']},
+  {n:'Knotless Braids',d:'Tension-free box braids with added hair. Any natural length. Lasts 6–8 weeks.',dur:'4–6 hrs',price:'From $175',badge:'Best Seller',e:'🌿',p:'ph2',goals:['protect','sleek'],tx:['curly','coily','wavy','straight'],ls:['minimal','moderate'],in:['add'],len:['twa','short','medium','long'],gender:['women'],protect:['individual']},
+  {n:'Senegalese / Box Twists',d:'Long, smooth rope-like twists with added hair. Lightweight, versatile, lasts 6–8 weeks.',dur:'5–7 hrs',price:'From $185',badge:'Extensions',e:'🌿',p:'ph2',goals:['protect','sleek'],tx:['curly','coily','wavy','straight'],ls:['minimal','moderate'],in:['add'],len:['short','medium','long'],gender:['women'],protect:['individual']},
+  {n:'Feed-In Style Braids',d:'Cornrow-based feed-in braids with natural-color hair. Includes shampoo & conditioning.',dur:'1.5–2.5 hrs',price:'From $95',badge:'Cornrows',e:'🌿',p:'ph2',goals:['protect'],tx:['curly','coily','wavy'],ls:['minimal','moderate'],in:['add'],len:['short','medium','long'],gender:['women'],protect:['individual']},
+  {n:'Faux Locs — Butterfly',d:'Lightweight, bohemian faux locs with a textured, wispy finish. Added hair.',dur:'5–7 hrs',price:'From $265',badge:'Faux Locs',e:'🌿',p:'ph2',goals:['protect'],tx:['curly','coily','wavy'],ls:['minimal','moderate'],in:['add'],len:['short','medium','long'],gender:['women'],protect:['individual']},
+  {n:'Faux Locs — Soft',d:'Softer-textured faux locs — clean, smooth, long-lasting protective style.',dur:'5–7 hrs',price:'From $265',badge:'Faux Locs',e:'🌿',p:'ph2',goals:['protect'],tx:['curly','coily','wavy'],ls:['minimal','moderate'],in:['add'],len:['short','medium','long'],gender:['women'],protect:['individual']},
+  {n:'Individuals Over Locs',d:'Protective individual braids or twists installed over existing locs.',dur:'5 hrs',price:'From $275',badge:'Over Locs',e:'🌿',p:'ph2',goals:['protect'],tx:['locs'],ls:['minimal','moderate'],in:['add'],len:['short','medium','long'],gender:['women'],protect:['individual']},
+  {n:'Mini Twists w/ Added Hair',d:'Loose-natural protective style with added hair. Shampoo, condition, and blow dry included.',dur:'2.5 hrs+',price:'From $225',badge:'Twists',e:'🌿',p:'ph2',goals:['protect'],tx:['curly','coily','wavy'],ls:['minimal','moderate'],in:['add'],len:['short','medium','long'],gender:['women'],protect:['individual']},
+  // Natural Braids (no added hair)
+  {n:'Natural Hair Braiding',d:'Braiding using your own natural hair — no extensions. Includes shampoo, condition, and blow dry.',dur:'1.75 hrs+',price:'Varies',badge:'Natural',e:'🌿',p:'ph5',goals:['protect','natural'],tx:['curly','coily','wavy'],ls:['minimal','moderate','invested'],in:['keep'],len:['short','medium','long'],gender:['women'],protect:['natural-braids']},
+  {n:'Mini Twists (Two Strands)',d:'Loose-natural protective mini twists with your own hair. Shampoo, conditioning, and blow dry included.',dur:'1.5 hrs+',price:'From $125',badge:'Natural',e:'🌿',p:'ph5',goals:['protect','natural'],tx:['curly','coily','wavy'],ls:['minimal','moderate'],in:['keep'],len:['short','medium','long'],gender:['women'],protect:['natural-braids']},
+  {n:'Two-Strand Twists',d:'Worn as-is or unraveled for a twist-out. No extensions needed.',dur:'2–3 hrs',price:'From $80',badge:'Protective',e:'🌿',p:'ph5',goals:['protect','natural'],tx:['curly','coily'],ls:['minimal','moderate'],in:['keep'],len:['short','medium','long'],gender:['women'],protect:['natural-braids']},
+  // Natural Styles (non-braided natural textures — also available via 'natural' goal)
+  {n:'Curl Definition + Restoration',d:'Intentional definition and hydration for your curls. Includes shampoo + conditioning and curl definition.',dur:'45 min+',price:'From $65',badge:'Natural',e:'🌀',p:'ph3',goals:['protect','natural'],tx:['curly','coily','wavy'],ls:['minimal','moderate','invested'],in:['keep'],len:['short','medium','long'],gender:['women'],protect:['natural-styles']},
+  // Weave & Extensions family
+  {n:'Sew-In Weave Installation',d:'Full sew-in install with styling. Hair not included. Consultation recommended.',dur:'4 hrs+',price:'From $375',badge:'Sew-In',e:'➰',p:'ph2',goals:['weave','protect'],tx:['curly','coily','wavy','straight'],ls:['moderate','invested'],in:['add'],len:['short','medium','long'],gender:['women']},
+  {n:'Partial Sew-In',d:'Partial install — leave-out natural hair blended with added hair.',dur:'2 hrs',price:'From $175',badge:'Partial',e:'➰',p:'ph2',goals:['weave','protect'],tx:['curly','coily','wavy','straight'],ls:['moderate','invested'],in:['add'],len:['medium','long'],gender:['women']},
+  {n:'Quick Weave',d:'Bonded quick weave install with shampoo and conditioning included.',dur:'3 hrs',price:'From $200',badge:'Weave',e:'➰',p:'ph2',goals:['weave','protect'],tx:['curly','coily','wavy','straight'],ls:['minimal','moderate'],in:['add'],len:['short','medium','long'],gender:['women']},
+  {n:'Crochet Styles',d:'Hair extension styling installed using the crochet method. Shampoo & conditioning included.',dur:'2.5 hrs+',price:'From $180',badge:'Crochet',e:'➰',p:'ph2',goals:['weave','protect'],tx:['curly','coily','wavy'],ls:['minimal','moderate'],in:['add'],len:['short','medium','long'],gender:['women']},
+  {n:'Hair Extensions',d:'Tape-in or microlinks extension install. Long-lasting, natural-looking length.',dur:'2 hrs+',price:'From $200',badge:'Extensions',e:'➰',p:'ph2',goals:['weave','protect'],tx:['straight','wavy','curly','coily'],ls:['moderate','invested'],in:['add'],len:['short','medium','long'],gender:['women']},
+  {n:'Natural Hair Styling',d:'Wash-and-gos, braid-outs, defined sets — your natural texture in full expression.',dur:'1.5–2.5 hrs',price:'From $55',badge:'Natural',e:'🌀',p:'ph3',goals:['natural','protect'],tx:['curly','coily','wavy'],ls:['moderate','invested'],in:['keep'],len:['short','medium','long'],gender:['women'],protect:['natural-styles']},
+  {n:'Updo & Special Occasion',d:'Elevated looks for elevated moments — bridal, prom, event styling.',dur:'1.5–2.5 hrs',price:'From $95',badge:'Occasion',e:'👑',p:'ph6',goals:['occasion','sleek'],tx:['straight','wavy','curly','coily','locs'],ls:['moderate','invested'],in:['keep','add'],len:['short','medium','long'],gender:['women']},
+  {n:'Sleek Ponytail',d:'Sleek ponytail at any length — your choice of braided, curled, or straight finish.',dur:'1.25 hrs+',price:'From $115',badge:'Sleek',e:'✨',p:'ph1',goals:['sleek','occasion'],tx:['straight','wavy','curly','coily'],ls:['minimal','moderate'],in:['keep','add'],len:['short','medium','long'],gender:['women']},
+  {n:'Shampoo & Style',d:'Signature shampoo, conditioning, and molded to your desired style. Perfect between protective styles.',dur:'1 hr',price:'From $90',badge:'Refresh',e:'💧',p:'ph3',goals:['shampoo','sleek','natural'],tx:['straight','wavy','curly','coily'],ls:['minimal','moderate','invested'],in:['keep'],len:['short','medium','long'],gender:['women','men']},
+  // Chemical services — require disclaimer
+  {n:'Chemical Relaxer',d:'Straighten curly and coiled hair using professional chemical relaxer.',dur:'25 min+',price:'From $45',badge:'Chemical',e:'🧪',p:'ph1',goals:['chemical'],tx:['curly','coily','wavy'],ls:['minimal','moderate','invested'],in:['keep'],len:['short','medium','long'],gender:['women'],disclaimer:true,chem:['relaxer']},
+  {n:'Chemical Perm',d:'Classic rod-set perm — defined curls or waves via traditional texture service.',dur:'1.5 hrs+',price:'From $80',badge:'Chemical',e:'🧪',p:'ph1',goals:['chemical'],tx:['straight','wavy'],ls:['moderate','invested'],in:['keep'],len:['short','medium','long'],gender:['women'],disclaimer:true,chem:['perm']},
+  {n:'Color (Loose Hair)',d:'Professional hair color on loose hair — single process, highlights, or toning.',dur:'35 min+',price:'From $75',badge:'Color',e:'🎨',p:'ph1',goals:['chemical'],tx:['straight','wavy','curly','coily'],ls:['moderate','invested'],in:['keep'],len:['short','medium','long'],gender:['women'],chem:['color']},
+  // Loc services (shared M/F, filtered by loc branch)
+  {n:'Starter Locs',d:'Begin your loc journey. We choose the best method for your texture and length — palm roll, two-strand start, or interlock.',dur:'3–5 hrs',price:'Consult req.',badge:'Journey',e:'🔱',p:'ph4',goals:['locs'],tx:['coily','curly'],ls:['minimal','moderate','invested'],in:['keep','add'],len:['twa','short','medium','long'],gender:['women','men'],loc:['starting']},
+  {n:'Instant Locs',d:'Skip the budding stage. A needle crochets hair for an instant lock-and-hold. Wash & condition included.',dur:'4 hrs',price:'Starting at $500',badge:'Instant',e:'🔱',p:'ph4',goals:['locs'],tx:['coily','curly','wavy'],ls:['moderate','invested'],in:['keep','add'],len:['short','medium','long'],gender:['women','men'],loc:['starting']},
+  {n:'Loc Retwist',d:'Keep locs neat, defined, and thriving with a traditional palm-roll retwist. Foundation of loc care.',dur:'1.5–3 hrs',price:'From $65',badge:'Maintenance',e:'🔱',p:'ph4',goals:['locs'],tx:['locs'],ls:['minimal','moderate'],in:['keep'],len:['twa','short','medium','long'],gender:['women','men'],loc:['maintenance']},
+  {n:'Interlocking',d:'Long-lasting loc maintenance using interlocking instead of palm rolling. Ideal if you swim or work out often.',dur:'2–4 hrs',price:'From $85',badge:'Maintenance',e:'🔱',p:'ph4',goals:['locs'],tx:['locs'],ls:['minimal','moderate'],in:['keep'],len:['short','medium','long'],gender:['women','men'],loc:['maintenance']},
+  {n:'Loc Moisturizing Treatment',d:'Deep hydration for dry or neglected locs — restores moisture, softness, and shine.',dur:'1–1.5 hrs',price:'From $50',badge:'Restore',e:'💧',p:'ph5',goals:['locs','scalp'],tx:['locs'],ls:['minimal','moderate','invested'],in:['keep'],len:['twa','short','medium','long'],gender:['women','men'],loc:['maintenance','repair']},
+  {n:'Loc Styling',d:'Your locs, elevated — updo, pinned, wrapped, or braided designs for events or everyday.',dur:'1.5–2.5 hrs',price:'From $90',badge:'Style',e:'✨',p:'ph4',goals:['locs','occasion'],tx:['locs'],ls:['moderate','invested'],in:['keep'],len:['short','medium','long'],gender:['women','men'],loc:['styling']},
+  {n:'Loc Repair & Combine',d:'Rebuild thinning locs, combine, reinforce weak points — keep your locs thriving.',dur:'2–4 hrs',price:'Consult req.',badge:'Repair',e:'🛠️',p:'ph4',goals:['locs'],tx:['locs'],ls:['minimal','moderate','invested'],in:['keep'],len:['short','medium','long'],gender:['women','men'],loc:['repair']},
+  {n:'Loc Extensions',d:'Add length or fullness to your existing locs with expert extension techniques.',dur:'4–6 hrs',price:'Consult req.',badge:'Length',e:'➕',p:'ph4',goals:['locs'],tx:['locs'],ls:['moderate','invested'],in:['add'],len:['short','medium','long'],gender:['women','men'],loc:['extensions']},
+  {n:'Freeform Locs',d:'Transitioning to organic, free-growing locs. We consult on the switch and support your hair health along the way.',dur:'1–2 hrs',price:'Consult req.',badge:'Organic',e:'🌿',p:'ph4',goals:['locs','natural'],tx:['locs','coily','curly'],ls:['minimal'],in:['keep'],len:['twa','short','medium','long'],gender:['women','men'],loc:['freeform']},
+  {n:'Loc Color',d:'Highlights, full color, or toning on existing locs. Consultation required before service.',dur:'3–5 hrs',price:'Consult req.',badge:'Color',e:'🎨',p:'ph4',goals:['locs'],tx:['locs'],ls:['moderate','invested'],in:['keep'],len:['short','medium','long'],gender:['women','men'],loc:['color']},
+  // Shared scalp
+  {n:'Scalp Detox & Steam',d:'Removes buildup, soothes irritation, rebalances your scalp. Works at any length.',dur:'1–1.5 hrs',price:'From $60',badge:'Restore',e:'💧',p:'ph5',goals:['scalp','natural'],tx:['straight','wavy','curly','coily','locs'],ls:['minimal','moderate','invested'],in:['add','keep','cut'],len:['twa','short','medium','long'],gender:['women','men']},
+  {n:'Hot Towel Treatment',d:'Warm towel therapy to open pores, soothe scalp, and prep for any service. Add-on or standalone.',dur:'20–30 min',price:'From $20',badge:'Add-on',e:'♨️',p:'ph5',goals:['scalp','barber','beard'],tx:['straight','wavy','curly','coily','locs'],ls:['minimal','moderate','invested'],in:['keep','cut'],len:['twa','short','medium','long'],gender:['women','men']},
+  // Men's services
+  {n:'Barber Cut & Fade',d:'Precision fade, taper, or shape — any level, any guard. Crisp every time.',dur:'45 min–1 hr',price:'From $40',badge:'Cut',e:'💈',p:'ph7',goals:['barber','cut'],tx:['straight','wavy','curly','coily'],ls:['minimal','moderate','invested'],in:['cut'],len:['twa','short','medium','long'],gender:['men']},
+  {n:'Line-up & Beard Sculpt',d:'Crisp hairline and clean beard shape — the finishing touch that makes any cut land.',dur:'30–45 min',price:'From $25',badge:'Line-up',e:'🧔🏾',p:'ph7',goals:['beard','barber'],tx:['straight','wavy','curly','coily'],ls:['minimal','moderate','invested'],in:['cut','keep'],len:['twa','short','medium','long'],gender:['men']},
+  {n:'Men\'s Cornrows & Braids',d:'Custom cornrows or braids built for you — classic straight-back to intricate designs.',dur:'2–3 hrs',price:'From $95',badge:'Braids',e:'🌿',p:'ph2',goals:['braids_m','protect'],tx:['curly','coily','wavy'],ls:['minimal','moderate'],in:['add','keep'],len:['short','medium','long'],gender:['men']},
+  {n:'Men\'s Natural Styling',d:'Wash-and-go, twist-out, braid-out, or defined curls shaped to you. No chemicals.',dur:'1–1.5 hrs',price:'From $55',badge:'Natural',e:'🌀',p:'ph3',goals:['natural','cut'],tx:['curly','coily','wavy'],ls:['moderate','invested'],in:['keep'],len:['short','medium','long'],gender:['men']},
+  {n:'Men\'s Silk Press',d:'Heat-smooth straight style — no chemicals. For men with medium to long natural hair.',dur:'1.5–2 hrs',price:'From $75',badge:'Press',e:'✨',p:'ph1',goals:['sleek','natural'],tx:['curly','coily','wavy'],ls:['moderate','invested'],in:['keep'],len:['medium','long'],gender:['men']},
+  // Tiny Heirs
+  {n:'Tiny Heirs Wash & Style',d:'Gentle shampoo, condition, and style — soft hands, calm pace.',dur:'1–1.5 hrs',price:'From $35',badge:'Wash & Style',e:'🌱',p:'ph6',goals:['kids'],tx:['straight','wavy','curly','coily'],ls:['minimal','moderate','invested'],in:['keep'],len:['twa','short','medium','long'],gender:['tiny'],age:['toddler','child','teen'],childGender:['girl','boy'],need:['style','natural']},
+  {n:'Tiny Heirs Braids & Twists',d:'Age-appropriate protective braiding or twists — gentle tension, comfortable sessions.',dur:'2–3 hrs',price:'From $75',badge:'Protective',e:'🌱',p:'ph2',goals:['kids'],tx:['curly','coily','wavy'],ls:['minimal','moderate'],in:['add','keep'],len:['short','medium','long'],gender:['tiny'],age:['toddler','child','teen'],childGender:['girl','boy'],need:['style']},
+  {n:'Tiny Heirs First Cut',d:'Their very first haircut — celebrated, calm, with photo keepsakes if you want.',dur:'30–45 min',price:'From $30',badge:'First Cut',e:'🌱',p:'ph7',goals:['kids'],tx:['straight','wavy','curly','coily'],ls:['minimal','moderate','invested'],in:['cut'],len:['twa','short','medium'],gender:['tiny'],age:['toddler'],childGender:['girl','boy'],need:['trim']},
+  {n:'Tiny Heirs Shape-Up & Line-up',d:'Fresh cut, taper, or clean line-up for boys — kid-pace, crisp result.',dur:'30–45 min',price:'From $30',badge:'Shape-Up',e:'💈',p:'ph7',goals:['kids'],tx:['straight','wavy','curly','coily'],ls:['minimal','moderate','invested'],in:['cut'],len:['twa','short','medium'],gender:['tiny'],age:['child','teen'],childGender:['boy'],need:['trim']},
+  {n:'Tiny Heirs Trim & Shape',d:'Trim to keep length healthy or shape for a fresh look. Gentle and confidence-building.',dur:'30–45 min',price:'From $35',badge:'Trim',e:'✂️',p:'ph7',goals:['kids'],tx:['straight','wavy','curly','coily'],ls:['minimal','moderate','invested'],in:['cut'],len:['short','medium','long'],gender:['tiny'],age:['child','teen'],childGender:['girl','boy'],need:['trim']},
+  {n:'Tiny Heirs Natural Care',d:'Wash, deep condition, detangle, and twist-out or curl definition — teaching curl care.',dur:'1–1.5 hrs',price:'From $45',badge:'Natural',e:'🌀',p:'ph3',goals:['kids'],tx:['curly','coily','wavy'],ls:['moderate','invested'],in:['keep'],len:['short','medium','long'],gender:['tiny'],age:['toddler','child','teen'],childGender:['girl','boy'],need:['natural']},
+  {n:'Tiny Heirs Loc Maintenance',d:'Gentle retwist or loc care adapted for little heads. Calm, quick sessions.',dur:'1–1.5 hrs',price:'From $50',badge:'Locs',e:'🔱',p:'ph4',goals:['kids'],tx:['locs','coily','curly'],ls:['minimal','moderate'],in:['keep'],len:['short','medium','long'],gender:['tiny'],age:['child','teen'],childGender:['girl','boy'],need:['locs']},
 ];
 function buildD2Results(){
-  const scored=SVCS.map(s=>{
-    if(!s.len.includes(hLen)||!s.in.includes(hIntent))return{...s,sc:-1};
+  const scored=SVCS.filter(s=>s.gender.includes(d2Gender)).map(s=>{
+    if(!s.len.includes(hLen))return{...s,sc:-1};
+    if(hIntent!=='any'&&!s.in.includes(hIntent))return{...s,sc:-1};
+    // Loc branch filter: if user picked locs goal, only show services matching that loc branch
+    if(s.loc){
+      if(!d2LocBranch||!s.loc.includes(d2LocBranch))return{...s,sc:-1};
+    }
+    // Chemical branch filter: if user picked chemical goal, only show services matching that chem branch
+    if(s.chem){
+      if(!d2ChemBranch||!s.chem.includes(d2ChemBranch))return{...s,sc:-1};
+    }
+    // Protect branch filter: only constrain services that declare a protect branch AND user picked protect goal
+    if(s.protect && d2Goals.has('protect')){
+      if(!d2ProtectBranch||!s.protect.includes(d2ProtectBranch))return{...s,sc:-1};
+    }
     let sc=0;d2Goals.forEach(g=>{if(s.goals.includes(g))sc+=4;});
     if(sc===0)return{...s,sc:-1};
     if(s.tx.includes(d2Prof.texture))sc+=2;
@@ -1369,25 +2096,68 @@ function buildD2Results(){
     return{...s,sc};
   }).filter(s=>s.sc>0).sort((a,b)=>b.sc-a.sc).slice(0,4);
   const grid=document.getElementById('d2grid');
-  grid.innerHTML=scored.length?scored.map(s=>`
+  let html=scored.length?scored.map(s=>`
     <div class="scard">
       <div class="scard-vis ${s.p}"><div class="sbadge">${s.badge}</div><span style="font-size:2.2rem">${s.e}</span></div>
-      <div class="scard-body"><h3>${s.n}</h3><p>${s.d}</p><div class="scard-meta"><span class="dur">⏱ ${s.dur}</span><span class="price">${s.price}</span></div></div>
-      <a class="book-now-btn" href="https://crownheirs.com" target="_blank">Book now</a>
+      <div class="scard-body"><h3>${s.n}</h3><p>${s.d}</p>${s.disclaimer?CHEM_DISCLAIMER_HTML:''}<div class="scard-meta"><span class="dur">⏱ ${s.dur}</span><span class="price">${s.price}</span></div></div>
+      <a class="book-now-btn" href="${getBookingUrl(s.n)}" target="_blank">${/consult/i.test(s.price)?'Book Consultation':'Book now'}</a>
     </div>`).join('')
     :`<div style="grid-column:1/-1;text-align:center;padding:40px;font-family:var(--font-serif);font-size:1.1rem;color:var(--ink-dim);">We'd love to build a custom plan. <a href="mailto:info@crownheirs.com" style="color:var(--terra)">Email us</a> or book a free consultation.</div>`;
+  // If any loc-goal service present, append Loc Sparkles as an add-on card
+  if(scored.some(s=>s.loc)){
+    html+=`<div class="scard" style="border:1px dashed var(--border)">
+      <div class="scard-vis ph4"><div class="sbadge">Add-on</div><span style="font-size:2.2rem">✨</span></div>
+      <div class="scard-body"><h3>Loc Sparkles</h3><p>Adorn your locs with silver or gold beads — book alongside your retwist or on its own.</p><div class="scard-meta"><span class="dur">⏱ 20 min+</span><span class="price">From $12</span></div></div>
+      <a class="book-now-btn" href="${getBookingUrl('Loc Sparkles')}" target="_blank">Add Sparkles</a>
+    </div>`;
+  }
+  grid.innerHTML=html;
   const gNames=[...d2Goals].map(g=>GOALS.find(x=>x.id===g)?.l).filter(Boolean);
   document.getElementById('d2rTxt').textContent=`Your matches for ${gNames.join(' and ')} — curated for your crown. Questions? Ask me right here.`;
   d2go(5);
 }
+const CHEM_DISCLAIMER_HTML=`<div style="background:#fff7ec;border:1px solid #e6cfa8;border-radius:10px;padding:10px 12px;margin:10px 0;font-family:var(--font-ui);font-size:0.78rem;line-height:1.5;color:#8a5a1a">
+<strong style="display:block;margin-bottom:4px;color:#5f3d0e">Health Notice — Chemical Services</strong>
+Requires a strand test &amp; health history review at your appointment. Arrive with clean, uncoated hair; avoid heat styling for 48 hrs prior. If you have a scalp condition, chemical allergy, or are pregnant, contact us before booking.
+</div>`;
+function buildTinyResults(){
+  // Filter tiny services by age + child gender + need
+  const tinySvcs=SVCS.filter(s=>s.gender.includes('tiny'))
+    .filter(s=>!tinyAge||s.age.includes(tinyAge))
+    .filter(s=>!tinyChildGender||s.childGender.includes(tinyChildGender))
+    .filter(s=>!tinyNeed||s.need.includes(tinyNeed));
+  const grid=document.getElementById('dtinygrid');
+  grid.innerHTML=tinySvcs.length?tinySvcs.map(s=>`
+    <div class="scard">
+      <div class="scard-vis ${s.p}"><div class="sbadge">${s.badge}</div><span style="font-size:2.2rem">${s.e}</span></div>
+      <div class="scard-body"><h3>${s.n}</h3><p>${s.d}</p><div class="scard-meta"><span class="dur">⏱ ${s.dur}</span><span class="price">${s.price}</span></div></div>
+      <a class="book-now-btn" href="${getBookingUrl(s.n)}" target="_blank">${/consult/i.test(s.price)?'Book Consultation':'Book now'}</a>
+    </div>`).join('')
+    :`<div style="grid-column:1/-1;text-align:center;padding:40px;font-family:var(--font-serif);font-size:1.1rem;color:var(--ink-dim);">We'd love to build a custom plan. <a href="mailto:info@crownheirs.com" style="color:var(--terra)">Email us</a> or book a free consultation.</div>`;
+  showD2Screen('qtiny',5);
+}
 function resetD2(){
-  hLen=null;hIntent=null;d2Goals.clear();d2Prof={texture:null,lifestyle:null};
+  d2Gender=null;hLen=null;hIntent=null;d2Goals.clear();d2LocBranch=null;d2ChemBranch=null;d2ProtectBranch=null;d2Prof={texture:null,lifestyle:null};
+  tinyAge=null;tinyChildGender=null;tinyNeed=null;
   document.querySelectorAll('#door2 .card, #door2 .lcard').forEach(e=>e.classList.remove('sel'));
   document.querySelectorAll('#door2 .pill').forEach(e=>e.classList.remove('sel'));
+  document.getElementById('q0txt').textContent="First, who's this for? Everyone gets crowned at The Den — we just want to start you in the right lane.";
+  document.getElementById('q1txt').textContent="Let's start simple. How long is your hair right now? Just pick the closest — no wrong answer.";
+  document.getElementById('q0next').disabled=true;
+  document.getElementById('q0next').onclick=()=>d2go(1);
   document.getElementById('q1next').disabled=true;
   document.getElementById('q2next').disabled=true;
-  document.getElementById('d2log').innerHTML='';
-  d2go(1);
+  document.getElementById('q3next').disabled=true;
+  document.getElementById('qlocnext').disabled=true;
+  document.getElementById('qchemnext').disabled=true;
+  document.getElementById('qprotectnext').disabled=true;
+  document.getElementById('qtinyAgeNext').disabled=true;
+  document.getElementById('qtinyGenderNext').disabled=true;
+  document.getElementById('qtinyNeedNext').disabled=true;
+  const log=document.getElementById('d2log');if(log)log.innerHTML='';
+  const tlog=document.getElementById('dtinylog');if(tlog)tlog.innerHTML='';
+  updateProgressLabels('women');
+  d2go(0);
 }
 
 /* ── DOOR 3 ── */
@@ -1412,14 +2182,31 @@ function pickMatch(k,v,el){
   document.getElementById('i2next').disabled=!matchD.face||!matchD.skin;
 }
 const INSPO_MAP={
-  braids:   {n:'Knotless Braids',   d:'Tension-free, protective. Lasts 6–8 weeks.',   e:'🌿',p:'ph2',price:'From $175'},
-  silkpress:{n:'Silk Press',        d:'Sleek, smooth, bouncy. Best for longer hair.',  e:'✨',p:'ph1',price:'From $85'},
-  locs:     {n:'Loc Maintenance',   d:'Defined, intentional, deeply personal.',        e:'🔱',p:'ph4',price:'From $65'},
-  natural:  {n:'Natural Styling',   d:'Defined curls and coils in full expression.',   e:'🌀',p:'ph3',price:'From $55'},
-  pixie:    {n:'Pixie & Tapered Cut',d:'Bold, sculpted, completely you.',              e:'✂️',p:'ph7',price:'From $65'},
-  twists:   {n:'Two-Strand Twists', d:'Protective — wear as-is or unravel for a twist-out.',e:'🌿',p:'ph5',price:'From $80'},
-  scalp:    {n:'Scalp Detox & Steam',d:'The reset your scalp has been waiting for.',  e:'💧',p:'ph5',price:'From $60'},
-  updo:     {n:'Updo & Special Styling',d:'Elevated looks for elevated moments.',     e:'👑',p:'ph6',price:'Consultation'},
+  // Women's
+  braids:       {n:'Knotless Braids',       d:'Tension-free, protective. Lasts 6–8 weeks.',                 e:'🌿',p:'ph2',price:'From $175'},
+  senegalese:   {n:'Senegalese / Box Twists',d:'Smooth, long twists with added hair. Lasts 6–8 weeks.',      e:'🌿',p:'ph2',price:'From $185'},
+  silkpress:    {n:'Silk Press',            d:'Sleek, smooth, bouncy. Best for longer hair.',               e:'✨',p:'ph1',price:'From $85'},
+  natural:      {n:'Natural Styling',       d:'Defined curls and coils in full expression.',                e:'🌀',p:'ph3',price:'From $55'},
+  pixie:        {n:'Pixie & Tapered Cut',   d:'Bold, sculpted, completely you.',                            e:'✂️',p:'ph7',price:'From $65'},
+  twists:       {n:'Two-Strand Twists',     d:'Protective — wear as-is or unravel for a twist-out.',        e:'🌿',p:'ph5',price:'From $80'},
+  scalp:        {n:'Scalp Detox & Steam',   d:'The reset your scalp has been waiting for.',                 e:'💧',p:'ph5',price:'From $60'},
+  updo:         {n:'Updo & Special Styling',d:'Elevated looks for elevated moments.',                       e:'👑',p:'ph6',price:'From $95'},
+  // Locs
+  'locs-starter':   {n:'Starter Locs',       d:'Begin your loc journey — palm roll, two-strand, or interlock.',e:'🌱',p:'ph4',price:'Consult req.'},
+  locs:             {n:'Loc Retwist',        d:'Traditional retwist to keep locs defined and thriving.',      e:'🔱',p:'ph4',price:'From $65'},
+  'locs-styled':    {n:'Loc Styling',        d:'Styled up — updos, pinned, wrapped, or braided designs.',    e:'✨',p:'ph4',price:'From $90'},
+  'locs-freeform':  {n:'Freeform Locs',      d:'Organic, free-growing locs. Consult on the transition.',     e:'🌿',p:'ph4',price:'Consult req.'},
+  'locs-color':     {n:'Loc Color',          d:'Highlights, full color, or toning on existing locs.',        e:'🎨',p:'ph4',price:'Consult req.'},
+  // Men's
+  'men-fade':    {n:'Barber Cut & Fade',    d:'Precision fade, taper, or shape. Crisp every time.',          e:'💈',p:'ph7',price:'From $40'},
+  'men-beard':   {n:'Line-up & Beard Sculpt',d:'Crisp hairline and beard shape.',                            e:'🧔🏾',p:'ph7',price:'From $25'},
+  'men-locs':    {n:'Men\'s Loc Retwist',   d:'Fresh, defined retwist built for men.',                       e:'🔱',p:'ph4',price:'From $65'},
+  'men-braids':  {n:'Men\'s Cornrows & Braids',d:'Custom cornrows or designed braids.',                      e:'🌿',p:'ph2',price:'From $95'},
+  'men-natural': {n:'Men\'s Natural Styling',d:'Wash-and-go, twist-out, or defined curls.',                  e:'🌀',p:'ph3',price:'From $55'},
+  // Tiny Heirs
+  'tiny-braids': {n:'Tiny Heirs Braids & Twists',d:'Gentle protective braiding or twists for kids.',         e:'🌱',p:'ph2',price:'From $75'},
+  'tiny-cut':    {n:'Tiny Heirs Cut',       d:'First cuts, shape-ups, and trims at kid pace.',              e:'✂️',p:'ph7',price:'From $35'},
+  'tiny-natural':{n:'Tiny Heirs Natural Care',d:'Wash, detangle, define — teaching curl care early.',        e:'🌀',p:'ph3',price:'From $45'},
 };
 function buildMatchResults(){
   const grid=document.getElementById('matchGrid');
@@ -1431,12 +2218,171 @@ function buildMatchResults(){
       <div class="mresult-body">
         <h3>${r.n}</h3><p>${r.d}</p>
         <div class="mresult-meta"><span>Starting price</span><strong>${r.price}</strong></div>
-        <a class="book-now-btn" href="https://crownheirs.com" target="_blank" style="width:100%;margin:0;display:block">Book now</a>
+        <a class="book-now-btn" href="${getBookingUrl(r.n)}" target="_blank" style="width:100%;margin:0;display:block">${/consult/i.test(r.price||'')?'Book Consultation':'Book now'}</a>
       </div>
     </div>`;
   }).join('');
   const names=sel.map(s=>INSPO_MAP[s]?.n).filter(Boolean);
   document.getElementById('i4txt').textContent=`You were drawn to ${names.join(', ')}. These are your Crown Heirs matches — every transformation done right here in The Den.`;
+}
+
+/* ── DOOR 4 SUPPLEMENTARY CATALOG ── */
+/* Services not in Door 2's SVCS but reachable through Door 4 */
+const ALL_SVCS={
+  'Braiding Add-Ons':    {n:'Braiding Add-Ons',d:'Add-ons to your existing braid service — edges, beads, partial re-braids.',dur:'30 min+',price:'From $20',badge:'Add-on',e:'✂️',p:'ph2'},
+  'Takedown':            {n:'Takedown',d:"In between styles? Let us take your current style down, wash, and prep for what's next.",dur:'30 min+',price:'From $30',badge:'Removal',e:'🧺',p:'ph2'},
+  'Sew-In Maintenance':  {n:'Sew-In Maintenance',d:'Tighten, wash, and restyle your existing sew-in.',dur:'1.25 hrs',price:'$35',badge:'Maintenance',e:'➰',p:'ph2'},
+  'Shampoo & Style':     {n:'Shampoo & Style',d:'Signature shampoo, conditioner, and mold to your desired style. Perfect refresh between services.',dur:'1 hr',price:'From $90',badge:'Refresh',e:'💧',p:'ph3'},
+  'Perimeter Touch Up':  {n:'Perimeter Touch Up',d:'First two/three rows of braids, faux locs, or singles — stretches any install.',dur:'2 hrs',price:'From $120',badge:'Touch-up',e:'✨',p:'ph2'},
+  'Loc Sparkles':        {n:'Loc Sparkles',d:'Adorn your locs with silver or gold beads sewn into each loc.',dur:'20 min+',price:'From $12',badge:'Add-on',e:'✨',p:'ph4'},
+};
+
+/* ── DOOR 4 — I ALREADY HAVE A STYLE ── */
+let d4p=0,dHave=null,dNeed=null;
+const D4_SCREENS=['h1','h2','h3'];
+const HAVE_MAP={
+  braids:{
+    label:'Braids',
+    prompt:'Braids of any kind — box, knotless, cornrows, twists, faux locs.',
+    needs:[
+      {id:'maintenance',label:'Maintenance / Touch-up',desc:'Edges, new growth, add-ons',service:'Braiding Add-Ons'},
+      {id:'removal',label:'Removal',desc:'Take them down, wash, and reset',service:'Takedown'},
+      {id:'refresh',label:'Refresh',desc:'Wash, style, make them feel new',service:'Shampoo & Style'}
+    ]
+  },
+  weave:{
+    label:'Weave or Sew-In',
+    prompt:'Full sew-in, partial sew-in, or any weave install.',
+    needs:[
+      {id:'maintenance',label:'Maintenance',desc:'Tighten, wash, restyle',service:'Sew-In Maintenance'},
+      {id:'removal',label:'Removal',desc:'Take it down, wash, reset',service:'Takedown'},
+      {id:'refresh',label:'Refresh',desc:'Wash & restyle the install',service:'Shampoo & Style'}
+    ]
+  },
+  locs:{
+    label:'Locs',
+    prompt:'Any stage — starter, mature, freeform.',
+    needs:[
+      {id:'maintenance',label:'Retwist / Maintenance',desc:'Keep them neat',service:'Loc Retwist'},
+      {id:'style',label:'Style them',desc:'Updo, pinned, designed',service:'Loc Styling'},
+      {id:'repair',label:'Repair',desc:'Thinning or broken locs',service:'Loc Repair & Combine'},
+      {id:'sparkles',label:'Add Sparkles',desc:'Gold or silver beads',service:'Loc Sparkles'}
+    ]
+  },
+  chemical:{
+    label:'Color or Chemical',
+    prompt:'Existing color, relaxer, or perm.',
+    needs:[
+      {id:'touchup',label:'Perimeter Touch Up',desc:'Fix edges / hairline on existing install',service:'Perimeter Touch Up'},
+      {id:'newcolor',label:'New color / service',desc:'Route me into the chemical flow',routeTo:'chemical'}
+    ]
+  },
+  natural:{
+    label:'Natural Hair',
+    prompt:'No extensions, no chemicals — just you.',
+    needs:[
+      {id:'refresh',label:'Refresh / Style',desc:'Wash, condition, shape',service:'Shampoo & Style'},
+      {id:'scalp',label:'Scalp Reset',desc:'Detox, steam, buildup relief',service:'Scalp Detox & Steam'}
+    ]
+  }
+};
+function d4go(n){
+  ['h1','h2','h3'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.classList.remove('active');
+  });
+  d4p=n;
+  document.getElementById(D4_SCREENS[n]).classList.add('active');
+  const pct=Math.round((n/2)*100);
+  document.getElementById('d4fill').style.width=pct+'%';
+  for(let i=0;i<3;i++){const el=document.getElementById('d4s'+i);if(!el)continue;el.classList.remove('act','dn');if(i===n)el.classList.add('act');else if(i<n)el.classList.add('dn');}
+  window.scrollTo(0,0);
+}
+function pickHave(v,el){
+  document.querySelectorAll('#h1 .card').forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel');dHave=v;
+  document.getElementById('h1next').disabled=false;
+}
+function buildNeeds(){
+  const h=HAVE_MAP[dHave]; if(!h)return;
+  document.getElementById('h2txt').textContent=h.prompt+' What does it need today?';
+  const grid=document.getElementById('needGrid'); grid.innerHTML='';
+  dNeed=null; document.getElementById('h2next').disabled=true;
+  h.needs.forEach(n=>{
+    grid.innerHTML+=`<div class="card" style="overflow:hidden;cursor:pointer" onclick="pickNeed('${n.id}',this)">
+      <div class="card-vis ph2" style="aspect-ratio:4/3;font-size:1.6rem">•</div>
+      <div class="card-body"><h3>${n.label}</h3><p>${n.desc}</p></div>
+    </div>`;
+  });
+  d4go(1);
+}
+function pickNeed(v,el){
+  document.querySelectorAll('#h2 .card').forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel');dNeed=v;
+  document.getElementById('h2next').disabled=false;
+}
+function buildD4Results(){
+  const h=HAVE_MAP[dHave]; const n=h.needs.find(x=>x.id===dNeed);
+  if(n.routeTo==='chemical'){
+    // Route to Door 2 chemical flow: jump to Door 2 with prefilled state
+    showScreen('door2');
+    resetD2();
+    d2Gender='women'; updateProgressLabels('women');
+    hLen='medium'; hIntent='keep';
+    d2Goals.clear(); d2Goals.add('chemical');
+    showD2Screen('qchem',3);
+    return;
+  }
+  // Find the service in SVCS or standalone catalog
+  const svc=SVCS.find(s=>s.n===n.service) || ALL_SVCS[n.service];
+  const grid=document.getElementById('d4grid');
+  if(svc){
+    grid.innerHTML=`<div class="scard">
+      <div class="scard-vis ${svc.p||'ph2'}"><div class="sbadge">${svc.badge||'Service'}</div><span style="font-size:2.2rem">${svc.e||'•'}</span></div>
+      <div class="scard-body"><h3>${svc.n}</h3><p>${svc.d||''}</p><div class="scard-meta"><span class="dur">⏱ ${svc.dur||''}</span><span class="price">${svc.price||''}</span></div></div>
+      <a class="book-now-btn" href="${getBookingUrl(svc.n)}" target="_blank">${/consult/i.test(svc.price||'')?'Book Consultation':'Book now'}</a>
+    </div>`;
+  } else {
+    grid.innerHTML=`<div style="grid-column:1/-1;text-align:center;padding:40px;font-family:var(--font-serif);font-size:1.1rem;color:var(--ink-dim);">We couldn't match that automatically. <a href="mailto:info@crownheirs.com" style="color:var(--terra)">Email us</a> and we'll take care of you.</div>`;
+  }
+  document.getElementById('d4rTxt').textContent=`You've got ${h.label.toLowerCase()} and need ${n.label.toLowerCase()}. Here's your match.`;
+  d4go(2);
+}
+function resetD4(){
+  dHave=null; dNeed=null;
+  document.querySelectorAll('#door4 .card').forEach(c=>c.classList.remove('sel'));
+  document.getElementById('h1next').disabled=true;
+  document.getElementById('h2next').disabled=true;
+  const log=document.getElementById('d4log'); if(log) log.innerHTML='';
+  d4go(0);
+}
+
+/* ── DOOR 5 — BEAUTY ── */
+const BEAUTY_SVCS=[
+  {section:'Lashes',n:'Lash Extensions — Full Set',     d:'A glam session as your lashes are transformed one by one.',dur:'2.5 hrs+',price:'From $120',badge:'Full Set',e:'👁️',p:'ph1'},
+  {section:'Lashes',n:'Lash 2/3 Week Fill',              d:'Routine touch-up when about 50% of lashes remain.',dur:'1 hr',price:'From $65',badge:'Fill',e:'👁️',p:'ph1'},
+  {section:'Lashes',n:'Lash Mini Fill',                  d:'Refresh your set. Recommended at 1-week touch-up.',dur:'30 min+',price:'From $45',badge:'Mini',e:'👁️',p:'ph1'},
+  {section:'Makeup',n:'Makeup — Full Face',              d:'The whole bag — foundation, lashes, concealer, contour.',dur:'1 hr+',price:'From $70',badge:'Full Glam',e:'💄',p:'ph6'},
+  {section:'Makeup',n:'Makeup — Half Face',              d:'Eyebrows, lashes, and liner. Clean and polished.',dur:'30 min',price:'From $30',badge:'Half',e:'💄',p:'ph6'},
+  {section:'Waxing',n:'Waxing — Face',                   d:'Brows, lip, chin — smooth and shaped.',dur:'10 min+',price:'From $7',badge:'Face',e:'✨',p:'ph5'},
+  {section:'Waxing',n:'Waxing — Body',                   d:'Hair removal from the root. Smooth, long-lasting.',dur:'30 min+',price:'From $20',badge:'Body',e:'✨',p:'ph5'},
+  {section:'Loc Add-Ons',n:'Loc Sparkles',               d:'Adorn your locs with silver or gold beads sewn in.',dur:'20 min+',price:'From $12',badge:'Add-On',e:'✨',p:'ph4'}
+];
+function initBeauty(){
+  const grid=document.getElementById('beautyGrid');
+  let html=''; let lastSection='';
+  BEAUTY_SVCS.forEach(s=>{
+    if(s.section!==lastSection){
+      html+=`<div style="grid-column:1/-1;margin:10px 4px 2px;font-family:var(--font-ui);font-size:0.62rem;letter-spacing:0.22em;text-transform:uppercase;color:var(--ink-faint);font-weight:500">${s.section}</div>`;
+      lastSection=s.section;
+    }
+    html+=`<div class="scard">
+      <div class="scard-vis ${s.p}"><div class="sbadge">${s.badge}</div><span style="font-size:2.2rem">${s.e}</span></div>
+      <div class="scard-body"><h3>${s.n}</h3><p>${s.d}</p><div class="scard-meta"><span class="dur">⏱ ${s.dur}</span><span class="price">${s.price}</span></div></div>
+      <a class="book-now-btn" href="${getBookingUrl(s.n)}" target="_blank">Book now</a>
+    </div>`;
+  });
+  grid.innerHTML=html;
+  window.scrollTo(0,0);
 }
 
 /* ── CHAT ── */
