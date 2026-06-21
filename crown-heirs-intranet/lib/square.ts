@@ -96,14 +96,17 @@ export async function getKpis(): Promise<
   if (!process.env.SQUARE_ACCESS_TOKEN) return { configured: false };
   try {
     const now = new Date();
-    const begin30 = new Date(now);
-    begin30.setDate(begin30.getDate() - 30);
-    const payments = await fetchPayments(begin30.toISOString());
+    const begin90 = new Date(now);
+    begin90.setDate(begin90.getDate() - 90);
+    // Cached 15 min — shared with the dashboard/leaderboard fetches.
+    const payments = await fetchPayments(begin90.toISOString(), 900);
 
     const startOfToday = new Date(now);
     startOfToday.setHours(0, 0, 0, 0);
     const begin7 = new Date(now);
     begin7.setDate(begin7.getDate() - 7);
+    const begin30 = new Date(now);
+    begin30.setDate(begin30.getDate() - 30);
 
     return {
       configured: true,
@@ -111,6 +114,7 @@ export async function getKpis(): Promise<
         { ...sumSince(payments, startOfToday.toISOString()), label: "Today" },
         { ...sumSince(payments, begin7.toISOString()), label: "Last 7 days" },
         { ...sumSince(payments, begin30.toISOString()), label: "Last 30 days" },
+        { ...sumSince(payments, begin90.toISOString()), label: "Last 90 days" },
       ],
     };
   } catch (err) {

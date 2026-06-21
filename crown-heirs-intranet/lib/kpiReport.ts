@@ -1,6 +1,6 @@
 import "server-only";
 import { listEmployees } from "@/lib/employees";
-import { getTeamKpis } from "@/lib/square";
+import { getKpis, getTeamKpis } from "@/lib/square";
 
 function csvCell(v: string | number) {
   const s = String(v);
@@ -21,12 +21,30 @@ export async function buildTeamKpiCsv(): Promise<
   if (!team.configured) return { ok: false, reason: "Square not configured." };
   if ("error" in team) return { ok: false, reason: `Square error: ${team.error}` };
 
+  const lines: string[] = [];
+
+  // Salon-wide totals first (if available), then a blank separator row.
+  const overall = await getKpis();
+  if (overall.configured && "periods" in overall) {
+    lines.push("Salon-wide totals");
+    lines.push(["Period", "Sales", "Sales #", "Avg ticket", "Tips"].map(csvCell).join(","));
+    for (const p of overall.periods) {
+      lines.push(
+        [p.label, p.sales.toFixed(2), p.count, p.avg.toFixed(2), p.tips.toFixed(2)]
+          .map(csvCell)
+          .join(","),
+      );
+    }
+    lines.push("");
+    lines.push("Per-stylist");
+  }
+
   const header = ["Stylist"];
   for (const label of team.periodLabels) {
     header.push(`Tips (${label})`, `Clients (${label})`, `Retention (${label})`);
   }
 
-  const lines = [header.map(csvCell).join(",")];
+  lines.push(header.map(csvCell).join(","));
   for (const row of team.rows) {
     const cells: (string | number)[] = [row.name];
     for (const p of row.periods) {
