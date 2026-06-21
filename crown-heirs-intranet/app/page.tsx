@@ -22,6 +22,11 @@ export default async function Home() {
         </div>
 
         <div className="grid">
+          <Link href="/schedule" className="card">
+            <h3>Schedule</h3>
+            <p>The weekly schedule — who’s working when. Admins build it; everyone sees it.</p>
+            <span className="badge">View schedule →</span>
+          </Link>
           <Link href="/team" className="card">
             <h3>Team</h3>
             <p>The staff roster — names, roles, contact info, and start dates.</p>

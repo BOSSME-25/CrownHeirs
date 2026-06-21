@@ -180,6 +180,40 @@ h1.title {
 .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 22px; }
 @media(max-width:620px){ .form-grid { grid-template-columns: 1fr; } }
 
+/* ─── Schedule ─── */
+.week-nav { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
+.week-range { font-family: var(--font-serif); font-size: 1.25rem; text-align: center; display: flex; flex-direction: column; gap: 2px; }
+.week-today { font-family: var(--font-ui); font-size: 0.74rem; color: var(--terra); text-decoration: none; }
+.week-today:hover { text-decoration: underline; }
+.sched-actions { display: flex; gap: 12px; align-items: center; margin-bottom: 18px; }
+
+.week-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
+@media(max-width:900px){ .week-grid { grid-template-columns: repeat(2, 1fr); } }
+@media(max-width:520px){ .week-grid { grid-template-columns: 1fr; } }
+
+.day-col { background: var(--surface-dim); border: 1px solid var(--border); border-radius: var(--r-m); min-height: 120px; display: flex; flex-direction: column; }
+.day-col.is-today { border-color: var(--terra-lo); box-shadow: 0 0 0 1px var(--terra-lo); }
+.day-head { padding: 10px 12px; border-bottom: 1px solid var(--border); }
+.day-dow { display: block; font-size: 0.74rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-dim); }
+.day-date { display: block; font-family: var(--font-serif); font-size: 1.05rem; color: var(--ink); }
+.day-body { padding: 8px; display: flex; flex-direction: column; gap: 7px; }
+.day-empty { color: var(--ink-faint); text-align: center; font-size: 0.9rem; padding: 6px 0; }
+
+.shift-card { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--terra-lo); border-radius: var(--r-s); padding: 8px 10px; position: relative; }
+.shift-card.mine { border-left-color: var(--terra); background: #faf4f0; }
+.shift-card.draft { opacity: 0.82; border-style: dashed; }
+.shift-time { font-size: 0.8rem; font-weight: 500; color: var(--ink); }
+.shift-name { font-size: 0.86rem; color: var(--ink-mid); }
+.shift-pos { font-size: 0.74rem; color: var(--ink-dim); }
+.shift-badge { display: inline-block; margin-top: 4px; font-size: 0.64rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--gold); border: 1px solid rgba(200,149,42,0.4); border-radius: var(--r-pill); padding: 1px 7px; }
+.shift-tools { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+.shift-edit { font-size: 0.74rem; color: var(--terra); text-decoration: none; }
+.shift-edit:hover { text-decoration: underline; }
+.shift-del { background: none; border: none; color: var(--ink-faint); font-size: 1.1rem; line-height: 1; cursor: pointer; padding: 0 2px; }
+.shift-del:hover { color: #9a3b2e; }
+.day-add { font-size: 0.78rem; color: var(--ink-dim); text-decoration: none; text-align: center; padding: 5px; border: 1px dashed var(--border-mid); border-radius: var(--r-s); }
+.day-add:hover { color: var(--terra); border-color: var(--terra-lo); }
+
 /* ─── Notices ─── */
 .notice {
   border-radius: var(--r-m); padding: 14px 18px; font-size: 0.88rem; margin: 16px 0;

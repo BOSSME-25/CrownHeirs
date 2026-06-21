@@ -9,6 +9,7 @@ export default async function SiteHeader() {
     <header className="site-header">
       <Link href="/" className="site-logo">Crown Heirs · Team Hub</Link>
       <nav className="site-nav">
+        <Link href="/schedule">Schedule</Link>
         <Link href="/team">Team</Link>
         <Link href="/handbook">Handbook</Link>
         <Link href="/policies">Policies</Link>

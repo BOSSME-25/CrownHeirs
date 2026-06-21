@@ -33,6 +33,19 @@ export async function POST() {
         updated_at timestamptz DEFAULT now()
       )
     `;
+    await sql`
+      CREATE TABLE IF NOT EXISTS shifts (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        employee_id uuid NOT NULL REFERENCES employees(id) ON DELETE CASCADE,
+        shift_date date NOT NULL,
+        start_time text NOT NULL,
+        end_time text NOT NULL,
+        position text,
+        notes text,
+        published boolean NOT NULL DEFAULT false,
+        created_at timestamptz DEFAULT now()
+      )
+    `;
     return Response.json({ ok: true });
   } catch (err) {
     return Response.json(
