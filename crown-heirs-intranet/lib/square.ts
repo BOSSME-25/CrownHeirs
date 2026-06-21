@@ -1,9 +1,9 @@
 import "server-only";
+import { getSquareCreds } from "@/lib/orgConfig";
 
-const BASE =
-  process.env.SQUARE_ENV === "sandbox"
-    ? "https://connect.squareupsandbox.com"
-    : "https://connect.squareup.com";
+function baseFor(env: "production" | "sandbox") {
+  return env === "sandbox" ? "https://connect.squareupsandbox.com" : "https://connect.squareup.com";
+}
 
 type SquarePayment = {
   status?: string;
@@ -16,22 +16,22 @@ type SquarePayment = {
 
 async function fetchPayments(
   beginTimeISO: string,
+  creds: { token: string; locationId?: string; env: "production" | "sandbox" },
   revalidateSeconds = 0,
 ): Promise<SquarePayment[]> {
-  const token = process.env.SQUARE_ACCESS_TOKEN;
-  const location = process.env.SQUARE_LOCATION_ID;
+  const base = baseFor(creds.env);
   const out: SquarePayment[] = [];
   let cursor: string | undefined;
 
   do {
-    const url = new URL(BASE + "/v2/payments");
+    const url = new URL(base + "/v2/payments");
     url.searchParams.set("begin_time", beginTimeISO);
     url.searchParams.set("limit", "100");
-    if (location) url.searchParams.set("location_id", location);
+    if (creds.locationId) url.searchParams.set("location_id", creds.locationId);
     if (cursor) url.searchParams.set("cursor", cursor);
 
     const res = await fetch(url, {
-      headers: { Authorization: `Bearer ${token}`, "Square-Version": "2024-10-17" },
+      headers: { Authorization: `Bearer ${creds.token}`, "Square-Version": "2024-10-17" },
       ...(revalidateSeconds > 0 ? { next: { revalidate: revalidateSeconds } } : { cache: "no-store" }),
     });
     if (!res.ok) throw new Error(`Square API error ${res.status}`);
@@ -47,13 +47,13 @@ export type SquareTeamMember = { id: string; name: string; email: string | null;
 
 // Lists active Square team members so an admin can map them to employees.
 export async function listTeamMembers(): Promise<SquareTeamMember[]> {
-  const token = process.env.SQUARE_ACCESS_TOKEN;
-  if (!token) return [];
+  const creds = await getSquareCreds();
+  if (!creds) return [];
   try {
-    const res = await fetch(BASE + "/v2/team-members/search", {
+    const res = await fetch(baseFor(creds.env) + "/v2/team-members/search", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${creds.token}`,
         "Square-Version": "2024-10-17",
         "Content-Type": "application/json",
       },
@@ -101,13 +101,14 @@ function sumSince(payments: SquarePayment[], sinceISO: string): Kpi {
 export async function getKpis(): Promise<
   { configured: false } | { configured: true; periods: Kpi[] } | { configured: true; error: string }
 > {
-  if (!process.env.SQUARE_ACCESS_TOKEN) return { configured: false };
+  const creds = await getSquareCreds();
+  if (!creds) return { configured: false };
   try {
     const now = new Date();
     const begin90 = new Date(now);
     begin90.setDate(begin90.getDate() - 90);
     // Cached 15 min — shared with the dashboard/leaderboard fetches.
-    const payments = await fetchPayments(begin90.toISOString(), 900);
+    const payments = await fetchPayments(begin90.toISOString(), creds, 900);
 
     const startOfToday = new Date(now);
     startOfToday.setHours(0, 0, 0, 0);
@@ -202,13 +203,14 @@ export async function getEmployeeKpis(
   | { configured: true; periods: EmployeeKpi[] }
   | { configured: true; error: string }
 > {
-  if (!process.env.SQUARE_ACCESS_TOKEN) return { configured: false };
+  const creds = await getSquareCreds();
+  if (!creds) return { configured: false };
   try {
     const now = new Date();
     const begin90 = new Date(now);
     begin90.setDate(begin90.getDate() - 90);
     // Cached for 15 min — this is read on every staffer's dashboard.
-    const all = await fetchPayments(begin90.toISOString(), 900);
+    const all = await fetchPayments(begin90.toISOString(), creds, 900);
     return { configured: true, periods: computeEmployeeKpis(all, teamMemberId, now) };
   } catch (err) {
     return { configured: true, error: err instanceof Error ? err.message : "Square request failed" };
@@ -225,12 +227,13 @@ export async function getTeamKpis(
   | { configured: true; rows: TeamKpiRow[]; periodLabels: string[] }
   | { configured: true; error: string }
 > {
-  if (!process.env.SQUARE_ACCESS_TOKEN) return { configured: false };
+  const creds = await getSquareCreds();
+  if (!creds) return { configured: false };
   try {
     const now = new Date();
     const begin90 = new Date(now);
     begin90.setDate(begin90.getDate() - 90);
-    const all = await fetchPayments(begin90.toISOString(), 900);
+    const all = await fetchPayments(begin90.toISOString(), creds, 900);
     const rows = members.map((m) => ({
       name: m.name,
       periods: computeEmployeeKpis(all, m.teamMemberId, now),

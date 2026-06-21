@@ -40,6 +40,11 @@ export default async function AdminPage() {
             <p>Who changed what, when — across the system.</p>
             <span className="badge">View log →</span>
           </Link>
+          <Link href="/admin/settings" className="card">
+            <h3>Settings</h3>
+            <p>Branding, notifications, and your point-of-sale integration.</p>
+            <span className="badge">Edit settings →</span>
+          </Link>
         </div>
         <InitDbButton />
         <AdminPanel />
