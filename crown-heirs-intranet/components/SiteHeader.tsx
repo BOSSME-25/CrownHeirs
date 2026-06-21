@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { auth, signOut } from "@/auth";
+import MobileNav from "@/components/MobileNav";
 
 export default async function SiteHeader() {
   const session = await auth();
@@ -8,6 +9,7 @@ export default async function SiteHeader() {
   return (
     <header className="site-header">
       <Link href="/" className="site-logo">Crown Heirs · Team Hub</Link>
+      <MobileNav isAdmin={isAdmin} email={session?.user?.email} />
       <nav className="site-nav">
         <div className="nav-group">
           <button type="button" className="nav-top">Calendar ▾</button>
