@@ -66,6 +66,10 @@ export default async function CalendarPage() {
                 <label htmlFor="startTime">Time</label>
                 <input id="startTime" name="startTime" type="time" />
               </div>
+              <div className="field">
+                <label htmlFor="meetingUrl">Video link (optional)</label>
+                <input id="meetingUrl" name="meetingUrl" placeholder="Google Meet / Zoom URL" />
+              </div>
             </div>
             <div className="field">
               <label htmlFor="notes">Notes</label>
@@ -103,6 +107,11 @@ export default async function CalendarPage() {
                       {it.location ? ` · ${it.location}` : ""}
                       {it.notes ? ` · ${it.notes}` : ""}
                     </div>
+                    {it.url && (
+                      <a className="btn btn-ghost" href={it.url} target="_blank" rel="noopener noreferrer" style={{ marginTop: 8 }}>
+                        Join video
+                      </a>
+                    )}
                   </div>
                   {admin && it.kind === "meeting" && it.id && (
                     <DeleteMeetingButton id={it.id} title={it.title} />

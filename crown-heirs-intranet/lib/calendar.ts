@@ -11,6 +11,7 @@ export type CalendarItem = {
   time?: string | null;
   location?: string | null;
   notes?: string | null;
+  url?: string | null;
   id?: string;
 };
 
@@ -46,6 +47,7 @@ export async function upcomingEvents(days = 60): Promise<CalendarItem[]> {
     time: m.startTime,
     location: m.location,
     notes: m.notes,
+    url: m.meetingUrl,
   }));
 
   const emps = await db

@@ -140,10 +140,12 @@ export async function POST() {
         meeting_date date NOT NULL,
         start_time text,
         location text,
+        meeting_url text,
         notes text,
         created_at timestamptz DEFAULT now()
       )
     `;
+    await sql`ALTER TABLE meetings ADD COLUMN IF NOT EXISTS meeting_url text`;
     return Response.json({ ok: true });
   } catch (err) {
     return Response.json(

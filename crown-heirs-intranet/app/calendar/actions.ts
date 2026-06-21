@@ -25,6 +25,7 @@ export async function addMeeting(formData: FormData) {
     meetingDate,
     startTime: get("startTime"),
     location: get("location"),
+    meetingUrl: get("meetingUrl"),
     notes: get("notes"),
   });
   revalidatePath("/calendar");

@@ -41,6 +41,9 @@ export default async function Home() {
             <span>
               <strong>Upcoming:</strong> {meeting.title} — {fmtMeeting(meeting)}
               {meeting.location ? ` · ${meeting.location}` : ""}.{" "}
+              {meeting.meetingUrl && (
+                <a href={meeting.meetingUrl} target="_blank" rel="noopener noreferrer">Join video</a>
+              )}{meeting.meetingUrl ? " · " : ""}
               <Link href="/calendar">See calendar</Link>
             </span>
           </div>

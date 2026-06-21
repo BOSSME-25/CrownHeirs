@@ -200,6 +200,7 @@ export const meetings = pgTable("meetings", {
   meetingDate: date("meeting_date").notNull(),
   startTime: text("start_time"), // "HH:MM"
   location: text("location"),
+  meetingUrl: text("meeting_url"), // video link (Meet/Zoom/etc.)
   notes: text("notes"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });
