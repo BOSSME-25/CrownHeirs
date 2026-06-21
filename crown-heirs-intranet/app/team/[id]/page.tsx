@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { auth } from "@/auth";
-import { getAccess } from "@/lib/perms";
+import { getAccess, accessLabelFor } from "@/lib/perms";
 import SiteHeader from "@/components/SiteHeader";
 import Avatar from "@/components/Avatar";
 import { getEmployee, labelFor, EMPLOYMENT_TYPES, ROLES } from "@/lib/employees";
@@ -45,7 +45,13 @@ export default async function ProfilePage({
           <div style={{ display: "flex", alignItems: "center", gap: 18, marginTop: 8 }}>
             <Avatar name={e.fullName} src={e.photoUrl} size={80} />
             <div>
-              <h1 className="title" style={{ fontSize: "2rem" }}>{e.fullName}</h1>
+              <h1 className="title" style={{ fontSize: "2rem" }}>
+                {e.fullName}
+                {(() => {
+                  const b = accessLabelFor(e.email, e.role);
+                  return b ? <span className={`role-badge role-${b.key}`}>{b.label}</span> : null;
+                })()}
+              </h1>
               <p style={{ color: "var(--terra)", fontSize: "1.05rem" }}>{e.jobTitle ?? ""}</p>
             </div>
           </div>

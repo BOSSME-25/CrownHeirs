@@ -531,3 +531,14 @@ h1.title {
   .cal-layout { grid-template-columns: 1fr; }
   .cal-cell { min-height: 70px; }
 }
+
+/* Access-level badges (roster + profile) */
+.role-badge {
+  display: inline-block; margin-left: 8px; vertical-align: middle;
+  font-size: 0.62rem; font-weight: 700; letter-spacing: 0.04em;
+  text-transform: uppercase; padding: 2px 7px; border-radius: 100px;
+  font-family: var(--font-display, inherit);
+}
+.role-ceo { background: #6d3b8e; color: #fff; }
+.role-director { background: #a0624a; color: #fff; }
+.role-manager { background: #e3d3c9; color: #6b4636; }

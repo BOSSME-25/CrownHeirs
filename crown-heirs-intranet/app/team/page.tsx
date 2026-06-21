@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { auth } from "@/auth";
-import { getAccess } from "@/lib/perms";
+import { getAccess, accessLabelFor } from "@/lib/perms";
 import SiteHeader from "@/components/SiteHeader";
 import Avatar from "@/components/Avatar";
 import DeleteEmployeeButton from "@/components/DeleteEmployeeButton";
@@ -76,7 +76,13 @@ export default async function TeamPage() {
                 <Link href={`/team/${e.id}`} style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 10, textDecoration: "none", color: "inherit" }}>
                   <Avatar name={e.fullName} src={e.photoUrl} size={52} />
                   <div>
-                    <h3 style={{ marginBottom: 2 }}>{e.fullName}</h3>
+                    <h3 style={{ marginBottom: 2 }}>
+                      {e.fullName}
+                      {(() => {
+                        const b = accessLabelFor(e.email, e.role);
+                        return b ? <span className={`role-badge role-${b.key}`}>{b.label}</span> : null;
+                      })()}
+                    </h3>
                     <p style={{ color: "var(--terra)" }}>{e.jobTitle ?? "—"}</p>
                   </div>
                 </Link>

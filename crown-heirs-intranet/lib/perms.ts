@@ -50,3 +50,15 @@ const ROLE_OPTS = [
 export function assignableRoles(canSystem: boolean) {
   return canSystem ? ROLE_OPTS : ROLE_OPTS.filter((r) => r.value !== "director");
 }
+
+// A short badge describing a person's access level (for the roster/profile).
+// Returns null for plain staff so the UI stays clean.
+export function accessLabelFor(
+  email: string,
+  role: string | null,
+): { label: string; key: "ceo" | "director" | "manager" } | null {
+  if (isAdmin(email)) return { label: "CEO / COO", key: "ceo" };
+  if (role === "director" || role === "admin") return { label: "Director", key: "director" };
+  if (role === "manager") return { label: "Manager", key: "manager" };
+  return null;
+}
