@@ -40,6 +40,7 @@ export default async function SiteHeader() {
 
         {session?.user && (
           <>
+            <Link href="/me" className="nav-top-link">My Profile</Link>
             <span className="who">{session.user.email}</span>
             <form
               action={async () => {

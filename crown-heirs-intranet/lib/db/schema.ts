@@ -37,6 +37,11 @@ export const employees = pgTable("employees", {
   emergencyContactName: text("emergency_contact_name"),
   emergencyContactPhone: text("emergency_contact_phone"),
   notes: text("notes"),
+  // Social "about me" — shown to the whole team.
+  bio: text("bio"),
+  whyCrownHeirs: text("why_crown_heirs"),
+  fiveYearPlan: text("five_year_plan"),
+  favoriteAway: text("favorite_away"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 });

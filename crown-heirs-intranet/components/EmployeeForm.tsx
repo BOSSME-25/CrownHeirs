@@ -107,6 +107,26 @@ export default function EmployeeForm({
         <textarea id="notes" name="notes" rows={3} defaultValue={e?.notes ?? ""} />
       </div>
 
+      <h2 style={{ fontFamily: "var(--font-serif)", fontWeight: 600, fontSize: "1.3rem", margin: "8px 0 4px" }}>
+        About (shown to the whole team)
+      </h2>
+      <div className="field">
+        <label htmlFor="bio">Short bio</label>
+        <textarea id="bio" name="bio" rows={2} defaultValue={e?.bio ?? ""} />
+      </div>
+      <div className="field">
+        <label htmlFor="whyCrownHeirs">Why Crown Heirs?</label>
+        <textarea id="whyCrownHeirs" name="whyCrownHeirs" rows={2} defaultValue={e?.whyCrownHeirs ?? ""} />
+      </div>
+      <div className="field">
+        <label htmlFor="fiveYearPlan">Five-year plan / goals</label>
+        <textarea id="fiveYearPlan" name="fiveYearPlan" rows={2} defaultValue={e?.fiveYearPlan ?? ""} />
+      </div>
+      <div className="field">
+        <label htmlFor="favoriteAway">Favorite thing to do away from the salon</label>
+        <textarea id="favoriteAway" name="favoriteAway" rows={2} defaultValue={e?.favoriteAway ?? ""} />
+      </div>
+
       <div style={{ display: "flex", gap: 12, marginTop: 8 }}>
         <button className="btn" type="submit">{e ? "Save changes" : "Add team member"}</button>
         <Link className="btn btn-ghost" href="/team">Cancel</Link>

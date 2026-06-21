@@ -57,6 +57,10 @@ function readForm(formData: FormData) {
     emergencyContactName: get("emergencyContactName"),
     emergencyContactPhone: get("emergencyContactPhone"),
     notes: get("notes"),
+    bio: get("bio"),
+    whyCrownHeirs: get("whyCrownHeirs"),
+    fiveYearPlan: get("fiveYearPlan"),
+    favoriteAway: get("favoriteAway"),
   };
 }
 

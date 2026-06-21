@@ -37,6 +37,10 @@ export async function POST() {
     // For databases created before these columns existed.
     await sql`ALTER TABLE employees ADD COLUMN IF NOT EXISTS photo_url text`;
     await sql`ALTER TABLE employees ADD COLUMN IF NOT EXISTS birthday date`;
+    await sql`ALTER TABLE employees ADD COLUMN IF NOT EXISTS bio text`;
+    await sql`ALTER TABLE employees ADD COLUMN IF NOT EXISTS why_crown_heirs text`;
+    await sql`ALTER TABLE employees ADD COLUMN IF NOT EXISTS five_year_plan text`;
+    await sql`ALTER TABLE employees ADD COLUMN IF NOT EXISTS favorite_away text`;
     await sql`
       CREATE TABLE IF NOT EXISTS shifts (
         id uuid PRIMARY KEY DEFAULT gen_random_uuid(),

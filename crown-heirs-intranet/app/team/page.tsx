@@ -50,13 +50,13 @@ export default async function TeamPage() {
           <div className="grid">
             {employees.map((e) => (
               <div className="card" key={e.id} style={{ cursor: "default" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 10 }}>
+                <Link href={`/team/${e.id}`} style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 10, textDecoration: "none", color: "inherit" }}>
                   <Avatar name={e.fullName} src={e.photoUrl} size={52} />
                   <div>
                     <h3 style={{ marginBottom: 2 }}>{e.fullName}</h3>
                     <p style={{ color: "var(--terra)" }}>{e.jobTitle ?? "—"}</p>
                   </div>
-                </div>
+                </Link>
                 <p style={{ fontSize: "0.86rem" }}>
                   {e.email}
                   {e.phone ? <><br />{e.phone}</> : null}
