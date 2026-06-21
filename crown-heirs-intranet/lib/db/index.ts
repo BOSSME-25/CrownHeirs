@@ -7,13 +7,23 @@ import * as schema from "./schema";
 // aren't present) — only when a query actually runs.
 
 function connectionString(): string {
-  const cs = process.env.DATABASE_URL ?? process.env.POSTGRES_URL;
-  if (!cs) {
-    throw new Error(
-      "Database is not configured yet. Connect a Postgres store in Vercel (sets DATABASE_URL).",
-    );
-  }
-  return cs;
+  // 1) Standard names, if present.
+  const direct = process.env.DATABASE_URL ?? process.env.POSTGRES_URL;
+  if (direct) return direct;
+
+  // 2) Vercel's Neon integration prefixes every variable with the store
+  //    name, e.g. `crown_team_db_DATABASE_URL` / `crown_team_db_POSTGRES_URL`.
+  //    Find a pooled, SSL-enabled connection string among them. We match the
+  //    exact suffix so we skip the *_NO_SSL / *_NON_POOLING / *_UNPOOLED ones.
+  const keys = Object.keys(process.env);
+  const match =
+    keys.find((k) => /(^|_)DATABASE_URL$/.test(k) && process.env[k]) ??
+    keys.find((k) => /(^|_)POSTGRES_URL$/.test(k) && process.env[k]);
+  if (match && process.env[match]) return process.env[match] as string;
+
+  throw new Error(
+    "Database is not configured yet. Connect a Postgres store in Vercel (sets DATABASE_URL).",
+  );
 }
 
 let _sql: NeonQueryFunction<false, false> | null = null;
