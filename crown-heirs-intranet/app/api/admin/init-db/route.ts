@@ -92,9 +92,11 @@ export async function POST() {
         title text NOT NULL,
         youtube_id text NOT NULL,
         description text,
+        section text,
         created_at timestamptz DEFAULT now()
       )
     `;
+    await sql`ALTER TABLE training_videos ADD COLUMN IF NOT EXISTS section text`;
     return Response.json({ ok: true });
   } catch (err) {
     return Response.json(

@@ -184,6 +184,10 @@ h1.title {
 .video-meta { padding: 16px 18px; }
 .video-meta h3 { font-family: var(--font-serif); font-weight: 600; font-size: 1.2rem; margin-bottom: 6px; }
 .video-meta p { color: var(--ink-dim); font-size: 0.9rem; line-height: 1.5; }
+.section-head { font-family: var(--font-serif); font-weight: 600; font-size: 1.35rem; color: var(--ink); margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+.video-admin { display: flex; align-items: center; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+.section-edit { display: flex; gap: 6px; flex: 1; min-width: 0; }
+.section-edit input { flex: 1; min-width: 0; padding: 7px 10px; border: 1px solid var(--border-mid); border-radius: var(--r-s); font-family: var(--font-ui); font-size: 0.8rem; }
 
 /* Avatars */
 .avatar { border-radius: 50%; object-fit: cover; display: block; flex: 0 0 auto; border: 1px solid var(--border); }

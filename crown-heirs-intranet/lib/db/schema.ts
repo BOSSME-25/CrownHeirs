@@ -133,6 +133,7 @@ export const trainingVideos = pgTable("training_videos", {
   title: text("title").notNull(),
   youtubeId: text("youtube_id").notNull(),
   description: text("description"),
+  section: text("section"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });
 

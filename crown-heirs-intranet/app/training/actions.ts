@@ -15,6 +15,7 @@ export async function addVideo(formData: FormData) {
   const title = String(formData.get("title") ?? "").trim();
   const url = String(formData.get("youtube") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim() || null;
+  const section = String(formData.get("section") ?? "").trim() || null;
   if (!title || !url) throw new Error("Title and YouTube link are required.");
 
   const youtubeId = parseYouTubeId(url);
@@ -22,7 +23,16 @@ export async function addVideo(formData: FormData) {
     throw new Error("Couldn’t read that YouTube link. Paste the full video URL.");
   }
 
-  await db.insert(trainingVideos).values({ title, youtubeId, description });
+  await db.insert(trainingVideos).values({ title, youtubeId, description, section });
+  revalidatePath("/training");
+}
+
+// Recategorize a video into a (possibly new) section.
+export async function updateVideoSection(id: string, formData: FormData) {
+  const session = await auth();
+  if (!isAdmin(session?.user?.email)) throw new Error("Only admins can edit videos.");
+  const section = String(formData.get("section") ?? "").trim() || null;
+  await db.update(trainingVideos).set({ section }).where(eq(trainingVideos.id, id));
   revalidatePath("/training");
 }
 
