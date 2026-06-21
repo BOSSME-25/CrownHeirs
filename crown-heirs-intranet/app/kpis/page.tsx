@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { isAdmin } from "@/lib/access";
@@ -11,9 +12,23 @@ export const metadata = { title: "KPIs — Crown Heirs Team Hub" };
 const money = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
 const pct = (r: number | null) => (r === null ? "—" : `${Math.round(r * 100)}%`);
 
-export default async function KpisPage() {
+type SortKey = "tips" | "clients" | "retention";
+const SORTS: { key: SortKey; label: string }[] = [
+  { key: "tips", label: "Tips" },
+  { key: "clients", label: "Clients" },
+  { key: "retention", label: "Retention" },
+];
+
+export default async function KpisPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ sort?: string }>;
+}) {
   const session = await auth();
   if (!isAdmin(session?.user?.email)) redirect("/");
+
+  const { sort } = await searchParams;
+  const sortKey: SortKey = sort === "clients" || sort === "retention" ? sort : "tips";
 
   const result = await getKpis();
 
@@ -68,6 +83,25 @@ export default async function KpisPage() {
           <p className="lede">Tips, clients, and repeat-client retention per stylist.</p>
         </div>
 
+        {team && team.configured && "rows" in team && (
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 12, alignItems: "center", marginBottom: 18 }}>
+            <span className="muted" style={{ fontSize: "0.85rem" }}>Sort by:</span>
+            {SORTS.map((s) => (
+              <Link
+                key={s.key}
+                href={`/kpis?sort=${s.key}`}
+                className={s.key === sortKey ? "badge" : "badge badge-ghost"}
+                style={s.key === sortKey ? { background: "var(--accent, #a0624a)", color: "#fff" } : undefined}
+              >
+                {s.label}
+              </Link>
+            ))}
+            <a className="btn btn-ghost" href="/api/kpis/export" style={{ marginLeft: "auto" }}>
+              ⬇ Export CSV
+            </a>
+          </div>
+        )}
+
         {!team ? (
           <div className="notice">
             No employees are linked to Square yet. Go to <strong>Team → Edit</strong> and set each
@@ -81,7 +115,11 @@ export default async function KpisPage() {
           team.periodLabels.map((label, pi) => {
             const rows = team.rows
               .map((r) => ({ name: r.name, ...r.periods[pi] }))
-              .sort((a, b) => b.tips - a.tips);
+              .sort((a, b) => {
+                if (sortKey === "retention") return (b.retention ?? -1) - (a.retention ?? -1);
+                if (sortKey === "clients") return b.clients - a.clients;
+                return b.tips - a.tips;
+              });
             return (
               <div key={label} style={{ marginBottom: 28 }}>
                 <h3 style={{ fontFamily: "var(--font-serif)", fontWeight: 600, fontSize: "1.2rem", margin: "0 0 8px" }}>
