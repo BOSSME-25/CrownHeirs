@@ -112,6 +112,11 @@ export default async function Home() {
             <p>The weekly schedule — who’s working when. Admins build it; everyone sees it.</p>
             <span className="badge">View schedule →</span>
           </Link>
+          <Link href="/timeclock" className="card">
+            <h3>Time Clock</h3>
+            <p>Punch in and out, track your hours, and see your weekly total.</p>
+            <span className="badge">Clock in/out →</span>
+          </Link>
           <Link href="/calendar" className="card">
             <h3>Calendar</h3>
             <p>Upcoming meetings and team birthdays for the next 60 days.</p>

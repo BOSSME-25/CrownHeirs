@@ -299,6 +299,20 @@ export async function POST() {
         created_at timestamptz DEFAULT now()
       )
     `;
+    await sql`
+      CREATE TABLE IF NOT EXISTS time_entries (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        org_id uuid,
+        location_id uuid,
+        employee_id uuid NOT NULL REFERENCES employees(id) ON DELETE CASCADE,
+        clock_in timestamptz NOT NULL,
+        clock_out timestamptz,
+        break_minutes integer NOT NULL DEFAULT 0,
+        note text,
+        edited_by text,
+        created_at timestamptz DEFAULT now()
+      )
+    `;
 
     // Backfill existing rows to Crown Heirs org + Main location.
     const [{ id: orgId } = { id: null }] = (await sql`

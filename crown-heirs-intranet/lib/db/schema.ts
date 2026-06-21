@@ -389,3 +389,22 @@ export const auditLog = pgTable("audit_log", {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });
 export type AuditEntry = typeof auditLog.$inferSelect;
+
+// ───────────────────────────────────────────────
+// Time clock — punch in/out, the basis for hours,
+// overtime, and payroll export.
+// ───────────────────────────────────────────────
+export const timeEntries = pgTable("time_entries", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  orgId: uuid("org_id"),
+  locationId: uuid("location_id"),
+  employeeId: uuid("employee_id").notNull().references(() => employees.id, { onDelete: "cascade" }),
+  clockIn: timestamp("clock_in", { withTimezone: true }).notNull(),
+  clockOut: timestamp("clock_out", { withTimezone: true }),
+  breakMinutes: integer("break_minutes").notNull().default(0),
+  note: text("note"),
+  // Set when a manager creates/corrects an entry by hand.
+  editedBy: text("edited_by"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+export type TimeEntry = typeof timeEntries.$inferSelect;
