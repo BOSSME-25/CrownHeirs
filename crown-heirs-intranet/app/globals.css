@@ -195,6 +195,36 @@ h1.title {
 .quiz-opt { display: flex; align-items: center; gap: 10px; padding: 6px 0; cursor: pointer; color: var(--ink-mid); }
 .quiz-opt input { width: 17px; height: 17px; accent-color: var(--terra); }
 
+/* ─── Certificate ─── */
+.certificate { background: #fff; border: 2px solid var(--gold); border-radius: var(--r-l); padding: 56px 48px; text-align: center; max-width: 760px; margin: 12px auto; box-shadow: 0 10px 40px rgba(26,24,22,0.07); }
+.cert-mark { font-family: var(--font-display); letter-spacing: 0.22em; text-transform: uppercase; color: var(--terra); }
+.cert-kicker { font-family: var(--font-display); letter-spacing: 0.18em; text-transform: uppercase; font-size: 0.9rem; color: var(--ink-dim); margin-top: 16px; }
+.cert-pre { color: var(--ink-dim); margin-top: 22px; }
+.cert-name { font-family: var(--font-serif); font-size: 2.4rem; color: var(--ink); margin: 8px 0; }
+.cert-course { font-family: var(--font-serif); font-size: 1.5rem; color: var(--terra); margin: 6px 0; }
+.cert-score { color: var(--ink-mid); margin-top: 14px; }
+.cert-date { color: var(--ink-dim); margin-top: 24px; border-top: 1px solid var(--border); display: inline-block; padding-top: 8px; }
+
+/* ─── Calendar ─── */
+.cal-list { display: flex; flex-direction: column; gap: 10px; }
+.cal-item { display: flex; gap: 16px; align-items: flex-start; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-m); padding: 14px 18px; }
+.cal-date { flex: 0 0 64px; text-align: center; }
+.cal-date .d { font-family: var(--font-serif); font-size: 1.5rem; line-height: 1; color: var(--ink); }
+.cal-date .mo { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-dim); }
+.cal-body { flex: 1; }
+.cal-title { color: var(--ink); }
+.cal-meta { color: var(--ink-dim); font-size: 0.84rem; margin-top: 2px; }
+.cal-ico { flex: 0 0 auto; font-size: 1.1rem; }
+.meeting-banner { background: var(--terra); color: #fff; border-radius: var(--r-m); padding: 14px 20px; margin-bottom: 22px; display: flex; align-items: center; gap: 12px; }
+.meeting-banner a { color: #fff; text-decoration: underline; }
+
+@media print {
+  .no-print { display: none !important; }
+  body { background: #fff; }
+  .wrap { padding: 0; }
+  .certificate { box-shadow: none; }
+}
+
 /* Avatars */
 .avatar { border-radius: 50%; object-fit: cover; display: block; flex: 0 0 auto; border: 1px solid var(--border); }
 .avatar-fallback { display: grid; place-items: center; background: var(--terra-lo); color: #fff; font-family: var(--font-ui); font-weight: 400; letter-spacing: 0.02em; }

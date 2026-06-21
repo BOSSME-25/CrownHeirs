@@ -33,6 +33,8 @@ export async function addVideo(formData: FormData) {
   const url = String(formData.get("youtube") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim() || null;
   const section = String(formData.get("section") ?? "").trim() || null;
+  const required = formData.get("required") === "on";
+  const dueDate = String(formData.get("dueDate") ?? "").trim() || null;
   if (!title || !url) throw new Error("Title and YouTube link are required.");
 
   const youtubeId = parseYouTubeId(url);
@@ -40,8 +42,20 @@ export async function addVideo(formData: FormData) {
     throw new Error("Couldn’t read that YouTube link. Paste the full video URL.");
   }
 
-  await db.insert(trainingVideos).values({ title, youtubeId, description, section });
+  await db.insert(trainingVideos).values({ title, youtubeId, description, section, required, dueDate });
   revalidatePath("/training");
+}
+
+// Mark a video required (or not) and set/clear its due date.
+export async function setRequirement(videoId: string, formData: FormData) {
+  const session = await auth();
+  if (!isAdmin(session?.user?.email)) throw new Error("Only admins can edit videos.");
+  const required = formData.get("required") === "on";
+  const dueDate = String(formData.get("dueDate") ?? "").trim() || null;
+  await db.update(trainingVideos).set({ required, dueDate }).where(eq(trainingVideos.id, videoId));
+  revalidatePath("/training");
+  revalidatePath(`/training/${videoId}`);
+  revalidatePath("/training/dashboard");
 }
 
 // Recategorize a video into a (possibly new) section.

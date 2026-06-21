@@ -1,5 +1,5 @@
 import "server-only";
-import { and, asc, desc, eq } from "drizzle-orm";
+import { and, asc, desc, eq, inArray } from "drizzle-orm";
 import { db } from "@/lib/db";
 import {
   employees,
@@ -8,6 +8,7 @@ import {
   trainingVideos,
   videoViews,
 } from "@/lib/db/schema";
+import type { TrainingVideo } from "@/lib/db/schema";
 
 export const PASS_PCT = 0.8;
 
@@ -120,4 +121,132 @@ export async function viewerStatuses(videoId: string): Promise<ViewerStatus[]> {
     score: bestByEmployee.get(r.id)?.score ?? null,
     total: bestByEmployee.get(r.id)?.total ?? null,
   }));
+}
+
+export async function getWatchedAt(videoId: string, employeeId: string) {
+  const rows = await db
+    .select({ w: videoViews.watchedAt })
+    .from(videoViews)
+    .where(and(eq(videoViews.videoId, videoId), eq(videoViews.employeeId, employeeId)));
+  return rows[0]?.w;
+}
+
+// ── Required training / completion ──
+
+export async function requiredVideos() {
+  return db
+    .select()
+    .from(trainingVideos)
+    .where(eq(trainingVideos.required, true))
+    .orderBy(asc(trainingVideos.dueDate));
+}
+
+function todayYMD() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+async function questionCounts(ids: string[]): Promise<Map<string, number>> {
+  const map = new Map<string, number>();
+  if (!ids.length) return map;
+  const rows = await db
+    .select({ videoId: quizQuestions.videoId })
+    .from(quizQuestions)
+    .where(inArray(quizQuestions.videoId, ids));
+  for (const r of rows) map.set(r.videoId, (map.get(r.videoId) ?? 0) + 1);
+  return map;
+}
+
+export type MyRequired = {
+  video: TrainingVideo;
+  watched: boolean;
+  hasQuiz: boolean;
+  best: { score: number; total: number } | null;
+  complete: boolean;
+  overdue: boolean;
+};
+
+export async function myRequiredStatus(employeeId: string): Promise<MyRequired[]> {
+  const reqs = await requiredVideos();
+  const ids = reqs.map((r) => r.id);
+  if (!ids.length) return [];
+
+  const qCount = await questionCounts(ids);
+  const views = await db
+    .select({ videoId: videoViews.videoId })
+    .from(videoViews)
+    .where(and(inArray(videoViews.videoId, ids), eq(videoViews.employeeId, employeeId)));
+  const watchedSet = new Set(views.map((v) => v.videoId));
+
+  const attempts = await db
+    .select({ videoId: quizAttempts.videoId, score: quizAttempts.score, total: quizAttempts.total })
+    .from(quizAttempts)
+    .where(and(inArray(quizAttempts.videoId, ids), eq(quizAttempts.employeeId, employeeId)));
+  const best = new Map<string, { score: number; total: number }>();
+  for (const a of attempts) {
+    const c = best.get(a.videoId);
+    if (!c || a.score / a.total > c.score / c.total) best.set(a.videoId, { score: a.score, total: a.total });
+  }
+
+  const today = todayYMD();
+  return reqs.map((v) => {
+    const hasQuiz = (qCount.get(v.id) ?? 0) > 0;
+    const watched = watchedSet.has(v.id);
+    const b = best.get(v.id) ?? null;
+    const passed = hasQuiz ? (b ? b.score / b.total >= PASS_PCT : false) : true;
+    const complete = watched && passed;
+    const overdue = !complete && !!v.dueDate && v.dueDate < today;
+    return { video: v, watched, hasQuiz, best: b, complete, overdue };
+  });
+}
+
+export type DashVideo = {
+  video: TrainingVideo;
+  rows: { employeeId: string; name: string; complete: boolean }[];
+  completeCount: number;
+  total: number;
+  overdue: boolean;
+};
+
+export async function requiredDashboard(): Promise<DashVideo[]> {
+  const reqs = await requiredVideos();
+  const ids = reqs.map((r) => r.id);
+  if (!ids.length) return [];
+
+  const roster = await db
+    .select({ id: employees.id, name: employees.fullName })
+    .from(employees)
+    .where(eq(employees.status, "active"))
+    .orderBy(asc(employees.fullName));
+  const qCount = await questionCounts(ids);
+
+  const views = await db
+    .select({ videoId: videoViews.videoId, employeeId: videoViews.employeeId })
+    .from(videoViews)
+    .where(inArray(videoViews.videoId, ids));
+  const watchedSet = new Set(views.map((v) => `${v.videoId}|${v.employeeId}`));
+
+  const attempts = await db
+    .select({ videoId: quizAttempts.videoId, employeeId: quizAttempts.employeeId, score: quizAttempts.score, total: quizAttempts.total })
+    .from(quizAttempts)
+    .where(inArray(quizAttempts.videoId, ids));
+  const best = new Map<string, { score: number; total: number }>();
+  for (const a of attempts) {
+    const k = `${a.videoId}|${a.employeeId}`;
+    const c = best.get(k);
+    if (!c || a.score / a.total > c.score / c.total) best.set(k, { score: a.score, total: a.total });
+  }
+
+  const today = todayYMD();
+  return reqs.map((v) => {
+    const hasQuiz = (qCount.get(v.id) ?? 0) > 0;
+    const rows = roster.map((r) => {
+      const watched = watchedSet.has(`${v.id}|${r.id}`);
+      const b = best.get(`${v.id}|${r.id}`);
+      const passed = hasQuiz ? (b ? b.score / b.total >= PASS_PCT : false) : true;
+      return { employeeId: r.id, name: r.name, complete: watched && passed };
+    });
+    const completeCount = rows.filter((r) => r.complete).length;
+    const overdue = !!v.dueDate && v.dueDate < today && completeCount < rows.length;
+    return { video: v, rows, completeCount, total: rows.length, overdue };
+  });
 }

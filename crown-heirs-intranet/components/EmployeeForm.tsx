@@ -78,6 +78,10 @@ export default function EmployeeForm({
           <input id="startDate" name="startDate" type="date" defaultValue={e?.startDate ?? ""} />
         </div>
         <div className="field">
+          <label htmlFor="birthday">Birthday</label>
+          <input id="birthday" name="birthday" type="date" defaultValue={e?.birthday ?? ""} />
+        </div>
+        <div className="field">
           <label htmlFor="wage">Pay rate (admins only)</label>
           <input id="wage" name="wage" type="number" step="0.01" defaultValue={e?.wage ?? ""} placeholder="e.g. 22.50" />
         </div>

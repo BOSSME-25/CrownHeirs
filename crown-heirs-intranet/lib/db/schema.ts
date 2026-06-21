@@ -21,6 +21,7 @@ export const employees = pgTable("employees", {
   fullName: text("full_name").notNull(),
   phone: text("phone"),
   photoUrl: text("photo_url"),
+  birthday: date("birthday"),
   jobTitle: text("job_title"),
   // 'full_time' | 'part_time' | 'contractor'
   employmentType: text("employment_type"),
@@ -136,6 +137,8 @@ export const trainingVideos = pgTable("training_videos", {
   youtubeId: text("youtube_id").notNull(),
   description: text("description"),
   section: text("section"),
+  required: boolean("required").notNull().default(false),
+  dueDate: date("due_date"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });
 
@@ -182,3 +185,18 @@ export const quizAttempts = pgTable("quiz_attempts", {
 });
 
 export type QuizAttempt = typeof quizAttempts.$inferSelect;
+
+// ───────────────────────────────────────────────
+// Meetings / events — powers the team calendar.
+// ───────────────────────────────────────────────
+export const meetings = pgTable("meetings", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  title: text("title").notNull(),
+  meetingDate: date("meeting_date").notNull(),
+  startTime: text("start_time"), // "HH:MM"
+  location: text("location"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+
+export type Meeting = typeof meetings.$inferSelect;

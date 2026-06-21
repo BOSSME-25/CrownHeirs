@@ -46,6 +46,7 @@ function readForm(formData: FormData) {
     email: (get("email") ?? "").toLowerCase(),
     fullName: get("fullName") ?? "",
     phone: get("phone"),
+    birthday: get("birthday"),
     jobTitle: get("jobTitle"),
     employmentType: get("employmentType"),
     status: get("status") ?? "active",

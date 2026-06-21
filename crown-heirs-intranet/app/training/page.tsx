@@ -5,7 +5,8 @@ import SiteHeader from "@/components/SiteHeader";
 import DocumentList from "@/components/DocumentList";
 import VideoDeleteButton from "@/components/VideoDeleteButton";
 import { addVideo, updateVideoSection } from "@/app/training/actions";
-import { listVideos } from "@/lib/training";
+import { listVideos, myRequiredStatus, type MyRequired } from "@/lib/training";
+import { getEmployeeByEmail } from "@/lib/employees";
 import type { TrainingVideo } from "@/lib/db/schema";
 
 export const dynamic = "force-dynamic";
@@ -13,14 +14,23 @@ export const metadata = { title: "Training — Crown Heirs Team Hub" };
 
 const UNCATEGORIZED = "General";
 
+function fmtDate(ymd: string) {
+  return new Date(ymd + "T00:00:00Z").toLocaleDateString("en-US", {
+    timeZone: "UTC", month: "short", day: "numeric", year: "numeric",
+  });
+}
+
 export default async function TrainingPage() {
   const session = await auth();
   const admin = isAdmin(session?.user?.email);
 
   let videos: TrainingVideo[] = [];
+  let myReq: MyRequired[] = [];
   let setupNeeded = false;
   try {
     videos = await listVideos();
+    const employee = session?.user?.email ? await getEmployeeByEmail(session.user.email) : undefined;
+    if (employee) myReq = await myRequiredStatus(employee.id);
   } catch {
     setupNeeded = true;
   }
@@ -61,7 +71,46 @@ export default async function TrainingPage() {
           ))}
         </datalist>
 
-        <h2 className="title" style={{ fontSize: "1.4rem" }}>Training Videos</h2>
+        {/* My required training */}
+        {myReq.length > 0 && (
+          <div className="prose" style={{ marginBottom: 24 }}>
+            <h2>My required training</h2>
+            <div className="req-list">
+              {myReq.map((r) => (
+                <div className="req" key={r.video.id}>
+                  <div>
+                    <div className="req-title">
+                      <Link href={`/training/${r.video.id}`} style={{ textDecoration: "none", color: "var(--ink)" }}>
+                        {r.video.title}
+                      </Link>
+                    </div>
+                    <div className="req-meta">
+                      {r.video.dueDate ? `Due ${fmtDate(r.video.dueDate)}` : "No due date"}
+                      {r.overdue ? " · Overdue" : ""}
+                    </div>
+                  </div>
+                  <div className="req-right">
+                    {r.complete ? (
+                      <>
+                        <span className="status-badge approved">Complete</span>
+                        <Link className="btn btn-ghost" href={`/training/${r.video.id}/certificate`}>Certificate</Link>
+                      </>
+                    ) : (
+                      <span className={`status-badge ${r.overdue ? "denied" : "pending"}`}>
+                        {r.overdue ? "Overdue" : "Incomplete"}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+          <h2 className="title" style={{ fontSize: "1.4rem" }}>Training Videos</h2>
+          {admin && <Link className="btn btn-ghost" href="/training/dashboard">Completion dashboard →</Link>}
+        </div>
 
         {admin && (
           <form className="prose" action={addVideo} style={{ margin: "16px 0 24px" }}>
@@ -86,6 +135,15 @@ export default async function TrainingPage() {
             <div className="field">
               <label htmlFor="description">Description (optional)</label>
               <textarea id="description" name="description" rows={2} />
+            </div>
+            <div className="form-grid">
+              <div className="field">
+                <label><input type="checkbox" name="required" style={{ marginRight: 8 }} />Required training</label>
+              </div>
+              <div className="field">
+                <label htmlFor="dueDate">Due date (optional)</label>
+                <input id="dueDate" name="dueDate" type="date" />
+              </div>
             </div>
             <button className="btn" type="submit">Add video</button>
           </form>
@@ -116,6 +174,11 @@ export default async function TrainingPage() {
                     </div>
                     <div className="video-meta">
                       <h3>{v.title}</h3>
+                      {v.required && (
+                        <span className="status-badge pending" style={{ marginBottom: 6, display: "inline-block" }}>
+                          Required{v.dueDate ? ` · due ${fmtDate(v.dueDate)}` : ""}
+                        </span>
+                      )}
                       {v.description && <p>{v.description}</p>}
                       <Link href={`/training/${v.id}`} className="badge" style={{ display: "inline-block", marginTop: 8 }}>
                         Open &amp; take assessment →

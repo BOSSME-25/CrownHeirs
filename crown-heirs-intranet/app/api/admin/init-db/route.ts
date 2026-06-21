@@ -34,8 +34,9 @@ export async function POST() {
         updated_at timestamptz DEFAULT now()
       )
     `;
-    // For databases created before this column existed.
+    // For databases created before these columns existed.
     await sql`ALTER TABLE employees ADD COLUMN IF NOT EXISTS photo_url text`;
+    await sql`ALTER TABLE employees ADD COLUMN IF NOT EXISTS birthday date`;
     await sql`
       CREATE TABLE IF NOT EXISTS shifts (
         id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -97,6 +98,8 @@ export async function POST() {
       )
     `;
     await sql`ALTER TABLE training_videos ADD COLUMN IF NOT EXISTS section text`;
+    await sql`ALTER TABLE training_videos ADD COLUMN IF NOT EXISTS required boolean NOT NULL DEFAULT false`;
+    await sql`ALTER TABLE training_videos ADD COLUMN IF NOT EXISTS due_date date`;
     await sql`
       CREATE TABLE IF NOT EXISTS video_views (
         id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -124,6 +127,17 @@ export async function POST() {
         score integer NOT NULL,
         total integer NOT NULL,
         taken_at timestamptz DEFAULT now()
+      )
+    `;
+    await sql`
+      CREATE TABLE IF NOT EXISTS meetings (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        title text NOT NULL,
+        meeting_date date NOT NULL,
+        start_time text,
+        location text,
+        notes text,
+        created_at timestamptz DEFAULT now()
       )
     `;
     return Response.json({ ok: true });

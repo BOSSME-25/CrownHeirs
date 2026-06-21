@@ -4,7 +4,7 @@ import { auth } from "@/auth";
 import { isAdmin } from "@/lib/access";
 import SiteHeader from "@/components/SiteHeader";
 import DeleteQuestionButton from "@/components/DeleteQuestionButton";
-import { addQuestion, markWatched, submitQuiz } from "@/app/training/actions";
+import { addQuestion, markWatched, setRequirement, submitQuiz } from "@/app/training/actions";
 import { getEmployeeByEmail } from "@/lib/employees";
 import {
   PASS_PCT,
@@ -97,6 +97,28 @@ export default async function VideoDetailPage({
                 </fieldset>
               ))}
               <button className="btn" type="submit">{attempt ? "Retake assessment" : "Submit assessment"}</button>
+            </form>
+          </div>
+        )}
+
+        {/* Admin: requirement settings */}
+        {admin && (
+          <div className="prose" style={{ marginTop: 24 }}>
+            <h2>Requirement</h2>
+            <form action={setRequirement.bind(null, id)}>
+              <div className="form-grid">
+                <div className="field">
+                  <label>
+                    <input type="checkbox" name="required" defaultChecked={video.required} style={{ marginRight: 8 }} />
+                    Required for all staff
+                  </label>
+                </div>
+                <div className="field">
+                  <label htmlFor="dueDate">Due date</label>
+                  <input id="dueDate" name="dueDate" type="date" defaultValue={video.dueDate ?? ""} />
+                </div>
+              </div>
+              <button className="btn btn-ghost" type="submit">Save requirement</button>
             </form>
           </div>
         )}

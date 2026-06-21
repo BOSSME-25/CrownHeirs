@@ -1,16 +1,50 @@
 import Link from "next/link";
 import { auth } from "@/auth";
 import SiteHeader from "@/components/SiteHeader";
+import { nextMeeting } from "@/lib/calendar";
+import type { Meeting } from "@/lib/db/schema";
+
+function fmtMeeting(m: Meeting) {
+  const d = new Date(m.meetingDate + "T00:00:00Z").toLocaleDateString("en-US", {
+    timeZone: "UTC", weekday: "long", month: "short", day: "numeric",
+  });
+  let time = "";
+  if (m.startTime) {
+    const [h, mn] = m.startTime.split(":");
+    let hr = parseInt(h, 10);
+    const ap = hr >= 12 ? "PM" : "AM";
+    hr = hr % 12 || 12;
+    time = ` at ${hr}:${mn} ${ap}`;
+  }
+  return `${d}${time}`;
+}
 
 export default async function Home() {
   const session = await auth();
   const firstName = session?.user?.name?.split(" ")[0];
   const isAdmin = session?.user?.isAdmin;
 
+  let meeting: Meeting | undefined;
+  try {
+    meeting = await nextMeeting(7);
+  } catch {
+    // calendar table not set up yet — no banner
+  }
+
   return (
     <>
       <SiteHeader />
       <main className="wrap">
+        {meeting && (
+          <div className="meeting-banner">
+            <span style={{ fontSize: "1.2rem" }}>📅</span>
+            <span>
+              <strong>Upcoming:</strong> {meeting.title} — {fmtMeeting(meeting)}
+              {meeting.location ? ` · ${meeting.location}` : ""}.{" "}
+              <Link href="/calendar">See calendar</Link>
+            </span>
+          </div>
+        )}
         <div className="page-head">
           <div className="eyebrow">Crown Heirs Team Hub</div>
           <h1 className="title">{firstName ? `Welcome, ${firstName}.` : "Welcome."}</h1>
@@ -26,6 +60,11 @@ export default async function Home() {
             <h3>Schedule</h3>
             <p>The weekly schedule — who’s working when. Admins build it; everyone sees it.</p>
             <span className="badge">View schedule →</span>
+          </Link>
+          <Link href="/calendar" className="card">
+            <h3>Calendar</h3>
+            <p>Upcoming meetings and team birthdays for the next 60 days.</p>
+            <span className="badge">View calendar →</span>
           </Link>
           <Link href="/time-off" className="card">
             <h3>Time Off</h3>
