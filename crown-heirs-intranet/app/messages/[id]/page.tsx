@@ -12,7 +12,7 @@ export const metadata = { title: "Conversation — Crown Heirs Team Hub" };
 
 function fmt(d: Date | string | null) {
   if (!d) return "";
-  return new Date(d).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+  return new Date(d).toLocaleString("en-US", { timeZone: "America/Phoenix", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
 }
 
 export default async function ThreadPage({

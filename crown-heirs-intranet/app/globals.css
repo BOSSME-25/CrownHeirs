@@ -413,3 +413,20 @@ h1.title {
 }
 .kpi-table tbody tr:last-child td { border-bottom: none; }
 .kpi-table tbody tr:first-child td { font-weight: 600; }
+
+/* KPI sort chips */
+.kpi-chip {
+  display: inline-block;
+  padding: 5px 14px;
+  border-radius: 100px;
+  border: 1px solid var(--line, #e6dcd5);
+  font-size: 0.82rem;
+  color: var(--ink-dim, #6a625c);
+  text-decoration: none;
+  background: #fff;
+}
+.kpi-chip.active {
+  background: var(--accent, #a0624a);
+  border-color: var(--accent, #a0624a);
+  color: #fff;
+}

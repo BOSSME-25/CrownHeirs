@@ -18,7 +18,7 @@ export const metadata = { title: "Certificate — Crown Heirs Team Hub" };
 
 function fmtDate(d: Date | string) {
   const date = typeof d === "string" ? new Date(d) : d;
-  return date.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
+  return date.toLocaleDateString("en-US", { timeZone: "America/Phoenix", month: "long", day: "numeric", year: "numeric" });
 }
 
 export default async function CertificatePage({

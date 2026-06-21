@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
 export const metadata = { title: "Suggestion Box — Crown Heirs Team Hub" };
 
 function fmt(d: Date | string) {
-  return new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  return new Date(d).toLocaleDateString("en-US", { timeZone: "America/Phoenix", month: "short", day: "numeric", year: "numeric" });
 }
 
 export default async function SuggestionsPage() {

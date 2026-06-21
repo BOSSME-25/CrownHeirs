@@ -43,6 +43,11 @@ export default async function KpisPage({
   }
   const team = linked.length ? await getTeamKpis(linked) : null;
 
+  // Square is reachable (salon-wide totals came back) → CSV export is useful
+  // even before any stylist is linked.
+  const squareWorks = result.configured && "periods" in result;
+  const hasTeamRows = !!team && team.configured && "rows" in team;
+
   return (
     <>
       <SiteHeader />
@@ -83,22 +88,27 @@ export default async function KpisPage({
           <p className="lede">Tips, clients, and repeat-client retention per stylist.</p>
         </div>
 
-        {team && team.configured && "rows" in team && (
+        {(hasTeamRows || squareWorks) && (
           <div style={{ display: "flex", flexWrap: "wrap", gap: 12, alignItems: "center", marginBottom: 18 }}>
-            <span className="muted" style={{ fontSize: "0.85rem" }}>Sort by:</span>
-            {SORTS.map((s) => (
-              <Link
-                key={s.key}
-                href={`/kpis?sort=${s.key}`}
-                className={s.key === sortKey ? "badge" : "badge badge-ghost"}
-                style={s.key === sortKey ? { background: "var(--accent, #a0624a)", color: "#fff" } : undefined}
-              >
-                {s.label}
-              </Link>
-            ))}
-            <a className="btn btn-ghost" href="/api/kpis/export" style={{ marginLeft: "auto" }}>
-              ⬇ Export CSV
-            </a>
+            {hasTeamRows && (
+              <>
+                <span className="muted" style={{ fontSize: "0.85rem" }}>Sort by:</span>
+                {SORTS.map((s) => (
+                  <Link
+                    key={s.key}
+                    href={`/kpis?sort=${s.key}`}
+                    className={`kpi-chip${s.key === sortKey ? " active" : ""}`}
+                  >
+                    {s.label}
+                  </Link>
+                ))}
+              </>
+            )}
+            {squareWorks && (
+              <a className="btn btn-ghost" href="/api/kpis/export" style={{ marginLeft: "auto" }}>
+                ⬇ Export CSV
+              </a>
+            )}
           </div>
         )}
 

@@ -116,7 +116,7 @@ export default function AdminPanel() {
                 <div style={{ minWidth: 0 }}>
                   <div className="doc-name">{doc.filename}</div>
                   <div className="doc-meta">
-                    {doc.category} · {fmtSize(doc.size)} · {new Date(doc.uploadedAt).toLocaleDateString()}
+                    {doc.category} · {fmtSize(doc.size)} · {new Date(doc.uploadedAt).toLocaleDateString("en-US", { timeZone: "America/Phoenix" })}
                   </div>
                 </div>
               </div>

@@ -53,7 +53,7 @@ export default function DocumentList({ category }: { category?: string }) {
             <div style={{ minWidth: 0 }}>
               <div className="doc-name">{doc.filename}</div>
               <div className="doc-meta">
-                {fmtSize(doc.size)} · {new Date(doc.uploadedAt).toLocaleDateString()}
+                {fmtSize(doc.size)} · {new Date(doc.uploadedAt).toLocaleDateString("en-US", { timeZone: "America/Phoenix" })}
               </div>
             </div>
           </div>

@@ -12,18 +12,9 @@ function csvCell(v: string | number) {
 export async function buildTeamKpiCsv(): Promise<
   { ok: true; csv: string; filename: string } | { ok: false; reason: string }
 > {
-  const linked = (await listEmployees())
-    .filter((e) => e.squareTeamMemberId)
-    .map((e) => ({ teamMemberId: e.squareTeamMemberId as string, name: e.fullName }));
-  if (linked.length === 0) return { ok: false, reason: "No employees are linked to Square." };
-
-  const team = await getTeamKpis(linked);
-  if (!team.configured) return { ok: false, reason: "Square not configured." };
-  if ("error" in team) return { ok: false, reason: `Square error: ${team.error}` };
-
   const lines: string[] = [];
 
-  // Salon-wide totals first (if available), then a blank separator row.
+  // Salon-wide totals first (works even before any stylist is linked).
   const overall = await getKpis();
   if (overall.configured && "periods" in overall) {
     lines.push("Salon-wide totals");
@@ -35,26 +26,38 @@ export async function buildTeamKpiCsv(): Promise<
           .join(","),
       );
     }
-    lines.push("");
-    lines.push("Per-stylist");
   }
 
-  const header = ["Stylist"];
-  for (const label of team.periodLabels) {
-    header.push(`Tips (${label})`, `Clients (${label})`, `Retention (${label})`);
-  }
-
-  lines.push(header.map(csvCell).join(","));
-  for (const row of team.rows) {
-    const cells: (string | number)[] = [row.name];
-    for (const p of row.periods) {
-      cells.push(
-        p.tips.toFixed(2),
-        p.clients,
-        p.retention === null ? "" : `${Math.round(p.retention * 100)}%`,
-      );
+  // Per-stylist section (only if employees are linked to Square).
+  const linked = (await listEmployees())
+    .filter((e) => e.squareTeamMemberId)
+    .map((e) => ({ teamMemberId: e.squareTeamMemberId as string, name: e.fullName }));
+  if (linked.length > 0) {
+    const team = await getTeamKpis(linked);
+    if (team.configured && "rows" in team) {
+      if (lines.length) lines.push("");
+      lines.push("Per-stylist");
+      const header = ["Stylist"];
+      for (const label of team.periodLabels) {
+        header.push(`Tips (${label})`, `Clients (${label})`, `Retention (${label})`);
+      }
+      lines.push(header.map(csvCell).join(","));
+      for (const row of team.rows) {
+        const cells: (string | number)[] = [row.name];
+        for (const p of row.periods) {
+          cells.push(
+            p.tips.toFixed(2),
+            p.clients,
+            p.retention === null ? "" : `${Math.round(p.retention * 100)}%`,
+          );
+        }
+        lines.push(cells.map(csvCell).join(","));
+      }
     }
-    lines.push(cells.map(csvCell).join(","));
+  }
+
+  if (lines.length === 0) {
+    return { ok: false, reason: "Square isn’t connected, so there’s no data to export yet." };
   }
 
   const today = new Date().toISOString().slice(0, 10);
