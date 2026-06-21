@@ -146,6 +146,16 @@ export async function POST() {
       )
     `;
     await sql`ALTER TABLE meetings ADD COLUMN IF NOT EXISTS meeting_url text`;
+    await sql`
+      CREATE TABLE IF NOT EXISTS suggestions (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        message text NOT NULL,
+        anonymous boolean NOT NULL DEFAULT false,
+        author_name text,
+        status text NOT NULL DEFAULT 'new',
+        created_at timestamptz DEFAULT now()
+      )
+    `;
     return Response.json({ ok: true });
   } catch (err) {
     return Response.json(

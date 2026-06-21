@@ -206,3 +206,18 @@ export const meetings = pgTable("meetings", {
 });
 
 export type Meeting = typeof meetings.$inferSelect;
+
+// ───────────────────────────────────────────────
+// Suggestion box — staff submit ideas to management,
+// optionally anonymously.
+// ───────────────────────────────────────────────
+export const suggestions = pgTable("suggestions", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  message: text("message").notNull(),
+  anonymous: boolean("anonymous").notNull().default(false),
+  authorName: text("author_name"), // null when anonymous
+  status: text("status").notNull().default("new"), // new | reviewed
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+
+export type Suggestion = typeof suggestions.$inferSelect;
