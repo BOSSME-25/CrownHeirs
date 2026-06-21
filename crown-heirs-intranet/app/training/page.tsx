@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { auth } from "@/auth";
 import { isAdmin } from "@/lib/access";
 import SiteHeader from "@/components/SiteHeader";
@@ -116,6 +117,9 @@ export default async function TrainingPage() {
                     <div className="video-meta">
                       <h3>{v.title}</h3>
                       {v.description && <p>{v.description}</p>}
+                      <Link href={`/training/${v.id}`} className="badge" style={{ display: "inline-block", marginTop: 8 }}>
+                        Open &amp; take assessment →
+                      </Link>
                       {admin && (
                         <div className="video-admin">
                           <form action={updateVideoSection.bind(null, v.id)} className="section-edit">

@@ -97,6 +97,35 @@ export async function POST() {
       )
     `;
     await sql`ALTER TABLE training_videos ADD COLUMN IF NOT EXISTS section text`;
+    await sql`
+      CREATE TABLE IF NOT EXISTS video_views (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        video_id uuid NOT NULL REFERENCES training_videos(id) ON DELETE CASCADE,
+        employee_id uuid NOT NULL REFERENCES employees(id) ON DELETE CASCADE,
+        watched_at timestamptz DEFAULT now(),
+        UNIQUE (video_id, employee_id)
+      )
+    `;
+    await sql`
+      CREATE TABLE IF NOT EXISTS quiz_questions (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        video_id uuid NOT NULL REFERENCES training_videos(id) ON DELETE CASCADE,
+        prompt text NOT NULL,
+        options jsonb NOT NULL,
+        correct_index integer NOT NULL,
+        created_at timestamptz DEFAULT now()
+      )
+    `;
+    await sql`
+      CREATE TABLE IF NOT EXISTS quiz_attempts (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        video_id uuid NOT NULL REFERENCES training_videos(id) ON DELETE CASCADE,
+        employee_id uuid NOT NULL REFERENCES employees(id) ON DELETE CASCADE,
+        score integer NOT NULL,
+        total integer NOT NULL,
+        taken_at timestamptz DEFAULT now()
+      )
+    `;
     return Response.json({ ok: true });
   } catch (err) {
     return Response.json(

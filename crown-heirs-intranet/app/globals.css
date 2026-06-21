@@ -189,6 +189,12 @@ h1.title {
 .section-edit { display: flex; gap: 6px; flex: 1; min-width: 0; }
 .section-edit input { flex: 1; min-width: 0; padding: 7px 10px; border: 1px solid var(--border-mid); border-radius: var(--r-s); font-family: var(--font-ui); font-size: 0.8rem; }
 
+/* ─── Quiz / assessment ─── */
+.quiz-q { border: 1px solid var(--border); border-radius: var(--r-m); padding: 16px 18px; margin-bottom: 14px; }
+.quiz-q legend { font-weight: 500; color: var(--ink); padding: 0 6px; }
+.quiz-opt { display: flex; align-items: center; gap: 10px; padding: 6px 0; cursor: pointer; color: var(--ink-mid); }
+.quiz-opt input { width: 17px; height: 17px; accent-color: var(--terra); }
+
 /* Avatars */
 .avatar { border-radius: 50%; object-fit: cover; display: block; flex: 0 0 auto; border: 1px solid var(--border); }
 .avatar-fallback { display: grid; place-items: center; background: var(--terra-lo); color: #fff; font-family: var(--font-ui); font-weight: 400; letter-spacing: 0.02em; }

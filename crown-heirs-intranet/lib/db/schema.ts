@@ -3,6 +3,8 @@ import {
   uuid,
   text,
   numeric,
+  integer,
+  jsonb,
   date,
   timestamp,
   boolean,
@@ -138,3 +140,45 @@ export const trainingVideos = pgTable("training_videos", {
 });
 
 export type TrainingVideo = typeof trainingVideos.$inferSelect;
+
+// Who has watched a training video (self-marked or via completing a quiz).
+export const videoViews = pgTable("video_views", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  videoId: uuid("video_id")
+    .notNull()
+    .references(() => trainingVideos.id, { onDelete: "cascade" }),
+  employeeId: uuid("employee_id")
+    .notNull()
+    .references(() => employees.id, { onDelete: "cascade" }),
+  watchedAt: timestamp("watched_at", { withTimezone: true }).defaultNow(),
+});
+
+// Assessment questions attached to a training video (multiple choice).
+export const quizQuestions = pgTable("quiz_questions", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  videoId: uuid("video_id")
+    .notNull()
+    .references(() => trainingVideos.id, { onDelete: "cascade" }),
+  prompt: text("prompt").notNull(),
+  options: jsonb("options").$type<string[]>().notNull(),
+  correctIndex: integer("correct_index").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+
+export type QuizQuestion = typeof quizQuestions.$inferSelect;
+
+// A staffer's assessment attempt for a video.
+export const quizAttempts = pgTable("quiz_attempts", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  videoId: uuid("video_id")
+    .notNull()
+    .references(() => trainingVideos.id, { onDelete: "cascade" }),
+  employeeId: uuid("employee_id")
+    .notNull()
+    .references(() => employees.id, { onDelete: "cascade" }),
+  score: integer("score").notNull(),
+  total: integer("total").notNull(),
+  takenAt: timestamp("taken_at", { withTimezone: true }).defaultNow(),
+});
+
+export type QuizAttempt = typeof quizAttempts.$inferSelect;
