@@ -1,6 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { isAdmin } from "@/lib/access";
+import { getAccess } from "@/lib/perms";
 import SiteHeader from "@/components/SiteHeader";
 import ShiftForm from "@/components/ShiftForm";
 import { updateShift } from "@/app/schedule/actions";
@@ -14,7 +14,7 @@ export default async function EditShiftPage({
   params: Promise<{ id: string }>;
 }) {
   const session = await auth();
-  if (!isAdmin(session?.user?.email)) redirect("/schedule");
+  if (!(await getAccess(session?.user?.email)).canApprove) redirect("/schedule");
 
   const { id } = await params;
   const shift = await getShift(id);

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { auth } from "@/auth";
-import { isAdmin } from "@/lib/access";
+import { getAccess } from "@/lib/perms";
 import SiteHeader from "@/components/SiteHeader";
 import DeleteShiftButton from "@/components/DeleteShiftButton";
 import PublishWeekButton from "@/components/PublishWeekButton";
@@ -24,7 +24,7 @@ export default async function SchedulePage({
   searchParams: Promise<{ week?: string }>;
 }) {
   const session = await auth();
-  const admin = isAdmin(session?.user?.email);
+  const admin = (await getAccess(session?.user?.email)).canApprove;
   const myEmail = session?.user?.email?.toLowerCase();
 
   const { week } = await searchParams;

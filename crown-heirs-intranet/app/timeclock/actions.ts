@@ -64,7 +64,7 @@ export async function clockOut(formData: FormData) {
 async function requireManage() {
   const session = await auth();
   const access = await getAccess(session?.user?.email);
-  if (!access.canManageTeam) throw new Error("Only managers and above can edit timesheets.");
+  if (!access.canApprove) throw new Error("Only managers and above can edit timesheets.");
   return session?.user?.email ?? null;
 }
 

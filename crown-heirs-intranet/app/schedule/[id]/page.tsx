@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { isAdmin } from "@/lib/access";
+import { getAccess } from "@/lib/perms";
 import SiteHeader from "@/components/SiteHeader";
 import DutyToggle from "@/components/DutyToggle";
 import DutyDeleteButton from "@/components/DutyDeleteButton";
@@ -19,7 +19,7 @@ export default async function ShiftDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const session = await auth();
-  const admin = isAdmin(session?.user?.email);
+  const admin = (await getAccess(session?.user?.email)).canApprove;
   const myEmail = session?.user?.email?.toLowerCase();
 
   const { id } = await params;

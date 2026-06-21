@@ -13,7 +13,7 @@ import { logAudit } from "@/lib/audit";
 async function requireManage() {
   const session = await auth();
   const access = await getAccess(session?.user?.email);
-  if (!access.canManageTeam) throw new Error("Only managers and above can adjust PTO.");
+  if (!access.canApprove) throw new Error("Only managers and above can adjust PTO.");
   return session?.user?.email ?? null;
 }
 

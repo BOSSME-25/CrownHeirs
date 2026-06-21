@@ -28,7 +28,7 @@ export default async function PtoPage() {
       myBalance = await balanceFor(me.id);
       myLedger = await ledgerFor(me.id);
     }
-    if (access.canManageTeam) {
+    if (access.canApprove) {
       const staff = await listEmployees();
       roster = staff.map((e) => ({ id: e.id, fullName: e.fullName }));
       if (staff.length) {
@@ -92,7 +92,7 @@ export default async function PtoPage() {
               )}
             </div>
 
-            {access.canManageTeam && (
+            {access.canApprove && (
               <div style={{ marginTop: 36 }}>
                 <h2 style={{ fontFamily: "var(--font-serif)", fontWeight: 600 }}>Team balances</h2>
                 <table className="kpi-table" style={{ marginBottom: 24 }}>

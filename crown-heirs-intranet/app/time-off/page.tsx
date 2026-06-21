@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import { isAdmin } from "@/lib/access";
+import { getAccess } from "@/lib/perms";
 import SiteHeader from "@/components/SiteHeader";
 import TimeOffDecision from "@/components/TimeOffDecision";
 import { adminAddTimeOff, submitTimeOff } from "@/app/time-off/actions";
@@ -21,7 +21,7 @@ function fmt(ymd: string) {
 
 export default async function TimeOffPage() {
   const session = await auth();
-  const admin = isAdmin(session?.user?.email);
+  const admin = (await getAccess(session?.user?.email)).canApprove;
   const email = session?.user?.email ?? "";
 
   let setupNeeded = false;

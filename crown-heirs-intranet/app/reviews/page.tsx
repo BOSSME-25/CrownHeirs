@@ -26,7 +26,7 @@ export default async function ReviewsPage() {
 
   try {
     me = await getEmployeeByEmail(session?.user?.email ?? "");
-    if (access.canManageTeam) {
+    if (access.canApprove) {
       roster = (await listEmployees()).map((e) => ({ id: e.id, fullName: e.fullName }));
       const all = await db
         .select({ r: reviews, who: employees.fullName })
@@ -54,7 +54,7 @@ export default async function ReviewsPage() {
           <div className="eyebrow">Reviews</div>
           <h1 className="title">Performance Reviews</h1>
           <p className="lede">
-            {access.canManageTeam ? "Write and share reviews with your team." : "Your shared performance reviews."}
+            {access.canApprove ? "Write and share reviews with your team." : "Your shared performance reviews."}
           </p>
         </div>
 
@@ -63,15 +63,15 @@ export default async function ReviewsPage() {
         ) : (
           <>
             {rows.length === 0 ? (
-              <p className="muted">{access.canManageTeam ? "No reviews yet." : "No reviews have been shared with you yet."}</p>
+              <p className="muted">{access.canApprove ? "No reviews yet." : "No reviews have been shared with you yet."}</p>
             ) : (
               <div className="prose">
                 {rows.map((r) => (
                   <div key={r.id} style={{ border: "1px solid var(--line,#ece3dd)", borderRadius: 12, padding: 16, marginBottom: 14 }}>
                     <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
                       <strong>
-                        {access.canManageTeam ? r.who : r.periodLabel || "Review"}
-                        {access.canManageTeam && r.periodLabel ? ` — ${r.periodLabel}` : ""}
+                        {access.canApprove ? r.who : r.periodLabel || "Review"}
+                        {access.canApprove && r.periodLabel ? ` — ${r.periodLabel}` : ""}
                       </strong>
                       <span className="muted" style={{ fontSize: "0.82rem" }}>
                         {r.reviewDate ?? ""} {r.status === "draft" ? "· Draft" : ""}
@@ -81,7 +81,7 @@ export default async function ReviewsPage() {
                     {r.strengths && <p style={{ margin: "6px 0" }}><strong>Strengths:</strong> {r.strengths}</p>}
                     {r.growth && <p style={{ margin: "6px 0" }}><strong>Growth areas:</strong> {r.growth}</p>}
                     {r.goals && <p style={{ margin: "6px 0" }}><strong>Goals:</strong> {r.goals}</p>}
-                    {access.canManageTeam && (
+                    {access.canApprove && (
                       <div style={{ display: "flex", gap: 10, marginTop: 8 }}>
                         {r.status === "draft" && (
                           <form action={shareReview.bind(null, r.id)}>
@@ -98,7 +98,7 @@ export default async function ReviewsPage() {
               </div>
             )}
 
-            {access.canManageTeam && (
+            {access.canApprove && (
               <form action={createReview} className="prose" style={{ marginTop: 24 }}>
                 <h2>New review</h2>
                 <div className="form-grid">

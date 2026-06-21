@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { eq } from "drizzle-orm";
 import { auth } from "@/auth";
-import { isAdmin } from "@/lib/access";
+import { getAccess } from "@/lib/perms";
 import { db } from "@/lib/db";
 import { employees, ptoLedger, timeOffRequests } from "@/lib/db/schema";
 import { getEmployeeByEmail } from "@/lib/employees";
@@ -56,7 +56,9 @@ export async function submitTimeOff(formData: FormData) {
 // Admin/manager records time off directly for a team member (already approved).
 export async function adminAddTimeOff(formData: FormData) {
   const session = await auth();
-  if (!isAdmin(session?.user?.email)) throw new Error("Only admins can do this.");
+  if (!(await getAccess(session?.user?.email)).canApprove) {
+    throw new Error("Only managers and above can do this.");
+  }
 
   const get = (k: string) => {
     const v = formData.get(k);
@@ -104,7 +106,9 @@ export async function adminAddTimeOff(formData: FormData) {
 
 export async function decideTimeOff(id: string, status: "approved" | "denied") {
   const session = await auth();
-  if (!isAdmin(session?.user?.email)) throw new Error("Only admins can decide requests.");
+  if (!(await getAccess(session?.user?.email)).canApprove) {
+    throw new Error("Only managers and above can decide requests.");
+  }
 
   await db
     .update(timeOffRequests)

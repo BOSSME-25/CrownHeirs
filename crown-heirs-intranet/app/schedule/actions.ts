@@ -4,17 +4,18 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { and, eq, gte, lte } from "drizzle-orm";
 import { auth } from "@/auth";
-import { isAdmin } from "@/lib/access";
+import { getAccess } from "@/lib/perms";
 import { db } from "@/lib/db";
 import { employees, shiftDuties, shifts, swapRequests } from "@/lib/db/schema";
 import { getEmployeeByEmail } from "@/lib/employees";
 import { addDays } from "@/lib/schedule";
 import { adminEmails, emailLayout, sendEmail } from "@/lib/email";
 
+// Managers and above can build/manage the schedule (day-to-day oversight).
 async function requireAdmin() {
   const session = await auth();
-  if (!isAdmin(session?.user?.email)) {
-    throw new Error("Only admins can manage the schedule.");
+  if (!(await getAccess(session?.user?.email)).canApprove) {
+    throw new Error("Only managers and above can manage the schedule.");
   }
 }
 
@@ -163,7 +164,7 @@ export async function toggleDuty(shiftId: string, dutyId: string, done: boolean)
   const email = session?.user?.email?.toLowerCase();
   if (!email) throw new Error("Not signed in.");
 
-  if (!isAdmin(email)) {
+  if (!(await getAccess(email)).canApprove) {
     // Must be the employee assigned to this shift.
     const rows = await db
       .select({ assignee: employees.email })
@@ -193,7 +194,7 @@ export async function requestSwap(shiftId: string, formData: FormData) {
   if (!s) throw new Error("Shift not found.");
 
   const me = await getEmployeeByEmail(email);
-  if (!isAdmin(email) && (!me || me.id !== s.employeeId)) {
+  if (!(await getAccess(email)).canApprove && (!me || me.id !== s.employeeId)) {
     throw new Error("You can only request a swap for your own shift.");
   }
 

@@ -12,13 +12,16 @@ export type AccessLevel = "ceo" | "director" | "manager" | "staff" | "none";
 
 export type Access = {
   level: AccessLevel;
-  canSystem: boolean; // admin page, documents, imports, KPIs, granting Director
-  canManageTeam: boolean; // add/edit/delete team members, assign up to Manager
-  canViewHr: boolean; // personal email, emergency contact, start date
+  canSystem: boolean; // owner: admin page, integrations, imports, KPIs, locations, audit, granting Director
+  canManageTeam: boolean; // director+: add/edit/delete people, assign up to Manager, suggestions queue
+  canApprove: boolean; // manager+: day-to-day approvals — schedules, time-off, swaps, timesheets, reviews, PTO
+  canViewHr: boolean; // manager+: personal email, emergency contact, start date
 };
 
 export async function getAccess(email?: string | null): Promise<Access> {
-  if (!email) return { level: "none", canSystem: false, canManageTeam: false, canViewHr: false };
+  if (!email) {
+    return { level: "none", canSystem: false, canManageTeam: false, canApprove: false, canViewHr: false };
+  }
 
   const ceo = isAdmin(email);
   let role = "staff";
@@ -33,10 +36,19 @@ export async function getAccess(email?: string | null): Promise<Access> {
   const canSystem = ceo;
   // Legacy "admin" role is treated as director-level (CEO/COO live in env).
   const canManageTeam = canSystem || role === "director" || role === "admin";
-  const canViewHr = canManageTeam || role === "manager";
-  const level: AccessLevel = ceo ? "ceo" : (role === "director" || role === "admin") ? "director" : role === "manager" ? "manager" : "staff";
+  // Managers handle day-to-day oversight of staff. In a small salon with no
+  // managers/directors, the owner (canSystem) is the direct oversight.
+  const canApprove = canManageTeam || role === "manager";
+  const canViewHr = canApprove;
+  const level: AccessLevel = ceo
+    ? "ceo"
+    : role === "director" || role === "admin"
+      ? "director"
+      : role === "manager"
+        ? "manager"
+        : "staff";
 
-  return { level, canSystem, canManageTeam, canViewHr };
+  return { level, canSystem, canManageTeam, canApprove, canViewHr };
 }
 
 const ROLE_OPTS = [

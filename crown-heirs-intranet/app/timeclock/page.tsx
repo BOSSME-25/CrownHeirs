@@ -39,7 +39,7 @@ export default async function TimeClockPage() {
         .where(and(eq(timeEntries.employeeId, me.id), gte(timeEntries.clockIn, weekStartInstant)))
         .orderBy(asc(timeEntries.clockIn));
     }
-    if (access.canManageTeam) {
+    if (access.canApprove) {
       roster = (await listEmployees()).map((e) => ({ id: e.id, fullName: e.fullName }));
       const rows = await db
         .select({ t: timeEntries, who: employees.fullName })
@@ -129,7 +129,7 @@ export default async function TimeClockPage() {
             </div>
 
             {/* Manager view */}
-            {access.canManageTeam && (
+            {access.canApprove && (
               <div style={{ marginTop: 36 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
                   <h2 style={{ fontFamily: "var(--font-serif)", fontWeight: 600 }}>Team hours this week</h2>
