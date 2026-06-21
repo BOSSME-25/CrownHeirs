@@ -25,13 +25,24 @@ export function adminEmails(): string[] {
     .filter(Boolean);
 }
 
-export async function sendEmail(opts: { to: string | string[]; subject: string; html: string }) {
+export async function sendEmail(opts: {
+  to: string | string[];
+  subject: string;
+  html: string;
+  attachments?: { filename: string; content: string | Buffer; contentType?: string }[];
+}) {
   const t = transporter();
   const to = Array.isArray(opts.to) ? opts.to.filter(Boolean) : [opts.to];
   if (!t || to.length === 0) return;
   const from = process.env.NOTIFY_FROM || process.env.SMTP_USER!;
   try {
-    await t.sendMail({ from, to: to.join(","), subject: opts.subject, html: opts.html });
+    await t.sendMail({
+      from,
+      to: to.join(","),
+      subject: opts.subject,
+      html: opts.html,
+      attachments: opts.attachments,
+    });
   } catch (err) {
     // Never let a failed email break the underlying action.
     console.error("Email send failed:", err);

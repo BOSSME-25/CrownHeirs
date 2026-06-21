@@ -1,12 +1,6 @@
 import { auth } from "@/auth";
 import { isAdmin } from "@/lib/access";
-import { listEmployees } from "@/lib/employees";
-import { getTeamKpis } from "@/lib/square";
-
-function csvCell(v: string | number) {
-  const s = String(v);
-  return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
-}
+import { buildTeamKpiCsv } from "@/lib/kpiReport";
 
 // Admin-only CSV download of the team performance leaderboard.
 export async function GET() {
@@ -15,41 +9,13 @@ export async function GET() {
     return new Response("Forbidden", { status: 403 });
   }
 
-  const linked = (await listEmployees())
-    .filter((e) => e.squareTeamMemberId)
-    .map((e) => ({ teamMemberId: e.squareTeamMemberId as string, name: e.fullName }));
+  const report = await buildTeamKpiCsv();
+  if (!report.ok) return new Response(report.reason, { status: 400 });
 
-  if (linked.length === 0) {
-    return new Response("No employees are linked to Square.", { status: 400 });
-  }
-
-  const team = await getTeamKpis(linked);
-  if (!team.configured) return new Response("Square not configured.", { status: 400 });
-  if ("error" in team) return new Response(`Square error: ${team.error}`, { status: 502 });
-
-  const header = ["Stylist"];
-  for (const label of team.periodLabels) {
-    header.push(`Tips (${label})`, `Clients (${label})`, `Retention (${label})`);
-  }
-
-  const lines = [header.map(csvCell).join(",")];
-  for (const row of team.rows) {
-    const cells: (string | number)[] = [row.name];
-    for (const p of row.periods) {
-      cells.push(
-        p.tips.toFixed(2),
-        p.clients,
-        p.retention === null ? "" : `${Math.round(p.retention * 100)}%`,
-      );
-    }
-    lines.push(cells.map(csvCell).join(","));
-  }
-
-  const today = new Date().toISOString().slice(0, 10);
-  return new Response(lines.join("\n"), {
+  return new Response(report.csv, {
     headers: {
       "content-type": "text/csv; charset=utf-8",
-      "content-disposition": `attachment; filename="crown-heirs-team-kpis-${today}.csv"`,
+      "content-disposition": `attachment; filename="${report.filename}"`,
     },
   });
 }
