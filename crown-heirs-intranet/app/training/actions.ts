@@ -35,6 +35,7 @@ export async function addVideo(formData: FormData) {
   const section = String(formData.get("section") ?? "").trim() || null;
   const required = formData.get("required") === "on";
   const dueDate = String(formData.get("dueDate") ?? "").trim() || null;
+  const roles = formData.getAll("roles").map(String).filter(Boolean);
   if (!title || !url) throw new Error("Title and YouTube link are required.");
 
   const youtubeId = parseYouTubeId(url);
@@ -42,7 +43,10 @@ export async function addVideo(formData: FormData) {
     throw new Error("Couldn’t read that YouTube link. Paste the full video URL.");
   }
 
-  await db.insert(trainingVideos).values({ title, youtubeId, description, section, required, dueDate });
+  await db.insert(trainingVideos).values({
+    title, youtubeId, description, section, required, dueDate,
+    requiredRoles: roles.length ? roles : null,
+  });
   revalidatePath("/training");
 }
 
@@ -52,7 +56,11 @@ export async function setRequirement(videoId: string, formData: FormData) {
   if (!isAdmin(session?.user?.email)) throw new Error("Only admins can edit videos.");
   const required = formData.get("required") === "on";
   const dueDate = String(formData.get("dueDate") ?? "").trim() || null;
-  await db.update(trainingVideos).set({ required, dueDate }).where(eq(trainingVideos.id, videoId));
+  const roles = formData.getAll("roles").map(String).filter(Boolean);
+  await db
+    .update(trainingVideos)
+    .set({ required, dueDate, requiredRoles: roles.length ? roles : null })
+    .where(eq(trainingVideos.id, videoId));
   revalidatePath("/training");
   revalidatePath(`/training/${videoId}`);
   revalidatePath("/training/dashboard");

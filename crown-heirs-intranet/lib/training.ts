@@ -165,8 +165,20 @@ export type MyRequired = {
   overdue: boolean;
 };
 
+function appliesTo(roles: string[] | null | undefined, jobTitle: string | null): boolean {
+  if (!roles || roles.length === 0) return true; // required for everyone
+  return jobTitle != null && roles.includes(jobTitle);
+}
+
 export async function myRequiredStatus(employeeId: string): Promise<MyRequired[]> {
-  const reqs = await requiredVideos();
+  const me = await db
+    .select({ jobTitle: employees.jobTitle })
+    .from(employees)
+    .where(eq(employees.id, employeeId));
+  const myTitle = me[0]?.jobTitle ?? null;
+
+  const allReqs = await requiredVideos();
+  const reqs = allReqs.filter((v) => appliesTo(v.requiredRoles, myTitle));
   const ids = reqs.map((r) => r.id);
   if (!ids.length) return [];
 
@@ -213,7 +225,7 @@ export async function requiredDashboard(): Promise<DashVideo[]> {
   if (!ids.length) return [];
 
   const roster = await db
-    .select({ id: employees.id, name: employees.fullName })
+    .select({ id: employees.id, name: employees.fullName, jobTitle: employees.jobTitle })
     .from(employees)
     .where(eq(employees.status, "active"))
     .orderBy(asc(employees.fullName));
@@ -239,12 +251,14 @@ export async function requiredDashboard(): Promise<DashVideo[]> {
   const today = todayYMD();
   return reqs.map((v) => {
     const hasQuiz = (qCount.get(v.id) ?? 0) > 0;
-    const rows = roster.map((r) => {
-      const watched = watchedSet.has(`${v.id}|${r.id}`);
-      const b = best.get(`${v.id}|${r.id}`);
-      const passed = hasQuiz ? (b ? b.score / b.total >= PASS_PCT : false) : true;
-      return { employeeId: r.id, name: r.name, complete: watched && passed };
-    });
+    const rows = roster
+      .filter((r) => appliesTo(v.requiredRoles, r.jobTitle))
+      .map((r) => {
+        const watched = watchedSet.has(`${v.id}|${r.id}`);
+        const b = best.get(`${v.id}|${r.id}`);
+        const passed = hasQuiz ? (b ? b.score / b.total >= PASS_PCT : false) : true;
+        return { employeeId: r.id, name: r.name, complete: watched && passed };
+      });
     const completeCount = rows.filter((r) => r.complete).length;
     const overdue = !!v.dueDate && v.dueDate < today && completeCount < rows.length;
     return { video: v, rows, completeCount, total: rows.length, overdue };

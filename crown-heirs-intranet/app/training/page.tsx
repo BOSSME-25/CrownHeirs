@@ -6,7 +6,7 @@ import DocumentList from "@/components/DocumentList";
 import VideoDeleteButton from "@/components/VideoDeleteButton";
 import { addVideo, updateVideoSection } from "@/app/training/actions";
 import { listVideos, myRequiredStatus, type MyRequired } from "@/lib/training";
-import { getEmployeeByEmail } from "@/lib/employees";
+import { getEmployeeByEmail, jobTitles } from "@/lib/employees";
 import type { TrainingVideo } from "@/lib/db/schema";
 
 export const dynamic = "force-dynamic";
@@ -26,11 +26,13 @@ export default async function TrainingPage() {
 
   let videos: TrainingVideo[] = [];
   let myReq: MyRequired[] = [];
+  let titles: string[] = [];
   let setupNeeded = false;
   try {
     videos = await listVideos();
     const employee = session?.user?.email ? await getEmployeeByEmail(session.user.email) : undefined;
     if (employee) myReq = await myRequiredStatus(employee.id);
+    if (admin) titles = await jobTitles();
   } catch {
     setupNeeded = true;
   }
@@ -145,6 +147,19 @@ export default async function TrainingPage() {
                 <input id="dueDate" name="dueDate" type="date" />
               </div>
             </div>
+            {titles.length > 0 && (
+              <div className="field">
+                <label>Required for (leave unchecked = everyone)</label>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "6px 16px", marginTop: 4 }}>
+                  {titles.map((t) => (
+                    <label key={t} style={{ display: "flex", alignItems: "center", gap: 6, fontWeight: 300 }}>
+                      <input type="checkbox" name="roles" value={t} />
+                      {t}
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
             <button className="btn" type="submit">Add video</button>
           </form>
         )}
@@ -176,7 +191,7 @@ export default async function TrainingPage() {
                       <h3>{v.title}</h3>
                       {v.required && (
                         <span className="status-badge pending" style={{ marginBottom: 6, display: "inline-block" }}>
-                          Required{v.dueDate ? ` · due ${fmtDate(v.dueDate)}` : ""}
+                          Required{v.requiredRoles && v.requiredRoles.length ? `: ${v.requiredRoles.join(", ")}` : ""}{v.dueDate ? ` · due ${fmtDate(v.dueDate)}` : ""}
                         </span>
                       )}
                       {v.description && <p>{v.description}</p>}

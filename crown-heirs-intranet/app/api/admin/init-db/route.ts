@@ -104,6 +104,7 @@ export async function POST() {
     await sql`ALTER TABLE training_videos ADD COLUMN IF NOT EXISTS section text`;
     await sql`ALTER TABLE training_videos ADD COLUMN IF NOT EXISTS required boolean NOT NULL DEFAULT false`;
     await sql`ALTER TABLE training_videos ADD COLUMN IF NOT EXISTS due_date date`;
+    await sql`ALTER TABLE training_videos ADD COLUMN IF NOT EXISTS required_roles jsonb`;
     await sql`
       CREATE TABLE IF NOT EXISTS video_views (
         id uuid PRIMARY KEY DEFAULT gen_random_uuid(),

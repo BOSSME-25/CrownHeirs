@@ -5,7 +5,7 @@ import { isAdmin } from "@/lib/access";
 import SiteHeader from "@/components/SiteHeader";
 import DeleteQuestionButton from "@/components/DeleteQuestionButton";
 import { addQuestion, markWatched, setRequirement, submitQuiz } from "@/app/training/actions";
-import { getEmployeeByEmail } from "@/lib/employees";
+import { getEmployeeByEmail, jobTitles } from "@/lib/employees";
 import {
   PASS_PCT,
   getVideo,
@@ -36,6 +36,7 @@ export default async function VideoDetailPage({
   const watched = employee ? await hasWatched(id, employee.id) : false;
   const attempt = employee ? await lastAttempt(id, employee.id) : undefined;
   const viewers = admin ? await viewerStatuses(id) : [];
+  const titles = admin ? await jobTitles() : [];
 
   return (
     <>
@@ -118,6 +119,19 @@ export default async function VideoDetailPage({
                   <input id="dueDate" name="dueDate" type="date" defaultValue={video.dueDate ?? ""} />
                 </div>
               </div>
+              {titles.length > 0 && (
+                <div className="field">
+                  <label>Required for (leave all unchecked = everyone)</label>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "6px 16px", marginTop: 4 }}>
+                    {titles.map((t) => (
+                      <label key={t} style={{ display: "flex", alignItems: "center", gap: 6, fontWeight: 300 }}>
+                        <input type="checkbox" name="roles" value={t} defaultChecked={video.requiredRoles?.includes(t) ?? false} />
+                        {t}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
               <button className="btn btn-ghost" type="submit">Save requirement</button>
             </form>
           </div>

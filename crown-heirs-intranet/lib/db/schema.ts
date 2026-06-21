@@ -144,6 +144,8 @@ export const trainingVideos = pgTable("training_videos", {
   section: text("section"),
   required: boolean("required").notNull().default(false),
   dueDate: date("due_date"),
+  // Job titles this is required for. Empty/null = required for everyone.
+  requiredRoles: jsonb("required_roles").$type<string[]>(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });
 

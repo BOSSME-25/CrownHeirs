@@ -20,6 +20,17 @@ export async function getEmployeeByEmail(email: string): Promise<Employee | unde
   return rows[0];
 }
 
+// Distinct job titles among active staff (for targeting required training).
+export async function jobTitles(): Promise<string[]> {
+  const rows = await db
+    .select({ t: employees.jobTitle })
+    .from(employees)
+    .where(eq(employees.status, "active"));
+  const set = new Set<string>();
+  for (const r of rows) if (r.t && r.t.trim()) set.add(r.t.trim());
+  return [...set].sort();
+}
+
 export const EMPLOYMENT_TYPES = [
   { value: "full_time", label: "Full-time" },
   { value: "part_time", label: "Part-time" },
