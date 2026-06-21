@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import SiteHeader from "@/components/SiteHeader";
 import AdminPanel from "@/components/AdminPanel";
+import InitDbButton from "@/components/InitDbButton";
 
 export const metadata = { title: "Admin — Crown Heirs Team Hub" };
 
@@ -22,6 +23,7 @@ export default async function AdminPage() {
             so each file shows up in the right section for the team.
           </p>
         </div>
+        <InitDbButton />
         <AdminPanel />
       </main>
     </>

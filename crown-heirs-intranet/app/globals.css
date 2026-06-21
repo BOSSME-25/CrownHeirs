@@ -166,11 +166,19 @@ h1.title {
 /* ─── Forms ─── */
 .field { margin-bottom: 18px; }
 .field label { display: block; font-size: 0.82rem; color: var(--ink-mid); margin-bottom: 7px; letter-spacing: 0.03em; }
-.field select, .field input[type="file"] {
+.field select, .field input[type="file"],
+.field input[type="text"], .field input[type="email"],
+.field input[type="number"], .field input[type="date"],
+.field input:not([type]), .field textarea {
   width: 100%; padding: 11px 14px; border: 1px solid var(--border-mid);
   border-radius: var(--r-m); background: var(--surface); font-family: var(--font-ui);
   font-size: 0.92rem; color: var(--ink);
 }
+.field textarea { resize: vertical; }
+
+/* Two-column form layout for the employee form */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 22px; }
+@media(max-width:620px){ .form-grid { grid-template-columns: 1fr; } }
 
 /* ─── Notices ─── */
 .notice {
