@@ -26,6 +26,22 @@ Running list of features to build later. Not in priority order.
 - **Likely needs Square integration** (sales, services, tips, etc.).
 - Will need to scope which KPIs matter and Square API/auth setup.
 
+### Team communication
+- **Messaging between team members** — direct (1:1) and likely group/channels.
+- **Virtual meetings** — ability to hold a video meeting. Easiest path is
+  generating a **Google Meet** link (ties into the calendar Meetings feature)
+  rather than building video from scratch.
+
+### Meeting notes
+- Upload/store **team meeting notes** (from all-staff meetings).
+- Store **1:1 meeting notes** between management and an individual employee.
+  - These are sensitive: visible only to **management + that employee**,
+    not the whole team.
+
+### Virtual suggestion box
+- A place for staff to submit suggestions to management.
+- Consider an **anonymous** submission option.
+
 ## Earlier ideas still open
 - **Google Calendar sync** — published shifts appear in staff Google Calendars.
 - **Email notifications** — schedule published, time-off/swap decisions, etc.
