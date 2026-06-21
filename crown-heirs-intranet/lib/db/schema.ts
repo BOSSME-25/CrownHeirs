@@ -123,3 +123,17 @@ export const swapRequests = pgTable("swap_requests", {
 });
 
 export type SwapRequest = typeof swapRequests.$inferSelect;
+
+// ───────────────────────────────────────────────
+// Training videos — embedded YouTube videos for the
+// Training section (and a future education platform).
+// ───────────────────────────────────────────────
+export const trainingVideos = pgTable("training_videos", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  title: text("title").notNull(),
+  youtubeId: text("youtube_id").notNull(),
+  description: text("description"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+
+export type TrainingVideo = typeof trainingVideos.$inferSelect;

@@ -86,6 +86,15 @@ export async function POST() {
         created_at timestamptz DEFAULT now()
       )
     `;
+    await sql`
+      CREATE TABLE IF NOT EXISTS training_videos (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        title text NOT NULL,
+        youtube_id text NOT NULL,
+        description text,
+        created_at timestamptz DEFAULT now()
+      )
+    `;
     return Response.json({ ok: true });
   } catch (err) {
     return Response.json(

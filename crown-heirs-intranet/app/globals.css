@@ -176,6 +176,15 @@ h1.title {
 }
 .field textarea { resize: vertical; }
 
+/* ─── Training videos ─── */
+.video-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
+.video-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-l); overflow: hidden; }
+.video-frame { position: relative; width: 100%; aspect-ratio: 16 / 9; background: #000; }
+.video-frame iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.video-meta { padding: 16px 18px; }
+.video-meta h3 { font-family: var(--font-serif); font-weight: 600; font-size: 1.2rem; margin-bottom: 6px; }
+.video-meta p { color: var(--ink-dim); font-size: 0.9rem; line-height: 1.5; }
+
 /* Avatars */
 .avatar { border-radius: 50%; object-fit: cover; display: block; flex: 0 0 auto; border: 1px solid var(--border); }
 .avatar-fallback { display: grid; place-items: center; background: var(--terra-lo); color: #fff; font-family: var(--font-ui); font-weight: 400; letter-spacing: 0.02em; }
