@@ -23,11 +23,13 @@ export default function EmployeeForm({
   action,
   employee,
   squareTeamMembers,
+  locations,
   roleOptions = ROLES,
 }: {
   action: (formData: FormData) => void;
   employee?: Employee;
   squareTeamMembers?: { id: string; name: string }[];
+  locations?: { id: string; name: string }[];
   roleOptions?: { value: string; label: string }[];
 }) {
   const e = employee;
@@ -81,6 +83,15 @@ export default function EmployeeForm({
             <Options list={STATUSES} />
           </select>
         </div>
+        {locations && locations.length > 0 && (
+          <div className="field">
+            <label htmlFor="locationId">Home location</label>
+            <select id="locationId" name="locationId" defaultValue={e?.locationId ?? ""}>
+              <option value="">—</option>
+              <Options list={locations.map((l) => ({ value: l.id, label: l.name }))} />
+            </select>
+          </div>
+        )}
         <div className="field">
           <label htmlFor="startDate">Start date</label>
           <input id="startDate" name="startDate" type="date" defaultValue={e?.startDate ?? ""} />

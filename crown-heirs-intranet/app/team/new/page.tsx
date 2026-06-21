@@ -5,6 +5,7 @@ import SiteHeader from "@/components/SiteHeader";
 import EmployeeForm from "@/components/EmployeeForm";
 import { createEmployee } from "@/app/team/actions";
 import { listTeamMembers } from "@/lib/square";
+import { listLocations } from "@/lib/org";
 
 export const metadata = { title: "Add team member — Crown Heirs Team Hub" };
 
@@ -14,6 +15,7 @@ export default async function NewEmployeePage() {
   if (!access.canManageTeam) redirect("/team");
 
   const squareTeamMembers = access.canSystem ? await listTeamMembers() : undefined;
+  const locations = await listLocations();
 
   return (
     <>
@@ -23,7 +25,7 @@ export default async function NewEmployeePage() {
           <div className="eyebrow">Team</div>
           <h1 className="title">Add a team member</h1>
         </div>
-        <EmployeeForm action={createEmployee} squareTeamMembers={squareTeamMembers} roleOptions={assignableRoles(access.canSystem)} />
+        <EmployeeForm action={createEmployee} squareTeamMembers={squareTeamMembers} locations={locations} roleOptions={assignableRoles(access.canSystem)} />
       </main>
     </>
   );

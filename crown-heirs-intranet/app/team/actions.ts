@@ -11,6 +11,7 @@ import { getAccess } from "@/lib/perms";
 import { db } from "@/lib/db";
 import { employees } from "@/lib/db/schema";
 import { listTeamMembers } from "@/lib/square";
+import { getDefaultOrg } from "@/lib/org";
 
 const IMAGE_EXT = [".png", ".jpg", ".jpeg", ".webp", ".gif"];
 
@@ -78,6 +79,7 @@ function readForm(formData: FormData) {
   return {
     email: (get("email") ?? "").toLowerCase(),
     personalEmail: get("personalEmail"),
+    locationId: get("locationId"),
     fullName: get("fullName") ?? "",
     phone: get("phone"),
     birthday: get("birthday"),
@@ -107,7 +109,8 @@ export async function createEmployee(formData: FormData) {
   }
   guardDirectorScope(access, { newRole: data.role });
   const photoUrl = await uploadPhoto(formData);
-  await db.insert(employees).values({ ...data, photoUrl: photoUrl ?? null });
+  const org = await getDefaultOrg();
+  await db.insert(employees).values({ ...data, orgId: org?.id ?? null, photoUrl: photoUrl ?? null });
   revalidatePath("/team");
   redirect(`/team?ok=${encodeURIComponent("Team member added")}`);
 }
@@ -157,6 +160,7 @@ export async function importFromSquare() {
     redirect(`/team?ok=${encodeURIComponent("No Square team members found — check the Square connection/permissions.")}`);
   }
 
+  const org = await getDefaultOrg();
   const existing = await db.select().from(employees);
   const bySquare = new Set(existing.filter((e) => e.squareTeamMemberId).map((e) => e.squareTeamMemberId));
   const byName = new Map(
@@ -182,6 +186,7 @@ export async function importFromSquare() {
       linked += 1;
     } else {
       await db.insert(employees).values({
+        orgId: org?.id ?? null,
         fullName: m.name,
         email: `pending-${m.id}@crownheirs.invalid`,
         personalEmail: m.email,
@@ -270,6 +275,7 @@ export async function importFromHomebaseCsv(formData: FormData) {
   };
   const get = (r: string[], i: number) => (i >= 0 ? (r[i] ?? "").trim() : "");
 
+  const org = await getDefaultOrg();
   const existing = await db.select().from(employees);
   const byName = new Map(existing.map((e) => [e.fullName.trim().toLowerCase(), e.id]));
 
@@ -308,6 +314,7 @@ export async function importFromHomebaseCsv(formData: FormData) {
       updated++;
     } else {
       await db.insert(employees).values({
+        orgId: org?.id ?? null,
         fullName: full,
         email: `pending-${randomUUID()}@crownheirs.invalid`,
         role: "staff",

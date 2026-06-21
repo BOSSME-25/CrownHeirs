@@ -13,6 +13,44 @@ export async function POST() {
 
   try {
     await sql`CREATE EXTENSION IF NOT EXISTS pgcrypto`;
+
+    // ── Multi-tenant foundation ──
+    await sql`
+      CREATE TABLE IF NOT EXISTS organizations (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        name text NOT NULL,
+        slug text NOT NULL UNIQUE,
+        status text NOT NULL DEFAULT 'active',
+        settings jsonb,
+        created_at timestamptz DEFAULT now()
+      )
+    `;
+    await sql`
+      CREATE TABLE IF NOT EXISTS locations (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        org_id uuid NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+        name text NOT NULL,
+        square_location_id text,
+        timezone text DEFAULT 'America/Phoenix',
+        address text,
+        active boolean NOT NULL DEFAULT true,
+        created_at timestamptz DEFAULT now()
+      )
+    `;
+    // Seed Crown Heirs as org #1 + a default location, once.
+    await sql`
+      INSERT INTO organizations (name, slug)
+      SELECT 'Crown Heirs', 'crown-heirs'
+      WHERE NOT EXISTS (SELECT 1 FROM organizations)
+    `;
+    await sql`
+      INSERT INTO locations (org_id, name)
+      SELECT o.id, 'Main'
+      FROM organizations o
+      WHERE o.slug = 'crown-heirs'
+        AND NOT EXISTS (SELECT 1 FROM locations WHERE org_id = o.id)
+    `;
+
     await sql`
       CREATE TABLE IF NOT EXISTS employees (
         id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -44,6 +82,8 @@ export async function POST() {
     await sql`ALTER TABLE employees ADD COLUMN IF NOT EXISTS calendar_token text`;
     await sql`ALTER TABLE employees ADD COLUMN IF NOT EXISTS square_team_member_id text`;
     await sql`ALTER TABLE employees ADD COLUMN IF NOT EXISTS personal_email text`;
+    await sql`ALTER TABLE employees ADD COLUMN IF NOT EXISTS org_id uuid`;
+    await sql`ALTER TABLE employees ADD COLUMN IF NOT EXISTS location_id uuid`;
     await sql`
       CREATE TABLE IF NOT EXISTS shifts (
         id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -57,6 +97,8 @@ export async function POST() {
         created_at timestamptz DEFAULT now()
       )
     `;
+    await sql`ALTER TABLE shifts ADD COLUMN IF NOT EXISTS org_id uuid`;
+    await sql`ALTER TABLE shifts ADD COLUMN IF NOT EXISTS location_id uuid`;
     await sql`
       CREATE TABLE IF NOT EXISTS shift_duties (
         id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -150,6 +192,8 @@ export async function POST() {
       )
     `;
     await sql`ALTER TABLE meetings ADD COLUMN IF NOT EXISTS meeting_url text`;
+    await sql`ALTER TABLE meetings ADD COLUMN IF NOT EXISTS org_id uuid`;
+    await sql`ALTER TABLE meetings ADD COLUMN IF NOT EXISTS location_id uuid`;
     await sql`
       CREATE TABLE IF NOT EXISTS suggestions (
         id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -183,6 +227,23 @@ export async function POST() {
         created_at timestamptz DEFAULT now()
       )
     `;
+
+    // Backfill existing rows to Crown Heirs org + Main location.
+    const [{ id: orgId } = { id: null }] = (await sql`
+      SELECT id FROM organizations WHERE slug = 'crown-heirs' LIMIT 1
+    `) as { id: string | null }[];
+    if (orgId) {
+      const [{ id: locId } = { id: null }] = (await sql`
+        SELECT id FROM locations WHERE org_id = ${orgId} ORDER BY created_at LIMIT 1
+      `) as { id: string | null }[];
+      await sql`UPDATE employees SET org_id = ${orgId} WHERE org_id IS NULL`;
+      await sql`UPDATE shifts SET org_id = ${orgId} WHERE org_id IS NULL`;
+      await sql`UPDATE meetings SET org_id = ${orgId} WHERE org_id IS NULL`;
+      if (locId) {
+        await sql`UPDATE employees SET location_id = ${locId} WHERE location_id IS NULL`;
+      }
+    }
+
     return Response.json({ ok: true });
   } catch (err) {
     return Response.json(

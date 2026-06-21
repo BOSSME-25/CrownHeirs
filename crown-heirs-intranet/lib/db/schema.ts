@@ -11,11 +11,50 @@ import {
 } from "drizzle-orm/pg-core";
 
 // ───────────────────────────────────────────────
+// Organizations — the top-level tenant. Each salon
+// business that licenses the platform is one org.
+// (Crown Heirs is org #1.)
+// ───────────────────────────────────────────────
+export const organizations = pgTable("organizations", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  name: text("name").notNull(),
+  slug: text("slug").notNull().unique(),
+  // 'trial' | 'active' | 'suspended'
+  status: text("status").notNull().default("active"),
+  // Per-tenant config (Square creds, branding, etc.) lands here in Phase 2.
+  settings: jsonb("settings"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+
+// ───────────────────────────────────────────────
+// Locations — a physical salon within an org. Used
+// to scope schedules, staff, and KPIs per site.
+// ───────────────────────────────────────────────
+export const locations = pgTable("locations", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  orgId: uuid("org_id")
+    .notNull()
+    .references(() => organizations.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  squareLocationId: text("square_location_id"),
+  timezone: text("timezone").default("America/Phoenix"),
+  address: text("address"),
+  active: boolean("active").notNull().default(true),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+
+export type Organization = typeof organizations.$inferSelect;
+export type Location = typeof locations.$inferSelect;
+
+// ───────────────────────────────────────────────
 // Employees — the team roster. Everything else
 // (schedules, time clock, time-off) hangs off this.
 // ───────────────────────────────────────────────
 export const employees = pgTable("employees", {
   id: uuid("id").defaultRandom().primaryKey(),
+  // Tenant + home location (nullable during rollout; backfilled to org #1).
+  orgId: uuid("org_id"),
+  locationId: uuid("location_id"),
   // Links to the person's Google login email.
   email: text("email").notNull().unique(),
   // Personal email (from Homebase/Square import); not the login.
@@ -61,6 +100,8 @@ export type NewEmployee = typeof employees.$inferInsert;
 // ───────────────────────────────────────────────
 export const shifts = pgTable("shifts", {
   id: uuid("id").defaultRandom().primaryKey(),
+  orgId: uuid("org_id"),
+  locationId: uuid("location_id"),
   employeeId: uuid("employee_id")
     .notNull()
     .references(() => employees.id, { onDelete: "cascade" }),
@@ -204,6 +245,8 @@ export type QuizAttempt = typeof quizAttempts.$inferSelect;
 // ───────────────────────────────────────────────
 export const meetings = pgTable("meetings", {
   id: uuid("id").defaultRandom().primaryKey(),
+  orgId: uuid("org_id"),
+  locationId: uuid("location_id"),
   title: text("title").notNull(),
   meetingDate: date("meeting_date").notNull(),
   startTime: text("start_time"), // "HH:MM"

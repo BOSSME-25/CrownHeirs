@@ -30,6 +30,11 @@ export default async function AdminPage() {
             <p>Salon-wide sales, tips, transaction count, and average ticket from Square. Admins only.</p>
             <span className="badge">View KPIs →</span>
           </Link>
+          <Link href="/admin/locations" className="card">
+            <h3>Locations</h3>
+            <p>Manage the salon locations staff, schedules, and KPIs are scoped to.</p>
+            <span className="badge">Manage locations →</span>
+          </Link>
         </div>
         <InitDbButton />
         <AdminPanel />

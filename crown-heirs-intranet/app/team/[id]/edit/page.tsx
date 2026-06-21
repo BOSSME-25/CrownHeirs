@@ -6,6 +6,7 @@ import EmployeeForm from "@/components/EmployeeForm";
 import { getEmployee } from "@/lib/employees";
 import { updateEmployee } from "@/app/team/actions";
 import { listTeamMembers } from "@/lib/square";
+import { listLocations } from "@/lib/org";
 
 export const metadata = { title: "Edit team member — Crown Heirs Team Hub" };
 
@@ -24,6 +25,7 @@ export default async function EditEmployeePage({
 
   const action = updateEmployee.bind(null, id);
   const squareTeamMembers = access.canSystem ? await listTeamMembers() : undefined;
+  const locations = await listLocations();
 
   return (
     <>
@@ -33,7 +35,7 @@ export default async function EditEmployeePage({
           <div className="eyebrow">Team</div>
           <h1 className="title">Edit {employee.fullName}</h1>
         </div>
-        <EmployeeForm action={action} employee={employee} squareTeamMembers={squareTeamMembers} roleOptions={assignableRoles(access.canSystem)} />
+        <EmployeeForm action={action} employee={employee} squareTeamMembers={squareTeamMembers} locations={locations} roleOptions={assignableRoles(access.canSystem)} />
       </main>
     </>
   );
