@@ -83,6 +83,24 @@ a { color: inherit; }
 }
 .site-nav a:hover { color: var(--terra); }
 .site-nav .who { color: var(--ink-faint); font-size: 0.74rem; }
+
+/* Grouped dropdown navigation */
+.nav-group { position: relative; display: flex; align-items: center; height: 64px; }
+.nav-top, .nav-top-link {
+  font-family: var(--font-ui); font-size: 0.82rem; font-weight: 400;
+  color: var(--ink-mid); letter-spacing: 0.04em; background: none; border: none;
+  cursor: pointer; padding: 0; text-decoration: none; transition: color 0.2s;
+}
+.nav-top:hover, .nav-top-link:hover, .nav-group:hover .nav-top { color: var(--terra); }
+.nav-menu {
+  position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-m);
+  box-shadow: 0 12px 30px rgba(26,24,22,0.12); padding: 8px; min-width: 190px;
+  display: none; flex-direction: column; gap: 2px; z-index: 250;
+}
+.nav-group:hover .nav-menu, .nav-group:focus-within .nav-menu { display: flex; }
+.nav-menu a { padding: 9px 12px; border-radius: var(--r-s); white-space: nowrap; font-size: 0.84rem; }
+.nav-menu a:hover { background: var(--surface-dim); color: var(--terra); }
 .btn-link {
   background: none; border: 1px solid var(--border-mid);
   color: var(--ink-mid); cursor: pointer;

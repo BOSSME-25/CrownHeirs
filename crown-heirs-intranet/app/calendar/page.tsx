@@ -43,7 +43,7 @@ export default async function CalendarPage() {
         <div className="page-head">
           <div className="eyebrow">Calendar</div>
           <h1 className="title">What’s Coming Up</h1>
-          <p className="lede">Team meetings and birthdays for the next 60 days.</p>
+          <p className="lede">Meetings, birthdays, and who’s off — for the next 60 days.</p>
         </div>
 
         {admin && !setupNeeded && (
@@ -95,7 +95,7 @@ export default async function CalendarPage() {
                   </div>
                   <div className="cal-body">
                     <div className="cal-title">
-                      <span className="cal-ico">{it.kind === "birthday" ? "🎂" : "📅"}</span> {it.title}
+                      <span className="cal-ico">{it.kind === "birthday" ? "🎂" : it.kind === "timeoff" ? "🌴" : "📅"}</span> {it.title}
                     </div>
                     <div className="cal-meta">
                       {p.dow}

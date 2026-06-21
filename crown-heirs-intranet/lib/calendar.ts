@@ -1,11 +1,11 @@
 import "server-only";
 import { and, asc, eq, gte, lte } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { employees, meetings } from "@/lib/db/schema";
+import { employees, meetings, timeOffRequests } from "@/lib/db/schema";
 import type { Meeting } from "@/lib/db/schema";
 
 export type CalendarItem = {
-  kind: "meeting" | "birthday";
+  kind: "meeting" | "birthday" | "timeoff";
   date: string; // YYYY-MM-DD (this year's occurrence for birthdays)
   title: string;
   time?: string | null;
@@ -16,6 +16,12 @@ export type CalendarItem = {
 
 function ymd(d: Date) {
   return d.toISOString().slice(0, 10);
+}
+
+function fmtShort(ymdStr: string) {
+  return new Date(ymdStr + "T00:00:00Z").toLocaleDateString("en-US", {
+    timeZone: "UTC", month: "short", day: "numeric",
+  });
 }
 
 /** Meetings + birthdays in the next `days` days, sorted chronologically. */
@@ -55,6 +61,34 @@ export async function upcomingEvents(days = 60): Promise<CalendarItem[]> {
     if (occ >= todayY && occ <= endY) {
       items.push({ kind: "birthday", date: occ, title: `${e.name}’s birthday` });
     }
+  }
+
+  // Approved time off whose range overlaps the window.
+  const offs = await db
+    .select({
+      name: employees.fullName,
+      start: timeOffRequests.startDate,
+      end: timeOffRequests.endDate,
+    })
+    .from(timeOffRequests)
+    .innerJoin(employees, eq(timeOffRequests.employeeId, employees.id))
+    .where(
+      and(
+        eq(timeOffRequests.status, "approved"),
+        lte(timeOffRequests.startDate, endY),
+        gte(timeOffRequests.endDate, todayY),
+      ),
+    );
+  for (const o of offs) {
+    const showDate = o.start >= todayY ? o.start : todayY;
+    const range =
+      o.start === o.end ? fmtShort(o.start) : `${fmtShort(o.start)} – ${fmtShort(o.end)}`;
+    items.push({
+      kind: "timeoff",
+      date: showDate,
+      title: `${o.name} off`,
+      notes: range,
+    });
   }
 
   items.sort((a, b) =>
