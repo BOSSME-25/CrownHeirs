@@ -242,3 +242,21 @@ export const meetingNotes = pgTable("meeting_notes", {
 });
 
 export type MeetingNote = typeof meetingNotes.$inferSelect;
+
+// ───────────────────────────────────────────────
+// Direct messages between two team members.
+// ───────────────────────────────────────────────
+export const messages = pgTable("messages", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  senderId: uuid("sender_id")
+    .notNull()
+    .references(() => employees.id, { onDelete: "cascade" }),
+  recipientId: uuid("recipient_id")
+    .notNull()
+    .references(() => employees.id, { onDelete: "cascade" }),
+  body: text("body").notNull(),
+  readAt: timestamp("read_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+
+export type Message = typeof messages.$inferSelect;

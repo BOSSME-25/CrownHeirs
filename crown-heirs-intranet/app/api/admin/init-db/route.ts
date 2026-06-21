@@ -170,6 +170,16 @@ export async function POST() {
         created_at timestamptz DEFAULT now()
       )
     `;
+    await sql`
+      CREATE TABLE IF NOT EXISTS messages (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        sender_id uuid NOT NULL REFERENCES employees(id) ON DELETE CASCADE,
+        recipient_id uuid NOT NULL REFERENCES employees(id) ON DELETE CASCADE,
+        body text NOT NULL,
+        read_at timestamptz,
+        created_at timestamptz DEFAULT now()
+      )
+    `;
     return Response.json({ ok: true });
   } catch (err) {
     return Response.json(

@@ -79,6 +79,11 @@ export default async function Home() {
             <p>The staff roster — names, roles, contact info, and start dates.</p>
             <span className="badge">View team →</span>
           </Link>
+          <Link href="/messages" className="card">
+            <h3>Messages</h3>
+            <p>Direct messages with your teammates.</p>
+            <span className="badge">Open messages →</span>
+          </Link>
           <Link href="/handbook" className="card">
             <h3>Employee Handbook</h3>
             <p>Who we are, how we work, expectations, schedules, pay, and benefits.</p>

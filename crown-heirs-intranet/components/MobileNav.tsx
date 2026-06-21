@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { signOutAction } from "@/app/signout-action";
 
-export default function MobileNav({ isAdmin, email }: { isAdmin?: boolean; email?: string | null }) {
+export default function MobileNav({ isAdmin, email, unread = 0 }: { isAdmin?: boolean; email?: string | null; unread?: number }) {
   const [open, setOpen] = useState(false);
   const close = () => setOpen(false);
 
@@ -26,6 +26,7 @@ export default function MobileNav({ isAdmin, email }: { isAdmin?: boolean; email
 
           <div className="m-group">Team</div>
           <Link href="/team">Directory</Link>
+          <Link href="/messages">Messages{unread > 0 ? ` (${unread})` : ""}</Link>
           <Link href="/notes">Meeting Notes</Link>
           <Link href="/suggestions">Suggestion Box</Link>
 

@@ -255,6 +255,24 @@ h1.title {
 .meeting-banner { background: var(--terra); color: #fff; border-radius: var(--r-m); padding: 14px 20px; margin-bottom: 22px; display: flex; align-items: center; gap: 12px; }
 .meeting-banner a { color: #fff; text-decoration: underline; }
 
+/* ─── Messaging ─── */
+.msg-conv-list { display: flex; flex-direction: column; gap: 8px; }
+.msg-conv { display: flex; align-items: center; gap: 14px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-m); padding: 12px 16px; text-decoration: none; color: inherit; }
+.msg-conv:hover { border-color: var(--terra-lo); }
+.msg-conv-body { flex: 1; min-width: 0; }
+.msg-conv-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.msg-conv-name { color: var(--ink); font-weight: 400; }
+.msg-conv-preview { color: var(--ink-dim); font-size: 0.86rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.msg-badge { background: var(--terra); color: #fff; font-size: 0.72rem; border-radius: var(--r-pill); padding: 1px 9px; flex: 0 0 auto; }
+.msg-thread { display: flex; flex-direction: column; gap: 8px; margin-bottom: 18px; }
+.msg-bubble { max-width: 78%; padding: 10px 14px; border-radius: var(--r-l); }
+.msg-bubble.mine { align-self: flex-end; background: var(--terra); color: #fff; }
+.msg-bubble.theirs { align-self: flex-start; background: var(--surface); border: 1px solid var(--border); }
+.msg-text { white-space: pre-wrap; line-height: 1.4; }
+.msg-time { font-size: 0.68rem; opacity: 0.7; margin-top: 4px; }
+.msg-form { display: flex; gap: 10px; position: sticky; bottom: 16px; }
+.msg-form input { flex: 1; padding: 12px 16px; border: 1px solid var(--border-mid); border-radius: var(--r-pill); font-family: var(--font-ui); font-size: 0.95rem; background: var(--surface); }
+
 @media print {
   .no-print { display: none !important; }
   body { background: #fff; }
