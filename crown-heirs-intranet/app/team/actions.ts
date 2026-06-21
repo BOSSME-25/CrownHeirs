@@ -8,6 +8,7 @@ import { auth } from "@/auth";
 import { isAdmin } from "@/lib/access";
 import { db } from "@/lib/db";
 import { employees } from "@/lib/db/schema";
+import { listTeamMembers } from "@/lib/square";
 
 const IMAGE_EXT = [".png", ".jpg", ".jpeg", ".webp", ".gif"];
 
@@ -102,4 +103,49 @@ export async function deleteEmployee(id: string) {
   await db.delete(employees).where(eq(employees.id, id));
   revalidatePath("/team");
   redirect(`/team?ok=${encodeURIComponent("Team member removed")}`);
+}
+
+// Seed the roster from Square team members. Matches existing people by name
+// (linking them), otherwise creates a new record with a placeholder email
+// that an admin replaces later with the person's real Google login.
+export async function importFromSquare() {
+  await requireAdmin();
+  const members = await listTeamMembers();
+  if (members.length === 0) {
+    redirect(`/team?ok=${encodeURIComponent("No Square team members found — check the Square connection/permissions.")}`);
+  }
+
+  const existing = await db.select().from(employees);
+  const bySquare = new Set(existing.filter((e) => e.squareTeamMemberId).map((e) => e.squareTeamMemberId));
+  const byName = new Map(
+    existing.filter((e) => !e.squareTeamMemberId).map((e) => [e.fullName.trim().toLowerCase(), e.id]),
+  );
+
+  let added = 0;
+  let linked = 0;
+  for (const m of members) {
+    if (bySquare.has(m.id)) continue;
+    const key = m.name.trim().toLowerCase();
+    const matchId = byName.get(key);
+    if (matchId) {
+      await db.update(employees).set({ squareTeamMemberId: m.id }).where(eq(employees.id, matchId));
+      byName.delete(key);
+      linked += 1;
+    } else {
+      await db.insert(employees).values({
+        fullName: m.name,
+        email: `pending-${m.id}@crownheirs.invalid`,
+        squareTeamMemberId: m.id,
+        role: "staff",
+        status: "active",
+      });
+      added += 1;
+    }
+    bySquare.add(m.id);
+  }
+
+  revalidatePath("/team");
+  redirect(
+    `/team?ok=${encodeURIComponent(`Square import complete — ${added} added, ${linked} linked. Add their emails via Edit.`)}`,
+  );
 }

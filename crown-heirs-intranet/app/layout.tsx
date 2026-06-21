@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import FlashToast from "@/components/FlashToast";
+import MessagesDock from "@/components/MessagesDock";
 
 export const metadata: Metadata = {
   title: "Crown Heirs — Team Hub",
@@ -22,6 +23,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <FlashToast />
         {children}
+        <MessagesDock />
       </body>
     </html>
   );

@@ -5,6 +5,7 @@ import SiteHeader from "@/components/SiteHeader";
 import Avatar from "@/components/Avatar";
 import DeleteEmployeeButton from "@/components/DeleteEmployeeButton";
 import { listEmployees, labelFor, EMPLOYMENT_TYPES, ROLES } from "@/lib/employees";
+import { importFromSquare } from "@/app/team/actions";
 import type { Employee } from "@/lib/db/schema";
 
 export const dynamic = "force-dynamic";
@@ -34,7 +35,12 @@ export default async function TeamPage() {
             <p className="lede">Everyone on the roster. {admin && "As an admin, you can add and edit team members."}</p>
           </div>
           {admin && !setupNeeded && (
-            <Link className="btn" href="/team/new">+ Add team member</Link>
+            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+              <form action={importFromSquare}>
+                <button className="btn btn-ghost" type="submit">⇪ Import from Square</button>
+              </form>
+              <Link className="btn" href="/team/new">+ Add team member</Link>
+            </div>
           )}
         </div>
 
