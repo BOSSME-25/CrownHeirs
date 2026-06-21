@@ -221,3 +221,22 @@ export const suggestions = pgTable("suggestions", {
 });
 
 export type Suggestion = typeof suggestions.$inferSelect;
+
+// ───────────────────────────────────────────────
+// Meeting notes — team-meeting notes (visible to all)
+// and 1:1 notes (visible to management + that employee).
+// ───────────────────────────────────────────────
+export const meetingNotes = pgTable("meeting_notes", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  kind: text("kind").notNull().default("team"), // 'team' | 'one_on_one'
+  title: text("title").notNull(),
+  meetingDate: date("meeting_date"),
+  body: text("body"),
+  fileUrl: text("file_url"),
+  // For 1:1 notes: the employee the meeting was with.
+  employeeId: uuid("employee_id").references(() => employees.id, { onDelete: "set null" }),
+  createdBy: text("created_by"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+
+export type MeetingNote = typeof meetingNotes.$inferSelect;

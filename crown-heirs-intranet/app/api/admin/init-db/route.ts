@@ -156,6 +156,19 @@ export async function POST() {
         created_at timestamptz DEFAULT now()
       )
     `;
+    await sql`
+      CREATE TABLE IF NOT EXISTS meeting_notes (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        kind text NOT NULL DEFAULT 'team',
+        title text NOT NULL,
+        meeting_date date,
+        body text,
+        file_url text,
+        employee_id uuid REFERENCES employees(id) ON DELETE SET NULL,
+        created_by text,
+        created_at timestamptz DEFAULT now()
+      )
+    `;
     return Response.json({ ok: true });
   } catch (err) {
     return Response.json(

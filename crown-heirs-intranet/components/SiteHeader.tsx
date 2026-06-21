@@ -39,6 +39,7 @@ export default async function SiteHeader() {
           <button type="button" className="nav-top">Team ▾</button>
           <div className="nav-menu">
             <Link href="/team">Directory</Link>
+            <Link href="/notes">Meeting Notes</Link>
             <Link href="/suggestions">Suggestion Box</Link>
           </div>
         </div>
