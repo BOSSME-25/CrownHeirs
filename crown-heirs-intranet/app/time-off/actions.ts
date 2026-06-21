@@ -6,8 +6,10 @@ import { eq } from "drizzle-orm";
 import { auth } from "@/auth";
 import { isAdmin } from "@/lib/access";
 import { db } from "@/lib/db";
-import { employees, timeOffRequests } from "@/lib/db/schema";
+import { employees, ptoLedger, timeOffRequests } from "@/lib/db/schema";
 import { getEmployeeByEmail } from "@/lib/employees";
+import { getDefaultOrg } from "@/lib/org";
+import { DEFAULT_HOURS_PER_DAY, daysInclusive } from "@/lib/pto";
 import { adminEmails, emailLayout, sendEmail } from "@/lib/email";
 
 export async function submitTimeOff(formData: FormData) {
@@ -69,15 +71,32 @@ export async function adminAddTimeOff(formData: FormData) {
   }
   if (endDate < startDate) throw new Error("End date can’t be before the start date.");
 
-  await db.insert(timeOffRequests).values({
+  const [added] = await db
+    .insert(timeOffRequests)
+    .values({
+      employeeId,
+      startDate,
+      endDate,
+      type: get("type"),
+      note: get("note"),
+      status: "approved",
+      decidedBy: session?.user?.email,
+      decidedAt: new Date(),
+    })
+    .returning({ id: timeOffRequests.id });
+
+  // Deduct from the PTO ledger.
+  const org = await getDefaultOrg();
+  const hrs = daysInclusive(startDate, endDate) * DEFAULT_HOURS_PER_DAY;
+  await db.insert(ptoLedger).values({
+    orgId: org?.id ?? null,
     employeeId,
-    startDate,
-    endDate,
-    type: get("type"),
-    note: get("note"),
-    status: "approved",
-    decidedBy: session?.user?.email,
-    decidedAt: new Date(),
+    hours: String(-hrs),
+    kind: "usage",
+    note: `Time off ${startDate}–${endDate}`,
+    effectiveDate: startDate,
+    requestId: added?.id,
+    createdBy: session?.user?.email,
   });
   revalidatePath("/time-off");
   redirect(`/time-off?ok=${encodeURIComponent("Time off added")}`);
@@ -94,11 +113,36 @@ export async function decideTimeOff(id: string, status: "approved" | "denied") {
 
   // Notify the employee of the decision.
   const rows = await db
-    .select({ email: employees.email, name: employees.fullName, start: timeOffRequests.startDate, end: timeOffRequests.endDate })
+    .select({ employeeId: timeOffRequests.employeeId, email: employees.email, name: employees.fullName, start: timeOffRequests.startDate, end: timeOffRequests.endDate, type: timeOffRequests.type })
     .from(timeOffRequests)
     .innerJoin(employees, eq(timeOffRequests.employeeId, employees.id))
     .where(eq(timeOffRequests.id, id));
   const r = rows[0];
+
+  // Keep the PTO ledger in sync with the decision.
+  if (r) {
+    if (status === "approved") {
+      const existing = await db.select({ id: ptoLedger.id }).from(ptoLedger).where(eq(ptoLedger.requestId, id));
+      if (existing.length === 0) {
+        const org = await getDefaultOrg();
+        const hrs = daysInclusive(r.start, r.end) * DEFAULT_HOURS_PER_DAY;
+        await db.insert(ptoLedger).values({
+          orgId: org?.id ?? null,
+          employeeId: r.employeeId,
+          hours: String(-hrs),
+          kind: "usage",
+          note: `Time off ${r.start}–${r.end}${r.type ? ` (${r.type})` : ""}`,
+          effectiveDate: r.start,
+          requestId: id,
+          createdBy: session?.user?.email,
+        });
+      }
+    } else {
+      // Denied/reverted — remove any auto-deduction for this request.
+      await db.delete(ptoLedger).where(eq(ptoLedger.requestId, id));
+    }
+  }
+
   if (r) {
     await sendEmail({
       to: r.email,

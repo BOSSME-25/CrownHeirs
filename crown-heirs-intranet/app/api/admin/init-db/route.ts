@@ -313,6 +313,20 @@ export async function POST() {
         created_at timestamptz DEFAULT now()
       )
     `;
+    await sql`
+      CREATE TABLE IF NOT EXISTS pto_ledger (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        org_id uuid,
+        employee_id uuid NOT NULL REFERENCES employees(id) ON DELETE CASCADE,
+        hours numeric NOT NULL,
+        kind text NOT NULL DEFAULT 'adjustment',
+        note text,
+        effective_date date,
+        request_id uuid,
+        created_by text,
+        created_at timestamptz DEFAULT now()
+      )
+    `;
 
     // Backfill existing rows to Crown Heirs org + Main location.
     const [{ id: orgId } = { id: null }] = (await sql`

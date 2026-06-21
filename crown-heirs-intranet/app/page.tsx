@@ -127,6 +127,11 @@ export default async function Home() {
             <p>Request days off and track approvals. Shift swaps live on each shift.</p>
             <span className="badge">Request time off →</span>
           </Link>
+          <Link href="/pto" className="card">
+            <h3>PTO Balance</h3>
+            <p>See your paid-time-off balance and history.</p>
+            <span className="badge">View balance →</span>
+          </Link>
           <Link href="/team" className="card">
             <h3>Team</h3>
             <p>The staff roster — names, roles, contact info, and start dates.</p>

@@ -408,3 +408,24 @@ export const timeEntries = pgTable("time_entries", {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });
 export type TimeEntry = typeof timeEntries.$inferSelect;
+
+// ───────────────────────────────────────────────
+// PTO ledger — running balance of paid time off.
+// Positive hours = accrual/grant, negative = usage.
+// Balance for an employee = sum of their entries.
+// ───────────────────────────────────────────────
+export const ptoLedger = pgTable("pto_ledger", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  orgId: uuid("org_id"),
+  employeeId: uuid("employee_id").notNull().references(() => employees.id, { onDelete: "cascade" }),
+  hours: numeric("hours").notNull(),
+  // 'grant' | 'accrual' | 'usage' | 'adjustment'
+  kind: text("kind").notNull().default("adjustment"),
+  note: text("note"),
+  effectiveDate: date("effective_date"),
+  // Links a usage entry to the approved time-off request that created it.
+  requestId: uuid("request_id"),
+  createdBy: text("created_by"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+export type PtoEntry = typeof ptoLedger.$inferSelect;
