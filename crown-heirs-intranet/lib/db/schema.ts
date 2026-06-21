@@ -309,3 +309,83 @@ export const messages = pgTable("messages", {
 });
 
 export type Message = typeof messages.$inferSelect;
+
+// ───────────────────────────────────────────────
+// Policy acknowledgments — "I've read & agree", with
+// a dated record per employee.
+// ───────────────────────────────────────────────
+export const policies = pgTable("policies", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  orgId: uuid("org_id"),
+  title: text("title").notNull(),
+  body: text("body"),
+  fileUrl: text("file_url"),
+  active: boolean("active").notNull().default(true),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+export const policyAcks = pgTable("policy_acks", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  policyId: uuid("policy_id").notNull().references(() => policies.id, { onDelete: "cascade" }),
+  employeeId: uuid("employee_id").notNull().references(() => employees.id, { onDelete: "cascade" }),
+  acknowledgedAt: timestamp("acknowledged_at", { withTimezone: true }).defaultNow(),
+});
+export type Policy = typeof policies.$inferSelect;
+
+// ───────────────────────────────────────────────
+// Onboarding — a checklist template per org, with
+// per-employee completion.
+// ───────────────────────────────────────────────
+export const onboardingTasks = pgTable("onboarding_tasks", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  orgId: uuid("org_id"),
+  title: text("title").notNull(),
+  description: text("description"),
+  sortOrder: numeric("sort_order").default("0"),
+  active: boolean("active").notNull().default(true),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+export const onboardingProgress = pgTable("onboarding_progress", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  taskId: uuid("task_id").notNull().references(() => onboardingTasks.id, { onDelete: "cascade" }),
+  employeeId: uuid("employee_id").notNull().references(() => employees.id, { onDelete: "cascade" }),
+  done: boolean("done").notNull().default(false),
+  doneAt: timestamp("done_at", { withTimezone: true }),
+});
+export type OnboardingTask = typeof onboardingTasks.$inferSelect;
+
+// ───────────────────────────────────────────────
+// Performance reviews — written by a manager/director,
+// shared with the employee when ready.
+// ───────────────────────────────────────────────
+export const reviews = pgTable("reviews", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  orgId: uuid("org_id"),
+  employeeId: uuid("employee_id").notNull().references(() => employees.id, { onDelete: "cascade" }),
+  reviewerEmail: text("reviewer_email"),
+  periodLabel: text("period_label"),
+  reviewDate: date("review_date"),
+  rating: integer("rating"),
+  strengths: text("strengths"),
+  growth: text("growth"),
+  goals: text("goals"),
+  // 'draft' | 'shared'
+  status: text("status").notNull().default("draft"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
+export type Review = typeof reviews.$inferSelect;
+
+// ───────────────────────────────────────────────
+// Audit log — who changed what, when.
+// ───────────────────────────────────────────────
+export const auditLog = pgTable("audit_log", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  orgId: uuid("org_id"),
+  actorEmail: text("actor_email"),
+  action: text("action").notNull(),
+  entity: text("entity"),
+  entityId: text("entity_id"),
+  detail: text("detail"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+export type AuditEntry = typeof auditLog.$inferSelect;

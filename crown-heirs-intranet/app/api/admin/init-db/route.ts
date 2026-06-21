@@ -228,6 +228,78 @@ export async function POST() {
       )
     `;
 
+    // ── Phase 4 features ──
+    await sql`
+      CREATE TABLE IF NOT EXISTS policies (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        org_id uuid,
+        title text NOT NULL,
+        body text,
+        file_url text,
+        active boolean NOT NULL DEFAULT true,
+        created_at timestamptz DEFAULT now()
+      )
+    `;
+    await sql`
+      CREATE TABLE IF NOT EXISTS policy_acks (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        policy_id uuid NOT NULL REFERENCES policies(id) ON DELETE CASCADE,
+        employee_id uuid NOT NULL REFERENCES employees(id) ON DELETE CASCADE,
+        acknowledged_at timestamptz DEFAULT now(),
+        UNIQUE (policy_id, employee_id)
+      )
+    `;
+    await sql`
+      CREATE TABLE IF NOT EXISTS onboarding_tasks (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        org_id uuid,
+        title text NOT NULL,
+        description text,
+        sort_order numeric DEFAULT 0,
+        active boolean NOT NULL DEFAULT true,
+        created_at timestamptz DEFAULT now()
+      )
+    `;
+    await sql`
+      CREATE TABLE IF NOT EXISTS onboarding_progress (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        task_id uuid NOT NULL REFERENCES onboarding_tasks(id) ON DELETE CASCADE,
+        employee_id uuid NOT NULL REFERENCES employees(id) ON DELETE CASCADE,
+        done boolean NOT NULL DEFAULT false,
+        done_at timestamptz,
+        UNIQUE (task_id, employee_id)
+      )
+    `;
+    await sql`
+      CREATE TABLE IF NOT EXISTS reviews (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        org_id uuid,
+        employee_id uuid NOT NULL REFERENCES employees(id) ON DELETE CASCADE,
+        reviewer_email text,
+        period_label text,
+        review_date date,
+        rating integer,
+        strengths text,
+        growth text,
+        goals text,
+        status text NOT NULL DEFAULT 'draft',
+        created_at timestamptz DEFAULT now(),
+        updated_at timestamptz DEFAULT now()
+      )
+    `;
+    await sql`
+      CREATE TABLE IF NOT EXISTS audit_log (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        org_id uuid,
+        actor_email text,
+        action text NOT NULL,
+        entity text,
+        entity_id text,
+        detail text,
+        created_at timestamptz DEFAULT now()
+      )
+    `;
+
     // Backfill existing rows to Crown Heirs org + Main location.
     const [{ id: orgId } = { id: null }] = (await sql`
       SELECT id FROM organizations WHERE slug = 'crown-heirs' LIMIT 1

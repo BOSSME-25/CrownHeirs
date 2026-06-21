@@ -152,6 +152,21 @@ export default async function Home() {
             <p>Browse and download every uploaded file across all categories.</p>
             <span className="badge">Browse files →</span>
           </Link>
+          <Link href="/onboarding" className="card">
+            <h3>Onboarding</h3>
+            <p>Your getting-started checklist for new team members.</p>
+            <span className="badge">View checklist →</span>
+          </Link>
+          <Link href="/acknowledgments" className="card">
+            <h3>Acknowledgments</h3>
+            <p>Review and sign off on company policies.</p>
+            <span className="badge">Review policies →</span>
+          </Link>
+          <Link href="/reviews" className="card">
+            <h3>Reviews</h3>
+            <p>Your performance reviews and goals.</p>
+            <span className="badge">View reviews →</span>
+          </Link>
           {isAdmin && (
             <Link href="/admin" className="card">
               <h3>Admin</h3>

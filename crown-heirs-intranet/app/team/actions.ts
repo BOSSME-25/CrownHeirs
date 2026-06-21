@@ -12,6 +12,7 @@ import { db } from "@/lib/db";
 import { employees } from "@/lib/db/schema";
 import { listTeamMembers } from "@/lib/square";
 import { getDefaultOrg } from "@/lib/org";
+import { logAudit } from "@/lib/audit";
 
 const IMAGE_EXT = [".png", ".jpg", ".jpeg", ".webp", ".gif"];
 
@@ -111,6 +112,8 @@ export async function createEmployee(formData: FormData) {
   const photoUrl = await uploadPhoto(formData);
   const org = await getDefaultOrg();
   await db.insert(employees).values({ ...data, orgId: org?.id ?? null, photoUrl: photoUrl ?? null });
+  const session = await auth();
+  await logAudit({ actorEmail: session?.user?.email, action: "create", entity: "employee", detail: `${data.fullName} (${data.role})` });
   revalidatePath("/team");
   redirect(`/team?ok=${encodeURIComponent("Team member added")}`);
 }
@@ -137,6 +140,9 @@ export async function updateEmployee(id: string, formData: FormData) {
       updatedAt: new Date(),
     })
     .where(eq(employees.id, id));
+  const session = await auth();
+  const roleNote = target && target.role !== data.role ? ` · role ${target.role}→${data.role}` : "";
+  await logAudit({ actorEmail: session?.user?.email, action: "update", entity: "employee", entityId: id, detail: `${data.fullName}${roleNote}` });
   revalidatePath("/team");
   redirect(`/team?ok=${encodeURIComponent("Team member updated")}`);
 }
@@ -146,6 +152,8 @@ export async function deleteEmployee(id: string) {
   const target = (await db.select().from(employees).where(eq(employees.id, id)))[0];
   guardDirectorScope(access, { targetEmail: target?.email, targetRole: target?.role });
   await db.delete(employees).where(eq(employees.id, id));
+  const session = await auth();
+  await logAudit({ actorEmail: session?.user?.email, action: "delete", entity: "employee", entityId: id, detail: target?.fullName });
   revalidatePath("/team");
   redirect(`/team?ok=${encodeURIComponent("Team member removed")}`);
 }

@@ -35,6 +35,11 @@ export default async function AdminPage() {
             <p>Manage the salon locations staff, schedules, and KPIs are scoped to.</p>
             <span className="badge">Manage locations →</span>
           </Link>
+          <Link href="/admin/audit" className="card">
+            <h3>Audit Log</h3>
+            <p>Who changed what, when — across the system.</p>
+            <span className="badge">View log →</span>
+          </Link>
         </div>
         <InitDbButton />
         <AdminPanel />
