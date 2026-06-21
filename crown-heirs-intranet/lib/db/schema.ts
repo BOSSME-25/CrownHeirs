@@ -61,3 +61,20 @@ export const shifts = pgTable("shifts", {
 
 export type Shift = typeof shifts.$inferSelect;
 export type NewShift = typeof shifts.$inferInsert;
+
+// ───────────────────────────────────────────────
+// Shift duties — a checklist of tasks for a shift.
+// The person working (or an admin) checks them off.
+// ───────────────────────────────────────────────
+export const shiftDuties = pgTable("shift_duties", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  shiftId: uuid("shift_id")
+    .notNull()
+    .references(() => shifts.id, { onDelete: "cascade" }),
+  description: text("description").notNull(),
+  done: boolean("done").notNull().default(false),
+  sortOrder: numeric("sort_order").default("0"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+
+export type ShiftDuty = typeof shiftDuties.$inferSelect;

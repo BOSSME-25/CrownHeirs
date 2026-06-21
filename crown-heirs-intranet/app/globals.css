@@ -213,6 +213,17 @@ h1.title {
 .shift-del:hover { color: #9a3b2e; }
 .day-add { font-size: 0.78rem; color: var(--ink-dim); text-decoration: none; text-align: center; padding: 5px; border: 1px dashed var(--border-mid); border-radius: var(--r-s); }
 .day-add:hover { color: var(--terra); border-color: var(--terra-lo); }
+.shift-duties { display: block; margin-top: 6px; font-size: 0.72rem; color: var(--ink-dim); text-decoration: none; }
+.shift-duties:hover { color: var(--terra); }
+
+/* ─── Duty checklist (shift detail) ─── */
+.duty-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+.duty-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.duty { display: flex; align-items: center; gap: 10px; cursor: pointer; flex: 1; }
+.duty input { width: 18px; height: 18px; accent-color: var(--terra); cursor: pointer; }
+.duty.done span { text-decoration: line-through; color: var(--ink-faint); }
+.duty-add-form { display: flex; gap: 10px; margin-top: 6px; }
+.duty-add-form input { flex: 1; padding: 10px 14px; border: 1px solid var(--border-mid); border-radius: var(--r-m); font-family: var(--font-ui); font-size: 0.92rem; }
 
 /* ─── Notices ─── */
 .notice {

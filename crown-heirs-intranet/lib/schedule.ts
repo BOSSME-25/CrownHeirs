@@ -1,7 +1,7 @@
 import "server-only";
-import { and, asc, eq, gte, lte } from "drizzle-orm";
+import { and, asc, eq, gte, inArray, lte } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { employees, shifts } from "@/lib/db/schema";
+import { employees, shiftDuties, shifts } from "@/lib/db/schema";
 
 // ── Date helpers (work in UTC on plain YYYY-MM-DD strings) ──
 
@@ -64,6 +64,8 @@ export type ShiftWithEmployee = {
   position: string | null;
   notes: string | null;
   published: boolean;
+  dutyTotal: number;
+  dutyDone: number;
 };
 
 /** All shifts for the week starting `ws`. Staff only see published ones. */
@@ -75,7 +77,7 @@ export async function shiftsForWeek(
   const conditions = [gte(shifts.shiftDate, ws), lte(shifts.shiftDate, end)];
   if (!includeUnpublished) conditions.push(eq(shifts.published, true));
 
-  return db
+  const rows = await db
     .select({
       id: shifts.id,
       employeeId: shifts.employeeId,
@@ -92,11 +94,62 @@ export async function shiftsForWeek(
     .innerJoin(employees, eq(shifts.employeeId, employees.id))
     .where(and(...conditions))
     .orderBy(asc(shifts.shiftDate), asc(shifts.startTime));
+
+  // Tally duty progress per shift.
+  const ids = rows.map((r) => r.id);
+  const duties = ids.length
+    ? await db
+        .select({ shiftId: shiftDuties.shiftId, done: shiftDuties.done })
+        .from(shiftDuties)
+        .where(inArray(shiftDuties.shiftId, ids))
+    : [];
+  const tally = new Map<string, { total: number; done: number }>();
+  for (const d of duties) {
+    const t = tally.get(d.shiftId) ?? { total: 0, done: 0 };
+    t.total += 1;
+    if (d.done) t.done += 1;
+    tally.set(d.shiftId, t);
+  }
+
+  return rows.map((r) => ({
+    ...r,
+    dutyTotal: tally.get(r.id)?.total ?? 0,
+    dutyDone: tally.get(r.id)?.done ?? 0,
+  }));
 }
 
 export async function getShift(id: string) {
   const rows = await db.select().from(shifts).where(eq(shifts.id, id));
   return rows[0];
+}
+
+/** A single shift joined with the assigned employee (for the detail page). */
+export async function getShiftWithEmployee(id: string) {
+  const rows = await db
+    .select({
+      id: shifts.id,
+      employeeId: shifts.employeeId,
+      employeeName: employees.fullName,
+      employeeEmail: employees.email,
+      shiftDate: shifts.shiftDate,
+      startTime: shifts.startTime,
+      endTime: shifts.endTime,
+      position: shifts.position,
+      notes: shifts.notes,
+      published: shifts.published,
+    })
+    .from(shifts)
+    .innerJoin(employees, eq(shifts.employeeId, employees.id))
+    .where(eq(shifts.id, id));
+  return rows[0];
+}
+
+export async function getDuties(shiftId: string) {
+  return db
+    .select()
+    .from(shiftDuties)
+    .where(eq(shiftDuties.shiftId, shiftId))
+    .orderBy(asc(shiftDuties.createdAt));
 }
 
 /** Active employees, for assigning shifts. */

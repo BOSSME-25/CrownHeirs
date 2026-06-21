@@ -31,7 +31,7 @@ export default async function NewShiftPage({
         {employees.length === 0 ? (
           <div className="notice">Add team members first (Team → Add team member), then assign shifts.</div>
         ) : (
-          <ShiftForm action={createShift} employees={employees} defaultDate={date} backHref={backHref} />
+          <ShiftForm action={createShift} employees={employees} defaultDate={date} backHref={backHref} showDuties />
         )}
       </main>
     </>

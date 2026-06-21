@@ -46,6 +46,16 @@ export async function POST() {
         created_at timestamptz DEFAULT now()
       )
     `;
+    await sql`
+      CREATE TABLE IF NOT EXISTS shift_duties (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        shift_id uuid NOT NULL REFERENCES shifts(id) ON DELETE CASCADE,
+        description text NOT NULL,
+        done boolean NOT NULL DEFAULT false,
+        sort_order numeric DEFAULT 0,
+        created_at timestamptz DEFAULT now()
+      )
+    `;
     return Response.json({ ok: true });
   } catch (err) {
     return Response.json(
