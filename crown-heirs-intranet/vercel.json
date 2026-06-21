@@ -2,7 +2,7 @@
   "crons": [
     {
       "path": "/api/cron/weekly-kpis",
-      "schedule": "0 14 * * 1"
+      "schedule": "0 13 * * 1"
     }
   ]
 }
