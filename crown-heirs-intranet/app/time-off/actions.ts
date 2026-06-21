@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { eq } from "drizzle-orm";
 import { auth } from "@/auth";
 import { isAdmin } from "@/lib/access";
@@ -47,6 +48,7 @@ export async function submitTimeOff(formData: FormData) {
     ),
   });
   revalidatePath("/time-off");
+  redirect(`/time-off?ok=${encodeURIComponent("Time-off request submitted")}`);
 }
 
 // Admin/manager records time off directly for a team member (already approved).
@@ -78,6 +80,7 @@ export async function adminAddTimeOff(formData: FormData) {
     decidedAt: new Date(),
   });
   revalidatePath("/time-off");
+  redirect(`/time-off?ok=${encodeURIComponent("Time off added")}`);
 }
 
 export async function decideTimeOff(id: string, status: "approved" | "denied") {
@@ -108,4 +111,5 @@ export async function decideTimeOff(id: string, status: "approved" | "denied") {
     });
   }
   revalidatePath("/time-off");
+  redirect(`/time-off?ok=${encodeURIComponent(`Request ${status}`)}`);
 }

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import FlashToast from "@/components/FlashToast";
 
 export const metadata: Metadata = {
   title: "Crown Heirs — Team Hub",
@@ -18,7 +19,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           rel="stylesheet"
         />
       </head>
-      <body>{children}</body>
+      <body>
+        <FlashToast />
+        {children}
+      </body>
     </html>
   );
 }

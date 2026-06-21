@@ -71,5 +71,5 @@ export async function updateMyProfile(formData: FormData) {
   revalidatePath("/team");
   revalidatePath(`/team/${me.id}`);
   revalidatePath("/me");
-  redirect("/me?saved=1");
+  redirect(`/me?ok=${encodeURIComponent("Profile saved")}`);
 }

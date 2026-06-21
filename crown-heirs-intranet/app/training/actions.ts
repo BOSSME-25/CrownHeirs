@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { eq } from "drizzle-orm";
 import { auth } from "@/auth";
 import { isAdmin } from "@/lib/access";
@@ -48,6 +49,7 @@ export async function addVideo(formData: FormData) {
     requiredRoles: roles.length ? roles : null,
   });
   revalidatePath("/training");
+  redirect(`/training?ok=${encodeURIComponent("Video added")}`);
 }
 
 // Mark a video required (or not) and set/clear its due date.
@@ -64,6 +66,7 @@ export async function setRequirement(videoId: string, formData: FormData) {
   revalidatePath("/training");
   revalidatePath(`/training/${videoId}`);
   revalidatePath("/training/dashboard");
+  redirect(`/training?ok=${encodeURIComponent("Requirement updated")}`);
 }
 
 // Recategorize a video into a (possibly new) section.
@@ -73,6 +76,7 @@ export async function updateVideoSection(id: string, formData: FormData) {
   const section = String(formData.get("section") ?? "").trim() || null;
   await db.update(trainingVideos).set({ section }).where(eq(trainingVideos.id, id));
   revalidatePath("/training");
+  redirect(`/training?ok=${encodeURIComponent("Video moved")}`);
 }
 
 export async function deleteVideo(id: string) {
@@ -80,6 +84,7 @@ export async function deleteVideo(id: string) {
   if (!isAdmin(session?.user?.email)) throw new Error("Only admins can remove videos.");
   await db.delete(trainingVideos).where(eq(trainingVideos.id, id));
   revalidatePath("/training");
+  redirect(`/training?ok=${encodeURIComponent("Video removed")}`);
 }
 
 // ── Watching ──
@@ -91,6 +96,7 @@ export async function markWatched(videoId: string) {
     .values({ videoId, employeeId: employee.id })
     .onConflictDoNothing();
   revalidatePath(`/training/${videoId}`);
+  redirect(`/training/${videoId}?ok=${encodeURIComponent("Marked as watched")}`);
 }
 
 // ── Assessments ──
@@ -117,6 +123,7 @@ export async function addQuestion(videoId: string, formData: FormData) {
 
   await db.insert(quizQuestions).values({ videoId, prompt, options, correctIndex });
   revalidatePath(`/training/${videoId}`);
+  redirect(`/training/${videoId}?ok=${encodeURIComponent("Question added")}`);
 }
 
 export async function deleteQuestion(videoId: string, questionId: string) {
@@ -124,6 +131,7 @@ export async function deleteQuestion(videoId: string, questionId: string) {
   if (!isAdmin(session?.user?.email)) throw new Error("Only admins can edit assessments.");
   await db.delete(quizQuestions).where(eq(quizQuestions.id, questionId));
   revalidatePath(`/training/${videoId}`);
+  redirect(`/training/${videoId}?ok=${encodeURIComponent("Question removed")}`);
 }
 
 export async function submitQuiz(videoId: string, formData: FormData) {
@@ -150,4 +158,7 @@ export async function submitQuiz(videoId: string, formData: FormData) {
     .onConflictDoNothing();
 
   revalidatePath(`/training/${videoId}`);
+  redirect(
+    `/training/${videoId}?ok=${encodeURIComponent(`Assessment submitted — you scored ${score}/${questions.length}`)}`,
+  );
 }

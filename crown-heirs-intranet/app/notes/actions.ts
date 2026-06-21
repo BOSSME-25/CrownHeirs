@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { eq } from "drizzle-orm";
 import { put } from "@vercel/blob";
 import { auth } from "@/auth";
@@ -47,6 +48,7 @@ export async function addNote(formData: FormData) {
     createdBy: session?.user?.email,
   });
   revalidatePath("/notes");
+  redirect(`/notes?ok=${encodeURIComponent("Note posted")}`);
 }
 
 export async function deleteNote(id: string) {
@@ -54,4 +56,5 @@ export async function deleteNote(id: string) {
   if (!isAdmin(session?.user?.email)) throw new Error("Only admins can delete notes.");
   await db.delete(meetingNotes).where(eq(meetingNotes.id, id));
   revalidatePath("/notes");
+  redirect(`/notes?ok=${encodeURIComponent("Note deleted")}`);
 }

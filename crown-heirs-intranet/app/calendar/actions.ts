@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { eq } from "drizzle-orm";
 import { auth } from "@/auth";
 import { isAdmin } from "@/lib/access";
@@ -30,6 +31,7 @@ export async function addMeeting(formData: FormData) {
   });
   revalidatePath("/calendar");
   revalidatePath("/");
+  redirect(`/calendar?ok=${encodeURIComponent("Meeting added")}`);
 }
 
 export async function deleteMeeting(id: string) {
@@ -38,4 +40,5 @@ export async function deleteMeeting(id: string) {
   await db.delete(meetings).where(eq(meetings.id, id));
   revalidatePath("/calendar");
   revalidatePath("/");
+  redirect(`/calendar?ok=${encodeURIComponent("Meeting removed")}`);
 }

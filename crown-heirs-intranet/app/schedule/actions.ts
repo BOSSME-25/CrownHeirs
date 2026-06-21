@@ -34,8 +34,10 @@ function readForm(formData: FormData) {
   };
 }
 
-function backToWeek(shiftDate: string | null): string {
-  return shiftDate ? `/schedule?week=${shiftDate}` : "/schedule";
+function backToWeek(shiftDate: string | null, ok?: string): string {
+  const base = shiftDate ? `/schedule?week=${shiftDate}` : "/schedule";
+  if (!ok) return base;
+  return `${base}${base.includes("?") ? "&" : "?"}ok=${encodeURIComponent(ok)}`;
 }
 
 function parseDuties(formData: FormData): string[] {
@@ -77,7 +79,7 @@ export async function createShift(formData: FormData) {
   }
 
   revalidatePath("/schedule");
-  redirect(backToWeek(d.shiftDate));
+  redirect(backToWeek(d.shiftDate, "Shift added"));
 }
 
 export async function updateShift(id: string, formData: FormData) {
@@ -98,13 +100,14 @@ export async function updateShift(id: string, formData: FormData) {
     })
     .where(eq(shifts.id, id));
   revalidatePath("/schedule");
-  redirect(backToWeek(d.shiftDate));
+  redirect(backToWeek(d.shiftDate, "Shift updated"));
 }
 
 export async function deleteShift(id: string) {
   await requireAdmin();
   await db.delete(shifts).where(eq(shifts.id, id));
   revalidatePath("/schedule");
+  redirect(`/schedule?ok=${encodeURIComponent("Shift deleted")}`);
 }
 
 /** Publish every shift in the given week so staff can see it. */
@@ -133,6 +136,7 @@ export async function publishWeek(weekStartYMD: string) {
     ),
   });
   revalidatePath("/schedule");
+  redirect(`/schedule?week=${weekStartYMD}&ok=${encodeURIComponent("Schedule published — staff notified")}`);
 }
 
 // ── Duties ──
@@ -143,12 +147,14 @@ export async function addDuty(shiftId: string, formData: FormData) {
   if (!description) return;
   await db.insert(shiftDuties).values({ shiftId, description });
   revalidatePath(`/schedule/${shiftId}`);
+  redirect(`/schedule/${shiftId}?ok=${encodeURIComponent("Task added")}`);
 }
 
 export async function deleteDuty(shiftId: string, dutyId: string) {
   await requireAdmin();
   await db.delete(shiftDuties).where(eq(shiftDuties.id, dutyId));
   revalidatePath(`/schedule/${shiftId}`);
+  redirect(`/schedule/${shiftId}?ok=${encodeURIComponent("Task removed")}`);
 }
 
 /** Toggle a duty's done state. Allowed for admins or the assigned employee. */
@@ -224,6 +230,7 @@ export async function requestSwap(shiftId: string, formData: FormData) {
   }
   revalidatePath(`/schedule/${shiftId}`);
   revalidatePath("/schedule");
+  redirect(`/schedule/${shiftId}?ok=${encodeURIComponent("Swap requested")}`);
 }
 
 export async function decideSwap(swapId: string, approve: boolean, formData: FormData) {
@@ -266,4 +273,5 @@ export async function decideSwap(swapId: string, approve: boolean, formData: For
   }
   revalidatePath(`/schedule/${swap.shiftId}`);
   revalidatePath("/schedule");
+  redirect(`/schedule/${swap.shiftId}?ok=${encodeURIComponent(`Swap ${approve ? "approved" : "denied"}`)}`);
 }

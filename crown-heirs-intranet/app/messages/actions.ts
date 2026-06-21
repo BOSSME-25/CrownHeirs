@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
 import { messages } from "@/lib/db/schema";
@@ -18,4 +19,5 @@ export async function sendMessage(otherId: string, formData: FormData) {
   await db.insert(messages).values({ senderId: me.id, recipientId: otherId, body });
   revalidatePath(`/messages/${otherId}`);
   revalidatePath("/messages");
+  redirect(`/messages/${otherId}?ok=${encodeURIComponent("Message sent")}`);
 }

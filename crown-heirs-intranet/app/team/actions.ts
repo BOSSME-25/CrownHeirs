@@ -73,7 +73,7 @@ export async function createEmployee(formData: FormData) {
   const photoUrl = await uploadPhoto(formData);
   await db.insert(employees).values({ ...data, photoUrl: photoUrl ?? null });
   revalidatePath("/team");
-  redirect("/team");
+  redirect(`/team?ok=${encodeURIComponent("Team member added")}`);
 }
 
 export async function updateEmployee(id: string, formData: FormData) {
@@ -93,11 +93,12 @@ export async function updateEmployee(id: string, formData: FormData) {
     })
     .where(eq(employees.id, id));
   revalidatePath("/team");
-  redirect("/team");
+  redirect(`/team?ok=${encodeURIComponent("Team member updated")}`);
 }
 
 export async function deleteEmployee(id: string) {
   await requireAdmin();
   await db.delete(employees).where(eq(employees.id, id));
   revalidatePath("/team");
+  redirect(`/team?ok=${encodeURIComponent("Team member removed")}`);
 }
