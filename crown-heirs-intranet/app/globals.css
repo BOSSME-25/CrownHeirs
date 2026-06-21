@@ -176,6 +176,10 @@ h1.title {
 }
 .field textarea { resize: vertical; }
 
+/* Avatars */
+.avatar { border-radius: 50%; object-fit: cover; display: block; flex: 0 0 auto; border: 1px solid var(--border); }
+.avatar-fallback { display: grid; place-items: center; background: var(--terra-lo); color: #fff; font-family: var(--font-ui); font-weight: 400; letter-spacing: 0.02em; }
+
 /* Two-column form layout for the employee form */
 .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 22px; }
 @media(max-width:620px){ .form-grid { grid-template-columns: 1fr; } }

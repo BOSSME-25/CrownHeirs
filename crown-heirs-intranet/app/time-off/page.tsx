@@ -2,8 +2,9 @@ import { auth } from "@/auth";
 import { isAdmin } from "@/lib/access";
 import SiteHeader from "@/components/SiteHeader";
 import TimeOffDecision from "@/components/TimeOffDecision";
-import { submitTimeOff } from "@/app/time-off/actions";
+import { adminAddTimeOff, submitTimeOff } from "@/app/time-off/actions";
 import { getEmployeeByEmail } from "@/lib/employees";
+import { activeEmployees } from "@/lib/schedule";
 import { listAllTimeOff, listMyTimeOff, TIME_OFF_TYPES, timeOffTypeLabel } from "@/lib/requests";
 
 export const dynamic = "force-dynamic";
@@ -27,10 +28,14 @@ export default async function TimeOffPage() {
   let employee;
   let mine: Awaited<ReturnType<typeof listMyTimeOff>> = [];
   let all: Awaited<ReturnType<typeof listAllTimeOff>> = [];
+  let roster: { id: string; fullName: string }[] = [];
   try {
     employee = await getEmployeeByEmail(email);
     if (employee) mine = await listMyTimeOff(employee.id);
-    if (admin) all = await listAllTimeOff();
+    if (admin) {
+      all = await listAllTimeOff();
+      roster = await activeEmployees();
+    }
   } catch {
     setupNeeded = true;
   }
@@ -86,6 +91,49 @@ export default async function TimeOffPage() {
               <div className="notice">
                 You’re not on the team roster yet, so you can’t submit requests. Ask an admin to add you under Team.
               </div>
+            )}
+
+            {/* Admin: record time off for a team member */}
+            {admin && (
+              <form className="prose" action={adminAddTimeOff} style={{ marginTop: 28 }}>
+                <h2>Add time off for a team member</h2>
+                <p className="muted" style={{ marginBottom: 14 }}>
+                  Recording it here marks it approved right away.
+                </p>
+                <div className="form-grid">
+                  <div className="field">
+                    <label htmlFor="a_employeeId">Team member *</label>
+                    <select id="a_employeeId" name="employeeId" required defaultValue="">
+                      <option value="">Choose…</option>
+                      {roster.map((e) => (
+                        <option key={e.id} value={e.id}>{e.fullName}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="field">
+                    <label htmlFor="a_type">Type</label>
+                    <select id="a_type" name="type">
+                      <option value="">—</option>
+                      {TIME_OFF_TYPES.map((t) => (
+                        <option key={t.value} value={t.value}>{t.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="field">
+                    <label htmlFor="a_startDate">Start date *</label>
+                    <input id="a_startDate" name="startDate" type="date" required />
+                  </div>
+                  <div className="field">
+                    <label htmlFor="a_endDate">End date *</label>
+                    <input id="a_endDate" name="endDate" type="date" required />
+                  </div>
+                </div>
+                <div className="field">
+                  <label htmlFor="a_note">Note (optional)</label>
+                  <textarea id="a_note" name="note" rows={2} />
+                </div>
+                <button className="btn" type="submit">Add time off</button>
+              </form>
             )}
 
             {/* Admin: all requests */}

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { auth } from "@/auth";
 import { isAdmin } from "@/lib/access";
 import SiteHeader from "@/components/SiteHeader";
+import Avatar from "@/components/Avatar";
 import DeleteEmployeeButton from "@/components/DeleteEmployeeButton";
 import { listEmployees, labelFor, EMPLOYMENT_TYPES, ROLES } from "@/lib/employees";
 import type { Employee } from "@/lib/db/schema";
@@ -49,8 +50,13 @@ export default async function TeamPage() {
           <div className="grid">
             {employees.map((e) => (
               <div className="card" key={e.id} style={{ cursor: "default" }}>
-                <h3 style={{ marginBottom: 4 }}>{e.fullName}</h3>
-                <p style={{ color: "var(--terra)", marginBottom: 10 }}>{e.jobTitle ?? "—"}</p>
+                <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 10 }}>
+                  <Avatar name={e.fullName} src={e.photoUrl} size={52} />
+                  <div>
+                    <h3 style={{ marginBottom: 2 }}>{e.fullName}</h3>
+                    <p style={{ color: "var(--terra)" }}>{e.jobTitle ?? "—"}</p>
+                  </div>
+                </div>
                 <p style={{ fontSize: "0.86rem" }}>
                   {e.email}
                   {e.phone ? <><br />{e.phone}</> : null}

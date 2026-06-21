@@ -38,6 +38,37 @@ export async function submitTimeOff(formData: FormData) {
   revalidatePath("/time-off");
 }
 
+// Admin/manager records time off directly for a team member (already approved).
+export async function adminAddTimeOff(formData: FormData) {
+  const session = await auth();
+  if (!isAdmin(session?.user?.email)) throw new Error("Only admins can do this.");
+
+  const get = (k: string) => {
+    const v = formData.get(k);
+    const s = typeof v === "string" ? v.trim() : "";
+    return s === "" ? null : s;
+  };
+  const employeeId = get("employeeId");
+  const startDate = get("startDate");
+  const endDate = get("endDate");
+  if (!employeeId || !startDate || !endDate) {
+    throw new Error("Team member, start and end dates are required.");
+  }
+  if (endDate < startDate) throw new Error("End date can’t be before the start date.");
+
+  await db.insert(timeOffRequests).values({
+    employeeId,
+    startDate,
+    endDate,
+    type: get("type"),
+    note: get("note"),
+    status: "approved",
+    decidedBy: session?.user?.email,
+    decidedAt: new Date(),
+  });
+  revalidatePath("/time-off");
+}
+
 export async function decideTimeOff(id: string, status: "approved" | "denied") {
   const session = await auth();
   if (!isAdmin(session?.user?.email)) throw new Error("Only admins can decide requests.");

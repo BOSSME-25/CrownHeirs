@@ -19,6 +19,7 @@ export async function POST() {
         email text NOT NULL UNIQUE,
         full_name text NOT NULL,
         phone text,
+        photo_url text,
         job_title text,
         employment_type text,
         status text NOT NULL DEFAULT 'active',
@@ -33,6 +34,8 @@ export async function POST() {
         updated_at timestamptz DEFAULT now()
       )
     `;
+    // For databases created before this column existed.
+    await sql`ALTER TABLE employees ADD COLUMN IF NOT EXISTS photo_url text`;
     await sql`
       CREATE TABLE IF NOT EXISTS shifts (
         id uuid PRIMARY KEY DEFAULT gen_random_uuid(),

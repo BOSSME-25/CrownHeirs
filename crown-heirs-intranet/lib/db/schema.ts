@@ -18,6 +18,7 @@ export const employees = pgTable("employees", {
   email: text("email").notNull().unique(),
   fullName: text("full_name").notNull(),
   phone: text("phone"),
+  photoUrl: text("photo_url"),
   jobTitle: text("job_title"),
   // 'full_time' | 'part_time' | 'contractor'
   employmentType: text("employment_type"),
