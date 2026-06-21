@@ -8,9 +8,14 @@ import { APP_URL } from "@/lib/email";
 export const dynamic = "force-dynamic";
 export const metadata = { title: "My Profile — Crown Heirs Team Hub" };
 
-export default async function MyProfilePage() {
+export default async function MyProfilePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ saved?: string }>;
+}) {
   const session = await auth();
   const email = session?.user?.email ?? "";
+  const { saved } = await searchParams;
 
   let me;
   let setupNeeded = false;
@@ -29,6 +34,12 @@ export default async function MyProfilePage() {
           <h1 className="title">Edit my profile</h1>
           <p className="lede">Your bio and answers are visible to the whole team — help everyone get to know you.</p>
         </div>
+
+        {saved && (
+          <div className="notice" style={{ background: "#e7f4ea", borderColor: "#9cc8a8", color: "#1f5130" }}>
+            ✓ Your profile was saved.
+          </div>
+        )}
 
         {setupNeeded ? (
           <div className="notice">The database isn’t set up yet. Ask an admin to finish setup.</div>
