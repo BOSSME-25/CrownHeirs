@@ -2,7 +2,11 @@ import Link from "next/link";
 import { auth } from "@/auth";
 import SiteHeader from "@/components/SiteHeader";
 import { nextMeeting } from "@/lib/calendar";
+import { getEmployeeByEmail } from "@/lib/employees";
+import { getEmployeeKpis, type EmployeeKpi } from "@/lib/square";
 import type { Meeting } from "@/lib/db/schema";
+
+const money = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
 
 function fmtMeeting(m: Meeting) {
   const d = new Date(m.meetingDate + "T00:00:00Z").toLocaleDateString("en-US", {
@@ -31,6 +35,21 @@ export default async function Home() {
     // calendar table not set up yet — no banner
   }
 
+  // Personal KPIs for the signed-in staffer (if linked to Square).
+  let myKpis: EmployeeKpi[] | undefined;
+  const email = session?.user?.email;
+  if (email) {
+    try {
+      const me = await getEmployeeByEmail(email);
+      if (me?.squareTeamMemberId) {
+        const r = await getEmployeeKpis(me.squareTeamMemberId);
+        if (r.configured && "periods" in r) myKpis = r.periods;
+      }
+    } catch {
+      // Square not set up or DB not migrated — just skip the section.
+    }
+  }
+
   return (
     <>
       <SiteHeader />
@@ -57,6 +76,35 @@ export default async function Home() {
             consistent across the team.
           </p>
         </div>
+
+        {myKpis && (
+          <section style={{ marginBottom: 36 }}>
+            <h2 style={{ fontFamily: "var(--font-serif)", fontWeight: 600, fontSize: "1.4rem", margin: "0 0 14px" }}>
+              Your numbers
+            </h2>
+            <div className="grid">
+              {myKpis.map((p) => (
+                <div className="card" key={p.label} style={{ cursor: "default" }}>
+                  <h3>{p.label}</h3>
+                  <p style={{ margin: "8px 0 2px" }}>
+                    <span className="muted">Tips</span>{" "}
+                    <strong style={{ fontFamily: "var(--font-serif)", fontSize: "1.5rem" }}>{money.format(p.tips)}</strong>
+                  </p>
+                  <p style={{ margin: "2px 0" }}>
+                    <span className="muted">Clients</span> <strong>{p.clients}</strong>
+                  </p>
+                  <p style={{ margin: "2px 0" }}>
+                    <span className="muted">Retention</span>{" "}
+                    <strong>{p.retention === null ? "—" : `${Math.round(p.retention * 100)}%`}</strong>
+                  </p>
+                </div>
+              ))}
+            </div>
+            <p className="muted" style={{ fontSize: "0.8rem", marginTop: 8 }}>
+              Retention = share of your clients in the period who are repeat clients (2+ visits in the last 90 days).
+            </p>
+          </section>
+        )}
 
         <div className="grid">
           <Link href="/schedule" className="card">
@@ -105,16 +153,9 @@ export default async function Home() {
             <span className="badge">Browse files →</span>
           </Link>
           {isAdmin && (
-            <Link href="/kpis" className="card">
-              <h3>KPIs</h3>
-              <p>Sales performance and business metrics from Square.</p>
-              <span className="badge">View KPIs →</span>
-            </Link>
-          )}
-          {isAdmin && (
             <Link href="/admin" className="card">
               <h3>Admin</h3>
-              <p>Upload new documents and manage what the team can see.</p>
+              <p>Upload documents, manage the team, and view business KPIs.</p>
               <span className="badge">Manage content →</span>
             </Link>
           )}

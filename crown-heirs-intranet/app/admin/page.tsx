@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import SiteHeader from "@/components/SiteHeader";
@@ -22,6 +23,13 @@ export default async function AdminPage() {
             Upload handbooks, policies, and training materials. Choose a category
             so each file shows up in the right section for the team.
           </p>
+        </div>
+        <div className="grid" style={{ marginBottom: 28 }}>
+          <Link href="/kpis" className="card">
+            <h3>Business KPIs</h3>
+            <p>Salon-wide sales, tips, transaction count, and average ticket from Square. Admins only.</p>
+            <span className="badge">View KPIs →</span>
+          </Link>
         </div>
         <InitDbButton />
         <AdminPanel />

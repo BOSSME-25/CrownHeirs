@@ -61,6 +61,7 @@ function readForm(formData: FormData) {
     whyCrownHeirs: get("whyCrownHeirs"),
     fiveYearPlan: get("fiveYearPlan"),
     favoriteAway: get("favoriteAway"),
+    squareTeamMemberId: get("squareTeamMemberId"),
   };
 }
 

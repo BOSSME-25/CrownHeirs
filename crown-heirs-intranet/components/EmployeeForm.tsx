@@ -22,9 +22,11 @@ function Options({ list }: { list: { value: string; label: string }[] }) {
 export default function EmployeeForm({
   action,
   employee,
+  squareTeamMembers,
 }: {
   action: (formData: FormData) => void;
   employee?: Employee;
+  squareTeamMembers?: { id: string; name: string }[];
 }) {
   const e = employee;
   return (
@@ -106,6 +108,25 @@ export default function EmployeeForm({
         <label htmlFor="notes">Notes (admins only)</label>
         <textarea id="notes" name="notes" rows={3} defaultValue={e?.notes ?? ""} />
       </div>
+
+      {squareTeamMembers && (
+        <div className="field">
+          <label htmlFor="squareTeamMemberId">Square team member (for personal KPIs)</label>
+          {squareTeamMembers.length === 0 ? (
+            <input
+              id="squareTeamMemberId"
+              name="squareTeamMemberId"
+              defaultValue={e?.squareTeamMemberId ?? ""}
+              placeholder="Square team member ID"
+            />
+          ) : (
+            <select id="squareTeamMemberId" name="squareTeamMemberId" defaultValue={e?.squareTeamMemberId ?? ""}>
+              <option value="">— not linked —</option>
+              <Options list={squareTeamMembers.map((m) => ({ value: m.id, label: m.name }))} />
+            </select>
+          )}
+        </div>
+      )}
 
       <h2 style={{ fontFamily: "var(--font-serif)", fontWeight: 600, fontSize: "1.3rem", margin: "8px 0 4px" }}>
         About (shown to the whole team)

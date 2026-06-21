@@ -60,7 +60,6 @@ export default async function SiteHeader() {
           </div>
         </div>
 
-        {isAdmin && <Link href="/kpis" className="nav-top-link">KPIs</Link>}
         {isAdmin && <Link href="/admin" className="nav-top-link">Admin</Link>}
 
         {session?.user && (

@@ -44,6 +44,8 @@ export const employees = pgTable("employees", {
   favoriteAway: text("favorite_away"),
   // Secret token for the private calendar (.ics) subscription feed.
   calendarToken: text("calendar_token"),
+  // Links this employee to their Square team member, for personal KPIs.
+  squareTeamMemberId: text("square_team_member_id"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 });
