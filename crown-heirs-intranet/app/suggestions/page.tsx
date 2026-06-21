@@ -1,6 +1,6 @@
 import { desc } from "drizzle-orm";
 import { auth } from "@/auth";
-import { isAdmin } from "@/lib/access";
+import { getAccess } from "@/lib/perms";
 import SiteHeader from "@/components/SiteHeader";
 import DeleteSuggestionButton from "@/components/DeleteSuggestionButton";
 import { setSuggestionStatus, submitSuggestion } from "@/app/suggestions/actions";
@@ -17,11 +17,12 @@ function fmt(d: Date | string) {
 
 export default async function SuggestionsPage() {
   const session = await auth();
-  const admin = isAdmin(session?.user?.email);
+  const access = await getAccess(session?.user?.email);
+  const canReview = access.canManageTeam; // directors + owners
 
   let all: Suggestion[] = [];
   let setupNeeded = false;
-  if (admin) {
+  if (canReview) {
     try {
       all = await db.select().from(suggestions).orderBy(desc(suggestions.createdAt));
     } catch {
@@ -55,7 +56,7 @@ export default async function SuggestionsPage() {
           </p>
         </form>
 
-        {admin && (
+        {canReview && (
           <>
             <h2 className="title" style={{ fontSize: "1.4rem", marginTop: 36 }}>Submitted suggestions</h2>
             {setupNeeded ? (
