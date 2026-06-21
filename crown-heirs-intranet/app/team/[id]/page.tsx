@@ -4,7 +4,7 @@ import { auth } from "@/auth";
 import { isAdmin } from "@/lib/access";
 import SiteHeader from "@/components/SiteHeader";
 import Avatar from "@/components/Avatar";
-import { getEmployee, labelFor, EMPLOYMENT_TYPES, ROLES } from "@/lib/employees";
+import { getEmployee, getEmployeeByEmail, labelFor, EMPLOYMENT_TYPES, ROLES } from "@/lib/employees";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Profile — Crown Heirs Team Hub" };
@@ -30,6 +30,10 @@ export default async function ProfilePage({
 
   const e = await getEmployee(id);
   if (!e) notFound();
+
+  // Admins (incl. emily/bethany via ADMIN_EMAILS) and managers may see HR info.
+  const viewer = session?.user?.email ? await getEmployeeByEmail(session.user.email) : undefined;
+  const canViewHr = admin || viewer?.role === "manager" || viewer?.role === "admin";
 
   const isMe = e.email.toLowerCase() === session?.user?.email?.toLowerCase();
   const hasAbout = e.bio || e.whyCrownHeirs || e.fiveYearPlan || e.favoriteAway;
@@ -61,6 +65,28 @@ export default async function ProfilePage({
               {labelFor(EMPLOYMENT_TYPES, e.employmentType)} · {labelFor(ROLES, e.role)}
             </span>
           </p>
+
+          {canViewHr && (
+            <>
+              <h2>
+                HR details{" "}
+                <span className="muted" style={{ fontSize: "0.75rem", fontWeight: 400 }}>
+                  (managers &amp; admins only)
+                </span>
+              </h2>
+              <p>
+                {e.personalEmail ? <>Personal email: {e.personalEmail}<br /></> : null}
+                {e.emergencyContactName ? (
+                  <>Emergency contact: {e.emergencyContactName}
+                    {e.emergencyContactPhone ? ` · ${e.emergencyContactPhone}` : ""}<br /></>
+                ) : null}
+                {e.startDate ? <>Start date: {e.startDate}<br /></> : null}
+                {!e.personalEmail && !e.emergencyContactName && !e.startDate && (
+                  <span className="muted">None on file yet.</span>
+                )}
+              </p>
+            </>
+          )}
 
           {hasAbout ? (
             <>
