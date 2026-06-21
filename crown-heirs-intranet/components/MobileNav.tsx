@@ -37,6 +37,7 @@ export default function MobileNav({ isAdmin, email, unread = 0 }: { isAdmin?: bo
 
           <div className="m-group">You</div>
           <Link href="/me">My Profile</Link>
+          {isAdmin && <Link href="/kpis">KPIs</Link>}
           {isAdmin && <Link href="/admin">Admin</Link>}
           {email && <div className="m-email">{email}</div>}
           <form action={signOutAction}>

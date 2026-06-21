@@ -1,5 +1,6 @@
 "use server";
 
+import { randomBytes } from "crypto";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { eq } from "drizzle-orm";
@@ -8,6 +9,20 @@ import { auth } from "@/auth";
 import { db } from "@/lib/db";
 import { employees } from "@/lib/db/schema";
 import { getEmployeeByEmail } from "@/lib/employees";
+
+// Create the private calendar-subscription token if the user doesn't have one.
+export async function ensureCalendarToken() {
+  const session = await auth();
+  const email = session?.user?.email;
+  if (!email) throw new Error("Not signed in.");
+  const me = await getEmployeeByEmail(email);
+  if (!me) throw new Error("You’re not on the team roster yet.");
+  if (!me.calendarToken) {
+    const token = randomBytes(24).toString("hex");
+    await db.update(employees).set({ calendarToken: token }).where(eq(employees.id, me.id));
+  }
+  revalidatePath("/me");
+}
 
 const IMAGE_EXT = [".png", ".jpg", ".jpeg", ".webp", ".gif"];
 

@@ -105,6 +105,13 @@ export default async function Home() {
             <span className="badge">Browse files →</span>
           </Link>
           {isAdmin && (
+            <Link href="/kpis" className="card">
+              <h3>KPIs</h3>
+              <p>Sales performance and business metrics from Square.</p>
+              <span className="badge">View KPIs →</span>
+            </Link>
+          )}
+          {isAdmin && (
             <Link href="/admin" className="card">
               <h3>Admin</h3>
               <p>Upload new documents and manage what the team can see.</p>

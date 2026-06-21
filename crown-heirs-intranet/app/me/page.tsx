@@ -1,8 +1,9 @@
 import { auth } from "@/auth";
 import SiteHeader from "@/components/SiteHeader";
 import Avatar from "@/components/Avatar";
-import { updateMyProfile } from "@/app/me/actions";
+import { ensureCalendarToken, updateMyProfile } from "@/app/me/actions";
 import { getEmployeeByEmail } from "@/lib/employees";
+import { APP_URL } from "@/lib/email";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "My Profile — Crown Heirs Team Hub" };
@@ -70,6 +71,32 @@ export default async function MyProfilePage() {
             </div>
             <button className="btn" type="submit">Save my profile</button>
           </form>
+        )}
+
+        {me && (
+          <div className="prose" style={{ marginTop: 24 }}>
+            <h2>Sync to your calendar</h2>
+            <p className="muted" style={{ marginBottom: 12 }}>
+              Subscribe to get your shifts, meetings, and approved time off in Google
+              Calendar (or Apple Calendar) — it updates automatically.
+            </p>
+            {me.calendarToken ? (
+              <>
+                <p style={{ marginBottom: 8 }}>Your private subscription link:</p>
+                <code style={{ display: "block", wordBreak: "break-all", background: "var(--surface-dim)", padding: "10px 12px", borderRadius: "var(--r-s)", fontSize: "0.82rem" }}>
+                  {APP_URL}/api/calendar/{me.calendarToken}
+                </code>
+                <p className="muted" style={{ marginTop: 10 }}>
+                  In Google Calendar: <strong>Other calendars → + → From URL</strong>, paste the link, and add.
+                  Keep this link private — anyone with it can see your schedule.
+                </p>
+              </>
+            ) : (
+              <form action={ensureCalendarToken}>
+                <button className="btn btn-ghost" type="submit">Create my calendar link</button>
+              </form>
+            )}
+          </div>
         )}
       </main>
     </>

@@ -42,6 +42,8 @@ export const employees = pgTable("employees", {
   whyCrownHeirs: text("why_crown_heirs"),
   fiveYearPlan: text("five_year_plan"),
   favoriteAway: text("favorite_away"),
+  // Secret token for the private calendar (.ics) subscription feed.
+  calendarToken: text("calendar_token"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 });

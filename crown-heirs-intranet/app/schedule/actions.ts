@@ -9,6 +9,7 @@ import { db } from "@/lib/db";
 import { employees, shiftDuties, shifts, swapRequests } from "@/lib/db/schema";
 import { getEmployeeByEmail } from "@/lib/employees";
 import { addDays } from "@/lib/schedule";
+import { adminEmails, emailLayout, sendEmail } from "@/lib/email";
 
 async function requireAdmin() {
   const session = await auth();
@@ -114,6 +115,23 @@ export async function publishWeek(weekStartYMD: string) {
     .update(shifts)
     .set({ published: true })
     .where(and(gte(shifts.shiftDate, weekStartYMD), lte(shifts.shiftDate, end)));
+
+  // Notify staff who have shifts this week.
+  const rows = await db
+    .select({ email: employees.email })
+    .from(shifts)
+    .innerJoin(employees, eq(shifts.employeeId, employees.id))
+    .where(and(gte(shifts.shiftDate, weekStartYMD), lte(shifts.shiftDate, end)));
+  const emails = [...new Set(rows.map((r) => r.email))];
+  await sendEmail({
+    to: emails,
+    subject: "This week’s schedule is posted",
+    html: emailLayout(
+      "Schedule posted",
+      `The schedule for the week of ${weekStartYMD} has been published. Check your shifts in the Team Hub.`,
+      "/schedule",
+    ),
+  });
   revalidatePath("/schedule");
 }
 
@@ -187,6 +205,23 @@ export async function requestSwap(shiftId: string, formData: FormData) {
     targetEmployeeId: typeof target === "string" && target ? target : null,
     reason: typeof reason === "string" && reason.trim() ? reason.trim() : null,
   });
+
+  const info = await db
+    .select({ date: shifts.shiftDate, name: employees.fullName })
+    .from(shifts)
+    .innerJoin(employees, eq(shifts.employeeId, employees.id))
+    .where(eq(shifts.id, shiftId));
+  if (info[0]) {
+    await sendEmail({
+      to: adminEmails(),
+      subject: `Shift swap requested — ${info[0].name}`,
+      html: emailLayout(
+        "Shift swap requested",
+        `<strong>${info[0].name}</strong> requested a swap for their shift on ${info[0].date}.`,
+        `/schedule/${shiftId}`,
+      ),
+    });
+  }
   revalidatePath(`/schedule/${shiftId}`);
   revalidatePath("/schedule");
 }
@@ -211,6 +246,23 @@ export async function decideSwap(swapId: string, approve: boolean, formData: For
       .update(swapRequests)
       .set({ status: "denied", decidedBy: session?.user?.email, decidedAt: new Date() })
       .where(eq(swapRequests.id, swapId));
+  }
+
+  // Notify the staffer who requested the swap.
+  const reqRows = await db
+    .select({ email: employees.email, name: employees.fullName })
+    .from(employees)
+    .where(eq(employees.id, swap.requestedById));
+  if (reqRows[0]) {
+    await sendEmail({
+      to: reqRows[0].email,
+      subject: `Your shift swap was ${approve ? "approved" : "denied"}`,
+      html: emailLayout(
+        `Swap ${approve ? "approved" : "denied"}`,
+        `Hi ${reqRows[0].name.split(" ")[0]}, your shift swap request was <strong>${approve ? "approved" : "denied"}</strong>.`,
+        "/schedule",
+      ),
+    });
   }
   revalidatePath(`/schedule/${swap.shiftId}`);
   revalidatePath("/schedule");
