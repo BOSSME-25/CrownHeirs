@@ -99,6 +99,55 @@ export async function upcomingEvents(days = 60): Promise<CalendarItem[]> {
   return items;
 }
 
+/** All events within a given month (meetings, birthdays, and time off
+ *  expanded to each covered day) — for the month-grid view. */
+export async function monthEvents(year: number, month0: number): Promise<CalendarItem[]> {
+  const mm = String(month0 + 1).padStart(2, "0");
+  const first = `${year}-${mm}-01`;
+  const lastDayNum = new Date(Date.UTC(year, month0 + 1, 0)).getUTCDate();
+  const last = `${year}-${mm}-${String(lastDayNum).padStart(2, "0")}`;
+  const items: CalendarItem[] = [];
+
+  const ms = await db
+    .select()
+    .from(meetings)
+    .where(and(gte(meetings.meetingDate, first), lte(meetings.meetingDate, last)));
+  for (const m of ms) {
+    items.push({
+      kind: "meeting", id: m.id, date: m.meetingDate, title: m.title,
+      time: m.startTime, location: m.location, notes: m.notes, url: m.meetingUrl,
+    });
+  }
+
+  const emps = await db
+    .select({ name: employees.fullName, bday: employees.birthday })
+    .from(employees)
+    .where(eq(employees.status, "active"));
+  for (const e of emps) {
+    if (e.bday && e.bday.slice(5, 7) === mm) {
+      items.push({ kind: "birthday", date: `${year}-${mm}-${e.bday.slice(8, 10)}`, title: `${e.name}’s birthday` });
+    }
+  }
+
+  const offs = await db
+    .select({ name: employees.fullName, start: timeOffRequests.startDate, end: timeOffRequests.endDate })
+    .from(timeOffRequests)
+    .innerJoin(employees, eq(timeOffRequests.employeeId, employees.id))
+    .where(and(eq(timeOffRequests.status, "approved"), lte(timeOffRequests.startDate, last), gte(timeOffRequests.endDate, first)));
+  for (const o of offs) {
+    const s = o.start < first ? first : o.start;
+    const e2 = o.end > last ? last : o.end;
+    const cur = new Date(s + "T00:00:00Z");
+    const endD = new Date(e2 + "T00:00:00Z");
+    while (cur <= endD) {
+      items.push({ kind: "timeoff", date: ymd(cur), title: `${o.name} off` });
+      cur.setUTCDate(cur.getUTCDate() + 1);
+    }
+  }
+
+  return items;
+}
+
 /** The soonest meeting within `days` days (for the dashboard banner). */
 export async function nextMeeting(days = 7): Promise<Meeting | undefined> {
   const today = new Date();

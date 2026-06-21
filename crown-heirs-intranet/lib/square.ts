@@ -43,7 +43,7 @@ async function fetchPayments(
   return out;
 }
 
-export type SquareTeamMember = { id: string; name: string };
+export type SquareTeamMember = { id: string; name: string; email: string | null; phone: string | null };
 
 // Lists active Square team members so an admin can map them to employees.
 export async function listTeamMembers(): Promise<SquareTeamMember[]> {
@@ -62,11 +62,19 @@ export async function listTeamMembers(): Promise<SquareTeamMember[]> {
     });
     if (!res.ok) return [];
     const data = (await res.json()) as {
-      team_members?: { id: string; given_name?: string; family_name?: string }[];
+      team_members?: {
+        id: string;
+        given_name?: string;
+        family_name?: string;
+        email_address?: string;
+        phone_number?: string;
+      }[];
     };
     return (data.team_members ?? []).map((m) => ({
       id: m.id,
       name: [m.given_name, m.family_name].filter(Boolean).join(" ") || m.id,
+      email: m.email_address ?? null,
+      phone: m.phone_number ?? null,
     }));
   } catch {
     return [];

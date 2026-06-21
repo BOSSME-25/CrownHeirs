@@ -43,6 +43,7 @@ export async function POST() {
     await sql`ALTER TABLE employees ADD COLUMN IF NOT EXISTS favorite_away text`;
     await sql`ALTER TABLE employees ADD COLUMN IF NOT EXISTS calendar_token text`;
     await sql`ALTER TABLE employees ADD COLUMN IF NOT EXISTS square_team_member_id text`;
+    await sql`ALTER TABLE employees ADD COLUMN IF NOT EXISTS personal_email text`;
     await sql`
       CREATE TABLE IF NOT EXISTS shifts (
         id uuid PRIMARY KEY DEFAULT gen_random_uuid(),

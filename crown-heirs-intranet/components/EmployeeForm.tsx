@@ -49,6 +49,10 @@ export default function EmployeeForm({
           <input id="email" name="email" type="email" defaultValue={e?.email ?? ""} required />
         </div>
         <div className="field">
+          <label htmlFor="personalEmail">Personal email (from import)</label>
+          <input id="personalEmail" name="personalEmail" type="email" defaultValue={e?.personalEmail ?? ""} />
+        </div>
+        <div className="field">
           <label htmlFor="phone">Phone</label>
           <input id="phone" name="phone" defaultValue={e?.phone ?? ""} />
         </div>

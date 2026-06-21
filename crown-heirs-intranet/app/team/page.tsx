@@ -5,7 +5,7 @@ import SiteHeader from "@/components/SiteHeader";
 import Avatar from "@/components/Avatar";
 import DeleteEmployeeButton from "@/components/DeleteEmployeeButton";
 import { listEmployees, labelFor, EMPLOYMENT_TYPES, ROLES } from "@/lib/employees";
-import { importFromSquare } from "@/app/team/actions";
+import { importFromSquare, importFromHomebaseCsv } from "@/app/team/actions";
 import type { Employee } from "@/lib/db/schema";
 
 export const dynamic = "force-dynamic";
@@ -35,14 +35,25 @@ export default async function TeamPage() {
             <p className="lede">Everyone on the roster. {admin && "As an admin, you can add and edit team members."}</p>
           </div>
           {admin && !setupNeeded && (
-            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+            <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
               <form action={importFromSquare}>
                 <button className="btn btn-ghost" type="submit">⇪ Import from Square</button>
+              </form>
+              <form action={importFromHomebaseCsv} style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                <input type="file" name="file" accept=".csv,text/csv" required
+                  style={{ fontSize: "0.8rem", maxWidth: 170 }} />
+                <button className="btn btn-ghost" type="submit">Import Homebase CSV</button>
               </form>
               <Link className="btn" href="/team/new">+ Add team member</Link>
             </div>
           )}
         </div>
+        {admin && !setupNeeded && (
+          <p className="muted" style={{ fontSize: "0.8rem", marginTop: -8, marginBottom: 18 }}>
+            Imports fill name, phone, personal email, emergency contact, start date &amp; birthday where available.
+            Add each person’s Crown Heirs login email afterward via <strong>Edit</strong>.
+          </p>
+        )}
 
         {setupNeeded ? (
           <div className="notice">

@@ -18,6 +18,8 @@ export const employees = pgTable("employees", {
   id: uuid("id").defaultRandom().primaryKey(),
   // Links to the person's Google login email.
   email: text("email").notNull().unique(),
+  // Personal email (from Homebase/Square import); not the login.
+  personalEmail: text("personal_email"),
   fullName: text("full_name").notNull(),
   phone: text("phone"),
   photoUrl: text("photo_url"),
