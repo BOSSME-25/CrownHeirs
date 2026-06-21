@@ -6,7 +6,8 @@ import { and, eq, gte, lte } from "drizzle-orm";
 import { auth } from "@/auth";
 import { isAdmin } from "@/lib/access";
 import { db } from "@/lib/db";
-import { employees, shiftDuties, shifts } from "@/lib/db/schema";
+import { employees, shiftDuties, shifts, swapRequests } from "@/lib/db/schema";
+import { getEmployeeByEmail } from "@/lib/employees";
 import { addDays } from "@/lib/schedule";
 
 async function requireAdmin() {
@@ -152,4 +153,65 @@ export async function toggleDuty(shiftId: string, dutyId: string, done: boolean)
 
   await db.update(shiftDuties).set({ done }).where(eq(shiftDuties.id, dutyId));
   revalidatePath(`/schedule/${shiftId}`);
+}
+
+// ── Shift swaps ──
+
+export async function requestSwap(shiftId: string, formData: FormData) {
+  const session = await auth();
+  const email = session?.user?.email;
+  if (!email) throw new Error("Not signed in.");
+
+  const [s] = await db
+    .select({ employeeId: shifts.employeeId })
+    .from(shifts)
+    .where(eq(shifts.id, shiftId));
+  if (!s) throw new Error("Shift not found.");
+
+  const me = await getEmployeeByEmail(email);
+  if (!isAdmin(email) && (!me || me.id !== s.employeeId)) {
+    throw new Error("You can only request a swap for your own shift.");
+  }
+
+  const existing = await db
+    .select({ id: swapRequests.id })
+    .from(swapRequests)
+    .where(and(eq(swapRequests.shiftId, shiftId), eq(swapRequests.status, "pending")));
+  if (existing.length) throw new Error("There's already a pending swap for this shift.");
+
+  const target = formData.get("targetEmployeeId");
+  const reason = formData.get("reason");
+  await db.insert(swapRequests).values({
+    shiftId,
+    requestedById: s.employeeId,
+    targetEmployeeId: typeof target === "string" && target ? target : null,
+    reason: typeof reason === "string" && reason.trim() ? reason.trim() : null,
+  });
+  revalidatePath(`/schedule/${shiftId}`);
+  revalidatePath("/schedule");
+}
+
+export async function decideSwap(swapId: string, approve: boolean, formData: FormData) {
+  await requireAdmin();
+  const session = await auth();
+  const [swap] = await db.select().from(swapRequests).where(eq(swapRequests.id, swapId));
+  if (!swap) throw new Error("Request not found.");
+
+  if (approve) {
+    const chosen = formData.get("targetEmployeeId");
+    const targetId = typeof chosen === "string" && chosen ? chosen : swap.targetEmployeeId;
+    if (!targetId) throw new Error("Choose who will take the shift.");
+    await db.update(shifts).set({ employeeId: targetId }).where(eq(shifts.id, swap.shiftId));
+    await db
+      .update(swapRequests)
+      .set({ status: "approved", targetEmployeeId: targetId, decidedBy: session?.user?.email, decidedAt: new Date() })
+      .where(eq(swapRequests.id, swapId));
+  } else {
+    await db
+      .update(swapRequests)
+      .set({ status: "denied", decidedBy: session?.user?.email, decidedAt: new Date() })
+      .where(eq(swapRequests.id, swapId));
+  }
+  revalidatePath(`/schedule/${swap.shiftId}`);
+  revalidatePath("/schedule");
 }

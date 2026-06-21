@@ -78,3 +78,47 @@ export const shiftDuties = pgTable("shift_duties", {
 });
 
 export type ShiftDuty = typeof shiftDuties.$inferSelect;
+
+// ───────────────────────────────────────────────
+// Time-off requests — staff request, admins decide.
+// ───────────────────────────────────────────────
+export const timeOffRequests = pgTable("time_off_requests", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  employeeId: uuid("employee_id")
+    .notNull()
+    .references(() => employees.id, { onDelete: "cascade" }),
+  startDate: date("start_date").notNull(),
+  endDate: date("end_date").notNull(),
+  type: text("type"), // vacation | sick | personal | unpaid
+  note: text("note"),
+  status: text("status").notNull().default("pending"), // pending | approved | denied
+  decidedBy: text("decided_by"),
+  decidedAt: timestamp("decided_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+
+export type TimeOffRequest = typeof timeOffRequests.$inferSelect;
+
+// ───────────────────────────────────────────────
+// Shift swap requests — staff ask to hand off a
+// shift; an admin approves (and reassigns) or denies.
+// ───────────────────────────────────────────────
+export const swapRequests = pgTable("swap_requests", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  shiftId: uuid("shift_id")
+    .notNull()
+    .references(() => shifts.id, { onDelete: "cascade" }),
+  requestedById: uuid("requested_by_id")
+    .notNull()
+    .references(() => employees.id, { onDelete: "cascade" }),
+  targetEmployeeId: uuid("target_employee_id").references(() => employees.id, {
+    onDelete: "set null",
+  }),
+  reason: text("reason"),
+  status: text("status").notNull().default("pending"), // pending | approved | denied
+  decidedBy: text("decided_by"),
+  decidedAt: timestamp("decided_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+
+export type SwapRequest = typeof swapRequests.$inferSelect;

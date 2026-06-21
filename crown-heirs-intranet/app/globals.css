@@ -225,6 +225,21 @@ h1.title {
 .duty-add-form { display: flex; gap: 10px; margin-top: 6px; }
 .duty-add-form input { flex: 1; padding: 10px 14px; border: 1px solid var(--border-mid); border-radius: var(--r-m); font-family: var(--font-ui); font-size: 0.92rem; }
 
+/* ─── Requests (time off + swaps) ─── */
+.shift-badge.swap { color: var(--terra); border-color: var(--terra-lo); }
+.req-list { display: flex; flex-direction: column; gap: 10px; }
+.req { display: flex; align-items: center; justify-content: space-between; gap: 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-m); padding: 14px 18px; }
+.req-title { font-weight: 400; color: var(--ink); }
+.req-meta { color: var(--ink-dim); font-size: 0.84rem; margin-top: 2px; }
+.req-right { display: flex; align-items: center; gap: 12px; }
+.decide-row { display: flex; gap: 8px; }
+.status-badge { font-size: 0.7rem; letter-spacing: 0.06em; text-transform: uppercase; border-radius: var(--r-pill); padding: 3px 12px; border: 1px solid var(--border-mid); color: var(--ink-dim); }
+.status-badge.pending { color: var(--gold); border-color: rgba(200,149,42,0.4); }
+.status-badge.approved { color: #2f6b3c; border-color: rgba(58,122,72,0.4); }
+.status-badge.denied { color: #9a3b2e; border-color: rgba(154,59,46,0.4); }
+.swap-decide { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 12px; }
+.swap-decide select { padding: 10px 14px; border: 1px solid var(--border-mid); border-radius: var(--r-m); font-family: var(--font-ui); font-size: 0.9rem; }
+
 /* ─── Notices ─── */
 .notice {
   border-radius: var(--r-m); padding: 14px 18px; font-size: 0.88rem; margin: 16px 0;

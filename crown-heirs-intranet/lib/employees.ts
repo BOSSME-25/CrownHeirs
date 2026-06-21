@@ -12,6 +12,14 @@ export async function getEmployee(id: string): Promise<Employee | undefined> {
   return rows[0];
 }
 
+export async function getEmployeeByEmail(email: string): Promise<Employee | undefined> {
+  const rows = await db
+    .select()
+    .from(employees)
+    .where(eq(employees.email, email.toLowerCase()));
+  return rows[0];
+}
+
 export const EMPLOYMENT_TYPES = [
   { value: "full_time", label: "Full-time" },
   { value: "part_time", label: "Part-time" },

@@ -56,6 +56,33 @@ export async function POST() {
         created_at timestamptz DEFAULT now()
       )
     `;
+    await sql`
+      CREATE TABLE IF NOT EXISTS time_off_requests (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        employee_id uuid NOT NULL REFERENCES employees(id) ON DELETE CASCADE,
+        start_date date NOT NULL,
+        end_date date NOT NULL,
+        type text,
+        note text,
+        status text NOT NULL DEFAULT 'pending',
+        decided_by text,
+        decided_at timestamptz,
+        created_at timestamptz DEFAULT now()
+      )
+    `;
+    await sql`
+      CREATE TABLE IF NOT EXISTS swap_requests (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        shift_id uuid NOT NULL REFERENCES shifts(id) ON DELETE CASCADE,
+        requested_by_id uuid NOT NULL REFERENCES employees(id) ON DELETE CASCADE,
+        target_employee_id uuid REFERENCES employees(id) ON DELETE SET NULL,
+        reason text,
+        status text NOT NULL DEFAULT 'pending',
+        decided_by text,
+        decided_at timestamptz,
+        created_at timestamptz DEFAULT now()
+      )
+    `;
     return Response.json({ ok: true });
   } catch (err) {
     return Response.json(

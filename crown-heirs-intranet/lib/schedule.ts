@@ -2,6 +2,7 @@ import "server-only";
 import { and, asc, eq, gte, inArray, lte } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { employees, shiftDuties, shifts } from "@/lib/db/schema";
+import { pendingSwapShiftIds } from "@/lib/requests";
 
 // ── Date helpers (work in UTC on plain YYYY-MM-DD strings) ──
 
@@ -66,6 +67,7 @@ export type ShiftWithEmployee = {
   published: boolean;
   dutyTotal: number;
   dutyDone: number;
+  hasSwap: boolean;
 };
 
 /** All shifts for the week starting `ws`. Staff only see published ones. */
@@ -111,10 +113,13 @@ export async function shiftsForWeek(
     tally.set(d.shiftId, t);
   }
 
+  const swapIds = await pendingSwapShiftIds(ids);
+
   return rows.map((r) => ({
     ...r,
     dutyTotal: tally.get(r.id)?.total ?? 0,
     dutyDone: tally.get(r.id)?.done ?? 0,
+    hasSwap: swapIds.has(r.id),
   }));
 }
 

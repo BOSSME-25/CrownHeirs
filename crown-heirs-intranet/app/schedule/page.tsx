@@ -98,6 +98,7 @@ export default async function SchedulePage({
                               <div className="shift-name">{s.employeeName}</div>
                               {s.position && <div className="shift-pos">{s.position}</div>}
                               {!s.published && <span className="shift-badge">Draft</span>}
+                              {s.hasSwap && <span className="shift-badge swap">⇄ Swap</span>}
                               <Link href={`/schedule/${s.id}`} className="shift-duties">
                                 {s.dutyTotal > 0 ? `✓ ${s.dutyDone}/${s.dutyTotal} duties` : "Duties"}
                               </Link>

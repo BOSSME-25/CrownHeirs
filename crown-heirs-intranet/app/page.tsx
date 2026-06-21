@@ -27,6 +27,11 @@ export default async function Home() {
             <p>The weekly schedule — who’s working when. Admins build it; everyone sees it.</p>
             <span className="badge">View schedule →</span>
           </Link>
+          <Link href="/time-off" className="card">
+            <h3>Time Off</h3>
+            <p>Request days off and track approvals. Shift swaps live on each shift.</p>
+            <span className="badge">Request time off →</span>
+          </Link>
           <Link href="/team" className="card">
             <h3>Team</h3>
             <p>The staff roster — names, roles, contact info, and start dates.</p>
