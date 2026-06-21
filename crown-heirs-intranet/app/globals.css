@@ -387,3 +387,29 @@ h1.title {
   from { opacity: 0; transform: translate(-50%, -10px); }
   to   { opacity: 1; transform: translate(-50%, 0); }
 }
+
+/* KPI leaderboard tables */
+.kpi-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--surface, #fff);
+  border-radius: var(--r-s, 8px);
+  overflow: hidden;
+  font-size: 0.92rem;
+}
+.kpi-table th,
+.kpi-table td {
+  padding: 10px 14px;
+  text-align: right;
+  border-bottom: 1px solid var(--line, #eee);
+}
+.kpi-table th {
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-dim, #777);
+  font-weight: 500;
+}
+.kpi-table tbody tr:last-child td { border-bottom: none; }
+.kpi-table tbody tr:first-child td { font-weight: 600; }

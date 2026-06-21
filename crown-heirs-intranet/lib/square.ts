@@ -132,6 +132,57 @@ function dayOf(iso: string) {
   return iso.slice(0, 10);
 }
 
+const KPI_PERIODS: { label: string; days: number }[] = [
+  { label: "Last 7 days", days: 7 },
+  { label: "Last 30 days", days: 30 },
+  { label: "Last 90 days", days: 90 },
+];
+
+// Computes the 7/30/90-day KPIs for one team member from a pre-fetched
+// payments list (so the whole team can share a single Square fetch).
+function computeEmployeeKpis(
+  all: SquarePayment[],
+  teamMemberId: string,
+  now: Date,
+): EmployeeKpi[] {
+  const mine = all.filter(
+    (p) => p.status === "COMPLETED" && p.team_member_id === teamMemberId,
+  );
+
+  // Distinct visit days per identified client (over the fetched window),
+  // used to decide who counts as a "returning" client.
+  const visitDays = new Map<string, Set<string>>();
+  for (const p of mine) {
+    if (!p.customer_id || !p.created_at) continue;
+    const set = visitDays.get(p.customer_id) ?? new Set<string>();
+    set.add(dayOf(p.created_at));
+    visitDays.set(p.customer_id, set);
+  }
+
+  return KPI_PERIODS.map(({ label, days }) => {
+    const since = new Date(now);
+    since.setDate(since.getDate() - days);
+    const sinceISO = since.toISOString();
+    let tipCents = 0;
+    const clients = new Set<string>();
+    let returning = 0;
+    for (const p of mine) {
+      if (!p.created_at || p.created_at < sinceISO) continue;
+      tipCents += p.tip_money?.amount ?? 0;
+      if (p.customer_id && !clients.has(p.customer_id)) {
+        clients.add(p.customer_id);
+        if ((visitDays.get(p.customer_id)?.size ?? 0) >= 2) returning += 1;
+      }
+    }
+    return {
+      label,
+      tips: tipCents / 100,
+      clients: clients.size,
+      retention: clients.size ? returning / clients.size : null,
+    };
+  });
+}
+
 export async function getEmployeeKpis(
   teamMemberId: string,
 ): Promise<
@@ -146,51 +197,33 @@ export async function getEmployeeKpis(
     begin90.setDate(begin90.getDate() - 90);
     // Cached for 15 min — this is read on every staffer's dashboard.
     const all = await fetchPayments(begin90.toISOString(), 900);
-    const mine = all.filter(
-      (p) => p.status === "COMPLETED" && p.team_member_id === teamMemberId,
-    );
+    return { configured: true, periods: computeEmployeeKpis(all, teamMemberId, now) };
+  } catch (err) {
+    return { configured: true, error: err instanceof Error ? err.message : "Square request failed" };
+  }
+}
 
-    // How many distinct days each identified client visited (over 90 days),
-    // used to decide who is a "returning" client.
-    const visitDays = new Map<string, Set<string>>();
-    for (const p of mine) {
-      if (!p.customer_id || !p.created_at) continue;
-      const set = visitDays.get(p.customer_id) ?? new Set<string>();
-      set.add(dayOf(p.created_at));
-      visitDays.set(p.customer_id, set);
-    }
+export type TeamKpiRow = { name: string; periods: EmployeeKpi[] };
 
-    function periodKpi(label: string, days: number): EmployeeKpi {
-      const since = new Date(now);
-      since.setDate(since.getDate() - days);
-      const sinceISO = since.toISOString();
-      let tipCents = 0;
-      const clients = new Set<string>();
-      let returning = 0;
-      for (const p of mine) {
-        if (!p.created_at || p.created_at < sinceISO) continue;
-        tipCents += p.tip_money?.amount ?? 0;
-        if (p.customer_id && !clients.has(p.customer_id)) {
-          clients.add(p.customer_id);
-          if ((visitDays.get(p.customer_id)?.size ?? 0) >= 2) returning += 1;
-        }
-      }
-      return {
-        label,
-        tips: tipCents / 100,
-        clients: clients.size,
-        retention: clients.size ? returning / clients.size : null,
-      };
-    }
-
-    return {
-      configured: true,
-      periods: [
-        periodKpi("Last 7 days", 7),
-        periodKpi("Last 30 days", 30),
-        periodKpi("Last 90 days", 90),
-      ],
-    };
+// Admin leaderboard: every linked employee's KPIs from one Square fetch.
+export async function getTeamKpis(
+  members: { teamMemberId: string; name: string }[],
+): Promise<
+  | { configured: false }
+  | { configured: true; rows: TeamKpiRow[]; periodLabels: string[] }
+  | { configured: true; error: string }
+> {
+  if (!process.env.SQUARE_ACCESS_TOKEN) return { configured: false };
+  try {
+    const now = new Date();
+    const begin90 = new Date(now);
+    begin90.setDate(begin90.getDate() - 90);
+    const all = await fetchPayments(begin90.toISOString(), 900);
+    const rows = members.map((m) => ({
+      name: m.name,
+      periods: computeEmployeeKpis(all, m.teamMemberId, now),
+    }));
+    return { configured: true, rows, periodLabels: KPI_PERIODS.map((p) => p.label) };
   } catch (err) {
     return { configured: true, error: err instanceof Error ? err.message : "Square request failed" };
   }
