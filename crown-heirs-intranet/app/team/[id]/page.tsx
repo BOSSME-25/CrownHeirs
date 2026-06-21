@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { auth } from "@/auth";
-import { isAdmin } from "@/lib/access";
+import { getAccess } from "@/lib/perms";
 import SiteHeader from "@/components/SiteHeader";
 import Avatar from "@/components/Avatar";
-import { getEmployee, getEmployeeByEmail, labelFor, EMPLOYMENT_TYPES, ROLES } from "@/lib/employees";
+import { getEmployee, labelFor, EMPLOYMENT_TYPES, ROLES } from "@/lib/employees";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Profile — Crown Heirs Team Hub" };
@@ -25,15 +25,11 @@ export default async function ProfilePage({
   params: Promise<{ id: string }>;
 }) {
   const session = await auth();
-  const admin = isAdmin(session?.user?.email);
+  const access = await getAccess(session?.user?.email);
   const { id } = await params;
 
   const e = await getEmployee(id);
   if (!e) notFound();
-
-  // Admins (incl. emily/bethany via ADMIN_EMAILS) and managers may see HR info.
-  const viewer = session?.user?.email ? await getEmployeeByEmail(session.user.email) : undefined;
-  const canViewHr = admin || viewer?.role === "manager" || viewer?.role === "admin";
 
   const isMe = e.email.toLowerCase() === session?.user?.email?.toLowerCase();
   const hasAbout = e.bio || e.whyCrownHeirs || e.fiveYearPlan || e.favoriteAway;
@@ -66,7 +62,7 @@ export default async function ProfilePage({
             </span>
           </p>
 
-          {canViewHr && (
+          {access.canViewHr && (
             <>
               <h2>
                 HR details{" "}
@@ -101,7 +97,7 @@ export default async function ProfilePage({
 
           <div style={{ display: "flex", gap: 12, marginTop: 18 }}>
             {isMe && <Link className="btn" href="/me">Edit my profile</Link>}
-            {admin && <Link className="btn btn-ghost" href={`/team/${e.id}/edit`}>Edit (admin)</Link>}
+            {access.canManageTeam && <Link className="btn btn-ghost" href={`/team/${e.id}/edit`}>Edit</Link>}
           </div>
         </div>
       </main>

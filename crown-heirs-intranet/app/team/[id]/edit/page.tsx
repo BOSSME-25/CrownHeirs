@@ -1,6 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { isAdmin } from "@/lib/access";
+import { getAccess, assignableRoles } from "@/lib/perms";
 import SiteHeader from "@/components/SiteHeader";
 import EmployeeForm from "@/components/EmployeeForm";
 import { getEmployee } from "@/lib/employees";
@@ -15,14 +15,15 @@ export default async function EditEmployeePage({
   params: Promise<{ id: string }>;
 }) {
   const session = await auth();
-  if (!isAdmin(session?.user?.email)) redirect("/team");
+  const access = await getAccess(session?.user?.email);
+  if (!access.canManageTeam) redirect("/team");
 
   const { id } = await params;
   const employee = await getEmployee(id);
   if (!employee) notFound();
 
   const action = updateEmployee.bind(null, id);
-  const squareTeamMembers = await listTeamMembers();
+  const squareTeamMembers = access.canSystem ? await listTeamMembers() : undefined;
 
   return (
     <>
@@ -32,7 +33,7 @@ export default async function EditEmployeePage({
           <div className="eyebrow">Team</div>
           <h1 className="title">Edit {employee.fullName}</h1>
         </div>
-        <EmployeeForm action={action} employee={employee} squareTeamMembers={squareTeamMembers} />
+        <EmployeeForm action={action} employee={employee} squareTeamMembers={squareTeamMembers} roleOptions={assignableRoles(access.canSystem)} />
       </main>
     </>
   );

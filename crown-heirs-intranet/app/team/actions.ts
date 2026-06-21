@@ -7,6 +7,7 @@ import { eq } from "drizzle-orm";
 import { put } from "@vercel/blob";
 import { auth } from "@/auth";
 import { isAdmin } from "@/lib/access";
+import { getAccess } from "@/lib/perms";
 import { db } from "@/lib/db";
 import { employees } from "@/lib/db/schema";
 import { listTeamMembers } from "@/lib/square";
@@ -30,10 +31,40 @@ async function uploadPhoto(formData: FormData): Promise<string | undefined> {
   return blob.url;
 }
 
-async function requireAdmin() {
+// CEO/COO only — system-level actions (imports, integrations).
+async function requireSystem() {
   const session = await auth();
-  if (!isAdmin(session?.user?.email)) {
-    throw new Error("Only admins can manage the team.");
+  const access = await getAccess(session?.user?.email);
+  if (!access.canSystem) {
+    throw new Error("Only the CEO/COO can do this.");
+  }
+}
+
+// Directors and above — managing the team roster.
+async function requireManageTeam() {
+  const session = await auth();
+  const access = await getAccess(session?.user?.email);
+  if (!access.canManageTeam) {
+    throw new Error("You don’t have permission to manage the team.");
+  }
+  return access;
+}
+
+// Guards a director from touching protected people or granting high roles.
+function guardDirectorScope(
+  access: { canSystem: boolean },
+  opts: { targetEmail?: string; targetRole?: string | null; newRole?: string | null },
+) {
+  if (access.canSystem) return; // CEO/COO unrestricted
+  const protectedRole = (r?: string | null) => r === "director" || r === "admin";
+  if (opts.targetEmail && isAdmin(opts.targetEmail)) {
+    throw new Error("Only the CEO/COO can manage that account.");
+  }
+  if (protectedRole(opts.targetRole)) {
+    throw new Error("Only the CEO/COO can manage Directors.");
+  }
+  if (protectedRole(opts.newRole)) {
+    throw new Error("Only the CEO/COO can grant Director access.");
   }
 }
 
@@ -69,11 +100,12 @@ function readForm(formData: FormData) {
 }
 
 export async function createEmployee(formData: FormData) {
-  await requireAdmin();
+  const access = await requireManageTeam();
   const data = readForm(formData);
   if (!data.email || !data.fullName) {
     throw new Error("Name and email are required.");
   }
+  guardDirectorScope(access, { newRole: data.role });
   const photoUrl = await uploadPhoto(formData);
   await db.insert(employees).values({ ...data, photoUrl: photoUrl ?? null });
   revalidatePath("/team");
@@ -81,11 +113,17 @@ export async function createEmployee(formData: FormData) {
 }
 
 export async function updateEmployee(id: string, formData: FormData) {
-  await requireAdmin();
+  const access = await requireManageTeam();
   const data = readForm(formData);
   if (!data.email || !data.fullName) {
     throw new Error("Name and email are required.");
   }
+  const target = (await db.select().from(employees).where(eq(employees.id, id)))[0];
+  guardDirectorScope(access, {
+    targetEmail: target?.email,
+    targetRole: target?.role,
+    newRole: data.role,
+  });
   const photoUrl = await uploadPhoto(formData);
   await db
     .update(employees)
@@ -101,7 +139,9 @@ export async function updateEmployee(id: string, formData: FormData) {
 }
 
 export async function deleteEmployee(id: string) {
-  await requireAdmin();
+  const access = await requireManageTeam();
+  const target = (await db.select().from(employees).where(eq(employees.id, id)))[0];
+  guardDirectorScope(access, { targetEmail: target?.email, targetRole: target?.role });
   await db.delete(employees).where(eq(employees.id, id));
   revalidatePath("/team");
   redirect(`/team?ok=${encodeURIComponent("Team member removed")}`);
@@ -111,7 +151,7 @@ export async function deleteEmployee(id: string) {
 // (linking them), otherwise creates a new record with a placeholder email
 // that an admin replaces later with the person's real Google login.
 export async function importFromSquare() {
-  await requireAdmin();
+  await requireSystem();
   const members = await listTeamMembers();
   if (members.length === 0) {
     redirect(`/team?ok=${encodeURIComponent("No Square team members found — check the Square connection/permissions.")}`);
@@ -198,7 +238,7 @@ function toYmd(s: string | undefined): string | null {
 }
 
 export async function importFromHomebaseCsv(formData: FormData) {
-  await requireAdmin();
+  await requireSystem();
   const file = formData.get("file");
   if (!(file instanceof File) || file.size === 0) {
     redirect(`/team?ok=${encodeURIComponent("No CSV file selected.")}`);

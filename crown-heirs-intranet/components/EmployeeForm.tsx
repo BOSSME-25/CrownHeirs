@@ -23,10 +23,12 @@ export default function EmployeeForm({
   action,
   employee,
   squareTeamMembers,
+  roleOptions = ROLES,
 }: {
   action: (formData: FormData) => void;
   employee?: Employee;
   squareTeamMembers?: { id: string; name: string }[];
+  roleOptions?: { value: string; label: string }[];
 }) {
   const e = employee;
   return (
@@ -70,7 +72,7 @@ export default function EmployeeForm({
         <div className="field">
           <label htmlFor="role">Access role</label>
           <select id="role" name="role" defaultValue={e?.role ?? "staff"}>
-            <Options list={ROLES} />
+            <Options list={roleOptions} />
           </select>
         </div>
         <div className="field">

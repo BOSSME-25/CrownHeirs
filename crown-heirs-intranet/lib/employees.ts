@@ -46,6 +46,7 @@ export const WAGE_TYPES = [
 export const ROLES = [
   { value: "staff", label: "Staff" },
   { value: "manager", label: "Manager" },
+  { value: "director", label: "Director" },
   { value: "admin", label: "Admin" },
 ];
 

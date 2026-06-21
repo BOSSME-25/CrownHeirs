@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { auth } from "@/auth";
-import { isAdmin } from "@/lib/access";
+import { getAccess } from "@/lib/perms";
 import SiteHeader from "@/components/SiteHeader";
 import Avatar from "@/components/Avatar";
 import DeleteEmployeeButton from "@/components/DeleteEmployeeButton";
@@ -13,7 +13,9 @@ export const metadata = { title: "Team — Crown Heirs Team Hub" };
 
 export default async function TeamPage() {
   const session = await auth();
-  const admin = isAdmin(session?.user?.email);
+  const access = await getAccess(session?.user?.email);
+  const canManage = access.canManageTeam;
+  const canSystem = access.canSystem;
 
   let employees: Employee[] = [];
   let setupNeeded = false;
@@ -32,23 +34,27 @@ export default async function TeamPage() {
           <div>
             <div className="eyebrow">Team</div>
             <h1 className="title">The Crown Heirs Team</h1>
-            <p className="lede">Everyone on the roster. {admin && "As an admin, you can add and edit team members."}</p>
+            <p className="lede">Everyone on the roster. {canManage && "As a manager/director, you can add and edit team members."}</p>
           </div>
-          {admin && !setupNeeded && (
+          {canManage && !setupNeeded && (
             <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
-              <form action={importFromSquare}>
-                <button className="btn btn-ghost" type="submit">⇪ Import from Square</button>
-              </form>
-              <form action={importFromHomebaseCsv} style={{ display: "flex", gap: 6, alignItems: "center" }}>
-                <input type="file" name="file" accept=".csv,text/csv" required
-                  style={{ fontSize: "0.8rem", maxWidth: 170 }} />
-                <button className="btn btn-ghost" type="submit">Import Homebase CSV</button>
-              </form>
+              {canSystem && (
+                <>
+                  <form action={importFromSquare}>
+                    <button className="btn btn-ghost" type="submit">⇪ Import from Square</button>
+                  </form>
+                  <form action={importFromHomebaseCsv} style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                    <input type="file" name="file" accept=".csv,text/csv" required
+                      style={{ fontSize: "0.8rem", maxWidth: 170 }} />
+                    <button className="btn btn-ghost" type="submit">Import Homebase CSV</button>
+                  </form>
+                </>
+              )}
               <Link className="btn" href="/team/new">+ Add team member</Link>
             </div>
           )}
         </div>
-        {admin && !setupNeeded && (
+        {canSystem && !setupNeeded && (
           <p className="muted" style={{ fontSize: "0.8rem", marginTop: -8, marginBottom: 18 }}>
             Imports fill name, phone, personal email, emergency contact, start date &amp; birthday where available.
             Add each person’s Crown Heirs login email afterward via <strong>Edit</strong>.
@@ -57,12 +63,12 @@ export default async function TeamPage() {
 
         {setupNeeded ? (
           <div className="notice">
-            The team database isn’t set up yet. {admin
+            The team database isn’t set up yet. {canSystem
               ? "Go to the Admin page and click “Set up database” to finish, then come back here."
               : "An admin needs to finish setup."}
           </div>
         ) : employees.length === 0 ? (
-          <p className="muted">No team members yet. {admin && "Click “Add team member” to start."}</p>
+          <p className="muted">No team members yet. {canManage && "Click “Add team member” to start."}</p>
         ) : (
           <div className="grid">
             {employees.map((e) => (
@@ -83,7 +89,7 @@ export default async function TeamPage() {
                     {e.status === "inactive" ? " · Inactive" : ""}
                   </span>
                 </p>
-                {admin && (
+                {canManage && (
                   <>
                     {e.wage != null && (
                       <p className="muted" style={{ marginTop: 8 }}>
