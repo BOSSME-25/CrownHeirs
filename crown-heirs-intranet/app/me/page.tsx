@@ -1,6 +1,6 @@
 import { auth } from "@/auth";
 import SiteHeader from "@/components/SiteHeader";
-import Avatar from "@/components/Avatar";
+import PhotoCropField from "@/components/PhotoCropField";
 import { ensureCalendarToken, updateMyProfile } from "@/app/me/actions";
 import { getEmployeeByEmail } from "@/lib/employees";
 import { APP_URL } from "@/lib/email";
@@ -39,13 +39,7 @@ export default async function MyProfilePage() {
           <div className="notice">You’re not on the team roster yet. Ask an admin to add you under Team.</div>
         ) : (
           <form className="prose" action={updateMyProfile}>
-            <div className="field">
-              <label htmlFor="photo">Profile photo</label>
-              {me.photoUrl && (
-                <Avatar name={me.fullName} src={me.photoUrl} size={64} />
-              )}
-              <input id="photo" name="photo" type="file" accept="image/*" style={{ marginTop: 8 }} />
-            </div>
+            <PhotoCropField currentUrl={me.photoUrl} />
             <div className="form-grid">
               <div className="field">
                 <label htmlFor="phone">Phone</label>

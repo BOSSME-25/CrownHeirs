@@ -4,6 +4,7 @@ import { getAccess } from "@/lib/perms";
 import SiteHeader from "@/components/SiteHeader";
 import { getOrgSettings, FONT_PRESETS } from "@/lib/orgConfig";
 import { canEncrypt } from "@/lib/crypto";
+import { aiConfigured } from "@/lib/ai";
 import { saveSettings } from "@/app/admin/settings/actions";
 
 export const dynamic = "force-dynamic";
@@ -23,6 +24,7 @@ export default async function SettingsPage() {
   }
   const hasToken = !!settings.pos?.squareTokenEnc;
   const provider = settings.pos?.provider ?? (process.env.SQUARE_ACCESS_TOKEN ? "square" : "none");
+  const aiOn = aiConfigured();
 
   return (
     <>
@@ -80,6 +82,24 @@ export default async function SettingsPage() {
                 <label htmlFor="loginImage">Login background {settings.loginImageUrl && "(set — replace)"}</label>
                 <input id="loginImage" name="loginImage" type="file" accept="image/*" />
               </div>
+            </div>
+
+            <h2 style={{ marginTop: 18 }}>AI writing assistant</h2>
+            <div className={aiOn ? "notice ok" : "notice"} style={{ marginTop: 0 }}>
+              {aiOn ? (
+                <>
+                  <strong>Connected.</strong> The “✨ Help me write” buttons appear on team profiles. It drafts
+                  short bios and answers from a few keywords — costs a fraction of a cent per use (model: Haiku, the
+                  fast, low-cost option). To set a monthly spend cap, use the Anthropic console.
+                </>
+              ) : (
+                <>
+                  <strong>Not set up.</strong> To turn on the “✨ Help me write” buttons on team profiles: create a
+                  key at <code>console.anthropic.com</code> (Settings → API Keys), add a little billing credit, then
+                  add it to Vercel as <code>ANTHROPIC_API_KEY</code> and redeploy. It uses the fast, low-cost Haiku
+                  model — pennies for the whole team. The key lives only in Vercel; never paste it here or into code.
+                </>
+              )}
             </div>
 
             <h2 style={{ marginTop: 18 }}>Point of Sale (KPIs)</h2>

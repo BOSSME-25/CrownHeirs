@@ -9,6 +9,7 @@ import { auth } from "@/auth";
 import { db } from "@/lib/db";
 import { employees } from "@/lib/db/schema";
 import { getEmployeeByEmail } from "@/lib/employees";
+import { logAudit, diffDetail } from "@/lib/audit";
 
 // Create the private calendar-subscription token if the user doesn't have one.
 export async function ensureCalendarToken() {
@@ -54,19 +55,25 @@ export async function updateMyProfile(formData: FormData) {
   };
   const photoUrl = await uploadPhoto(formData);
 
-  await db
-    .update(employees)
-    .set({
-      phone: get("phone"),
-      birthday: get("birthday"),
-      bio: get("bio"),
-      whyCrownHeirs: get("whyCrownHeirs"),
-      fiveYearPlan: get("fiveYearPlan"),
-      favoriteAway: get("favoriteAway"),
-      ...(photoUrl !== undefined ? { photoUrl } : {}),
-      updatedAt: new Date(),
-    })
-    .where(eq(employees.id, me.id));
+  // Only touch a field when its input was actually present in the submission.
+  // This makes it impossible for a stale or partial form to blank out a
+  // staffer's saved answers — a missing field is left untouched, while a
+  // present-but-empty field still clears (an intentional edit).
+  const set: Record<string, unknown> = { updatedAt: new Date() };
+  for (const k of ["phone", "birthday", "bio", "whyCrownHeirs", "fiveYearPlan", "favoriteAway"]) {
+    if (formData.has(k)) set[k] = get(k);
+  }
+  if (photoUrl !== undefined) set.photoUrl = photoUrl;
+
+  await db.update(employees).set(set).where(eq(employees.id, me.id));
+
+  // Record old→new so a staffer's edits (and prior answers) are recoverable.
+  const detail = diffDetail(me as unknown as Record<string, unknown>, set, [
+    "phone", "birthday", "bio", "whyCrownHeirs", "fiveYearPlan", "favoriteAway",
+  ]);
+  if (detail) {
+    await logAudit({ actorEmail: email, action: "update", entity: "employee", entityId: me.id, detail: `Self-edit — ${detail}` });
+  }
 
   revalidatePath("/team");
   revalidatePath(`/team/${me.id}`);

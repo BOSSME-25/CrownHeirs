@@ -13,32 +13,47 @@ export default function HandbookPage() {
           <h1 className="title">The Crown Heirs Handbook</h1>
           <p className="lede">
             Start here. The handbook covers who we are and what we expect of one
-            another. The official PDF and any updates are linked below.
+            another.
           </p>
         </div>
 
         <div className="prose">
-          <h2>Our Mission</h2>
+          <h2>Handbook Mission Statement</h2>
           <p>
-            Crown Heirs exists to make every guest feel like royalty — through
-            exceptional craft, warm hospitality, and a salon experience that
-            keeps people coming back. This handbook is a placeholder; replace
-            this text with your official handbook content, or simply upload the
-            handbook PDF in the Admin area.
+            This handbook exists to protect what makes Crown Heirs Hair Den more
+            than a salon. We are stewards of an environment — a space of
+            transformation, peace, and purpose where every guest is seen,
+            valued, and crowned. The standards within these pages are how we keep
+            that environment whole: not as rules imposed, but as a shared
+            commitment to excellence, integrity, and care. Clarity is kindness.
+            Consistency protects the culture. When each of us upholds the same
+            standard, the brand reads through in every chair, every interaction,
+            every visit.
           </p>
 
           <h2>What We Expect</h2>
           <ul>
-            <li>Show up on time, prepared, and ready to give clients your best.</li>
-            <li>Keep your station, tools, and shared spaces clean and sanitized.</li>
-            <li>Communicate openly with the team and with leadership.</li>
-            <li>Protect client trust and confidentiality at all times.</li>
+            <li><strong>Christ-centered character.</strong> Integrity, humility, and accountability in every interaction — in the salon, online, and anywhere connected to our brand.</li>
+            <li><strong>Excellence as a habit, not an act.</strong> Consistent, high-quality service delivery is the baseline, not the goal. Culture outweighs talent.</li>
+            <li><strong>Protection of the environment.</strong> The atmosphere is the product. Every team member is responsible for the peace, professionalism, and emotional safety of the space.</li>
+            <li><strong>Customer intentionality.</strong> Every guest is treated with dignity, care, and attention. Each appointment is an exchange of energy, excellence, and education.</li>
+            <li><strong>Reliability and readiness.</strong> Punctuality, preparedness, schedule adherence, and follow-through are non-negotiable standards of the role.</li>
+            <li><strong>Communication with class.</strong> Professional, respectful, and clear — with leadership, with teammates, and with guests.</li>
+            <li><strong>Community contribution.</strong> We grow stronger by pouring into one another. Team unity and mentorship strengthen the whole.</li>
+            <li><strong>Brand alignment.</strong> Conduct that disrupts team unity, compromises client experience, or misrepresents Crown Heirs may result in corrective action up to and including termination.</li>
           </ul>
 
-          <h2>Scheduling, Pay & Time Off</h2>
+          <h2>How to Use This Handbook</h2>
           <p>
-            Replace this section with your specifics on shifts, booking, pay
-            structure, commissions, tips, and how to request time off.
+            This handbook is your reference for the standards, expectations, and
+            culture that define Crown Heirs Hair Den. It is a living document —
+            review it during onboarding, return to it often, and treat it as the
+            source of truth whenever a question of conduct, process, or
+            expectation arises. Adherence to these standards is a condition of
+            employment and a reflection of the commitment each of us makes to
+            this brand and one another. Where you need clarification, bring it to
+            leadership directly; we would always rather answer a question than
+            correct an avoidable misstep.
           </p>
         </div>
 
