@@ -27,7 +27,10 @@ import {
   type TaskRow,
 } from "@/lib/duties";
 import {
+  ASSIGN_ROLES,
+  assignRoleLabel,
   DUTY_SECTIONS,
+  normalizeRole,
   prettyDate,
   reassignStatusLabel,
   salonToday,
@@ -85,6 +88,7 @@ export default async function DutiesPage({
   }
 
   const myTitle = me?.jobTitle ?? null;
+  const myRole = me ? normalizeRole(me.role) : null;
 
   // The live person behind an opener/closer duty.
   const autoFor = (role: string | null) =>
@@ -110,14 +114,22 @@ export default async function DutiesPage({
 
   function TaskCard({ row }: { row: TaskRow }) {
     const t = row.task;
-    const shared = t.assigneeTitle; // shared role duty (anyone with this title)
+    // Shared duty for anyone with a job title or access role.
+    const sharedLabel = t.assigneeTitle
+      ? `Any ${t.assigneeTitle}`
+      : t.assigneeRole
+        ? `Any ${assignRoleLabel(t.assigneeRole)}`
+        : null;
     const autoPerson = autoFor(t.autoRole);
     // Effective assignee: a fixed person, or the live opener/closer.
     const effId = t.assigneeId ?? autoPerson?.id ?? null;
     const effName = t.assigneeId ? row.assigneeName : autoPerson?.name ?? null;
     const roleLabel = t.autoRole === "opener" ? "Opening stylist" : t.autoRole === "closer" ? "Closing stylist" : null;
-    const mine = !shared && !!myId && effId === myId;
-    const canComplete = canManage || mine || (!!shared && !!myTitle && myTitle.trim().toLowerCase() === shared.trim().toLowerCase());
+    const mine = !sharedLabel && !!myId && effId === myId;
+    const iAmInShared =
+      (!!t.assigneeTitle && !!myTitle && myTitle.trim().toLowerCase() === t.assigneeTitle.trim().toLowerCase()) ||
+      (!!t.assigneeRole && !!myRole && myRole === normalizeRole(t.assigneeRole));
+    const canComplete = canManage || mine || iAmInShared;
     const ra = reassignByTask.get(t.id);
     const doneFlag = t.status === "done";
 
@@ -138,9 +150,9 @@ export default async function DutiesPage({
             <div style={{ fontWeight: 600, textDecoration: doneFlag ? "line-through" : "none" }}>{t.title}</div>
             {t.detail && <div className="muted" style={{ fontSize: "0.85rem", marginTop: 2 }}>{t.detail}</div>}
             <div className="muted" style={{ fontSize: "0.82rem", marginTop: 4 }}>
-              {shared ? (
+              {sharedLabel ? (
                 <>
-                  <span className="tag" style={{ marginRight: 6 }}>Any {shared}</span>
+                  <span className="tag" style={{ marginRight: 6 }}>{sharedLabel}</span>
                   {!doneFlag && <em>anyone with this role can complete</em>}
                 </>
               ) : roleLabel ? (
@@ -232,7 +244,7 @@ export default async function DutiesPage({
                 <form action={setAssignee} style={{ display: "flex", gap: 6, alignItems: "center" }}>
                   <input type="hidden" name="taskId" value={t.id} />
                   <input type="hidden" name="taskDate" value={date} />
-                  <select name="assigneeId" defaultValue={t.assigneeId ?? (t.autoRole ? `__${t.autoRole}__` : t.assigneeTitle ? `__title_shared__:${t.assigneeTitle}` : "")}>
+                  <select name="assigneeId" defaultValue={t.assigneeId ?? (t.autoRole ? `__${t.autoRole}__` : t.assigneeTitle ? `__title_shared__:${t.assigneeTitle}` : t.assigneeRole ? `__role_shared__:${t.assigneeRole}` : "")}>
                     <option value="">— Unassigned —</option>
                     <option value="__opener__">Opening stylist (auto)</option>
                     <option value="__closer__">Closing stylist (auto)</option>
@@ -246,6 +258,11 @@ export default async function DutiesPage({
                         ))}
                       </optgroup>
                     )}
+                    <optgroup label="Any with access role (shared)">
+                      {ASSIGN_ROLES.map((r) => (
+                        <option key={r.id} value={`__role_shared__:${r.id}`}>Any {r.label}</option>
+                      ))}
+                    </optgroup>
                   </select>
                   <button className="btn btn-ghost" type="submit">Set</button>
                 </form>
@@ -376,7 +393,8 @@ export default async function DutiesPage({
                       </div>
                       <div className="field">
                         <label htmlFor="tpl-assignee">Assign all to</label>
-                        <select id="tpl-assignee" name="assigneeId" defaultValue="">
+                        <select id="tpl-assignee" name="assigneeId" defaultValue="__default__">
+                          <option value="__default__">Use checklist&apos;s default</option>
                           <option value="">Auto (Opening→opener, Closing→closer)</option>
                           <option value="__opener__">Opening stylist (first appt)</option>
                           <option value="__closer__">Closing stylist (last appt)</option>
@@ -397,6 +415,16 @@ export default async function DutiesPage({
                               </optgroup>
                             </>
                           )}
+                          <optgroup label="By access role — each does their own">
+                            {ASSIGN_ROLES.map((r) => (
+                              <option key={`re-${r.id}`} value={`__role_each__:${r.id}`}>All {r.label} (each)</option>
+                            ))}
+                          </optgroup>
+                          <optgroup label="By access role — shared (anyone)">
+                            {ASSIGN_ROLES.map((r) => (
+                              <option key={`rs-${r.id}`} value={`__role_shared__:${r.id}`}>Any {r.label} (shared)</option>
+                            ))}
+                          </optgroup>
                         </select>
                       </div>
                     </div>
@@ -447,6 +475,16 @@ export default async function DutiesPage({
                             </optgroup>
                           </>
                         )}
+                        <optgroup label="By access role — each does their own">
+                          {ASSIGN_ROLES.map((r) => (
+                            <option key={`re-${r.id}`} value={`__role_each__:${r.id}`}>All {r.label} (each)</option>
+                          ))}
+                        </optgroup>
+                        <optgroup label="By access role — shared (anyone)">
+                          {ASSIGN_ROLES.map((r) => (
+                            <option key={`rs-${r.id}`} value={`__role_shared__:${r.id}`}>Any {r.label} (shared)</option>
+                          ))}
+                        </optgroup>
                       </select>
                     </div>
                   </div>

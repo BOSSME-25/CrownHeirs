@@ -24,6 +24,20 @@ export function sectionLabel(id: string): string {
   return DUTY_SECTIONS.find((s) => s.id === id)?.label ?? "Duties";
 }
 
+// Access-role groups a duty can be assigned to (matches the employee role tiers).
+export const ASSIGN_ROLES = [
+  { id: "staff", label: "Staff" },
+  { id: "manager", label: "Manager" },
+  { id: "director", label: "Director" },
+] as const;
+export function assignRoleLabel(id: string): string {
+  return ASSIGN_ROLES.find((r) => r.id === id)?.label ?? id;
+}
+// Normalize the stored role (legacy "admin" == director).
+export function normalizeRole(role: string | null | undefined): string {
+  return role === "admin" ? "director" : role ?? "staff";
+}
+
 // Reassignment status → friendly label.
 export function reassignStatusLabel(status: string, targetName?: string | null): string {
   switch (status) {

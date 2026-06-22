@@ -18,7 +18,7 @@ import { getDefaultOrg } from "@/lib/org";
 import { getAccess } from "@/lib/perms";
 import { logAudit } from "@/lib/audit";
 import { adminEmails, emailLayout, sendEmail } from "@/lib/email";
-import { DUTY_SECTION_IDS } from "@/lib/duties-constants";
+import { DUTY_SECTION_IDS, normalizeRole } from "@/lib/duties-constants";
 import { resolveAutoAssignees } from "@/lib/duties";
 
 const back = (date: string, msg: string) =>
@@ -51,30 +51,60 @@ const section = (v: string | null) => (v && DUTY_SECTION_IDS.includes(v) ? v : "
 // The assignee dropdown can carry a real employee id, or a special token:
 //   __opener__ / __closer__       → follow the day's first/last appointment
 //   __title_each__:<title>        → one copy per person with that job title
-//   __title_shared__:<title>      → one shared duty anyone with that title completes
+//   __title_shared__:<title>      → shared duty anyone with that title completes
+//   __role_each__:<role>          → one copy per person with that access role
+//   __role_shared__:<role>        → shared duty anyone with that access role completes
 type ParsedAssignee = {
   assigneeId: string | null;
   autoRole: string | null;
-  assigneeTitle: string | null; // shared
-  fanoutTitle: string | null; // one-per-person
+  assigneeTitle: string | null; // shared by job title
+  fanoutTitle: string | null; // one-per-person by job title
+  assigneeRole: string | null; // shared by access role
+  fanoutRole: string | null; // one-per-person by access role
 };
 function parseAssignee(raw: string | null): ParsedAssignee {
-  const base = { assigneeId: null, autoRole: null, assigneeTitle: null, fanoutTitle: null };
+  const base: ParsedAssignee = {
+    assigneeId: null, autoRole: null, assigneeTitle: null, fanoutTitle: null, assigneeRole: null, fanoutRole: null,
+  };
   if (raw === "__opener__") return { ...base, autoRole: "opener" };
   if (raw === "__closer__") return { ...base, autoRole: "closer" };
   if (raw?.startsWith("__title_each__:")) return { ...base, fanoutTitle: raw.slice("__title_each__:".length) };
   if (raw?.startsWith("__title_shared__:")) return { ...base, assigneeTitle: raw.slice("__title_shared__:".length) };
+  if (raw?.startsWith("__role_each__:")) return { ...base, fanoutRole: normalizeRole(raw.slice("__role_each__:".length)) };
+  if (raw?.startsWith("__role_shared__:")) return { ...base, assigneeRole: normalizeRole(raw.slice("__role_shared__:".length)) };
   return { ...base, assigneeId: raw };
 }
 
 // Active employees holding a given job title (used to fan a duty out per person).
-async function employeesWithTitle(title: string): Promise<{ id: string; email: string | null; fullName: string }[]> {
+async function employeesWithTitle(title: string): Promise<{ id: string }[]> {
   const rows = await db
-    .select({ id: employees.id, email: employees.email, fullName: employees.fullName, title: employees.jobTitle, status: employees.status })
+    .select({ id: employees.id, title: employees.jobTitle, status: employees.status })
     .from(employees);
   return rows
     .filter((r) => r.status === "active" && (r.title ?? "").trim().toLowerCase() === title.trim().toLowerCase())
-    .map((r) => ({ id: r.id, email: r.email, fullName: r.fullName }));
+    .map((r) => ({ id: r.id }));
+}
+
+// Active employees with a given access role (legacy "admin" counts as director).
+async function employeesWithRole(role: string): Promise<{ id: string }[]> {
+  const rows = await db
+    .select({ id: employees.id, role: employees.role, status: employees.status })
+    .from(employees);
+  return rows
+    .filter((r) => r.status === "active" && normalizeRole(r.role) === normalizeRole(role))
+    .map((r) => ({ id: r.id }));
+}
+
+// The fixed per-person targets to fan a duty out to, or null when not a fan-out.
+// Returns [null] when no one matches, so the duty still appears (unassigned).
+async function fanoutTargets(p: ParsedAssignee): Promise<(string | null)[] | null> {
+  const people = p.fanoutTitle
+    ? await employeesWithTitle(p.fanoutTitle)
+    : p.fanoutRole
+      ? await employeesWithRole(p.fanoutRole)
+      : null;
+  if (!people) return null;
+  return people.length ? people.map((x) => x.id) : [null];
 }
 
 // Who a duty currently belongs to: a fixed assignee, or the live opener/closer
@@ -92,12 +122,15 @@ async function effectiveAssigneeId(task: DailyTask): Promise<string | null> {
 // live opener/closer), anyone holding a shared duty's job title, or a manager.
 async function canComplete(
   task: DailyTask,
-  emp: { id: string; jobTitle: string | null },
+  emp: { id: string; jobTitle: string | null; role: string | null },
   isManager: boolean,
 ): Promise<boolean> {
   if (isManager) return true;
   if (task.assigneeTitle) {
     return !!emp.jobTitle && emp.jobTitle.trim().toLowerCase() === task.assigneeTitle.trim().toLowerCase();
+  }
+  if (task.assigneeRole) {
+    return normalizeRole(emp.role) === normalizeRole(task.assigneeRole);
   }
   return (await effectiveAssigneeId(task)) === emp.id;
 }
@@ -135,9 +168,12 @@ export async function applyTemplate(formData: FormData) {
 
   const org = await getDefaultOrg();
   const sec = ["opening", "endshift", "closing"].includes(tpl.section) ? tpl.section : "other";
-  const p = parseAssignee(raw);
-  // Opening/Closing checklists default to following the day's bookings.
-  if (!p.assigneeId && !p.autoRole && !p.assigneeTitle && !p.fanoutTitle) {
+  // "__default__" → fall back to the checklist's own default assignment.
+  const effRaw = raw === "__default__" || raw === null ? tpl.defaultAssignee ?? "" : raw;
+  const p = parseAssignee(effRaw === "" ? null : effRaw);
+  // With nothing chosen, Opening/Closing default to following the day's bookings.
+  const nothing = !p.assigneeId && !p.autoRole && !p.assigneeTitle && !p.fanoutTitle && !p.assigneeRole && !p.fanoutRole;
+  if (nothing) {
     if (sec === "opening") p.autoRole = "opener";
     else if (sec === "closing") p.autoRole = "closer";
   }
@@ -153,9 +189,8 @@ export async function applyTemplate(formData: FormData) {
     templateId,
   });
 
-  if (p.fanoutTitle) {
-    const people = await employeesWithTitle(p.fanoutTitle);
-    const targets: (string | null)[] = people.length ? people.map((p2) => p2.id) : [null];
+  const targets = await fanoutTargets(p);
+  if (targets) {
     const rows = items.flatMap((it, i) => targets.map((assigneeId) => ({ ...baseRow(it, i), assigneeId })));
     await db.insert(dailyTasks).values(rows);
   } else {
@@ -165,6 +200,7 @@ export async function applyTemplate(formData: FormData) {
         assigneeId: p.assigneeId,
         autoRole: p.autoRole,
         assigneeTitle: p.assigneeTitle,
+        assigneeRole: p.assigneeRole,
       })),
     );
   }
@@ -202,9 +238,8 @@ export async function addDuty(formData: FormData) {
     sortOrder,
   };
 
-  if (p.fanoutTitle) {
-    const people = await employeesWithTitle(p.fanoutTitle);
-    const targets: (string | null)[] = people.length ? people.map((p2) => p2.id) : [null];
+  const targets = await fanoutTargets(p);
+  if (targets) {
     await db.insert(dailyTasks).values(targets.map((assigneeId) => ({ ...common, assigneeId })));
   } else {
     await db.insert(dailyTasks).values({
@@ -212,6 +247,7 @@ export async function addDuty(formData: FormData) {
       assigneeId: p.assigneeId,
       autoRole: p.autoRole,
       assigneeTitle: p.assigneeTitle,
+      assigneeRole: p.assigneeRole,
     });
     if (p.assigneeId) {
       await notify(p.assigneeId, "New duty assigned", `You've been assigned: <strong>${title}</strong> for ${date}.`);
@@ -231,9 +267,10 @@ export async function setAssignee(formData: FormData) {
   const p = parseAssignee(str(formData, "assigneeId"));
   // "Each person" fan-out is a build-time choice; treat it as shared here.
   const assigneeTitle = p.assigneeTitle ?? p.fanoutTitle;
+  const assigneeRole = p.assigneeRole ?? p.fanoutRole;
   await db
     .update(dailyTasks)
-    .set({ assigneeId: p.assigneeId, autoRole: p.autoRole, assigneeTitle })
+    .set({ assigneeId: p.assigneeId, autoRole: p.autoRole, assigneeTitle, assigneeRole })
     .where(eq(dailyTasks.id, taskId));
   if (p.assigneeId) {
     await notify(p.assigneeId, "Duty assigned to you", `A duty was assigned to you for ${date}.`);
@@ -243,6 +280,7 @@ export async function setAssignee(formData: FormData) {
   const msg = p.autoRole === "opener" ? "Set to the opening stylist"
     : p.autoRole === "closer" ? "Set to the closing stylist"
     : assigneeTitle ? `Set to any ${assigneeTitle}`
+    : assigneeRole ? `Set to any ${assigneeRole}`
     : p.assigneeId ? "Duty assigned" : "Duty unassigned";
   back(date, msg);
 }
@@ -312,7 +350,7 @@ export async function requestReassign(formData: FormData) {
 
   const task = (await db.select().from(dailyTasks).where(eq(dailyTasks.id, taskId)))[0];
   if (!task) throw new Error("Duty not found.");
-  if (task.assigneeTitle) throw new Error("Shared role duties can't be handed off — a manager can reassign them.");
+  if (task.assigneeTitle || task.assigneeRole) throw new Error("Shared role duties can't be handed off — a manager can reassign them.");
   if ((await effectiveAssigneeId(task)) !== emp.id) throw new Error("You can only hand off duties assigned to you.");
 
   // One active request per duty at a time.
@@ -376,8 +414,8 @@ export async function decideReassign(formData: FormData) {
   if (r.status !== "accepted") throw new Error("Only an accepted handoff can be approved.");
 
   if (decision === "approve") {
-    // A handoff fixes the duty to a person, so it stops following bookings/titles.
-    await db.update(dailyTasks).set({ assigneeId: r.targetEmployeeId, autoRole: null, assigneeTitle: null }).where(eq(dailyTasks.id, r.taskId));
+    // A handoff fixes the duty to a person, so it stops following bookings/titles/roles.
+    await db.update(dailyTasks).set({ assigneeId: r.targetEmployeeId, autoRole: null, assigneeTitle: null, assigneeRole: null }).where(eq(dailyTasks.id, r.taskId));
     await db.update(taskReassignments).set({ status: "approved", decidedBy: actor, decidedAt: new Date() }).where(eq(taskReassignments.id, id));
     await notify(r.targetEmployeeId, "Duty is now yours", `A duty handoff was approved — it's now assigned to you for ${date}.`);
     await notify(r.requestedById, "Handoff approved", "Your duty handoff was approved.");

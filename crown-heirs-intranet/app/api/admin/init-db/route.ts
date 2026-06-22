@@ -426,7 +426,9 @@ export async function POST() {
     await sql`ALTER TABLE daily_tasks ADD COLUMN IF NOT EXISTS group_label text`;
     await sql`ALTER TABLE daily_tasks ADD COLUMN IF NOT EXISTS auto_role text`;
     await sql`ALTER TABLE daily_tasks ADD COLUMN IF NOT EXISTS assignee_title text`;
+    await sql`ALTER TABLE daily_tasks ADD COLUMN IF NOT EXISTS assignee_role text`;
     await sql`ALTER TABLE checklist_templates ADD COLUMN IF NOT EXISTS description text`;
+    await sql`ALTER TABLE checklist_templates ADD COLUMN IF NOT EXISTS default_assignee text`;
     await sql`CREATE INDEX IF NOT EXISTS daily_tasks_date_idx ON daily_tasks (task_date, section, sort_order)`;
     await sql`
       CREATE TABLE IF NOT EXISTS task_reassignments (
