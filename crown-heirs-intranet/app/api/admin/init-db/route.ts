@@ -486,6 +486,19 @@ export async function POST() {
       await fixGroup("Laundry & Handoff", "Laundry & Handover");
       await fixGroup("Stations & Cleanup", "Stations & Equipment");
 
+      // Move the End-of-Shift checklist (and any duties already created from it)
+      // onto the dedicated "endshift" board section instead of "Other".
+      await sql`
+        UPDATE checklist_templates SET section = 'endshift'
+        WHERE org_id = ${orgId} AND name = 'End-of-Shift Checklist' AND section = 'other'
+      `;
+      await sql`
+        UPDATE daily_tasks SET section = 'endshift'
+        WHERE section = 'other' AND template_id IN (
+          SELECT id FROM checklist_templates WHERE org_id = ${orgId} AND name = 'End-of-Shift Checklist'
+        )
+      `;
+
       // Crown Heirs' real Stylist Shift Checklists (imported from their Word doc).
       // Seeded per-checklist only when that checklist doesn't already exist, so
       // re-running setup never duplicates or overwrites edits. The description
@@ -557,7 +570,7 @@ export async function POST() {
         ] },
       ]);
 
-      await seed("End-of-Shift Checklist", "other",
+      await seed("End-of-Shift Checklist", "endshift",
         "Complete when your shift ends and the salon is still open. Leave your station guest-ready for whoever is next.", [
         { group: "Station Breakdown", items: [
           "Sanitize and wipe down your station, chair, and mirror.",

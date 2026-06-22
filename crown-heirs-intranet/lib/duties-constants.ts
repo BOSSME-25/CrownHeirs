@@ -1,9 +1,10 @@
 // Pure constants & helpers for Daily Duties — no server-only deps, safe to
 // import from client components.
 
-// Sections a duty can belong to on the daily board.
+// Sections a duty can belong to on the daily board (rendered in this order).
 export const DUTY_SECTIONS = [
   { id: "opening", label: "Opening Checklist" },
+  { id: "endshift", label: "End-of-Shift" },
   { id: "closing", label: "Closing Checklist" },
   { id: "role", label: "Roles & Responsibilities" },
   { id: "other", label: "Other Duties" },
@@ -13,9 +14,11 @@ export const DUTY_SECTION_IDS = DUTY_SECTIONS.map((s) => s.id) as string[];
 // Templates only cover the repeatable checklists (and custom lists).
 export const TEMPLATE_SECTIONS = [
   { id: "opening", label: "Opening" },
+  { id: "endshift", label: "End-of-Shift" },
   { id: "closing", label: "Closing" },
   { id: "other", label: "Other" },
 ] as const;
+export const TEMPLATE_SECTION_IDS = TEMPLATE_SECTIONS.map((s) => s.id) as string[];
 
 export function sectionLabel(id: string): string {
   return DUTY_SECTIONS.find((s) => s.id === id)?.label ?? "Duties";

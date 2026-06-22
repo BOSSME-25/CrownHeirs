@@ -78,7 +78,7 @@ export async function applyTemplate(formData: FormData) {
   if (items.length === 0) throw new Error("That checklist has no items yet.");
 
   const org = await getDefaultOrg();
-  const sec = tpl.section === "closing" ? "closing" : tpl.section === "opening" ? "opening" : "other";
+  const sec = ["opening", "endshift", "closing"].includes(tpl.section) ? tpl.section : "other";
   await db.insert(dailyTasks).values(
     items.map((it, i) => ({
       orgId: org?.id ?? null,

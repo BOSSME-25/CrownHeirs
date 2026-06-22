@@ -25,7 +25,8 @@ const str = (formData: FormData, k: string) => {
 
 const back = (msg: string) => redirect(`/duties/templates?ok=${encodeURIComponent(msg)}`);
 
-const sectionOf = (v: string | null) => (v === "closing" ? "closing" : v === "opening" ? "opening" : "other");
+const sectionOf = (v: string | null) =>
+  v && ["opening", "endshift", "closing"].includes(v) ? v : "other";
 
 export async function createTemplate(formData: FormData) {
   const actor = await requireManage();
