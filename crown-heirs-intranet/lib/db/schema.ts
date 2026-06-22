@@ -429,3 +429,61 @@ export const ptoLedger = pgTable("pto_ledger", {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });
 export type PtoEntry = typeof ptoLedger.$inferSelect;
+
+// ───────────────────────────────────────────────
+// Inventory — vendors, items (retail + back bar),
+// and a stock-movement ledger (receive / count /
+// adjust). On-hand is stored on the item and kept
+// in sync as movements are recorded.
+// ───────────────────────────────────────────────
+export const vendors = pgTable("vendors", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  orgId: uuid("org_id"),
+  name: text("name").notNull(),
+  contactName: text("contact_name"),
+  phone: text("phone"),
+  email: text("email"),
+  website: text("website"),
+  accountNumber: text("account_number"),
+  notes: text("notes"),
+  active: boolean("active").notNull().default(true),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+export type Vendor = typeof vendors.$inferSelect;
+
+export const inventoryItems = pgTable("inventory_items", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  orgId: uuid("org_id"),
+  locationId: uuid("location_id"),
+  vendorId: uuid("vendor_id"),
+  name: text("name").notNull(),
+  brand: text("brand"),
+  // 'retail' | 'backbar' | 'color' | 'supplies'
+  category: text("category").notNull().default("retail"),
+  sku: text("sku"),
+  size: text("size"),
+  unit: text("unit"),
+  cost: numeric("cost"),
+  retailPrice: numeric("retail_price"),
+  onHand: numeric("on_hand").notNull().default("0"),
+  reorderPoint: numeric("reorder_point").notNull().default("0"),
+  active: boolean("active").notNull().default(true),
+  notes: text("notes"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
+export type InventoryItem = typeof inventoryItems.$inferSelect;
+
+export const inventoryTxns = pgTable("inventory_txns", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  orgId: uuid("org_id"),
+  itemId: uuid("item_id").notNull().references(() => inventoryItems.id, { onDelete: "cascade" }),
+  delta: numeric("delta").notNull(),
+  // 'receive' | 'count' | 'adjust' | 'usage' | 'sale' | 'waste'
+  reason: text("reason").notNull().default("adjust"),
+  note: text("note"),
+  unitCost: numeric("unit_cost"),
+  actorEmail: text("actor_email"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+export type InventoryTxn = typeof inventoryTxns.$inferSelect;
