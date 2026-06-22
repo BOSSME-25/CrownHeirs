@@ -1,4 +1,5 @@
 import Link from "next/link";
+import PhotoCropField from "@/components/PhotoCropField";
 import { EMPLOYMENT_TYPES, ROLES, WAGE_TYPES } from "@/lib/employees";
 import type { Employee } from "@/lib/db/schema";
 
@@ -35,14 +36,7 @@ export default function EmployeeForm({
   const e = employee;
   return (
     <form className="prose" action={action}>
-      <div className="field">
-        <label htmlFor="photo">Profile photo</label>
-        {e?.photoUrl && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={e.photoUrl} alt="" className="avatar" style={{ width: 64, height: 64, display: "block", marginBottom: 8 }} />
-        )}
-        <input id="photo" name="photo" type="file" accept="image/*" />
-      </div>
+      <PhotoCropField currentUrl={e?.photoUrl} />
       <div className="form-grid">
         <div className="field">
           <label htmlFor="fullName">Full name *</label>
