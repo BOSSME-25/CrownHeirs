@@ -424,6 +424,7 @@ export async function POST() {
     `;
     await sql`ALTER TABLE checklist_items ADD COLUMN IF NOT EXISTS group_label text`;
     await sql`ALTER TABLE daily_tasks ADD COLUMN IF NOT EXISTS group_label text`;
+    await sql`ALTER TABLE checklist_templates ADD COLUMN IF NOT EXISTS description text`;
     await sql`CREATE INDEX IF NOT EXISTS daily_tasks_date_idx ON daily_tasks (task_date, section, sort_order)`;
     await sql`
       CREATE TABLE IF NOT EXISTS task_reassignments (
@@ -469,12 +470,30 @@ export async function POST() {
         )
       `;
 
-      // Crown Heirs' real Stylist Shift Checklists (imported from their PDF).
-      // Seeded per-checklist only when that checklist doesn't already exist,
-      // so re-running setup never duplicates or overwrites edits.
+      // Correct group headings + descriptions on checklists seeded by an earlier
+      // version (before the source Word doc was reviewed). Scoped to this org's
+      // checklist items; a no-op once the data is already correct.
+      const fixGroup = async (from: string, to: string) => {
+        await sql`
+          UPDATE checklist_items SET group_label = ${to}
+          WHERE group_label = ${from}
+            AND template_id IN (SELECT id FROM checklist_templates WHERE org_id = ${orgId})
+        `;
+      };
+      await fixGroup("Systems & Sign-In", "Systems & Schedule");
+      await fixGroup("Station & Cleanup", "Station Breakdown");
+      await fixGroup("Client & Records", "Guest & Records");
+      await fixGroup("Laundry & Handoff", "Laundry & Handover");
+      await fixGroup("Stations & Cleanup", "Stations & Equipment");
+
+      // Crown Heirs' real Stylist Shift Checklists (imported from their Word doc).
+      // Seeded per-checklist only when that checklist doesn't already exist, so
+      // re-running setup never duplicates or overwrites edits. The description
+      // is backfilled onto existing checklists when missing.
       const seed = async (
         name: string,
         section: string,
+        description: string,
         groups: { group: string; items: string[] }[],
       ) => {
         const [{ exists } = { exists: false }] = (await sql`
@@ -482,10 +501,16 @@ export async function POST() {
             SELECT 1 FROM checklist_templates WHERE org_id = ${orgId} AND name = ${name}
           ) AS exists
         `) as { exists: boolean }[];
-        if (exists) return;
+        if (exists) {
+          await sql`
+            UPDATE checklist_templates SET description = ${description}
+            WHERE org_id = ${orgId} AND name = ${name} AND (description IS NULL OR description = '')
+          `;
+          return;
+        }
         const [tpl] = (await sql`
-          INSERT INTO checklist_templates (org_id, name, section)
-          VALUES (${orgId}, ${name}, ${section}) RETURNING id
+          INSERT INTO checklist_templates (org_id, name, section, description)
+          VALUES (${orgId}, ${name}, ${section}, ${description}) RETURNING id
         `) as { id: string }[];
         let i = 0;
         for (const g of groups) {
@@ -499,7 +524,8 @@ export async function POST() {
         }
       };
 
-      await seed("Opening Checklist", "opening", [
+      await seed("Opening Checklist", "opening",
+        "Complete on arrival, before your first guest. The first stylist in opens the space.", [
         { group: "Arrival & Access", items: [
           "Disarm the alarm on entry.",
           "Unlock and open the front door for business.",
@@ -525,14 +551,15 @@ export async function POST() {
           "Bathroom check — clean, stocked, and presentable.",
           "Quick walkthrough: front desk, backbar, stations, private room, break room.",
         ] },
-        { group: "Systems & Sign-In", items: [
+        { group: "Systems & Schedule", items: [
           "Log in to the POS on the iPad and shop phone for your shift.",
           "Review your own schedule and confirm your appointments for the day.",
         ] },
       ]);
 
-      await seed("End-of-Shift Checklist", "other", [
-        { group: "Station & Cleanup", items: [
+      await seed("End-of-Shift Checklist", "other",
+        "Complete when your shift ends and the salon is still open. Leave your station guest-ready for whoever is next.", [
+        { group: "Station Breakdown", items: [
           "Sanitize and wipe down your station, chair, and mirror.",
           "Clean and disinfect your tools; return any shared tools to their place.",
           "Turn off and unplug your personal equipment (irons, dryers, steamers, wax warmer).",
@@ -543,20 +570,21 @@ export async function POST() {
           "Restock your station supplies (capes, towels, neck strips, product) for the next stylist.",
           "Flag any low or out-of-stock items for reorder.",
         ] },
-        { group: "Client & Records", items: [
+        { group: "Guest & Records", items: [
           "Log client notes, formulas, and purchases in the system.",
           "Confirm your guests are rebooked before they leave.",
           "Log out of the iPad or shop phone if you used it for your transactions.",
         ] },
-        { group: "Laundry & Handoff", items: [
+        { group: "Laundry & Handover", items: [
           "Start or move a load of towels if you used them; check the washer and dryer.",
           "Bathroom or private-room check if you were the last to use it.",
           "Leave a note for the receptionist or next stylist on anything outstanding — maintenance, guest follow-up, or special requests.",
         ] },
       ]);
 
-      await seed("Closing Checklist", "closing", [
-        { group: "Stations & Cleanup", items: [
+      await seed("Closing Checklist", "closing",
+        "Complete when you are the last to leave. This list secures the salon — every item matters.", [
+        { group: "Stations & Equipment", items: [
           "Sanitize all stations, chairs, mirrors, and high-touch surfaces.",
           "Turn off AND unplug all equipment — flat irons, blow dryers, steamers, wax warmers.",
           "Sweep and clear all floors.",

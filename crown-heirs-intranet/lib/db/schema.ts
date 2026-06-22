@@ -497,6 +497,8 @@ export const checklistTemplates = pgTable("checklist_templates", {
   id: uuid("id").defaultRandom().primaryKey(),
   orgId: uuid("org_id"),
   name: text("name").notNull(),
+  // A short note on when/who the checklist is for.
+  description: text("description"),
   // 'opening' | 'closing' | 'other'
   section: text("section").notNull().default("opening"),
   active: boolean("active").notNull().default(true),

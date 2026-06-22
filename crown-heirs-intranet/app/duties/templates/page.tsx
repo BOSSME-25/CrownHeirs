@@ -54,17 +54,25 @@ export default async function TemplatesPage() {
           <>
             {templates.map((tpl) => (
               <div key={tpl.id} className="card" style={{ cursor: "default", marginBottom: 20 }}>
-                <form action={renameTemplate} style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+                <form action={renameTemplate}>
                   <input type="hidden" name="templateId" value={tpl.id} />
-                  <input name="name" defaultValue={tpl.name} style={{ fontWeight: 600, minWidth: 200 }} required />
-                  <select name="section" defaultValue={tpl.section}>
-                    {TEMPLATE_SECTIONS.map((s) => (
-                      <option key={s.id} value={s.id}>{s.label}</option>
-                    ))}
-                  </select>
-                  <button className="btn btn-ghost" type="submit">Save</button>
-                  <span style={{ flex: 1 }} />
-                  <span className="tag">{sectionLabel(tpl.section)}</span>
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+                    <input name="name" defaultValue={tpl.name} style={{ fontWeight: 600, minWidth: 200 }} required />
+                    <select name="section" defaultValue={tpl.section}>
+                      {TEMPLATE_SECTIONS.map((s) => (
+                        <option key={s.id} value={s.id}>{s.label}</option>
+                      ))}
+                    </select>
+                    <button className="btn btn-ghost" type="submit">Save</button>
+                    <span style={{ flex: 1 }} />
+                    <span className="tag">{sectionLabel(tpl.section)}</span>
+                  </div>
+                  <input
+                    name="description"
+                    defaultValue={tpl.description ?? ""}
+                    placeholder="Short description — when/who this checklist is for"
+                    style={{ width: "100%", marginTop: 8 }}
+                  />
                 </form>
 
                 <div style={{ margin: "14px 0 0" }}>
@@ -122,14 +130,17 @@ export default async function TemplatesPage() {
 
             <div className="card" style={{ cursor: "default" }}>
               <h3>New checklist</h3>
-              <form action={createTemplate} style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center", marginTop: 8 }}>
-                <input name="name" placeholder="Checklist name" style={{ minWidth: 220 }} required />
-                <select name="section" defaultValue="other">
-                  {TEMPLATE_SECTIONS.map((s) => (
-                    <option key={s.id} value={s.id}>{s.label}</option>
-                  ))}
-                </select>
-                <button className="btn" type="submit">Create</button>
+              <form action={createTemplate} style={{ marginTop: 8 }}>
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+                  <input name="name" placeholder="Checklist name" style={{ minWidth: 220 }} required />
+                  <select name="section" defaultValue="other">
+                    {TEMPLATE_SECTIONS.map((s) => (
+                      <option key={s.id} value={s.id}>{s.label}</option>
+                    ))}
+                  </select>
+                  <button className="btn" type="submit">Create</button>
+                </div>
+                <input name="description" placeholder="Short description (optional)" style={{ width: "100%", marginTop: 8 }} />
               </form>
             </div>
           </>
