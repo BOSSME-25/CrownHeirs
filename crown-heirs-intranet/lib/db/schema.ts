@@ -534,6 +534,9 @@ export const dailyTasks = pgTable("daily_tasks", {
   groupLabel: text("group_label"),
   assigneeId: uuid("assignee_id").references(() => employees.id, { onDelete: "set null" }),
   assignedBy: text("assigned_by"),
+  // When set and no fixed assignee, the duty follows the day's bookings:
+  // 'opener' = first appointment of the day, 'closer' = last appointment.
+  autoRole: text("auto_role"),
   // 'open' | 'done'
   status: text("status").notNull().default("open"),
   acknowledgedById: uuid("acknowledged_by_id").references(() => employees.id, { onDelete: "set null" }),

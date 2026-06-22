@@ -11,8 +11,31 @@ import {
 } from "@/lib/db/schema";
 import type { ChecklistItem, ChecklistTemplate, DailyTask } from "@/lib/db/schema";
 import { getDefaultOrg } from "@/lib/org";
+import { getDayOpenerCloser } from "@/lib/square";
 
 export * from "@/lib/duties-constants";
+
+export type AutoAssignee = { id: string; name: string } | null;
+export type AutoAssignees = { opener: AutoAssignee; closer: AutoAssignee; configured: boolean };
+
+// Resolve the day's opener/closer (first/last appointment) to employees via
+// their linked Square team member. Used to render auto-assigned duties live.
+export async function resolveAutoAssignees(date: string): Promise<AutoAssignees> {
+  const oc = await getDayOpenerCloser(date);
+  if (!oc.configured) return { opener: null, closer: null, configured: false };
+  const ids = [oc.openerTeamMemberId, oc.closerTeamMemberId].filter(Boolean) as string[];
+  if (ids.length === 0) return { opener: null, closer: null, configured: true };
+  const rows = await db
+    .select({ id: employees.id, name: employees.fullName, tm: employees.squareTeamMemberId })
+    .from(employees)
+    .where(inArray(employees.squareTeamMemberId, ids));
+  const byTm = new Map(rows.map((r) => [r.tm, { id: r.id, name: r.name }]));
+  return {
+    opener: oc.openerTeamMemberId ? byTm.get(oc.openerTeamMemberId) ?? null : null,
+    closer: oc.closerTeamMemberId ? byTm.get(oc.closerTeamMemberId) ?? null : null,
+    configured: true,
+  };
+}
 
 export type TemplateWithItems = ChecklistTemplate & { items: ChecklistItem[] };
 

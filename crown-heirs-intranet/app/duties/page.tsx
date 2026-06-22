@@ -21,6 +21,8 @@ import {
   getTasksForDate,
   listTemplateMeta,
   listTemplates,
+  resolveAutoAssignees,
+  type AutoAssignees,
   type ReassignRow,
   type TaskRow,
 } from "@/lib/duties";
@@ -64,16 +66,23 @@ export default async function DutiesPage({
   let roster: Roster = [];
   let templates: Awaited<ReturnType<typeof listTemplates>> = [];
   let templateMeta: Awaited<ReturnType<typeof listTemplateMeta>> = [];
+  let auto: AutoAssignees = { opener: null, closer: null, configured: false };
   try {
     me = await getEmployeeByEmail(email);
     tasks = await getTasksForDate(date);
     reassigns = await activeReassignments(tasks.map((t) => t.task.id));
     roster = await activeEmployees();
     templateMeta = await listTemplateMeta();
+    // Only hit Square if the day actually has auto-assigned duties.
+    if (tasks.some((t) => t.task.autoRole)) auto = await resolveAutoAssignees(date);
     if (canManage) templates = await listTemplates();
   } catch {
     setupNeeded = true;
   }
+
+  // The live person behind an opener/closer duty.
+  const autoFor = (role: string | null) =>
+    role === "opener" ? auto.opener : role === "closer" ? auto.closer : null;
 
   // Checklist descriptions, keyed by the template they came from.
   const metaById = new Map(templateMeta.map((m) => [m.id, m]));
@@ -95,7 +104,12 @@ export default async function DutiesPage({
 
   function TaskCard({ row }: { row: TaskRow }) {
     const t = row.task;
-    const mine = myId && t.assigneeId === myId;
+    const autoPerson = autoFor(t.autoRole);
+    // Effective assignee: a fixed person, or the live opener/closer.
+    const effId = t.assigneeId ?? autoPerson?.id ?? null;
+    const effName = t.assigneeId ? row.assigneeName : autoPerson?.name ?? null;
+    const roleLabel = t.autoRole === "opener" ? "Opening stylist" : t.autoRole === "closer" ? "Closing stylist" : null;
+    const mine = !!myId && effId === myId;
     const canComplete = mine || canManage;
     const ra = reassignByTask.get(t.id);
     const doneFlag = t.status === "done";
@@ -117,7 +131,16 @@ export default async function DutiesPage({
             <div style={{ fontWeight: 600, textDecoration: doneFlag ? "line-through" : "none" }}>{t.title}</div>
             {t.detail && <div className="muted" style={{ fontSize: "0.85rem", marginTop: 2 }}>{t.detail}</div>}
             <div className="muted" style={{ fontSize: "0.82rem", marginTop: 4 }}>
-              {t.assigneeId ? <>Assigned to <strong>{row.assigneeName ?? "—"}</strong></> : <em>Unassigned</em>}
+              {roleLabel ? (
+                <>
+                  <span className="tag" style={{ marginRight: 6 }}>{roleLabel} · auto</span>
+                  {effName ? <>→ <strong>{effName}</strong></> : auto.configured ? <em>no appointment booked yet</em> : <em>link Square to resolve</em>}
+                </>
+              ) : effId ? (
+                <>Assigned to <strong>{effName ?? "—"}</strong></>
+              ) : (
+                <em>Unassigned</em>
+              )}
               {doneFlag && row.ackName && <> · ✓ acknowledged by {row.ackName} {ackTime(t.acknowledgedAt)}</>}
             </div>
 
@@ -197,8 +220,10 @@ export default async function DutiesPage({
                 <form action={setAssignee} style={{ display: "flex", gap: 6, alignItems: "center" }}>
                   <input type="hidden" name="taskId" value={t.id} />
                   <input type="hidden" name="taskDate" value={date} />
-                  <select name="assigneeId" defaultValue={t.assigneeId ?? ""}>
+                  <select name="assigneeId" defaultValue={t.assigneeId ?? (t.autoRole ? `__${t.autoRole}__` : "")}>
                     <option value="">— Unassigned —</option>
+                    <option value="__opener__">Opening stylist (auto)</option>
+                    <option value="__closer__">Closing stylist (auto)</option>
                     {roster.map((r) => (
                       <option key={r.id} value={r.id}>{r.fullName}</option>
                     ))}
@@ -331,15 +356,20 @@ export default async function DutiesPage({
                         </select>
                       </div>
                       <div className="field">
-                        <label htmlFor="tpl-assignee">Assign all to (optional)</label>
+                        <label htmlFor="tpl-assignee">Assign all to</label>
                         <select id="tpl-assignee" name="assigneeId" defaultValue="">
-                          <option value="">— Leave unassigned —</option>
+                          <option value="">Auto (Opening→opener, Closing→closer)</option>
+                          <option value="__opener__">Opening stylist (first appt)</option>
+                          <option value="__closer__">Closing stylist (last appt)</option>
                           {roster.map((r) => (
                             <option key={r.id} value={r.id}>{r.fullName}</option>
                           ))}
                         </select>
                       </div>
                     </div>
+                    <p className="muted" style={{ fontSize: "0.8rem", margin: "8px 0 0" }}>
+                      Leave on Auto and the Opening checklist follows the first appointment of the day and Closing the last — updating as the schedule changes.
+                    </p>
                     <button className="btn" type="submit" style={{ marginTop: 10 }}>Add checklist to {prettyDate(date)}</button>
                   </form>
                 )}
@@ -365,6 +395,8 @@ export default async function DutiesPage({
                       <label htmlFor="duty-assignee">Assign to</label>
                       <select id="duty-assignee" name="assigneeId" defaultValue="">
                         <option value="">— Unassigned —</option>
+                        <option value="__opener__">Opening stylist (first appt)</option>
+                        <option value="__closer__">Closing stylist (last appt)</option>
                         {roster.map((r) => (
                           <option key={r.id} value={r.id}>{r.fullName}</option>
                         ))}
