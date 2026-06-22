@@ -39,7 +39,7 @@ export async function generateProfileText(opts: {
   try {
     const client = new Anthropic();
     const res = await client.messages.create({
-      model: "claude-opus-4-8",
+      model: "claude-haiku-4-5",
       max_tokens: 400,
       messages: [{ role: "user", content: prompt }],
     });
