@@ -13,7 +13,7 @@ export default function HandbookPage() {
           <h1 className="title">The Crown Heirs Handbook</h1>
           <p className="lede">
             Start here. The handbook covers who we are and what we expect of one
-            another. The official PDF and any updates are linked below.
+            another.
           </p>
         </div>
 
