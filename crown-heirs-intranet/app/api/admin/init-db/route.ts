@@ -422,6 +422,8 @@ export async function POST() {
         created_at timestamptz DEFAULT now()
       )
     `;
+    await sql`ALTER TABLE checklist_items ADD COLUMN IF NOT EXISTS group_label text`;
+    await sql`ALTER TABLE daily_tasks ADD COLUMN IF NOT EXISTS group_label text`;
     await sql`CREATE INDEX IF NOT EXISTS daily_tasks_date_idx ON daily_tasks (task_date, section, sort_order)`;
     await sql`
       CREATE TABLE IF NOT EXISTS task_reassignments (
@@ -453,48 +455,138 @@ export async function POST() {
         await sql`UPDATE employees SET location_id = ${locId} WHERE location_id IS NULL`;
       }
 
-      // Seed default Opening/Closing checklists once (editable afterward).
-      const [{ count } = { count: 0 }] = (await sql`
-        SELECT count(*)::int AS count FROM checklist_templates WHERE org_id = ${orgId}
-      `) as { count: number }[];
-      if (!count) {
-        const seed = async (name: string, section: string, items: string[]) => {
-          const [tpl] = (await sql`
-            INSERT INTO checklist_templates (org_id, name, section)
-            VALUES (${orgId}, ${name}, ${section}) RETURNING id
-          `) as { id: string }[];
-          for (let i = 0; i < items.length; i++) {
+      // Remove the early generic placeholder checklists, if present. They're
+      // identified by items that only exist in that first-pass seed, so this
+      // never touches checklists the salon has built themselves.
+      await sql`
+        DELETE FROM checklist_templates WHERE org_id = ${orgId} AND id IN (
+          SELECT t.id FROM checklist_templates t
+          JOIN checklist_items ci ON ci.template_id = t.id
+          WHERE ci.title IN (
+            'Make coffee and set up the beverage station',
+            'Set the alarm and lock all doors'
+          )
+        )
+      `;
+
+      // Crown Heirs' real Stylist Shift Checklists (imported from their PDF).
+      // Seeded per-checklist only when that checklist doesn't already exist,
+      // so re-running setup never duplicates or overwrites edits.
+      const seed = async (
+        name: string,
+        section: string,
+        groups: { group: string; items: string[] }[],
+      ) => {
+        const [{ exists } = { exists: false }] = (await sql`
+          SELECT EXISTS (
+            SELECT 1 FROM checklist_templates WHERE org_id = ${orgId} AND name = ${name}
+          ) AS exists
+        `) as { exists: boolean }[];
+        if (exists) return;
+        const [tpl] = (await sql`
+          INSERT INTO checklist_templates (org_id, name, section)
+          VALUES (${orgId}, ${name}, ${section}) RETURNING id
+        `) as { id: string }[];
+        let i = 0;
+        for (const g of groups) {
+          for (const item of g.items) {
             await sql`
-              INSERT INTO checklist_items (template_id, title, sort_order)
-              VALUES (${tpl.id}, ${items[i]}, ${i})
+              INSERT INTO checklist_items (template_id, title, group_label, sort_order)
+              VALUES (${tpl.id}, ${item}, ${g.group}, ${i})
             `;
+            i++;
           }
-        };
-        await seed("Opening Checklist", "opening", [
-          "Unlock doors and disarm the alarm",
-          "Turn on all lights and music",
-          "Power on stations, tools, and wax warmers",
-          "Start a load of towels / laundry",
-          "Make coffee and set up the beverage station",
-          "Wipe down the front desk and waiting area",
-          "Check and restock the retail display",
-          "Review the day's appointment book",
-          "Confirm appointments and check voicemails",
-          "Count and verify the cash drawer (open)",
-        ]);
-        await seed("Closing Checklist", "closing", [
-          "Sweep and mop all floors",
-          "Sanitize stations, chairs, and tools",
-          "Launder and fold towels; restock for opening",
-          "Restock back bar and color supplies",
-          "Wipe down the front desk and restrooms",
-          "Take out trash and recycling",
-          "Count and reconcile the cash drawer (close)",
-          "Prep and confirm tomorrow's appointments",
-          "Turn off all tools, lights, and music",
-          "Set the alarm and lock all doors",
-        ]);
-      }
+        }
+      };
+
+      await seed("Opening Checklist", "opening", [
+        { group: "Arrival & Access", items: [
+          "Disarm the alarm on entry.",
+          "Unlock and open the front door for business.",
+          "Bring the sidewalk sign out front.",
+          "Flip the door sign to “Open.”",
+          "Confirm the back door is closed and secured.",
+          "Turn on all lights and open the blinds.",
+          "Turn on all TVs and music.",
+        ] },
+        { group: "Station & Tools", items: [
+          "Sanitize your station, chair, and mirror, and set up for the day.",
+          "Confirm tools are clean, sanitized, and ready (combs, shears, clips, brushes).",
+          "Power on and test your equipment — dryers, irons, steamers, wax warmer.",
+          "Stock capes, towels, and neck strips at your station.",
+        ] },
+        { group: "Backbar & Cart", items: [
+          "Check backbar product levels (shampoo, conditioner, treatments) and refill as needed.",
+          "Update and restock your cart inventory for the day.",
+          "Note any low or out-of-stock product for the receptionist or manager.",
+        ] },
+        { group: "Laundry & Facilities", items: [
+          "Start a load of towels if the bin is full; check the washer and dryer.",
+          "Bathroom check — clean, stocked, and presentable.",
+          "Quick walkthrough: front desk, backbar, stations, private room, break room.",
+        ] },
+        { group: "Systems & Sign-In", items: [
+          "Log in to the POS on the iPad and shop phone for your shift.",
+          "Review your own schedule and confirm your appointments for the day.",
+        ] },
+      ]);
+
+      await seed("End-of-Shift Checklist", "other", [
+        { group: "Station & Cleanup", items: [
+          "Sanitize and wipe down your station, chair, and mirror.",
+          "Clean and disinfect your tools; return any shared tools to their place.",
+          "Turn off and unplug your personal equipment (irons, dryers, steamers, wax warmer).",
+          "Sweep and clear hair from your area.",
+        ] },
+        { group: "Inventory & Restock", items: [
+          "Update your cart inventory — note what you used or depleted.",
+          "Restock your station supplies (capes, towels, neck strips, product) for the next stylist.",
+          "Flag any low or out-of-stock items for reorder.",
+        ] },
+        { group: "Client & Records", items: [
+          "Log client notes, formulas, and purchases in the system.",
+          "Confirm your guests are rebooked before they leave.",
+          "Log out of the iPad or shop phone if you used it for your transactions.",
+        ] },
+        { group: "Laundry & Handoff", items: [
+          "Start or move a load of towels if you used them; check the washer and dryer.",
+          "Bathroom or private-room check if you were the last to use it.",
+          "Leave a note for the receptionist or next stylist on anything outstanding — maintenance, guest follow-up, or special requests.",
+        ] },
+      ]);
+
+      await seed("Closing Checklist", "closing", [
+        { group: "Stations & Cleanup", items: [
+          "Sanitize all stations, chairs, mirrors, and high-touch surfaces.",
+          "Turn off AND unplug all equipment — flat irons, blow dryers, steamers, wax warmers.",
+          "Sweep and clear all floors.",
+          "Wipe down the backbar and bowls.",
+        ] },
+        { group: "Inventory", items: [
+          "Complete final cart inventory updates and note low stock for reorder.",
+          "Confirm retail and backbar restock is logged for the opener.",
+        ] },
+        { group: "Laundry & Facilities", items: [
+          "Washer and dryer check — confirm the final load is done and both are off.",
+          "Bathroom check — clean, stocked, water off, lights off.",
+          "Break room check — appliances off, surfaces clear.",
+        ] },
+        { group: "Systems", items: [
+          "Log out of the POS on the iPad.",
+          "Log out of the POS on the shop phone.",
+          "Power down the TVs, music, and any non-essential appliances.",
+        ] },
+        { group: "Lockup & Security", items: [
+          "Bring the sidewalk sign back in.",
+          "Flip the door sign to “Closed.”",
+          "Close the blinds.",
+          "Turn off all lights.",
+          "Close and lock the back door.",
+          "Lock the front door.",
+          "Set / arm the alarm.",
+          "Final walkthrough before you leave.",
+        ] },
+      ]);
     }
 
     return Response.json({ ok: true });

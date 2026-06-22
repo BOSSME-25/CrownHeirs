@@ -391,9 +391,20 @@ export default async function DutiesPage({
                       {sec.label}{" "}
                       <span className="muted" style={{ fontSize: "0.9rem", fontWeight: 400 }}>· {secDone}/{rows.length}</span>
                     </h2>
-                    {rows.map((row) => (
-                      <TaskCard key={row.task.id} row={row} />
-                    ))}
+                    {rows.map((row, i) => {
+                      const prevGroup = i > 0 ? rows[i - 1].task.groupLabel : undefined;
+                      const showGroup = (row.task.groupLabel ?? "") !== (prevGroup ?? "");
+                      return (
+                        <div key={row.task.id}>
+                          {showGroup && row.task.groupLabel && (
+                            <div className="muted" style={{ fontWeight: 600, margin: "10px 0 6px", textTransform: "uppercase", fontSize: "0.72rem", letterSpacing: "0.06em" }}>
+                              {row.task.groupLabel}
+                            </div>
+                          )}
+                          <TaskCard row={row} />
+                        </div>
+                      );
+                    })}
                   </section>
                 );
               })

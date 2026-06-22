@@ -79,6 +79,7 @@ export async function addItem(formData: FormData) {
     templateId,
     title,
     detail: str(formData, "detail"),
+    groupLabel: str(formData, "groupLabel"),
     sortOrder: String((Number(m) || 0) + 1),
   });
   await logAudit({ actorEmail: actor, action: "create", entity: "checklist_item", entityId: templateId });
@@ -91,7 +92,10 @@ export async function updateItem(formData: FormData) {
   const id = str(formData, "itemId");
   const title = str(formData, "title");
   if (!id || !title) throw new Error("Item text is required.");
-  await db.update(checklistItems).set({ title, detail: str(formData, "detail") }).where(eq(checklistItems.id, id));
+  await db
+    .update(checklistItems)
+    .set({ title, detail: str(formData, "detail"), groupLabel: str(formData, "groupLabel") })
+    .where(eq(checklistItems.id, id));
   await logAudit({ actorEmail: actor, action: "update", entity: "checklist_item", entityId: id });
   revalidatePath("/duties/templates");
   back("Item saved");
