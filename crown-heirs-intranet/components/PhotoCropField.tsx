@@ -20,7 +20,10 @@ export default function PhotoCropField({
   const submitRef = useRef<HTMLInputElement>(null); // the file that gets submitted
   const pickRef = useRef<HTMLInputElement>(null); // hidden chooser
   const imgRef = useRef<HTMLImageElement>(null);
+  const frameRef = useRef<HTMLDivElement>(null);
   const drag = useRef<{ x: number; y: number; ox: number; oy: number } | null>(null);
+  const pointers = useRef<Map<number, { x: number; y: number }>>(new Map());
+  const pinch = useRef<{ dist: number; zoom: number; natX: number; natY: number } | null>(null);
 
   const [src, setSrc] = useState<string | null>(null); // image being cropped
   const [nat, setNat] = useState<{ w: number; h: number } | null>(null);
@@ -59,17 +62,77 @@ export default function PhotoCropField({
     setOffset({ x: 0, y: 0 });
   }
 
+  // Frame-local coordinates for a pointer event.
+  function local(e: React.PointerEvent) {
+    const r = frameRef.current!.getBoundingClientRect();
+    return { x: e.clientX - r.left, y: e.clientY - r.top };
+  }
+
+  // Capture the natural-image point under the current two-finger midpoint so
+  // it stays put while pinching.
+  function startPinch() {
+    const pts = [...pointers.current.values()];
+    if (pts.length < 2) return;
+    const dist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+    const midX = (pts[0].x + pts[1].x) / 2;
+    const midY = (pts[0].y + pts[1].y) / 2;
+    const lx = (FRAME - drawW) / 2 + offset.x;
+    const ly = (FRAME - drawH) / 2 + offset.y;
+    pinch.current = { dist, zoom, natX: (midX - lx) / scale, natY: (midY - ly) / scale };
+    drag.current = null;
+  }
+
   function down(e: React.PointerEvent) {
     (e.currentTarget as Element).setPointerCapture(e.pointerId);
-    drag.current = { x: e.clientX, y: e.clientY, ox: offset.x, oy: offset.y };
+    pointers.current.set(e.pointerId, local(e));
+    if (pointers.current.size >= 2) {
+      startPinch();
+    } else {
+      const p = local(e);
+      drag.current = { x: p.x, y: p.y, ox: offset.x, oy: offset.y };
+    }
   }
+
   function move(e: React.PointerEvent) {
-    if (!drag.current) return;
-    const nx = drag.current.ox + (e.clientX - drag.current.x);
-    const ny = drag.current.oy + (e.clientY - drag.current.y);
-    setOffset(clampWith({ x: nx, y: ny }, drawW, drawH));
+    if (!pointers.current.has(e.pointerId)) return;
+    pointers.current.set(e.pointerId, local(e));
+
+    if (pointers.current.size >= 2 && pinch.current && nat) {
+      const pts = [...pointers.current.values()];
+      const dist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+      const midX = (pts[0].x + pts[1].x) / 2;
+      const midY = (pts[0].y + pts[1].y) / 2;
+      const z = Math.max(1, Math.min(3, (pinch.current.zoom * dist) / pinch.current.dist));
+      const sN = cover * z;
+      const dW = nat.w * sN;
+      const dH = nat.h * sN;
+      const ox = midX - pinch.current.natX * sN - FRAME / 2 + dW / 2;
+      const oy = midY - pinch.current.natY * sN - FRAME / 2 + dH / 2;
+      setZoom(z);
+      setOffset(clampWith({ x: ox, y: oy }, dW, dH));
+      return;
+    }
+
+    if (drag.current) {
+      const p = local(e);
+      const nx = drag.current.ox + (p.x - drag.current.x);
+      const ny = drag.current.oy + (p.y - drag.current.y);
+      setOffset(clampWith({ x: nx, y: ny }, drawW, drawH));
+    }
   }
-  function up() { drag.current = null; }
+
+  function up(e: React.PointerEvent) {
+    pointers.current.delete(e.pointerId);
+    if (pointers.current.size === 1) {
+      // Dropped to one finger — hand off to a fresh drag so it doesn't jump.
+      pinch.current = null;
+      const [p] = [...pointers.current.values()];
+      drag.current = { x: p.x, y: p.y, ox: offset.x, oy: offset.y };
+    } else if (pointers.current.size === 0) {
+      drag.current = null;
+      pinch.current = null;
+    }
+  }
 
   function onZoom(e: React.ChangeEvent<HTMLInputElement>) {
     if (!nat) return;
@@ -129,6 +192,7 @@ export default function PhotoCropField({
       {src ? (
         <div style={{ display: "flex", flexDirection: "column", gap: 12, alignItems: "flex-start" }}>
           <div
+            ref={frameRef}
             onPointerDown={down}
             onPointerMove={move}
             onPointerUp={up}
@@ -188,7 +252,7 @@ export default function PhotoCropField({
             />
           </div>
           <p className="muted" style={{ fontSize: "0.78rem", margin: 0 }}>
-            Drag to reposition · slide to zoom.
+            Drag to reposition · pinch or slide to zoom.
           </p>
           <div style={{ display: "flex", gap: 8 }}>
             <button type="button" className="btn" onClick={save}>Use photo</button>
