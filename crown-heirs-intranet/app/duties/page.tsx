@@ -2,7 +2,7 @@ import Link from "next/link";
 import { auth } from "@/auth";
 import SiteHeader from "@/components/SiteHeader";
 import { getAccess } from "@/lib/perms";
-import { getEmployeeByEmail } from "@/lib/employees";
+import { getEmployeeByEmail, jobTitles } from "@/lib/employees";
 import { activeEmployees } from "@/lib/schedule";
 import {
   acknowledgeTask,
@@ -67,6 +67,7 @@ export default async function DutiesPage({
   let templates: Awaited<ReturnType<typeof listTemplates>> = [];
   let templateMeta: Awaited<ReturnType<typeof listTemplateMeta>> = [];
   let auto: AutoAssignees = { opener: null, closer: null, configured: false };
+  let titles: string[] = [];
   try {
     me = await getEmployeeByEmail(email);
     tasks = await getTasksForDate(date);
@@ -75,10 +76,15 @@ export default async function DutiesPage({
     templateMeta = await listTemplateMeta();
     // Only hit Square if the day actually has auto-assigned duties.
     if (tasks.some((t) => t.task.autoRole)) auto = await resolveAutoAssignees(date);
-    if (canManage) templates = await listTemplates();
+    if (canManage) {
+      templates = await listTemplates();
+      titles = await jobTitles();
+    }
   } catch {
     setupNeeded = true;
   }
+
+  const myTitle = me?.jobTitle ?? null;
 
   // The live person behind an opener/closer duty.
   const autoFor = (role: string | null) =>
@@ -104,13 +110,14 @@ export default async function DutiesPage({
 
   function TaskCard({ row }: { row: TaskRow }) {
     const t = row.task;
+    const shared = t.assigneeTitle; // shared role duty (anyone with this title)
     const autoPerson = autoFor(t.autoRole);
     // Effective assignee: a fixed person, or the live opener/closer.
     const effId = t.assigneeId ?? autoPerson?.id ?? null;
     const effName = t.assigneeId ? row.assigneeName : autoPerson?.name ?? null;
     const roleLabel = t.autoRole === "opener" ? "Opening stylist" : t.autoRole === "closer" ? "Closing stylist" : null;
-    const mine = !!myId && effId === myId;
-    const canComplete = mine || canManage;
+    const mine = !shared && !!myId && effId === myId;
+    const canComplete = canManage || mine || (!!shared && !!myTitle && myTitle.trim().toLowerCase() === shared.trim().toLowerCase());
     const ra = reassignByTask.get(t.id);
     const doneFlag = t.status === "done";
 
@@ -131,7 +138,12 @@ export default async function DutiesPage({
             <div style={{ fontWeight: 600, textDecoration: doneFlag ? "line-through" : "none" }}>{t.title}</div>
             {t.detail && <div className="muted" style={{ fontSize: "0.85rem", marginTop: 2 }}>{t.detail}</div>}
             <div className="muted" style={{ fontSize: "0.82rem", marginTop: 4 }}>
-              {roleLabel ? (
+              {shared ? (
+                <>
+                  <span className="tag" style={{ marginRight: 6 }}>Any {shared}</span>
+                  {!doneFlag && <em>anyone with this role can complete</em>}
+                </>
+              ) : roleLabel ? (
                 <>
                   <span className="tag" style={{ marginRight: 6 }}>{roleLabel} · auto</span>
                   {effName ? <>→ <strong>{effName}</strong></> : auto.configured ? <em>no appointment booked yet</em> : <em>link Square to resolve</em>}
@@ -220,13 +232,20 @@ export default async function DutiesPage({
                 <form action={setAssignee} style={{ display: "flex", gap: 6, alignItems: "center" }}>
                   <input type="hidden" name="taskId" value={t.id} />
                   <input type="hidden" name="taskDate" value={date} />
-                  <select name="assigneeId" defaultValue={t.assigneeId ?? (t.autoRole ? `__${t.autoRole}__` : "")}>
+                  <select name="assigneeId" defaultValue={t.assigneeId ?? (t.autoRole ? `__${t.autoRole}__` : t.assigneeTitle ? `__title_shared__:${t.assigneeTitle}` : "")}>
                     <option value="">— Unassigned —</option>
                     <option value="__opener__">Opening stylist (auto)</option>
                     <option value="__closer__">Closing stylist (auto)</option>
                     {roster.map((r) => (
                       <option key={r.id} value={r.id}>{r.fullName}</option>
                     ))}
+                    {titles.length > 0 && (
+                      <optgroup label="Any with job title (shared)">
+                        {titles.map((jt) => (
+                          <option key={jt} value={`__title_shared__:${jt}`}>Any {jt}</option>
+                        ))}
+                      </optgroup>
+                    )}
                   </select>
                   <button className="btn btn-ghost" type="submit">Set</button>
                 </form>
@@ -364,6 +383,20 @@ export default async function DutiesPage({
                           {roster.map((r) => (
                             <option key={r.id} value={r.id}>{r.fullName}</option>
                           ))}
+                          {titles.length > 0 && (
+                            <>
+                              <optgroup label="By job title — each does their own">
+                                {titles.map((jt) => (
+                                  <option key={`e-${jt}`} value={`__title_each__:${jt}`}>All {jt} (each)</option>
+                                ))}
+                              </optgroup>
+                              <optgroup label="By job title — shared (anyone)">
+                                {titles.map((jt) => (
+                                  <option key={`s-${jt}`} value={`__title_shared__:${jt}`}>Any {jt} (shared)</option>
+                                ))}
+                              </optgroup>
+                            </>
+                          )}
                         </select>
                       </div>
                     </div>
@@ -400,6 +433,20 @@ export default async function DutiesPage({
                         {roster.map((r) => (
                           <option key={r.id} value={r.id}>{r.fullName}</option>
                         ))}
+                        {titles.length > 0 && (
+                          <>
+                            <optgroup label="By job title — each does their own">
+                              {titles.map((jt) => (
+                                <option key={`e-${jt}`} value={`__title_each__:${jt}`}>All {jt} (each)</option>
+                              ))}
+                            </optgroup>
+                            <optgroup label="By job title — shared (anyone)">
+                              {titles.map((jt) => (
+                                <option key={`s-${jt}`} value={`__title_shared__:${jt}`}>Any {jt} (shared)</option>
+                              ))}
+                            </optgroup>
+                          </>
+                        )}
                       </select>
                     </div>
                   </div>

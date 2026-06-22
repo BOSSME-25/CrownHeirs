@@ -48,12 +48,33 @@ const str = (formData: FormData, k: string) => {
 
 const section = (v: string | null) => (v && DUTY_SECTION_IDS.includes(v) ? v : "other");
 
-// The assignee dropdown can carry a real employee id, or a special token
-// meaning "follow the day's bookings" (opener/closer).
-function parseAssignee(raw: string | null): { assigneeId: string | null; autoRole: string | null } {
-  if (raw === "__opener__") return { assigneeId: null, autoRole: "opener" };
-  if (raw === "__closer__") return { assigneeId: null, autoRole: "closer" };
-  return { assigneeId: raw, autoRole: null };
+// The assignee dropdown can carry a real employee id, or a special token:
+//   __opener__ / __closer__       → follow the day's first/last appointment
+//   __title_each__:<title>        → one copy per person with that job title
+//   __title_shared__:<title>      → one shared duty anyone with that title completes
+type ParsedAssignee = {
+  assigneeId: string | null;
+  autoRole: string | null;
+  assigneeTitle: string | null; // shared
+  fanoutTitle: string | null; // one-per-person
+};
+function parseAssignee(raw: string | null): ParsedAssignee {
+  const base = { assigneeId: null, autoRole: null, assigneeTitle: null, fanoutTitle: null };
+  if (raw === "__opener__") return { ...base, autoRole: "opener" };
+  if (raw === "__closer__") return { ...base, autoRole: "closer" };
+  if (raw?.startsWith("__title_each__:")) return { ...base, fanoutTitle: raw.slice("__title_each__:".length) };
+  if (raw?.startsWith("__title_shared__:")) return { ...base, assigneeTitle: raw.slice("__title_shared__:".length) };
+  return { ...base, assigneeId: raw };
+}
+
+// Active employees holding a given job title (used to fan a duty out per person).
+async function employeesWithTitle(title: string): Promise<{ id: string; email: string | null; fullName: string }[]> {
+  const rows = await db
+    .select({ id: employees.id, email: employees.email, fullName: employees.fullName, title: employees.jobTitle, status: employees.status })
+    .from(employees);
+  return rows
+    .filter((r) => r.status === "active" && (r.title ?? "").trim().toLowerCase() === title.trim().toLowerCase())
+    .map((r) => ({ id: r.id, email: r.email, fullName: r.fullName }));
 }
 
 // Who a duty currently belongs to: a fixed assignee, or the live opener/closer
@@ -65,6 +86,20 @@ async function effectiveAssigneeId(task: DailyTask): Promise<string | null> {
     return (task.autoRole === "opener" ? auto.opener?.id : auto.closer?.id) ?? null;
   }
   return null;
+}
+
+// Can this person complete/acknowledge the duty? The assigned person (fixed or
+// live opener/closer), anyone holding a shared duty's job title, or a manager.
+async function canComplete(
+  task: DailyTask,
+  emp: { id: string; jobTitle: string | null },
+  isManager: boolean,
+): Promise<boolean> {
+  if (isManager) return true;
+  if (task.assigneeTitle) {
+    return !!emp.jobTitle && emp.jobTitle.trim().toLowerCase() === task.assigneeTitle.trim().toLowerCase();
+  }
+  return (await effectiveAssigneeId(task)) === emp.id;
 }
 
 async function notify(employeeId: string | null | undefined, subject: string, body: string) {
@@ -100,29 +135,41 @@ export async function applyTemplate(formData: FormData) {
 
   const org = await getDefaultOrg();
   const sec = ["opening", "endshift", "closing"].includes(tpl.section) ? tpl.section : "other";
-  let { assigneeId, autoRole } = parseAssignee(raw);
+  const p = parseAssignee(raw);
   // Opening/Closing checklists default to following the day's bookings.
-  if (!assigneeId && !autoRole) {
-    if (sec === "opening") autoRole = "opener";
-    else if (sec === "closing") autoRole = "closer";
+  if (!p.assigneeId && !p.autoRole && !p.assigneeTitle && !p.fanoutTitle) {
+    if (sec === "opening") p.autoRole = "opener";
+    else if (sec === "closing") p.autoRole = "closer";
   }
-  await db.insert(dailyTasks).values(
-    items.map((it, i) => ({
-      orgId: org?.id ?? null,
-      taskDate: date,
-      section: sec,
-      title: it.title,
-      detail: it.detail,
-      groupLabel: it.groupLabel,
-      assigneeId,
-      autoRole,
-      assignedBy: actor,
-      sortOrder: String(i),
-      templateId,
-    })),
-  );
-  if (assigneeId) {
-    await notify(assigneeId, `Duties assigned — ${tpl.name}`,
+  const baseRow = (it: (typeof items)[number], i: number) => ({
+    orgId: org?.id ?? null,
+    taskDate: date,
+    section: sec,
+    title: it.title,
+    detail: it.detail,
+    groupLabel: it.groupLabel,
+    assignedBy: actor,
+    sortOrder: String(i),
+    templateId,
+  });
+
+  if (p.fanoutTitle) {
+    const people = await employeesWithTitle(p.fanoutTitle);
+    const targets: (string | null)[] = people.length ? people.map((p2) => p2.id) : [null];
+    const rows = items.flatMap((it, i) => targets.map((assigneeId) => ({ ...baseRow(it, i), assigneeId })));
+    await db.insert(dailyTasks).values(rows);
+  } else {
+    await db.insert(dailyTasks).values(
+      items.map((it, i) => ({
+        ...baseRow(it, i),
+        assigneeId: p.assigneeId,
+        autoRole: p.autoRole,
+        assigneeTitle: p.assigneeTitle,
+      })),
+    );
+  }
+  if (p.assigneeId) {
+    await notify(p.assigneeId, `Duties assigned — ${tpl.name}`,
       `You've been assigned the <strong>${tpl.name}</strong> (${items.length} items) for ${date}.`);
   }
   await logAudit({ actorEmail: actor, action: "create", entity: "daily_tasks", detail: `${tpl.name} → ${date} (${items.length})` });
@@ -136,27 +183,39 @@ export async function addDuty(formData: FormData) {
   const date = str(formData, "taskDate");
   const title = str(formData, "title");
   if (!date || !title) throw new Error("A date and a duty are required.");
-  const { assigneeId, autoRole } = parseAssignee(str(formData, "assigneeId"));
+  const p = parseAssignee(str(formData, "assigneeId"));
+  const sec = section(str(formData, "section"));
   const org = await getDefaultOrg();
 
   const [{ m } = { m: null }] = await db
     .select({ m: max(dailyTasks.sortOrder) })
     .from(dailyTasks)
-    .where(and(eq(dailyTasks.taskDate, date), eq(dailyTasks.section, section(str(formData, "section")))));
-
-  await db.insert(dailyTasks).values({
+    .where(and(eq(dailyTasks.taskDate, date), eq(dailyTasks.section, sec)));
+  const sortOrder = String((Number(m) || 0) + 1);
+  const common = {
     orgId: org?.id ?? null,
     taskDate: date,
-    section: section(str(formData, "section")),
+    section: sec,
     title,
     detail: str(formData, "detail"),
-    assigneeId,
-    autoRole,
     assignedBy: actor,
-    sortOrder: String((Number(m) || 0) + 1),
-  });
-  if (assigneeId) {
-    await notify(assigneeId, "New duty assigned", `You've been assigned: <strong>${title}</strong> for ${date}.`);
+    sortOrder,
+  };
+
+  if (p.fanoutTitle) {
+    const people = await employeesWithTitle(p.fanoutTitle);
+    const targets: (string | null)[] = people.length ? people.map((p2) => p2.id) : [null];
+    await db.insert(dailyTasks).values(targets.map((assigneeId) => ({ ...common, assigneeId })));
+  } else {
+    await db.insert(dailyTasks).values({
+      ...common,
+      assigneeId: p.assigneeId,
+      autoRole: p.autoRole,
+      assigneeTitle: p.assigneeTitle,
+    });
+    if (p.assigneeId) {
+      await notify(p.assigneeId, "New duty assigned", `You've been assigned: <strong>${title}</strong> for ${date}.`);
+    }
   }
   await logAudit({ actorEmail: actor, action: "create", entity: "daily_tasks", detail: `${title} → ${date}` });
   revalidatePath("/duties");
@@ -169,16 +228,22 @@ export async function setAssignee(formData: FormData) {
   const taskId = str(formData, "taskId");
   const date = str(formData, "taskDate") ?? "";
   if (!taskId) throw new Error("Missing duty.");
-  const { assigneeId, autoRole } = parseAssignee(str(formData, "assigneeId"));
-  await db.update(dailyTasks).set({ assigneeId, autoRole }).where(eq(dailyTasks.id, taskId));
-  if (assigneeId) {
-    await notify(assigneeId, "Duty assigned to you", `A duty was assigned to you for ${date}.`);
+  const p = parseAssignee(str(formData, "assigneeId"));
+  // "Each person" fan-out is a build-time choice; treat it as shared here.
+  const assigneeTitle = p.assigneeTitle ?? p.fanoutTitle;
+  await db
+    .update(dailyTasks)
+    .set({ assigneeId: p.assigneeId, autoRole: p.autoRole, assigneeTitle })
+    .where(eq(dailyTasks.id, taskId));
+  if (p.assigneeId) {
+    await notify(p.assigneeId, "Duty assigned to you", `A duty was assigned to you for ${date}.`);
   }
   await logAudit({ actorEmail: actor, action: "update", entity: "daily_tasks", entityId: taskId, detail: "assignee changed" });
   revalidatePath("/duties");
-  const msg = autoRole === "opener" ? "Set to the opening stylist"
-    : autoRole === "closer" ? "Set to the closing stylist"
-    : assigneeId ? "Duty assigned" : "Duty unassigned";
+  const msg = p.autoRole === "opener" ? "Set to the opening stylist"
+    : p.autoRole === "closer" ? "Set to the closing stylist"
+    : assigneeTitle ? `Set to any ${assigneeTitle}`
+    : p.assigneeId ? "Duty assigned" : "Duty unassigned";
   back(date, msg);
 }
 
@@ -203,8 +268,9 @@ export async function acknowledgeTask(formData: FormData) {
   if (!taskId) throw new Error("Missing duty.");
   const task = (await db.select().from(dailyTasks).where(eq(dailyTasks.id, taskId)))[0];
   if (!task) throw new Error("Duty not found.");
-  // The assigned person (fixed or the live opener/closer) acknowledges; managers may override.
-  if ((await effectiveAssigneeId(task)) !== emp.id && !access.canApprove) {
+  // The assigned person (fixed, live opener/closer, or anyone with the duty's
+  // job title) acknowledges; managers may override.
+  if (!(await canComplete(task, emp, access.canApprove))) {
     throw new Error("Only the assigned person (or a manager) can complete this duty.");
   }
   await db
@@ -223,7 +289,7 @@ export async function unacknowledgeTask(formData: FormData) {
   if (!taskId) throw new Error("Missing duty.");
   const task = (await db.select().from(dailyTasks).where(eq(dailyTasks.id, taskId)))[0];
   if (!task) throw new Error("Duty not found.");
-  if ((await effectiveAssigneeId(task)) !== emp.id && !access.canApprove) {
+  if (!(await canComplete(task, emp, access.canApprove))) {
     throw new Error("Only the assigned person (or a manager) can change this.");
   }
   await db
@@ -246,6 +312,7 @@ export async function requestReassign(formData: FormData) {
 
   const task = (await db.select().from(dailyTasks).where(eq(dailyTasks.id, taskId)))[0];
   if (!task) throw new Error("Duty not found.");
+  if (task.assigneeTitle) throw new Error("Shared role duties can't be handed off — a manager can reassign them.");
   if ((await effectiveAssigneeId(task)) !== emp.id) throw new Error("You can only hand off duties assigned to you.");
 
   // One active request per duty at a time.
@@ -309,8 +376,8 @@ export async function decideReassign(formData: FormData) {
   if (r.status !== "accepted") throw new Error("Only an accepted handoff can be approved.");
 
   if (decision === "approve") {
-    // A handoff fixes the duty to a person, so it stops following bookings.
-    await db.update(dailyTasks).set({ assigneeId: r.targetEmployeeId, autoRole: null }).where(eq(dailyTasks.id, r.taskId));
+    // A handoff fixes the duty to a person, so it stops following bookings/titles.
+    await db.update(dailyTasks).set({ assigneeId: r.targetEmployeeId, autoRole: null, assigneeTitle: null }).where(eq(dailyTasks.id, r.taskId));
     await db.update(taskReassignments).set({ status: "approved", decidedBy: actor, decidedAt: new Date() }).where(eq(taskReassignments.id, id));
     await notify(r.targetEmployeeId, "Duty is now yours", `A duty handoff was approved — it's now assigned to you for ${date}.`);
     await notify(r.requestedById, "Handoff approved", "Your duty handoff was approved.");
