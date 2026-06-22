@@ -11,8 +11,11 @@ export type PosProvider = "square" | "manual" | "none";
 
 export type OrgSettings = {
   businessName?: string;
-  accent?: string; // brand color (hex)
+  accent?: string; // primary brand color (hex)
+  accent2?: string; // secondary/accent color (hex)
   logoUrl?: string;
+  faviconUrl?: string;
+  loginImageUrl?: string; // login-screen background
   font?: string; // key into FONT_PRESETS
   notifyFrom?: string;
   pos?: {

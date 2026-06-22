@@ -64,14 +64,17 @@ export default async function MyProfilePage() {
             <div className="field">
               <label htmlFor="whyCrownHeirs">Why Crown Heirs?</label>
               <textarea id="whyCrownHeirs" name="whyCrownHeirs" rows={2} defaultValue={me.whyCrownHeirs ?? ""} spellCheck />
+              {aiOn && <BioAssist field="why" fieldId="whyCrownHeirs" name={me.fullName} role={me.jobTitle} promptText="A few words on why you love it here (optional):" />}
             </div>
             <div className="field">
               <label htmlFor="fiveYearPlan">Five-year plan / goals</label>
               <textarea id="fiveYearPlan" name="fiveYearPlan" rows={2} defaultValue={me.fiveYearPlan ?? ""} spellCheck />
+              {aiOn && <BioAssist field="plan" fieldId="fiveYearPlan" name={me.fullName} role={me.jobTitle} promptText="A few words on your goals (optional):" />}
             </div>
             <div className="field">
               <label htmlFor="favoriteAway">Favorite thing to do away from the salon</label>
               <textarea id="favoriteAway" name="favoriteAway" rows={2} defaultValue={me.favoriteAway ?? ""} spellCheck />
+              {aiOn && <BioAssist field="away" fieldId="favoriteAway" name={me.fullName} role={me.jobTitle} promptText="A few words on what you love doing (optional):" />}
             </div>
             <button className="btn" type="submit">Save my profile</button>
           </form>

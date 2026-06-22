@@ -13,15 +13,20 @@ export const metadata: Metadata = {
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   // Per-tenant branding — font pairing + accent colour applied via CSS variables.
   let accent: string | null = null;
+  let accent2: string | null = null;
+  let faviconUrl: string | undefined;
   let preset = FONT_PRESETS.crown;
+  const hex = (v?: string) => (v && /^#[0-9a-fA-F]{6}$/.test(v) ? v : null);
   try {
     const { settings } = await getOrgSettings();
-    if (settings.accent && /^#[0-9a-fA-F]{6}$/.test(settings.accent)) accent = settings.accent;
+    accent = hex(settings.accent);
+    accent2 = hex(settings.accent2);
+    faviconUrl = settings.faviconUrl;
     if (settings.font && FONT_PRESETS[settings.font]) preset = FONT_PRESETS[settings.font];
   } catch {
     // DB not ready — fall back to defaults
   }
-  const brandCss = `:root{${accent ? `--terra:${accent};--accent:${accent};--terra-hi:${accent};` : ""}--font-serif:${preset.serif};--font-display:${preset.display};--font-ui:${preset.ui};}`;
+  const brandCss = `:root{${accent ? `--terra:${accent};--accent:${accent};--terra-hi:${accent};` : ""}${accent2 ? `--gold:${accent2};--gold-hi:${accent2};--accent2:${accent2};` : ""}--font-serif:${preset.serif};--font-display:${preset.display};--font-ui:${preset.ui};}`;
 
   return (
     <html lang="en">
@@ -29,6 +34,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link href={preset.href} rel="stylesheet" />
+        {faviconUrl && <link rel="icon" href={faviconUrl} />}
         <style dangerouslySetInnerHTML={{ __html: brandCss }} />
       </head>
       <body>

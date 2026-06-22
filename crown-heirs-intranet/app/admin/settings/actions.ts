@@ -43,22 +43,28 @@ export async function saveSettings(formData: FormData) {
     pos.squareTokenEnc = encryptSecret(newToken);
   }
 
-  // Optional logo upload.
-  let logoUrl: string | undefined;
-  const logo = formData.get("logo");
-  if (logo instanceof File && logo.size > 0) {
-    if (logo.size > 2 * 1024 * 1024) throw new Error("Logo must be under 2 MB.");
-    const blob = await put(`branding/${logo.name}`, logo, { access: "public", addRandomSuffix: true });
-    logoUrl = blob.url;
+  // Optional image uploads (logo, favicon, login background).
+  async function upload(key: string, max: number): Promise<string | undefined> {
+    const f = formData.get(key);
+    if (!(f instanceof File) || f.size === 0) return undefined;
+    if (f.size > max) throw new Error(`${key} is too large.`);
+    const blob = await put(`branding/${f.name}`, f, { access: "public", addRandomSuffix: true });
+    return blob.url;
   }
+  const logoUrl = await upload("logo", 2 * 1024 * 1024);
+  const faviconUrl = await upload("favicon", 512 * 1024);
+  const loginImageUrl = await upload("loginImage", 4 * 1024 * 1024);
 
   const font = get("font");
   await saveOrgSettings(org.id, {
     businessName: get("businessName"),
     accent: get("accent"),
+    accent2: get("accent2"),
     font: font && FONT_PRESETS[font] ? font : undefined,
     notifyFrom: get("notifyFrom"),
     ...(logoUrl ? { logoUrl } : {}),
+    ...(faviconUrl ? { faviconUrl } : {}),
+    ...(loginImageUrl ? { loginImageUrl } : {}),
     pos,
   });
   revalidatePath("/admin/settings");

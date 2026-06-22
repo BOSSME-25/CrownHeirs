@@ -1,7 +1,8 @@
 import { redirect } from "next/navigation";
 import { auth, signIn } from "@/auth";
+import { getOrgSettings } from "@/lib/orgConfig";
 
-export const metadata = { title: "Sign in — Crown Heirs Team Hub" };
+export const metadata = { title: "Sign in — Team Hub" };
 
 export default async function LoginPage({
   searchParams,
@@ -13,12 +14,32 @@ export default async function LoginPage({
 
   const { error } = await searchParams;
 
+  let businessName = "Crown Heirs";
+  let logoUrl: string | undefined;
+  let loginImageUrl: string | undefined;
+  try {
+    const { settings } = await getOrgSettings();
+    if (settings.businessName) businessName = settings.businessName;
+    logoUrl = settings.logoUrl;
+    loginImageUrl = settings.loginImageUrl;
+  } catch {
+    // defaults
+  }
+
   return (
-    <main className="login-shell">
+    <main
+      className="login-shell"
+      style={loginImageUrl ? { backgroundImage: `url(${loginImageUrl})`, backgroundSize: "cover", backgroundPosition: "center" } : undefined}
+    >
       <div className="login-card">
-        <div className="mark">Crown Heirs</div>
+        {logoUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={logoUrl} alt={businessName} style={{ height: 48, margin: "0 auto 8px", display: "block" }} />
+        ) : (
+          <div className="mark">{businessName}</div>
+        )}
         <h1>Team Hub</h1>
-        <p>This is a private space for Crown Heirs staff. Sign in with your work Google account to continue.</p>
+        <p>This is a private space for {businessName} staff. Sign in with your work Google account to continue.</p>
 
         {error && (
           <div className="notice err">

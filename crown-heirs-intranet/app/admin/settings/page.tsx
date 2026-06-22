@@ -45,8 +45,12 @@ export default async function SettingsPage() {
                 <input id="businessName" name="businessName" defaultValue={settings.businessName ?? ""} placeholder="Crown Heirs" />
               </div>
               <div className="field">
-                <label htmlFor="accent">Brand color (hex)</label>
+                <label htmlFor="accent">Primary color (hex)</label>
                 <input id="accent" name="accent" defaultValue={settings.accent ?? ""} placeholder="#a0624a" />
+              </div>
+              <div className="field">
+                <label htmlFor="accent2">Secondary color (hex)</label>
+                <input id="accent2" name="accent2" defaultValue={settings.accent2 ?? ""} placeholder="#c8952a" />
               </div>
               <div className="field">
                 <label htmlFor="font">Font style</label>
@@ -67,6 +71,14 @@ export default async function SettingsPage() {
                   <img src={settings.logoUrl} alt="" style={{ height: 40, display: "block", marginBottom: 6 }} />
                 )}
                 <input id="logo" name="logo" type="file" accept="image/*" />
+              </div>
+              <div className="field">
+                <label htmlFor="favicon">Favicon {settings.faviconUrl && "(set — replace)"}</label>
+                <input id="favicon" name="favicon" type="file" accept="image/*,.ico" />
+              </div>
+              <div className="field">
+                <label htmlFor="loginImage">Login background {settings.loginImageUrl && "(set — replace)"}</label>
+                <input id="loginImage" name="loginImage" type="file" accept="image/*" />
               </div>
             </div>
 
