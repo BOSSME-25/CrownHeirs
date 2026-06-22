@@ -79,6 +79,8 @@ export default async function SiteHeader() {
           </div>
         </div>
 
+        <Link href="/inventory" className="nav-top-link">Inventory</Link>
+
         {isAdmin && <Link href="/admin" className="nav-top-link">Admin</Link>}
 
         {session?.user && (

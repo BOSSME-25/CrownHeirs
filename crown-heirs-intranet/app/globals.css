@@ -183,6 +183,22 @@ h1.title {
 .tile-label { font-family: var(--font-serif); font-weight: 600; font-size: 1.05rem; line-height: 1.2; }
 .tile-desc { font-size: 0.78rem; line-height: 1.35; color: var(--ink-dim); margin-top: -4px; }
 
+/* ─── Data table (inventory, lists) ─── */
+.data-table { width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-m); overflow: hidden; font-size: 0.92rem; }
+.data-table th, .data-table td { padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border); vertical-align: middle; }
+.data-table th { font-family: var(--font-display); font-size: 0.7rem; letter-spacing: 0.07em; text-transform: uppercase; color: var(--ink-dim); font-weight: 500; }
+.data-table td.num, .data-table th.num { text-align: right; font-variant-numeric: tabular-nums; }
+.data-table tbody tr:last-child td { border-bottom: none; }
+.data-table tbody tr:hover { background: var(--surface-dim); }
+.data-table a { text-decoration: none; color: var(--terra); font-weight: 500; }
+.tag { display: inline-block; font-size: 0.7rem; letter-spacing: 0.03em; padding: 2px 8px; border-radius: var(--r-pill); background: var(--surface-dim); color: var(--ink-mid); border: 1px solid var(--border); white-space: nowrap; }
+.tag.low { background: rgba(160,98,74,0.12); color: var(--terra); border-color: var(--terra-lo); }
+.tag.ok { background: rgba(58,122,72,0.10); color: #2f6b3c; border-color: rgba(58,122,72,0.35); }
+.stat-row { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 20px; }
+.stat { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-m); padding: 14px 18px; min-width: 130px; }
+.stat .stat-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-dim); }
+.stat .stat-value { font-family: var(--font-serif); font-weight: 600; font-size: 1.6rem; }
+
 /* ─── Prose (handbook/policy text) ─── */
 .prose { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-l); padding: 36px; }
 .prose h2 { font-family: var(--font-serif); font-weight: 600; font-size: 1.5rem; margin: 28px 0 12px; }

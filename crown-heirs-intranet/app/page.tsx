@@ -51,6 +51,9 @@ const TILES: Tile[] = [
   { href: "/documents", label: "Documents", desc: "Browse and download every uploaded file.", icon: (
     <I><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z" /></I>
   ) },
+  { href: "/inventory", label: "Inventory", desc: "Stock & merchandise — counts, reorders, history.", icon: (
+    <I><path d="M3 8l9-5 9 5v8l-9 5-9-5V8z" /><path d="M3 8l9 5 9-5M12 13v8" /></I>
+  ) },
   { href: "/onboarding", label: "Onboarding", desc: "Your getting-started checklist for new team members.", icon: (
     <I><rect x="5" y="4" width="14" height="17" rx="2" /><path d="M9 4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1" /><path d="M9 13l2 2 4-4" /></I>
   ) },

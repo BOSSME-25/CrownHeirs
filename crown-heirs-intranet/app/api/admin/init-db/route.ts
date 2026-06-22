@@ -328,6 +328,59 @@ export async function POST() {
       )
     `;
 
+    // ── Inventory ──
+    await sql`
+      CREATE TABLE IF NOT EXISTS vendors (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        org_id uuid,
+        name text NOT NULL,
+        contact_name text,
+        phone text,
+        email text,
+        website text,
+        account_number text,
+        notes text,
+        active boolean NOT NULL DEFAULT true,
+        created_at timestamptz DEFAULT now()
+      )
+    `;
+    await sql`
+      CREATE TABLE IF NOT EXISTS inventory_items (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        org_id uuid,
+        location_id uuid,
+        vendor_id uuid,
+        name text NOT NULL,
+        brand text,
+        category text NOT NULL DEFAULT 'retail',
+        sku text,
+        size text,
+        unit text,
+        cost numeric(10,2),
+        retail_price numeric(10,2),
+        on_hand numeric NOT NULL DEFAULT 0,
+        reorder_point numeric NOT NULL DEFAULT 0,
+        active boolean NOT NULL DEFAULT true,
+        notes text,
+        created_at timestamptz DEFAULT now(),
+        updated_at timestamptz DEFAULT now()
+      )
+    `;
+    await sql`
+      CREATE TABLE IF NOT EXISTS inventory_txns (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        org_id uuid,
+        item_id uuid NOT NULL REFERENCES inventory_items(id) ON DELETE CASCADE,
+        delta numeric NOT NULL,
+        reason text NOT NULL DEFAULT 'adjust',
+        note text,
+        unit_cost numeric(10,2),
+        actor_email text,
+        created_at timestamptz DEFAULT now()
+      )
+    `;
+    await sql`CREATE INDEX IF NOT EXISTS inventory_txns_item_idx ON inventory_txns (item_id, created_at DESC)`;
+
     // Backfill existing rows to Crown Heirs org + Main location.
     const [{ id: orgId } = { id: null }] = (await sql`
       SELECT id FROM organizations WHERE slug = 'crown-heirs' LIMIT 1
