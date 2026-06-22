@@ -1,7 +1,14 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { upload } from "@vercel/blob/client";
 import { CATEGORIES, type DocumentItem } from "@/lib/documents";
+
+const ALLOWED_EXT = [
+  ".pdf", ".doc", ".docx", ".ppt", ".pptx", ".xls", ".xlsx",
+  ".txt", ".md", ".png", ".jpg", ".jpeg", ".mp4",
+];
+const MAX_BYTES = 25 * 1024 * 1024;
 
 function fmtSize(bytes: number) {
   if (bytes < 1024) return `${bytes} B`;
@@ -31,17 +38,24 @@ export default function AdminPanel() {
       setMsg({ type: "err", text: "Choose a file first." });
       return;
     }
+    const lower = file.name.toLowerCase();
+    if (!ALLOWED_EXT.some((ext) => lower.endsWith(ext))) {
+      setMsg({ type: "err", text: "Unsupported file type." });
+      return;
+    }
+    if (file.size > MAX_BYTES) {
+      setMsg({ type: "err", text: "File exceeds the 25 MB limit." });
+      return;
+    }
     setBusy(true);
     setMsg(null);
     try {
-      const body = new FormData();
-      body.append("file", file);
-      body.append("category", category);
-      const res = await fetch("/api/upload", { method: "POST", body });
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.error ?? `Upload failed (${res.status})`);
-      }
+      // Upload straight from the browser to Blob (no 4.5 MB function-body limit).
+      await upload(`documents/${category}/${file.name}`, file, {
+        access: "public",
+        handleUploadUrl: "/api/upload",
+        clientPayload: JSON.stringify({ category }),
+      });
       setMsg({ type: "ok", text: `Uploaded “${file.name}”.` });
       setFile(null);
       const input = document.getElementById("file-input") as HTMLInputElement | null;

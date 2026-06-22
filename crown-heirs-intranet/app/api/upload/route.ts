@@ -1,44 +1,64 @@
-import { put } from "@vercel/blob";
+import { handleUpload, type HandleUploadBody } from "@vercel/blob/client";
 import { auth } from "@/auth";
 import { isAdmin } from "@/lib/access";
 import { isCategory } from "@/lib/documents";
 
 const MAX_BYTES = 25 * 1024 * 1024; // 25 MB
-const ALLOWED_EXT = [
-  ".pdf", ".doc", ".docx", ".ppt", ".pptx", ".xls", ".xlsx",
-  ".txt", ".md", ".png", ".jpg", ".jpeg", ".mp4",
-];
 
-// Upload a document (admins only).
-export async function POST(request: Request) {
-  const session = await auth();
-  if (!isAdmin(session?.user?.email)) {
-    return new Response("Forbidden", { status: 403 });
-  }
+// Document uploads go straight from the browser to Vercel Blob (client upload),
+// which avoids the ~4.5 MB serverless request-body limit that broke large PDFs.
+// This route only mints a short-lived upload token after checking admin + inputs.
+export async function POST(request: Request): Promise<Response> {
+  const body = (await request.json()) as HandleUploadBody;
 
-  const form = await request.formData();
-  const file = form.get("file");
-  const category = String(form.get("category") ?? "general");
-
-  if (!(file instanceof File)) {
-    return Response.json({ error: "No file provided" }, { status: 400 });
+  try {
+    const json = await handleUpload({
+      request,
+      body,
+      onBeforeGenerateToken: async (pathname, clientPayload) => {
+        // Authorize the upload here — runs before any token is issued.
+        const session = await auth();
+        if (!isAdmin(session?.user?.email)) {
+          throw new Error("Only admins can upload documents.");
+        }
+        let category = "general";
+        try {
+          if (clientPayload) category = JSON.parse(clientPayload).category ?? "general";
+        } catch {
+          // fall back to general
+        }
+        if (!isCategory(category)) throw new Error("Unknown category.");
+        if (!pathname.startsWith(`documents/${category}/`)) {
+          throw new Error("Invalid upload path.");
+        }
+        return {
+          addRandomSuffix: true,
+          maximumSizeInBytes: MAX_BYTES,
+          allowedContentTypes: [
+            "application/pdf",
+            "application/msword",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "application/vnd.ms-powerpoint",
+            "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+            "application/vnd.ms-excel",
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "text/plain",
+            "text/markdown",
+            "image/png",
+            "image/jpeg",
+            "video/mp4",
+          ],
+        };
+      },
+      onUploadCompleted: async () => {
+        // Files are listed directly from Blob, so nothing to persist here.
+      },
+    });
+    return Response.json(json);
+  } catch (err) {
+    return Response.json(
+      { error: err instanceof Error ? err.message : "Upload failed." },
+      { status: 400 },
+    );
   }
-  if (!isCategory(category)) {
-    return Response.json({ error: "Unknown category" }, { status: 400 });
-  }
-  if (file.size > MAX_BYTES) {
-    return Response.json({ error: "File exceeds 25 MB limit" }, { status: 400 });
-  }
-  const lower = file.name.toLowerCase();
-  if (!ALLOWED_EXT.some((ext) => lower.endsWith(ext))) {
-    return Response.json({ error: "Unsupported file type" }, { status: 400 });
-  }
-
-  // Random suffix keeps blob URLs unguessable and avoids name collisions.
-  const blob = await put(`documents/${category}/${file.name}`, file, {
-    access: "public",
-    addRandomSuffix: true,
-  });
-
-  return Response.json({ ok: true, url: blob.url, pathname: blob.pathname });
 }
