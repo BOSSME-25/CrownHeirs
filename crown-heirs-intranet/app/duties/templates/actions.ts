@@ -35,6 +35,7 @@ export async function createTemplate(formData: FormData) {
   await db.insert(checklistTemplates).values({
     orgId: org?.id ?? null,
     name,
+    description: str(formData, "description"),
     section: sectionOf(str(formData, "section")),
   });
   await logAudit({ actorEmail: actor, action: "create", entity: "checklist_template", detail: name });
@@ -49,7 +50,7 @@ export async function renameTemplate(formData: FormData) {
   if (!id || !name) throw new Error("Name is required.");
   await db
     .update(checklistTemplates)
-    .set({ name, section: sectionOf(str(formData, "section")) })
+    .set({ name, description: str(formData, "description"), section: sectionOf(str(formData, "section")) })
     .where(eq(checklistTemplates.id, id));
   await logAudit({ actorEmail: actor, action: "update", entity: "checklist_template", entityId: id });
   revalidatePath("/duties/templates");
