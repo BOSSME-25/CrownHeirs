@@ -78,6 +78,7 @@ export default async function InventoryPage({
               {canManage && (
                 <>
                   <Link href="/inventory/vendors" className="btn btn-ghost">Vendors</Link>
+                  <Link href="/inventory/import" className="btn btn-ghost">Import CSV</Link>
                   <Link href="/inventory/new" className="btn">Add item</Link>
                 </>
               )}
