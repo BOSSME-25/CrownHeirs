@@ -15,49 +15,49 @@ const I = ({ children }: { children: ReactNode }) => (
     strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{children}</svg>
 );
 
-type Tile = { href: string; label: string; icon: ReactNode; gold?: boolean };
+type Tile = { href: string; label: string; desc: string; icon: ReactNode; gold?: boolean };
 
 const TILES: Tile[] = [
-  { href: "/schedule", label: "Schedule", icon: (
+  { href: "/schedule", label: "Schedule", desc: "The weekly schedule — who’s working when.", icon: (
     <I><rect x="3" y="4" width="18" height="17" rx="2" /><path d="M3 9h18M8 2v4M16 2v4M8 13h2M14 13h2M8 17h2M14 17h2" /></I>
   ) },
-  { href: "/timeclock", label: "Time Clock", icon: (
+  { href: "/timeclock", label: "Time Clock", desc: "Punch in and out and track your hours.", icon: (
     <I><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></I>
   ) },
-  { href: "/calendar", label: "Calendar", icon: (
+  { href: "/calendar", label: "Calendar", desc: "Upcoming meetings and team birthdays.", icon: (
     <I><rect x="3" y="4" width="18" height="17" rx="2" /><path d="M3 9h18M8 2v4M16 2v4" /><circle cx="12" cy="15" r="1.4" fill="currentColor" stroke="none" /></I>
   ) },
-  { href: "/time-off", label: "Time Off", icon: (
+  { href: "/time-off", label: "Time Off", desc: "Request days off and track approvals.", icon: (
     <I><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19" /></I>
   ) },
-  { href: "/pto", label: "PTO Balance", icon: (
+  { href: "/pto", label: "PTO Balance", desc: "See your paid-time-off balance and history.", icon: (
     <I><rect x="3" y="6" width="18" height="13" rx="2" /><path d="M3 10h18" /><circle cx="16.5" cy="14.5" r="1.2" fill="currentColor" stroke="none" /></I>
   ) },
-  { href: "/team", label: "Team", icon: (
+  { href: "/team", label: "Team", desc: "The staff roster — names, roles, and contact info.", icon: (
     <I><circle cx="9" cy="8" r="3.2" /><circle cx="17" cy="9" r="2.4" /><path d="M2.5 19c0-3 2.6-5 6.5-5s6.5 2 6.5 5" /><path d="M16 14c2.7.2 5 1.9 5 4.5" /></I>
   ) },
-  { href: "/messages", label: "Messages", icon: (
+  { href: "/messages", label: "Messages", desc: "Direct messages with your teammates.", icon: (
     <I><path d="M4 5h16a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H9l-4 4v-4H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z" /></I>
   ) },
-  { href: "/handbook", label: "Handbook", icon: (
+  { href: "/handbook", label: "Handbook", desc: "Who we are, how we work, pay, and benefits.", icon: (
     <I><path d="M12 6c-1.6-1-4.1-1.5-6-1.5V18c1.9 0 4.4.5 6 1.5 1.6-1 4.1-1.5 6-1.5V4.5c-1.9 0-4.4.5-6 1.5z" /><path d="M12 6v13.5" /></I>
   ) },
-  { href: "/policies", label: "Policies", icon: (
+  { href: "/policies", label: "Policies", desc: "Salon policies, safety, and client care.", icon: (
     <I><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6l7-3z" /><path d="M9 12l2 2 4-4" /></I>
   ) },
-  { href: "/training", label: "Training", icon: (
+  { href: "/training", label: "Training", desc: "Onboarding, techniques, and continuing education.", icon: (
     <I><path d="M12 4L2 9l10 5 10-5-10-5z" /><path d="M6 11v4c0 1.5 2.7 3 6 3s6-1.5 6-3v-4" /><path d="M22 9v5" /></I>
   ) },
-  { href: "/documents", label: "Documents", icon: (
+  { href: "/documents", label: "Documents", desc: "Browse and download every uploaded file.", icon: (
     <I><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z" /></I>
   ) },
-  { href: "/onboarding", label: "Onboarding", icon: (
+  { href: "/onboarding", label: "Onboarding", desc: "Your getting-started checklist for new team members.", icon: (
     <I><rect x="5" y="4" width="14" height="17" rx="2" /><path d="M9 4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1" /><path d="M9 13l2 2 4-4" /></I>
   ) },
-  { href: "/acknowledgments", label: "Acknowledgments", icon: (
+  { href: "/acknowledgments", label: "Acknowledgments", desc: "Review and sign off on company policies.", icon: (
     <I><path d="M4 17l8-8 3 3-8 8H4v-3z" /><path d="M14 7l2-2 3 3-2 2" /></I>
   ) },
-  { href: "/reviews", label: "Reviews", icon: (
+  { href: "/reviews", label: "Reviews", desc: "Your performance reviews and goals.", icon: (
     <I><path d="M12 3l2.6 5.5 6 .8-4.4 4.2 1.1 6L12 16.8 6.7 19.5l1.1-6L3.4 9.3l6-.8L12 3z" /></I>
   ) },
 ];
@@ -162,13 +162,13 @@ export default async function Home() {
 
         <div className="tiles">
           {TILES.map((t) => (
-            <Link key={t.href} href={t.href} className="tile">
+            <Link key={t.href} href={t.href} className="tile" title={t.desc}>
               <span className={"tile-icon" + (t.gold ? " gold" : "")}>{t.icon}</span>
               <span className="tile-label">{t.label}</span>
             </Link>
           ))}
           {isAdmin && (
-            <Link href="/admin" className="tile">
+            <Link href="/admin" className="tile" title="Upload documents, manage the team, and view business KPIs.">
               <span className="tile-icon gold">
                 <I><circle cx="12" cy="12" r="3.2" /><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1" /></I>
               </span>
