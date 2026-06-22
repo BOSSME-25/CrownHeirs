@@ -86,6 +86,7 @@ export async function applyTemplate(formData: FormData) {
       section: sec,
       title: it.title,
       detail: it.detail,
+      groupLabel: it.groupLabel,
       assigneeId: defaultAssignee ?? null,
       assignedBy: actor,
       sortOrder: String(i),

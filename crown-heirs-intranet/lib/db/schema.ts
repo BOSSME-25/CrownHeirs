@@ -510,6 +510,8 @@ export const checklistItems = pgTable("checklist_items", {
   templateId: uuid("template_id").notNull().references(() => checklistTemplates.id, { onDelete: "cascade" }),
   title: text("title").notNull(),
   detail: text("detail"),
+  // Optional sub-section heading within the checklist (e.g. "Arrival & Access").
+  groupLabel: text("group_label"),
   sortOrder: numeric("sort_order").default("0"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });
@@ -526,6 +528,8 @@ export const dailyTasks = pgTable("daily_tasks", {
   section: text("section").notNull().default("opening"),
   title: text("title").notNull(),
   detail: text("detail"),
+  // Sub-section heading carried over from the checklist item.
+  groupLabel: text("group_label"),
   assigneeId: uuid("assignee_id").references(() => employees.id, { onDelete: "set null" }),
   assignedBy: text("assigned_by"),
   // 'open' | 'done'

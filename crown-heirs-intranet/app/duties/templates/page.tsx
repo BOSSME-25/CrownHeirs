@@ -67,38 +67,49 @@ export default async function TemplatesPage() {
                   <span className="tag">{sectionLabel(tpl.section)}</span>
                 </form>
 
-                <ol style={{ margin: "14px 0 0", paddingLeft: 22 }}>
-                  {tpl.items.map((it, idx) => (
-                    <li key={it.id} style={{ marginBottom: 8 }}>
-                      <form action={updateItem} style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>
-                        <input type="hidden" name="itemId" value={it.id} />
-                        <input name="title" defaultValue={it.title} style={{ minWidth: 240, flex: 1 }} required />
-                        <button className="btn btn-ghost" type="submit">Save</button>
-                      </form>
-                      <div style={{ display: "flex", gap: 6, marginTop: 4 }}>
-                        <form action={moveItem}>
+                <div style={{ margin: "14px 0 0" }}>
+                  {tpl.items.map((it, idx) => {
+                    const prevGroup = idx > 0 ? tpl.items[idx - 1].groupLabel : undefined;
+                    const showGroup = (it.groupLabel ?? "") !== (prevGroup ?? "");
+                    return (
+                      <div key={it.id}>
+                        {showGroup && it.groupLabel && (
+                          <div className="muted" style={{ fontWeight: 600, margin: "12px 0 6px", textTransform: "uppercase", fontSize: "0.72rem", letterSpacing: "0.06em" }}>
+                            {it.groupLabel}
+                          </div>
+                        )}
+                        <form action={updateItem} style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center", marginBottom: 4 }}>
                           <input type="hidden" name="itemId" value={it.id} />
-                          <input type="hidden" name="dir" value="up" />
-                          <button className="btn-link" type="submit" disabled={idx === 0}>↑</button>
+                          <input name="title" defaultValue={it.title} style={{ minWidth: 240, flex: 1 }} required />
+                          <input name="groupLabel" defaultValue={it.groupLabel ?? ""} placeholder="Group" style={{ width: 140 }} />
+                          <button className="btn btn-ghost" type="submit">Save</button>
                         </form>
-                        <form action={moveItem}>
-                          <input type="hidden" name="itemId" value={it.id} />
-                          <input type="hidden" name="dir" value="down" />
-                          <button className="btn-link" type="submit" disabled={idx === tpl.items.length - 1}>↓</button>
-                        </form>
-                        <form action={deleteItem}>
-                          <input type="hidden" name="itemId" value={it.id} />
-                          <button className="btn-link" type="submit" style={{ color: "var(--terra,#a0624a)" }}>Remove</button>
-                        </form>
+                        <div style={{ display: "flex", gap: 6, marginBottom: 6 }}>
+                          <form action={moveItem}>
+                            <input type="hidden" name="itemId" value={it.id} />
+                            <input type="hidden" name="dir" value="up" />
+                            <button className="btn-link" type="submit" disabled={idx === 0}>↑</button>
+                          </form>
+                          <form action={moveItem}>
+                            <input type="hidden" name="itemId" value={it.id} />
+                            <input type="hidden" name="dir" value="down" />
+                            <button className="btn-link" type="submit" disabled={idx === tpl.items.length - 1}>↓</button>
+                          </form>
+                          <form action={deleteItem}>
+                            <input type="hidden" name="itemId" value={it.id} />
+                            <button className="btn-link" type="submit" style={{ color: "var(--terra,#a0624a)" }}>Remove</button>
+                          </form>
+                        </div>
                       </div>
-                    </li>
-                  ))}
-                </ol>
+                    );
+                  })}
+                </div>
                 {tpl.items.length === 0 && <p className="muted" style={{ marginTop: 10 }}>No items yet.</p>}
 
                 <form action={addItem} style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 12 }}>
                   <input type="hidden" name="templateId" value={tpl.id} />
                   <input name="title" placeholder="Add a checklist item…" style={{ minWidth: 240, flex: 1 }} required />
+                  <input name="groupLabel" placeholder="Group (optional)" style={{ width: 160 }} />
                   <button className="btn" type="submit">Add item</button>
                 </form>
 
