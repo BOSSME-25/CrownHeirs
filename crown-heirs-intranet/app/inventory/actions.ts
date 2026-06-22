@@ -10,7 +10,7 @@ import type { InventoryItem } from "@/lib/db/schema";
 import { getAccess } from "@/lib/perms";
 import { getDefaultOrg } from "@/lib/org";
 import { logAudit } from "@/lib/audit";
-import { isItemCategory, TXN_REASON_IDS, num } from "@/lib/inventory";
+import { isItemCategory, normalizeCategory, TXN_REASON_IDS, num } from "@/lib/inventory";
 
 // Managers and above manage inventory (day-to-day operational task).
 async function requireManage() {
@@ -231,4 +231,173 @@ export async function setVendorActive(id: string, active: boolean) {
   await db.update(vendors).set({ active }).where(eq(vendors.id, id));
   revalidatePath("/inventory/vendors");
   redirect(`/inventory/vendors?ok=${encodeURIComponent(active ? "Vendor reactivated" : "Vendor archived")}`);
+}
+
+// ── CSV import ──
+export type ImportRow = {
+  name?: string;
+  brand?: string;
+  category?: string;
+  sku?: string;
+  size?: string;
+  unit?: string;
+  cost?: string;
+  retailPrice?: string;
+  onHand?: string;
+  reorderPoint?: string;
+  vendorName?: string;
+};
+export type ImportResult = { created: number; updated: number; skipped: number; errors: string[] };
+
+const parseNum = (s?: string) => {
+  if (s == null) return null;
+  const t = String(s).replace(/[$,\s]/g, "");
+  if (t === "") return null;
+  const n = Number(t);
+  return Number.isFinite(n) ? n : null;
+};
+
+export async function importInventory(payload: {
+  rows: ImportRow[];
+  updateExisting: boolean;
+  defaultCategory?: string;
+}): Promise<ImportResult> {
+  const actor = await requireManage();
+  const org = await getDefaultOrg();
+  const orgId = org?.id ?? null;
+  const result: ImportResult = { created: 0, updated: 0, skipped: 0, errors: [] };
+  const rows = Array.isArray(payload?.rows) ? payload.rows : [];
+  if (rows.length === 0) return result;
+
+  const existing = orgId
+    ? await db.select().from(inventoryItems).where(eq(inventoryItems.orgId, orgId))
+    : await db.select().from(inventoryItems);
+  const bySku = new Map<string, InventoryItem>();
+  const byName = new Map<string, InventoryItem>();
+  for (const it of existing) {
+    if (it.sku) bySku.set(it.sku.trim().toLowerCase(), it);
+    byName.set(it.name.trim().toLowerCase(), it);
+  }
+
+  const vendorRows = orgId
+    ? await db.select().from(vendors).where(eq(vendors.orgId, orgId))
+    : await db.select().from(vendors);
+  const vendorByName = new Map<string, string>();
+  for (const v of vendorRows) vendorByName.set(v.name.trim().toLowerCase(), v.id);
+
+  async function ensureVendor(name?: string): Promise<string | null> {
+    const n = name?.trim();
+    if (!n) return null;
+    const key = n.toLowerCase();
+    const found = vendorByName.get(key);
+    if (found) return found;
+    const [v] = await db.insert(vendors).values({ orgId, name: n }).returning();
+    vendorByName.set(key, v.id);
+    return v.id;
+  }
+
+  const def = payload.defaultCategory ?? "retail";
+
+  for (let i = 0; i < rows.length; i++) {
+    const r = rows[i];
+    const name = (r.name ?? "").trim();
+    if (!name) {
+      result.skipped++;
+      continue;
+    }
+    try {
+      const cat = normalizeCategory(r.category, def);
+      const vendorId = await ensureVendor(r.vendorName);
+      const cost = parseNum(r.cost);
+      const retail = parseNum(r.retailPrice);
+      const reorder = parseNum(r.reorderPoint);
+      const onHand = parseNum(r.onHand);
+      const skuKey = r.sku?.trim().toLowerCase();
+      const match = (skuKey ? bySku.get(skuKey) : undefined) ?? byName.get(name.toLowerCase());
+
+      if (match) {
+        if (!payload.updateExisting) {
+          result.skipped++;
+          continue;
+        }
+        await db
+          .update(inventoryItems)
+          .set({
+            name,
+            brand: r.brand?.trim() || match.brand,
+            category: cat,
+            sku: r.sku?.trim() || match.sku,
+            size: r.size?.trim() || match.size,
+            unit: r.unit?.trim() || match.unit,
+            cost: cost != null ? String(cost) : match.cost,
+            retailPrice: retail != null ? String(retail) : match.retailPrice,
+            reorderPoint: reorder != null ? String(reorder) : match.reorderPoint,
+            vendorId: vendorId ?? match.vendorId,
+            updatedAt: new Date(),
+          })
+          .where(eq(inventoryItems.id, match.id));
+        if (onHand != null) {
+          const next = Math.max(0, onHand);
+          const delta = next - num(match.onHand);
+          await db.update(inventoryItems).set({ onHand: String(next) }).where(eq(inventoryItems.id, match.id));
+          if (delta !== 0) {
+            await db.insert(inventoryTxns).values({
+              orgId,
+              itemId: match.id,
+              delta: String(delta),
+              reason: "count",
+              note: "CSV import",
+              actorEmail: actor,
+            });
+          }
+        }
+        result.updated++;
+      } else {
+        const initial = onHand != null ? Math.max(0, onHand) : 0;
+        const [row] = await db
+          .insert(inventoryItems)
+          .values({
+            orgId,
+            vendorId,
+            name,
+            brand: r.brand?.trim() || null,
+            category: cat,
+            sku: r.sku?.trim() || null,
+            size: r.size?.trim() || null,
+            unit: r.unit?.trim() || null,
+            cost: cost != null ? String(cost) : null,
+            retailPrice: retail != null ? String(retail) : null,
+            onHand: String(initial),
+            reorderPoint: String(reorder ?? 0),
+          })
+          .returning();
+        if (row) {
+          byName.set(name.toLowerCase(), row);
+          if (row.sku) bySku.set(row.sku.trim().toLowerCase(), row);
+          if (initial > 0) {
+            await db.insert(inventoryTxns).values({
+              orgId,
+              itemId: row.id,
+              delta: String(initial),
+              reason: "count",
+              note: "CSV import (starting count)",
+              actorEmail: actor,
+            });
+          }
+        }
+        result.created++;
+      }
+    } catch (e) {
+      result.errors.push(`Row ${i + 1} (${name}): ${(e as Error).message}`);
+    }
+  }
+
+  await logAudit({
+    actorEmail: actor,
+    action: "import",
+    entity: "inventory_item",
+    detail: `${result.created} created, ${result.updated} updated, ${result.skipped} skipped`,
+  });
+  revalidatePath("/inventory");
+  return result;
 }
