@@ -46,6 +46,24 @@ export async function getTemplate(id: string): Promise<TemplateWithItems | undef
   return { ...tpl, items };
 }
 
+export type TemplateMeta = { id: string; name: string; description: string | null; section: string };
+
+// Lightweight template list (no items) so the board can show a checklist's
+// description to everyone, not just managers.
+export async function listTemplateMeta(): Promise<TemplateMeta[]> {
+  const org = await getDefaultOrg();
+  const base = db
+    .select({
+      id: checklistTemplates.id,
+      name: checklistTemplates.name,
+      description: checklistTemplates.description,
+      section: checklistTemplates.section,
+    })
+    .from(checklistTemplates);
+  if (!org) return base;
+  return base.where(eq(checklistTemplates.orgId, org.id));
+}
+
 export type TaskRow = {
   task: DailyTask;
   assigneeName: string | null;

@@ -19,6 +19,7 @@ import {
 import {
   activeReassignments,
   getTasksForDate,
+  listTemplateMeta,
   listTemplates,
   type ReassignRow,
   type TaskRow,
@@ -62,15 +63,20 @@ export default async function DutiesPage({
   let reassigns: ReassignRow[] = [];
   let roster: Roster = [];
   let templates: Awaited<ReturnType<typeof listTemplates>> = [];
+  let templateMeta: Awaited<ReturnType<typeof listTemplateMeta>> = [];
   try {
     me = await getEmployeeByEmail(email);
     tasks = await getTasksForDate(date);
     reassigns = await activeReassignments(tasks.map((t) => t.task.id));
     roster = await activeEmployees();
+    templateMeta = await listTemplateMeta();
     if (canManage) templates = await listTemplates();
   } catch {
     setupNeeded = true;
   }
+
+  // Checklist descriptions, keyed by the template they came from.
+  const metaById = new Map(templateMeta.map((m) => [m.id, m]));
 
   const myId = me?.id ?? null;
   const reassignByTask = new Map<string, ReassignRow>();
@@ -385,12 +391,21 @@ export default async function DutiesPage({
                 const rows = tasks.filter((t) => t.task.section === sec.id);
                 if (rows.length === 0) return null;
                 const secDone = rows.filter((r) => r.task.status === "done").length;
+                // Descriptions of the checklist(s) that fed this section today.
+                const descs = [...new Set(rows.map((r) => r.task.templateId).filter(Boolean) as string[])]
+                  .map((id) => metaById.get(id))
+                  .filter((m): m is NonNullable<typeof m> => !!m?.description);
                 return (
                   <section key={sec.id} style={{ marginBottom: 26 }}>
-                    <h2 style={{ fontFamily: "var(--font-serif)", fontWeight: 600, fontSize: "1.25rem", margin: "0 0 12px" }}>
+                    <h2 style={{ fontFamily: "var(--font-serif)", fontWeight: 600, fontSize: "1.25rem", margin: "0 0 6px" }}>
                       {sec.label}{" "}
                       <span className="muted" style={{ fontSize: "0.9rem", fontWeight: 400 }}>· {secDone}/{rows.length}</span>
                     </h2>
+                    {descs.map((m) => (
+                      <p key={m.id} className="muted" style={{ fontStyle: "italic", margin: "0 0 12px", fontSize: "0.88rem" }}>
+                        {m.description}
+                      </p>
+                    ))}
                     {rows.map((row, i) => {
                       const prevGroup = i > 0 ? rows[i - 1].task.groupLabel : undefined;
                       const showGroup = (row.task.groupLabel ?? "") !== (prevGroup ?? "");
