@@ -162,17 +162,19 @@ export default async function Home() {
 
         <div className="tiles">
           {TILES.map((t) => (
-            <Link key={t.href} href={t.href} className="tile" title={t.desc}>
+            <Link key={t.href} href={t.href} className="tile">
               <span className={"tile-icon" + (t.gold ? " gold" : "")}>{t.icon}</span>
               <span className="tile-label">{t.label}</span>
+              <span className="tile-desc">{t.desc}</span>
             </Link>
           ))}
           {isAdmin && (
-            <Link href="/admin" className="tile" title="Upload documents, manage the team, and view business KPIs.">
+            <Link href="/admin" className="tile">
               <span className="tile-icon gold">
                 <I><circle cx="12" cy="12" r="3.2" /><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1" /></I>
               </span>
               <span className="tile-label">Admin</span>
+              <span className="tile-desc">Upload documents, manage the team, and view KPIs.</span>
             </Link>
           )}
         </div>

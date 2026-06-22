@@ -181,6 +181,7 @@ h1.title {
 .tile:hover .tile-icon.gold { background: var(--gold-hi); }
 .tile-icon svg { width: 26px; height: 26px; }
 .tile-label { font-family: var(--font-serif); font-weight: 600; font-size: 1.05rem; line-height: 1.2; }
+.tile-desc { font-size: 0.78rem; line-height: 1.35; color: var(--ink-dim); margin-top: -4px; }
 
 /* ─── Prose (handbook/policy text) ─── */
 .prose { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-l); padding: 36px; }
