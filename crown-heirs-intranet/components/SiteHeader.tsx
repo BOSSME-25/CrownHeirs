@@ -48,6 +48,7 @@ export default async function SiteHeader() {
           <div className="nav-menu">
             <Link href="/calendar">Overview</Link>
             <Link href="/schedule">Schedule</Link>
+            <Link href="/duties">Daily Duties</Link>
             <Link href="/time-off">Time Off</Link>
           </div>
         </div>

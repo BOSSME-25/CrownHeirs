@@ -487,3 +487,71 @@ export const inventoryTxns = pgTable("inventory_txns", {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });
 export type InventoryTxn = typeof inventoryTxns.$inferSelect;
+
+// ───────────────────────────────────────────────
+// Daily duties & checklists — reusable Opening /
+// Closing checklist templates, plus per-day assigned
+// tasks that each get acknowledged on completion.
+// ───────────────────────────────────────────────
+export const checklistTemplates = pgTable("checklist_templates", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  orgId: uuid("org_id"),
+  name: text("name").notNull(),
+  // 'opening' | 'closing' | 'other'
+  section: text("section").notNull().default("opening"),
+  active: boolean("active").notNull().default(true),
+  sortOrder: numeric("sort_order").default("0"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+export type ChecklistTemplate = typeof checklistTemplates.$inferSelect;
+
+export const checklistItems = pgTable("checklist_items", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  templateId: uuid("template_id").notNull().references(() => checklistTemplates.id, { onDelete: "cascade" }),
+  title: text("title").notNull(),
+  detail: text("detail"),
+  sortOrder: numeric("sort_order").default("0"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+export type ChecklistItem = typeof checklistItems.$inferSelect;
+
+// A single duty assigned to one person for one date. Acknowledged by the
+// assignee (or a manager) when complete.
+export const dailyTasks = pgTable("daily_tasks", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  orgId: uuid("org_id"),
+  locationId: uuid("location_id"),
+  taskDate: date("task_date").notNull(),
+  // 'opening' | 'closing' | 'role' | 'other'
+  section: text("section").notNull().default("opening"),
+  title: text("title").notNull(),
+  detail: text("detail"),
+  assigneeId: uuid("assignee_id").references(() => employees.id, { onDelete: "set null" }),
+  assignedBy: text("assigned_by"),
+  // 'open' | 'done'
+  status: text("status").notNull().default("open"),
+  acknowledgedById: uuid("acknowledged_by_id").references(() => employees.id, { onDelete: "set null" }),
+  acknowledgedAt: timestamp("acknowledged_at", { withTimezone: true }),
+  sortOrder: numeric("sort_order").default("0"),
+  // Where it came from (a checklist template), for reference.
+  templateId: uuid("template_id"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+export type DailyTask = typeof dailyTasks.$inferSelect;
+
+// A request to hand a duty to another team member. The target must accept,
+// then a manager (Bethany/Emily/director/manager) approves.
+export const taskReassignments = pgTable("task_reassignments", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  taskId: uuid("task_id").notNull().references(() => dailyTasks.id, { onDelete: "cascade" }),
+  requestedById: uuid("requested_by_id").notNull().references(() => employees.id, { onDelete: "cascade" }),
+  targetEmployeeId: uuid("target_employee_id").notNull().references(() => employees.id, { onDelete: "cascade" }),
+  reason: text("reason"),
+  // 'pending_accept' | 'accepted' | 'declined' | 'approved' | 'denied' | 'cancelled'
+  status: text("status").notNull().default("pending_accept"),
+  acceptedAt: timestamp("accepted_at", { withTimezone: true }),
+  decidedBy: text("decided_by"),
+  decidedAt: timestamp("decided_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+export type TaskReassignment = typeof taskReassignments.$inferSelect;

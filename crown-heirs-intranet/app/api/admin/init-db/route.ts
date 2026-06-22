@@ -381,6 +381,63 @@ export async function POST() {
     `;
     await sql`CREATE INDEX IF NOT EXISTS inventory_txns_item_idx ON inventory_txns (item_id, created_at DESC)`;
 
+    // ── Daily duties & checklists ──
+    await sql`
+      CREATE TABLE IF NOT EXISTS checklist_templates (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        org_id uuid,
+        name text NOT NULL,
+        section text NOT NULL DEFAULT 'opening',
+        active boolean NOT NULL DEFAULT true,
+        sort_order numeric DEFAULT 0,
+        created_at timestamptz DEFAULT now()
+      )
+    `;
+    await sql`
+      CREATE TABLE IF NOT EXISTS checklist_items (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        template_id uuid NOT NULL REFERENCES checklist_templates(id) ON DELETE CASCADE,
+        title text NOT NULL,
+        detail text,
+        sort_order numeric DEFAULT 0,
+        created_at timestamptz DEFAULT now()
+      )
+    `;
+    await sql`
+      CREATE TABLE IF NOT EXISTS daily_tasks (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        org_id uuid,
+        location_id uuid,
+        task_date date NOT NULL,
+        section text NOT NULL DEFAULT 'opening',
+        title text NOT NULL,
+        detail text,
+        assignee_id uuid REFERENCES employees(id) ON DELETE SET NULL,
+        assigned_by text,
+        status text NOT NULL DEFAULT 'open',
+        acknowledged_by_id uuid REFERENCES employees(id) ON DELETE SET NULL,
+        acknowledged_at timestamptz,
+        sort_order numeric DEFAULT 0,
+        template_id uuid,
+        created_at timestamptz DEFAULT now()
+      )
+    `;
+    await sql`CREATE INDEX IF NOT EXISTS daily_tasks_date_idx ON daily_tasks (task_date, section, sort_order)`;
+    await sql`
+      CREATE TABLE IF NOT EXISTS task_reassignments (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        task_id uuid NOT NULL REFERENCES daily_tasks(id) ON DELETE CASCADE,
+        requested_by_id uuid NOT NULL REFERENCES employees(id) ON DELETE CASCADE,
+        target_employee_id uuid NOT NULL REFERENCES employees(id) ON DELETE CASCADE,
+        reason text,
+        status text NOT NULL DEFAULT 'pending_accept',
+        accepted_at timestamptz,
+        decided_by text,
+        decided_at timestamptz,
+        created_at timestamptz DEFAULT now()
+      )
+    `;
+
     // Backfill existing rows to Crown Heirs org + Main location.
     const [{ id: orgId } = { id: null }] = (await sql`
       SELECT id FROM organizations WHERE slug = 'crown-heirs' LIMIT 1
@@ -394,6 +451,49 @@ export async function POST() {
       await sql`UPDATE meetings SET org_id = ${orgId} WHERE org_id IS NULL`;
       if (locId) {
         await sql`UPDATE employees SET location_id = ${locId} WHERE location_id IS NULL`;
+      }
+
+      // Seed default Opening/Closing checklists once (editable afterward).
+      const [{ count } = { count: 0 }] = (await sql`
+        SELECT count(*)::int AS count FROM checklist_templates WHERE org_id = ${orgId}
+      `) as { count: number }[];
+      if (!count) {
+        const seed = async (name: string, section: string, items: string[]) => {
+          const [tpl] = (await sql`
+            INSERT INTO checklist_templates (org_id, name, section)
+            VALUES (${orgId}, ${name}, ${section}) RETURNING id
+          `) as { id: string }[];
+          for (let i = 0; i < items.length; i++) {
+            await sql`
+              INSERT INTO checklist_items (template_id, title, sort_order)
+              VALUES (${tpl.id}, ${items[i]}, ${i})
+            `;
+          }
+        };
+        await seed("Opening Checklist", "opening", [
+          "Unlock doors and disarm the alarm",
+          "Turn on all lights and music",
+          "Power on stations, tools, and wax warmers",
+          "Start a load of towels / laundry",
+          "Make coffee and set up the beverage station",
+          "Wipe down the front desk and waiting area",
+          "Check and restock the retail display",
+          "Review the day's appointment book",
+          "Confirm appointments and check voicemails",
+          "Count and verify the cash drawer (open)",
+        ]);
+        await seed("Closing Checklist", "closing", [
+          "Sweep and mop all floors",
+          "Sanitize stations, chairs, and tools",
+          "Launder and fold towels; restock for opening",
+          "Restock back bar and color supplies",
+          "Wipe down the front desk and restrooms",
+          "Take out trash and recycling",
+          "Count and reconcile the cash drawer (close)",
+          "Prep and confirm tomorrow's appointments",
+          "Turn off all tools, lights, and music",
+          "Set the alarm and lock all doors",
+        ]);
       }
     }
 
