@@ -45,7 +45,7 @@ export default async function SuggestionsPage() {
         <form className="prose" action={submitSuggestion}>
           <div className="field">
             <label htmlFor="message">Your suggestion</label>
-            <textarea id="message" name="message" rows={4} required placeholder="What’s on your mind?" />
+            <textarea id="message" name="message" rows={4} required placeholder="What’s on your mind?" spellCheck />
           </div>
           <div className="field">
             <label><input type="checkbox" name="anonymous" style={{ marginRight: 8 }} />Submit anonymously</label>

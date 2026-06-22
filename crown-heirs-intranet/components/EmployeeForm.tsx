@@ -50,11 +50,11 @@ export default function EmployeeForm({
         </div>
         <div className="field">
           <label htmlFor="email">Email (their Google login) *</label>
-          <input id="email" name="email" type="email" defaultValue={e?.email ?? ""} required />
+          <input id="email" name="email" type="email" defaultValue={e?.email ?? ""} required spellCheck={false} autoCapitalize="none" />
         </div>
         <div className="field">
           <label htmlFor="personalEmail">Personal email (from import)</label>
-          <input id="personalEmail" name="personalEmail" type="email" defaultValue={e?.personalEmail ?? ""} />
+          <input id="personalEmail" name="personalEmail" type="email" defaultValue={e?.personalEmail ?? ""} spellCheck={false} autoCapitalize="none" />
         </div>
         <div className="field">
           <label htmlFor="phone">Phone</label>

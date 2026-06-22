@@ -165,6 +165,7 @@ export default function MessagesDock() {
                   value={draft}
                   onChange={(e) => setDraft(e.target.value)}
                   placeholder="Write a message…"
+                  spellCheck
                   autoFocus
                 />
                 <button type="submit" disabled={sending || !draft.trim()}>Send</button>

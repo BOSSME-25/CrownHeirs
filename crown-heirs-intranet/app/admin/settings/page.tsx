@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { getAccess } from "@/lib/perms";
 import SiteHeader from "@/components/SiteHeader";
-import { getOrgSettings } from "@/lib/orgConfig";
+import { getOrgSettings, FONT_PRESETS } from "@/lib/orgConfig";
 import { canEncrypt } from "@/lib/crypto";
 import { saveSettings } from "@/app/admin/settings/actions";
 
@@ -49,8 +49,24 @@ export default async function SettingsPage() {
                 <input id="accent" name="accent" defaultValue={settings.accent ?? ""} placeholder="#a0624a" />
               </div>
               <div className="field">
+                <label htmlFor="font">Font style</label>
+                <select id="font" name="font" defaultValue={settings.font ?? "crown"}>
+                  {Object.entries(FONT_PRESETS).map(([key, f]) => (
+                    <option key={key} value={key}>{f.label}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="field">
                 <label htmlFor="notifyFrom">Notification “from” address</label>
                 <input id="notifyFrom" name="notifyFrom" defaultValue={settings.notifyFrom ?? ""} placeholder="Team Hub <admin@…>" />
+              </div>
+              <div className="field">
+                <label htmlFor="logo">Logo {settings.logoUrl && "(uploaded — choose a file to replace)"}</label>
+                {settings.logoUrl && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={settings.logoUrl} alt="" style={{ height: 40, display: "block", marginBottom: 6 }} />
+                )}
+                <input id="logo" name="logo" type="file" accept="image/*" />
               </div>
             </div>
 

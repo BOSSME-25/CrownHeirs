@@ -3,10 +3,22 @@ import { auth, signOut } from "@/auth";
 import MobileNav from "@/components/MobileNav";
 import { getEmployeeByEmail } from "@/lib/employees";
 import { unreadTotal } from "@/lib/messages";
+import { getOrgSettings } from "@/lib/orgConfig";
 
 export default async function SiteHeader() {
   const session = await auth();
   const isAdmin = session?.user?.isAdmin;
+
+  // Per-tenant brand name / logo.
+  let brandName = "Crown Heirs · Team Hub";
+  let logoUrl: string | undefined;
+  try {
+    const { settings } = await getOrgSettings();
+    if (settings.businessName) brandName = `${settings.businessName} · Team Hub`;
+    logoUrl = settings.logoUrl;
+  } catch {
+    // defaults
+  }
 
   // Best-effort unread message count (DB may not be set up yet).
   let unread = 0;
@@ -21,7 +33,14 @@ export default async function SiteHeader() {
 
   return (
     <header className="site-header">
-      <Link href="/" className="site-logo">Crown Heirs · Team Hub</Link>
+      <Link href="/" className="site-logo">
+        {logoUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={logoUrl} alt={brandName} style={{ height: 30, verticalAlign: "middle" }} />
+        ) : (
+          brandName
+        )}
+      </Link>
       <MobileNav isAdmin={isAdmin} email={session?.user?.email} unread={unread} />
       <nav className="site-nav">
         <div className="nav-group">

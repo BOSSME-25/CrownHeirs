@@ -4,6 +4,8 @@ import Avatar from "@/components/Avatar";
 import { ensureCalendarToken, updateMyProfile } from "@/app/me/actions";
 import { getEmployeeByEmail } from "@/lib/employees";
 import { APP_URL } from "@/lib/email";
+import { aiConfigured } from "@/lib/ai";
+import BioAssist from "@/components/BioAssist";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "My Profile — Crown Heirs Team Hub" };
@@ -11,6 +13,7 @@ export const metadata = { title: "My Profile — Crown Heirs Team Hub" };
 export default async function MyProfilePage() {
   const session = await auth();
   const email = session?.user?.email ?? "";
+  const aiOn = aiConfigured();
 
   let me;
   let setupNeeded = false;
@@ -55,19 +58,20 @@ export default async function MyProfilePage() {
             </div>
             <div className="field">
               <label htmlFor="bio">Short bio</label>
-              <textarea id="bio" name="bio" rows={2} defaultValue={me.bio ?? ""} />
+              <textarea id="bio" name="bio" rows={2} defaultValue={me.bio ?? ""} spellCheck />
+              {aiOn && <BioAssist name={me.fullName} role={me.jobTitle} />}
             </div>
             <div className="field">
               <label htmlFor="whyCrownHeirs">Why Crown Heirs?</label>
-              <textarea id="whyCrownHeirs" name="whyCrownHeirs" rows={2} defaultValue={me.whyCrownHeirs ?? ""} />
+              <textarea id="whyCrownHeirs" name="whyCrownHeirs" rows={2} defaultValue={me.whyCrownHeirs ?? ""} spellCheck />
             </div>
             <div className="field">
               <label htmlFor="fiveYearPlan">Five-year plan / goals</label>
-              <textarea id="fiveYearPlan" name="fiveYearPlan" rows={2} defaultValue={me.fiveYearPlan ?? ""} />
+              <textarea id="fiveYearPlan" name="fiveYearPlan" rows={2} defaultValue={me.fiveYearPlan ?? ""} spellCheck />
             </div>
             <div className="field">
               <label htmlFor="favoriteAway">Favorite thing to do away from the salon</label>
-              <textarea id="favoriteAway" name="favoriteAway" rows={2} defaultValue={me.favoriteAway ?? ""} />
+              <textarea id="favoriteAway" name="favoriteAway" rows={2} defaultValue={me.favoriteAway ?? ""} spellCheck />
             </div>
             <button className="btn" type="submit">Save my profile</button>
           </form>

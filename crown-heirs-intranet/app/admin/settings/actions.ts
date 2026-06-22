@@ -2,10 +2,11 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { put } from "@vercel/blob";
 import { auth } from "@/auth";
 import { getAccess } from "@/lib/perms";
 import { getDefaultOrg } from "@/lib/org";
-import { saveOrgSettings, type PosProvider } from "@/lib/orgConfig";
+import { FONT_PRESETS, saveOrgSettings, type PosProvider } from "@/lib/orgConfig";
 import { canEncrypt, encryptSecret } from "@/lib/crypto";
 
 async function requireSystem() {
@@ -42,10 +43,22 @@ export async function saveSettings(formData: FormData) {
     pos.squareTokenEnc = encryptSecret(newToken);
   }
 
+  // Optional logo upload.
+  let logoUrl: string | undefined;
+  const logo = formData.get("logo");
+  if (logo instanceof File && logo.size > 0) {
+    if (logo.size > 2 * 1024 * 1024) throw new Error("Logo must be under 2 MB.");
+    const blob = await put(`branding/${logo.name}`, logo, { access: "public", addRandomSuffix: true });
+    logoUrl = blob.url;
+  }
+
+  const font = get("font");
   await saveOrgSettings(org.id, {
     businessName: get("businessName"),
     accent: get("accent"),
+    font: font && FONT_PRESETS[font] ? font : undefined,
     notifyFrom: get("notifyFrom"),
+    ...(logoUrl ? { logoUrl } : {}),
     pos,
   });
   revalidatePath("/admin/settings");
