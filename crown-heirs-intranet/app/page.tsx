@@ -27,6 +27,9 @@ const TILES: Tile[] = [
   { href: "/calendar", label: "Calendar", desc: "Upcoming meetings and team birthdays.", icon: (
     <I><rect x="3" y="4" width="18" height="17" rx="2" /><path d="M3 9h18M8 2v4M16 2v4" /><circle cx="12" cy="15" r="1.4" fill="currentColor" stroke="none" /></I>
   ) },
+  { href: "/duties", label: "Daily Duties", desc: "Opening & closing checklists and assigned roles.", icon: (
+    <I><path d="M9 4h6a1 1 0 0 1 1 1v0a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1v0a1 1 0 0 1 1-1z" /><path d="M16 5h2a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2" /><path d="M8.5 12l2 2 4-4" /></I>
+  ) },
   { href: "/time-off", label: "Time Off", desc: "Request days off and track approvals.", icon: (
     <I><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19" /></I>
   ) },

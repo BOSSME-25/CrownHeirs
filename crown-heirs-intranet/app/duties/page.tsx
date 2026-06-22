@@ -1,0 +1,406 @@
+import Link from "next/link";
+import { auth } from "@/auth";
+import SiteHeader from "@/components/SiteHeader";
+import { getAccess } from "@/lib/perms";
+import { getEmployeeByEmail } from "@/lib/employees";
+import { activeEmployees } from "@/lib/schedule";
+import {
+  acknowledgeTask,
+  addDuty,
+  applyTemplate,
+  cancelReassign,
+  decideReassign,
+  deleteDuty,
+  requestReassign,
+  respondReassign,
+  setAssignee,
+  unacknowledgeTask,
+} from "@/app/duties/actions";
+import {
+  activeReassignments,
+  getTasksForDate,
+  listTemplates,
+  type ReassignRow,
+  type TaskRow,
+} from "@/lib/duties";
+import {
+  DUTY_SECTIONS,
+  prettyDate,
+  reassignStatusLabel,
+  salonToday,
+  shiftDate,
+} from "@/lib/duties-constants";
+
+export const dynamic = "force-dynamic";
+export const metadata = { title: "Daily Duties — Crown Heirs Team Hub" };
+
+type Roster = { id: string; fullName: string }[];
+
+function isValidDate(s?: string): s is string {
+  return !!s && /^\d{4}-\d{2}-\d{2}$/.test(s);
+}
+
+function ackTime(d: Date | null) {
+  if (!d) return "";
+  return new Date(d).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+}
+
+export default async function DutiesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ d?: string; ok?: string }>;
+}) {
+  const { d } = await searchParams;
+  const session = await auth();
+  const email = session?.user?.email ?? "";
+  const canManage = (await getAccess(email)).canApprove;
+  const date = isValidDate(d) ? d : salonToday();
+
+  let setupNeeded = false;
+  let me: Awaited<ReturnType<typeof getEmployeeByEmail>>;
+  let tasks: TaskRow[] = [];
+  let reassigns: ReassignRow[] = [];
+  let roster: Roster = [];
+  let templates: Awaited<ReturnType<typeof listTemplates>> = [];
+  try {
+    me = await getEmployeeByEmail(email);
+    tasks = await getTasksForDate(date);
+    reassigns = await activeReassignments(tasks.map((t) => t.task.id));
+    roster = await activeEmployees();
+    if (canManage) templates = await listTemplates();
+  } catch {
+    setupNeeded = true;
+  }
+
+  const myId = me?.id ?? null;
+  const reassignByTask = new Map<string, ReassignRow>();
+  for (const r of reassigns) reassignByTask.set(r.r.taskId, r);
+
+  // Action queues surfaced at the top of the page.
+  const toAccept = reassigns.filter((r) => r.r.status === "pending_accept" && r.r.targetEmployeeId === myId);
+  const toApprove = canManage ? reassigns.filter((r) => r.r.status === "accepted") : [];
+
+  const total = tasks.length;
+  const done = tasks.filter((t) => t.task.status === "done").length;
+
+  const prev = shiftDate(date, -1);
+  const next = shiftDate(date, 1);
+  const today = salonToday();
+
+  function TaskCard({ row }: { row: TaskRow }) {
+    const t = row.task;
+    const mine = myId && t.assigneeId === myId;
+    const canComplete = mine || canManage;
+    const ra = reassignByTask.get(t.id);
+    const doneFlag = t.status === "done";
+
+    return (
+      <div className="card" style={{ cursor: "default", padding: "14px 16px", marginBottom: 10 }}>
+        <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
+          <span
+            aria-hidden
+            style={{
+              fontSize: "1.1rem",
+              lineHeight: 1.4,
+              color: doneFlag ? "var(--olive, #5b7a4b)" : "var(--muted, #9a8f86)",
+            }}
+          >
+            {doneFlag ? "☑" : "☐"}
+          </span>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontWeight: 600, textDecoration: doneFlag ? "line-through" : "none" }}>{t.title}</div>
+            {t.detail && <div className="muted" style={{ fontSize: "0.85rem", marginTop: 2 }}>{t.detail}</div>}
+            <div className="muted" style={{ fontSize: "0.82rem", marginTop: 4 }}>
+              {t.assigneeId ? <>Assigned to <strong>{row.assigneeName ?? "—"}</strong></> : <em>Unassigned</em>}
+              {doneFlag && row.ackName && <> · ✓ acknowledged by {row.ackName} {ackTime(t.acknowledgedAt)}</>}
+            </div>
+
+            {/* In-flight handoff status */}
+            {ra && (
+              <div className="notice" style={{ marginTop: 8, padding: "6px 10px", fontSize: "0.83rem" }}>
+                {reassignStatusLabel(ra.r.status, ra.targetName)}
+                {ra.r.reason && <> — “{ra.r.reason}”</>}
+                {ra.r.requestedById === myId && (
+                  <form action={cancelReassign} style={{ display: "inline", marginLeft: 8 }}>
+                    <input type="hidden" name="reassignId" value={ra.r.id} />
+                    <input type="hidden" name="taskDate" value={date} />
+                    <button className="btn-link" type="submit">Cancel</button>
+                  </form>
+                )}
+              </div>
+            )}
+
+            {/* Action buttons */}
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 10, alignItems: "center" }}>
+              {canComplete && !doneFlag && (
+                <form action={acknowledgeTask}>
+                  <input type="hidden" name="taskId" value={t.id} />
+                  <input type="hidden" name="taskDate" value={date} />
+                  <button className="btn" type="submit">Mark done</button>
+                </form>
+              )}
+              {canComplete && doneFlag && (
+                <form action={unacknowledgeTask}>
+                  <input type="hidden" name="taskId" value={t.id} />
+                  <input type="hidden" name="taskDate" value={date} />
+                  <button className="btn btn-ghost" type="submit">Reopen</button>
+                </form>
+              )}
+
+              {/* Staff hand-off request (only on their own, not-done duty, no active handoff) */}
+              {mine && !doneFlag && !ra && roster.length > 1 && (
+                <details>
+                  <summary className="btn btn-ghost" style={{ display: "inline-block" }}>Hand off…</summary>
+                  <form action={requestReassign} style={{ marginTop: 8, display: "flex", flexWrap: "wrap", gap: 6 }}>
+                    <input type="hidden" name="taskId" value={t.id} />
+                    <input type="hidden" name="taskDate" value={date} />
+                    <select name="targetEmployeeId" required defaultValue="">
+                      <option value="" disabled>Hand to…</option>
+                      {roster.filter((r) => r.id !== myId).map((r) => (
+                        <option key={r.id} value={r.id}>{r.fullName}</option>
+                      ))}
+                    </select>
+                    <input name="reason" placeholder="Reason (optional)" style={{ minWidth: 160 }} />
+                    <button className="btn" type="submit">Request</button>
+                  </form>
+                </details>
+              )}
+
+              {/* Manager: approve an accepted handoff inline */}
+              {canManage && ra?.r.status === "accepted" && (
+                <>
+                  <form action={decideReassign}>
+                    <input type="hidden" name="reassignId" value={ra.r.id} />
+                    <input type="hidden" name="taskDate" value={date} />
+                    <input type="hidden" name="decision" value="approve" />
+                    <button className="btn" type="submit">Approve handoff</button>
+                  </form>
+                  <form action={decideReassign}>
+                    <input type="hidden" name="reassignId" value={ra.r.id} />
+                    <input type="hidden" name="taskDate" value={date} />
+                    <input type="hidden" name="decision" value="deny" />
+                    <button className="btn btn-ghost" type="submit">Deny</button>
+                  </form>
+                </>
+              )}
+            </div>
+
+            {/* Manager controls */}
+            {canManage && (
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 10, alignItems: "center" }}>
+                <form action={setAssignee} style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                  <input type="hidden" name="taskId" value={t.id} />
+                  <input type="hidden" name="taskDate" value={date} />
+                  <select name="assigneeId" defaultValue={t.assigneeId ?? ""}>
+                    <option value="">— Unassigned —</option>
+                    {roster.map((r) => (
+                      <option key={r.id} value={r.id}>{r.fullName}</option>
+                    ))}
+                  </select>
+                  <button className="btn btn-ghost" type="submit">Set</button>
+                </form>
+                <form action={deleteDuty}>
+                  <input type="hidden" name="taskId" value={t.id} />
+                  <input type="hidden" name="taskDate" value={date} />
+                  <button className="btn-link" type="submit" style={{ color: "var(--terra,#a0624a)" }}>Remove</button>
+                </form>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <SiteHeader />
+      <main className="wrap">
+        <div className="page-head">
+          <div className="eyebrow">Daily Duties</div>
+          <h1 className="title">Roles &amp; Checklists</h1>
+          <p className="lede">
+            Opening and closing checklists and the day’s responsibilities — each item is
+            assigned and acknowledged when it’s done.
+          </p>
+        </div>
+
+        {setupNeeded ? (
+          <div className="notice">
+            The duties tables aren’t set up yet. {canManage
+              ? "Go to Admin → “Set up / update database”, then come back."
+              : "An admin needs to finish setup."}
+          </div>
+        ) : (
+          <>
+            {/* Date navigation */}
+            <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap", marginBottom: 18 }}>
+              <Link className="btn btn-ghost" href={`/duties?d=${prev}`}>← Prev</Link>
+              <form method="get" style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                <input type="date" name="d" defaultValue={date} />
+                <button className="btn btn-ghost" type="submit">Go</button>
+              </form>
+              <Link className="btn btn-ghost" href={`/duties?d=${next}`}>Next →</Link>
+              {date !== today && <Link className="btn btn-ghost" href="/duties">Today</Link>}
+              <span style={{ flex: 1 }} />
+              {canManage && <Link className="btn btn-ghost" href="/duties/templates">Manage checklists</Link>}
+            </div>
+
+            <div className="stat-row" style={{ marginBottom: 18 }}>
+              <div className="stat">
+                <div className="stat-label">{prettyDate(date)}</div>
+                <div className="stat-value">{done}/{total} done</div>
+              </div>
+            </div>
+
+            {/* Things needing my action */}
+            {toAccept.length > 0 && (
+              <div className="card" style={{ cursor: "default", marginBottom: 18, borderLeft: "3px solid var(--gold,#c8a04a)" }}>
+                <h3>Handoffs waiting on you</h3>
+                {toAccept.map((r) => (
+                  <div key={r.r.id} style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center", marginTop: 8 }}>
+                    <span>
+                      <strong>{r.requesterName}</strong> wants to hand you “{r.taskTitle}”
+                      {r.r.reason && <> — “{r.r.reason}”</>}
+                    </span>
+                    <form action={respondReassign}>
+                      <input type="hidden" name="reassignId" value={r.r.id} />
+                      <input type="hidden" name="taskDate" value={date} />
+                      <input type="hidden" name="decision" value="accept" />
+                      <button className="btn" type="submit">Accept</button>
+                    </form>
+                    <form action={respondReassign}>
+                      <input type="hidden" name="reassignId" value={r.r.id} />
+                      <input type="hidden" name="taskDate" value={date} />
+                      <input type="hidden" name="decision" value="decline" />
+                      <button className="btn btn-ghost" type="submit">Decline</button>
+                    </form>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {toApprove.length > 0 && (
+              <div className="card" style={{ cursor: "default", marginBottom: 18, borderLeft: "3px solid var(--gold,#c8a04a)" }}>
+                <h3>Handoffs to approve</h3>
+                {toApprove.map((r) => (
+                  <div key={r.r.id} style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center", marginTop: 8 }}>
+                    <span>
+                      <strong>{r.requesterName}</strong> → <strong>{r.targetName}</strong> for “{r.taskTitle}”
+                      {" "}(accepted)
+                    </span>
+                    <form action={decideReassign}>
+                      <input type="hidden" name="reassignId" value={r.r.id} />
+                      <input type="hidden" name="taskDate" value={date} />
+                      <input type="hidden" name="decision" value="approve" />
+                      <button className="btn" type="submit">Approve</button>
+                    </form>
+                    <form action={decideReassign}>
+                      <input type="hidden" name="reassignId" value={r.r.id} />
+                      <input type="hidden" name="taskDate" value={date} />
+                      <input type="hidden" name="decision" value="deny" />
+                      <button className="btn btn-ghost" type="submit">Deny</button>
+                    </form>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Manager: build the day */}
+            {canManage && (
+              <details className="card" style={{ cursor: "default", marginBottom: 22 }}>
+                <summary style={{ cursor: "pointer", fontWeight: 600 }}>Assign duties for this day</summary>
+
+                {templates.length > 0 && (
+                  <form action={applyTemplate} style={{ marginTop: 14 }}>
+                    <input type="hidden" name="taskDate" value={date} />
+                    <div className="form-grid">
+                      <div className="field">
+                        <label htmlFor="tpl">Add a checklist</label>
+                        <select id="tpl" name="templateId" defaultValue="" required>
+                          <option value="" disabled>Choose a checklist…</option>
+                          {templates.map((t) => (
+                            <option key={t.id} value={t.id}>{t.name} ({t.items.length})</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="field">
+                        <label htmlFor="tpl-assignee">Assign all to (optional)</label>
+                        <select id="tpl-assignee" name="assigneeId" defaultValue="">
+                          <option value="">— Leave unassigned —</option>
+                          {roster.map((r) => (
+                            <option key={r.id} value={r.id}>{r.fullName}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                    <button className="btn" type="submit" style={{ marginTop: 10 }}>Add checklist to {prettyDate(date)}</button>
+                  </form>
+                )}
+
+                <hr style={{ margin: "18px 0", border: 0, borderTop: "1px solid var(--line,#e7ded5)" }} />
+
+                <form action={addDuty}>
+                  <input type="hidden" name="taskDate" value={date} />
+                  <div className="form-grid">
+                    <div className="field">
+                      <label htmlFor="duty-title">Single duty / role</label>
+                      <input id="duty-title" name="title" placeholder="e.g. Front desk lead" required />
+                    </div>
+                    <div className="field">
+                      <label htmlFor="duty-section">Section</label>
+                      <select id="duty-section" name="section" defaultValue="role">
+                        {DUTY_SECTIONS.map((s) => (
+                          <option key={s.id} value={s.id}>{s.label}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="field">
+                      <label htmlFor="duty-assignee">Assign to</label>
+                      <select id="duty-assignee" name="assigneeId" defaultValue="">
+                        <option value="">— Unassigned —</option>
+                        {roster.map((r) => (
+                          <option key={r.id} value={r.id}>{r.fullName}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                  <div className="field" style={{ marginTop: 10 }}>
+                    <label htmlFor="duty-detail">Notes (optional)</label>
+                    <input id="duty-detail" name="detail" placeholder="Any extra detail" />
+                  </div>
+                  <button className="btn" type="submit" style={{ marginTop: 10 }}>Add duty</button>
+                </form>
+              </details>
+            )}
+
+            {/* The board */}
+            {total === 0 ? (
+              <div className="notice">
+                No duties for {prettyDate(date)} yet.
+                {canManage && <> Use <strong>Assign duties for this day</strong> above to add the opening/closing checklists.</>}
+              </div>
+            ) : (
+              DUTY_SECTIONS.map((sec) => {
+                const rows = tasks.filter((t) => t.task.section === sec.id);
+                if (rows.length === 0) return null;
+                const secDone = rows.filter((r) => r.task.status === "done").length;
+                return (
+                  <section key={sec.id} style={{ marginBottom: 26 }}>
+                    <h2 style={{ fontFamily: "var(--font-serif)", fontWeight: 600, fontSize: "1.25rem", margin: "0 0 12px" }}>
+                      {sec.label}{" "}
+                      <span className="muted" style={{ fontSize: "0.9rem", fontWeight: 400 }}>· {secDone}/{rows.length}</span>
+                    </h2>
+                    {rows.map((row) => (
+                      <TaskCard key={row.task.id} row={row} />
+                    ))}
+                  </section>
+                );
+              })
+            )}
+          </>
+        )}
+      </main>
+    </>
+  );
+}

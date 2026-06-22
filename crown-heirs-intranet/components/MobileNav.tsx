@@ -18,6 +18,7 @@ export default function MobileNav({ isAdmin, email, unread = 0 }: { isAdmin?: bo
           <div className="m-group">Calendar</div>
           <Link href="/calendar">Overview</Link>
           <Link href="/schedule">Schedule</Link>
+          <Link href="/duties">Daily Duties</Link>
           <Link href="/time-off">Time Off</Link>
 
           <div className="m-group">Training</div>
