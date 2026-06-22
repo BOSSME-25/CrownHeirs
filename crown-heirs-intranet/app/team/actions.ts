@@ -130,6 +130,11 @@ export async function updateEmployee(id: string, formData: FormData) {
     targetRole: target?.role,
     newRole: data.role,
   });
+  // Never blank out the staffer's own "about" answers from a form that didn't
+  // include them (e.g. a stale page) — only update those fields when present.
+  for (const k of ["bio", "whyCrownHeirs", "fiveYearPlan", "favoriteAway"] as const) {
+    if (!formData.has(k)) delete (data as Record<string, unknown>)[k];
+  }
   const photoUrl = await uploadPhoto(formData);
   await db
     .update(employees)
