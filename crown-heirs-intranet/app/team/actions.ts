@@ -12,7 +12,7 @@ import { db } from "@/lib/db";
 import { employees } from "@/lib/db/schema";
 import { listTeamMembers } from "@/lib/square";
 import { getDefaultOrg } from "@/lib/org";
-import { logAudit } from "@/lib/audit";
+import { logAudit, diffDetail } from "@/lib/audit";
 
 const IMAGE_EXT = [".png", ".jpg", ".jpeg", ".webp", ".gif"];
 
@@ -130,10 +130,11 @@ export async function updateEmployee(id: string, formData: FormData) {
     targetRole: target?.role,
     newRole: data.role,
   });
-  // Never blank out the staffer's own "about" answers from a form that didn't
-  // include them (e.g. a stale page) — only update those fields when present.
+  // The "about" answers are self-authored. From the admin form, only ever
+  // *set* them to a non-empty value — never blank an existing answer (guards
+  // against a stale/empty Edit page wiping what the person just wrote).
   for (const k of ["bio", "whyCrownHeirs", "fiveYearPlan", "favoriteAway"] as const) {
-    if (!formData.has(k)) delete (data as Record<string, unknown>)[k];
+    if (data[k] == null) delete (data as Record<string, unknown>)[k];
   }
   const photoUrl = await uploadPhoto(formData);
   await db
@@ -146,8 +147,21 @@ export async function updateEmployee(id: string, formData: FormData) {
     })
     .where(eq(employees.id, id));
   const session = await auth();
-  const roleNote = target && target.role !== data.role ? ` · role ${target.role}→${data.role}` : "";
-  await logAudit({ actorEmail: session?.user?.email, action: "update", entity: "employee", entityId: id, detail: `${data.fullName}${roleNote}` });
+  // Capture old→new so changes (and prior values) are recoverable.
+  const detail = diffDetail(target as unknown as Record<string, unknown>, data as Record<string, unknown>, [
+    "fullName", "email", "personalEmail", "phone", "birthday", "jobTitle",
+    "employmentType", "status", "role", "startDate", "wage", "wageType",
+    "emergencyContactName", "emergencyContactPhone", "notes",
+    "bio", "whyCrownHeirs", "fiveYearPlan", "favoriteAway",
+    "locationId", "squareTeamMemberId",
+  ]);
+  await logAudit({
+    actorEmail: session?.user?.email,
+    action: "update",
+    entity: "employee",
+    entityId: id,
+    detail: detail ? `${data.fullName} — ${detail}` : data.fullName,
+  });
   revalidatePath("/team");
   redirect(`/team?ok=${encodeURIComponent("Team member updated")}`);
 }
