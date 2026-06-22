@@ -160,6 +160,28 @@ h1.title {
   color: var(--terra); letter-spacing: 0.04em;
 }
 
+/* ─── Dashboard tiles (icon grid) ─── */
+.tiles { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(148px, 1fr)); }
+.tile {
+  display: flex; flex-direction: column; align-items: center; gap: 12px;
+  text-align: center; text-decoration: none; color: inherit;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r-m); padding: 22px 14px;
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+}
+.tile:hover { transform: translateY(-3px); box-shadow: 0 12px 30px rgba(26,24,22,0.08); border-color: var(--terra-lo); }
+.tile-icon {
+  width: 56px; height: 56px; border-radius: 50%;
+  display: grid; place-items: center;
+  background: var(--terra); color: #fff;
+  transition: background 0.2s;
+}
+.tile:hover .tile-icon { background: var(--terra-hi); }
+.tile-icon.gold { background: var(--gold); }
+.tile:hover .tile-icon.gold { background: var(--gold-hi); }
+.tile-icon svg { width: 26px; height: 26px; }
+.tile-label { font-family: var(--font-serif); font-weight: 600; font-size: 1.05rem; line-height: 1.2; }
+
 /* ─── Prose (handbook/policy text) ─── */
 .prose { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-l); padding: 36px; }
 .prose h2 { font-family: var(--font-serif); font-weight: 600; font-size: 1.5rem; margin: 28px 0 12px; }
