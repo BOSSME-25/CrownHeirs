@@ -499,6 +499,8 @@ export const checklistTemplates = pgTable("checklist_templates", {
   name: text("name").notNull(),
   // A short note on when/who the checklist is for.
   description: text("description"),
+  // Default "assign all to" token used when this checklist is dropped on a day.
+  defaultAssignee: text("default_assignee"),
   // 'opening' | 'closing' | 'other'
   section: text("section").notNull().default("opening"),
   active: boolean("active").notNull().default(true),
@@ -539,6 +541,8 @@ export const dailyTasks = pgTable("daily_tasks", {
   autoRole: text("auto_role"),
   // A shared duty for anyone holding this job title (any one of them completes it).
   assigneeTitle: text("assignee_title"),
+  // A shared duty for anyone with this access role (staff/manager/director).
+  assigneeRole: text("assignee_role"),
   // 'open' | 'done'
   status: text("status").notNull().default("open"),
   acknowledgedById: uuid("acknowledged_by_id").references(() => employees.id, { onDelete: "set null" }),

@@ -3,8 +3,9 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import SiteHeader from "@/components/SiteHeader";
 import { getAccess } from "@/lib/perms";
+import { jobTitles } from "@/lib/employees";
 import { listTemplates } from "@/lib/duties";
-import { TEMPLATE_SECTIONS } from "@/lib/duties-constants";
+import { ASSIGN_ROLES, TEMPLATE_SECTIONS } from "@/lib/duties-constants";
 import {
   addItem,
   createTemplate,
@@ -27,8 +28,10 @@ export default async function TemplatesPage() {
 
   let setupNeeded = false;
   let templates: Awaited<ReturnType<typeof listTemplates>> = [];
+  let titles: string[] = [];
   try {
     templates = await listTemplates();
+    titles = await jobTitles();
   } catch {
     setupNeeded = true;
   }
@@ -73,6 +76,38 @@ export default async function TemplatesPage() {
                     placeholder="Short description — when/who this checklist is for"
                     style={{ width: "100%", marginTop: 8 }}
                   />
+                  <label className="muted" style={{ display: "block", fontSize: "0.8rem", margin: "10px 0 4px" }}>
+                    Default assignment (used when this checklist is dropped on a day)
+                  </label>
+                  <select name="defaultAssignee" defaultValue={tpl.defaultAssignee ?? ""}>
+                    <option value="">Auto (Opening→opener, Closing→closer)</option>
+                    <option value="__opener__">Opening stylist (first appt)</option>
+                    <option value="__closer__">Closing stylist (last appt)</option>
+                    {titles.length > 0 && (
+                      <>
+                        <optgroup label="By job title — each does their own">
+                          {titles.map((jt) => (
+                            <option key={`e-${jt}`} value={`__title_each__:${jt}`}>All {jt} (each)</option>
+                          ))}
+                        </optgroup>
+                        <optgroup label="By job title — shared (anyone)">
+                          {titles.map((jt) => (
+                            <option key={`s-${jt}`} value={`__title_shared__:${jt}`}>Any {jt} (shared)</option>
+                          ))}
+                        </optgroup>
+                      </>
+                    )}
+                    <optgroup label="By access role — each does their own">
+                      {ASSIGN_ROLES.map((r) => (
+                        <option key={`re-${r.id}`} value={`__role_each__:${r.id}`}>All {r.label} (each)</option>
+                      ))}
+                    </optgroup>
+                    <optgroup label="By access role — shared (anyone)">
+                      {ASSIGN_ROLES.map((r) => (
+                        <option key={`rs-${r.id}`} value={`__role_shared__:${r.id}`}>Any {r.label} (shared)</option>
+                      ))}
+                    </optgroup>
+                  </select>
                 </form>
 
                 <div style={{ margin: "14px 0 0" }}>
