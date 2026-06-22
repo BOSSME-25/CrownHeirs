@@ -12,12 +12,14 @@ import {
   employees,
   taskReassignments,
 } from "@/lib/db/schema";
+import type { DailyTask } from "@/lib/db/schema";
 import { getEmployeeByEmail } from "@/lib/employees";
 import { getDefaultOrg } from "@/lib/org";
 import { getAccess } from "@/lib/perms";
 import { logAudit } from "@/lib/audit";
 import { adminEmails, emailLayout, sendEmail } from "@/lib/email";
 import { DUTY_SECTION_IDS } from "@/lib/duties-constants";
+import { resolveAutoAssignees } from "@/lib/duties";
 
 const back = (date: string, msg: string) =>
   redirect(`/duties?d=${encodeURIComponent(date)}&ok=${encodeURIComponent(msg)}`);
@@ -46,6 +48,25 @@ const str = (formData: FormData, k: string) => {
 
 const section = (v: string | null) => (v && DUTY_SECTION_IDS.includes(v) ? v : "other");
 
+// The assignee dropdown can carry a real employee id, or a special token
+// meaning "follow the day's bookings" (opener/closer).
+function parseAssignee(raw: string | null): { assigneeId: string | null; autoRole: string | null } {
+  if (raw === "__opener__") return { assigneeId: null, autoRole: "opener" };
+  if (raw === "__closer__") return { assigneeId: null, autoRole: "closer" };
+  return { assigneeId: raw, autoRole: null };
+}
+
+// Who a duty currently belongs to: a fixed assignee, or the live opener/closer
+// resolved from the day's appointments.
+async function effectiveAssigneeId(task: DailyTask): Promise<string | null> {
+  if (task.assigneeId) return task.assigneeId;
+  if (task.autoRole === "opener" || task.autoRole === "closer") {
+    const auto = await resolveAutoAssignees(task.taskDate);
+    return (task.autoRole === "opener" ? auto.opener?.id : auto.closer?.id) ?? null;
+  }
+  return null;
+}
+
 async function notify(employeeId: string | null | undefined, subject: string, body: string) {
   if (!employeeId) return;
   try {
@@ -65,7 +86,7 @@ export async function applyTemplate(formData: FormData) {
   const actor = await requireManage();
   const templateId = str(formData, "templateId");
   const date = str(formData, "taskDate");
-  const defaultAssignee = str(formData, "assigneeId");
+  const raw = str(formData, "assigneeId");
   if (!templateId || !date) throw new Error("Pick a checklist and a date.");
 
   const tpl = (await db.select().from(checklistTemplates).where(eq(checklistTemplates.id, templateId)))[0];
@@ -79,6 +100,12 @@ export async function applyTemplate(formData: FormData) {
 
   const org = await getDefaultOrg();
   const sec = ["opening", "endshift", "closing"].includes(tpl.section) ? tpl.section : "other";
+  let { assigneeId, autoRole } = parseAssignee(raw);
+  // Opening/Closing checklists default to following the day's bookings.
+  if (!assigneeId && !autoRole) {
+    if (sec === "opening") autoRole = "opener";
+    else if (sec === "closing") autoRole = "closer";
+  }
   await db.insert(dailyTasks).values(
     items.map((it, i) => ({
       orgId: org?.id ?? null,
@@ -87,14 +114,15 @@ export async function applyTemplate(formData: FormData) {
       title: it.title,
       detail: it.detail,
       groupLabel: it.groupLabel,
-      assigneeId: defaultAssignee ?? null,
+      assigneeId,
+      autoRole,
       assignedBy: actor,
       sortOrder: String(i),
       templateId,
     })),
   );
-  if (defaultAssignee) {
-    await notify(defaultAssignee, `Duties assigned — ${tpl.name}`,
+  if (assigneeId) {
+    await notify(assigneeId, `Duties assigned — ${tpl.name}`,
       `You've been assigned the <strong>${tpl.name}</strong> (${items.length} items) for ${date}.`);
   }
   await logAudit({ actorEmail: actor, action: "create", entity: "daily_tasks", detail: `${tpl.name} → ${date} (${items.length})` });
@@ -108,7 +136,7 @@ export async function addDuty(formData: FormData) {
   const date = str(formData, "taskDate");
   const title = str(formData, "title");
   if (!date || !title) throw new Error("A date and a duty are required.");
-  const assigneeId = str(formData, "assigneeId");
+  const { assigneeId, autoRole } = parseAssignee(str(formData, "assigneeId"));
   const org = await getDefaultOrg();
 
   const [{ m } = { m: null }] = await db
@@ -123,6 +151,7 @@ export async function addDuty(formData: FormData) {
     title,
     detail: str(formData, "detail"),
     assigneeId,
+    autoRole,
     assignedBy: actor,
     sortOrder: String((Number(m) || 0) + 1),
   });
@@ -140,14 +169,17 @@ export async function setAssignee(formData: FormData) {
   const taskId = str(formData, "taskId");
   const date = str(formData, "taskDate") ?? "";
   if (!taskId) throw new Error("Missing duty.");
-  const assigneeId = str(formData, "assigneeId");
-  await db.update(dailyTasks).set({ assigneeId }).where(eq(dailyTasks.id, taskId));
+  const { assigneeId, autoRole } = parseAssignee(str(formData, "assigneeId"));
+  await db.update(dailyTasks).set({ assigneeId, autoRole }).where(eq(dailyTasks.id, taskId));
   if (assigneeId) {
     await notify(assigneeId, "Duty assigned to you", `A duty was assigned to you for ${date}.`);
   }
   await logAudit({ actorEmail: actor, action: "update", entity: "daily_tasks", entityId: taskId, detail: "assignee changed" });
   revalidatePath("/duties");
-  back(date, assigneeId ? "Duty assigned" : "Duty unassigned");
+  const msg = autoRole === "opener" ? "Set to the opening stylist"
+    : autoRole === "closer" ? "Set to the closing stylist"
+    : assigneeId ? "Duty assigned" : "Duty unassigned";
+  back(date, msg);
 }
 
 export async function deleteDuty(formData: FormData) {
@@ -171,8 +203,8 @@ export async function acknowledgeTask(formData: FormData) {
   if (!taskId) throw new Error("Missing duty.");
   const task = (await db.select().from(dailyTasks).where(eq(dailyTasks.id, taskId)))[0];
   if (!task) throw new Error("Duty not found.");
-  // The assigned person acknowledges; managers may override.
-  if (task.assigneeId !== emp.id && !access.canApprove) {
+  // The assigned person (fixed or the live opener/closer) acknowledges; managers may override.
+  if ((await effectiveAssigneeId(task)) !== emp.id && !access.canApprove) {
     throw new Error("Only the assigned person (or a manager) can complete this duty.");
   }
   await db
@@ -191,7 +223,7 @@ export async function unacknowledgeTask(formData: FormData) {
   if (!taskId) throw new Error("Missing duty.");
   const task = (await db.select().from(dailyTasks).where(eq(dailyTasks.id, taskId)))[0];
   if (!task) throw new Error("Duty not found.");
-  if (task.assigneeId !== emp.id && !access.canApprove) {
+  if ((await effectiveAssigneeId(task)) !== emp.id && !access.canApprove) {
     throw new Error("Only the assigned person (or a manager) can change this.");
   }
   await db
@@ -214,7 +246,7 @@ export async function requestReassign(formData: FormData) {
 
   const task = (await db.select().from(dailyTasks).where(eq(dailyTasks.id, taskId)))[0];
   if (!task) throw new Error("Duty not found.");
-  if (task.assigneeId !== emp.id) throw new Error("You can only hand off duties assigned to you.");
+  if ((await effectiveAssigneeId(task)) !== emp.id) throw new Error("You can only hand off duties assigned to you.");
 
   // One active request per duty at a time.
   const open = await db
@@ -277,7 +309,8 @@ export async function decideReassign(formData: FormData) {
   if (r.status !== "accepted") throw new Error("Only an accepted handoff can be approved.");
 
   if (decision === "approve") {
-    await db.update(dailyTasks).set({ assigneeId: r.targetEmployeeId }).where(eq(dailyTasks.id, r.taskId));
+    // A handoff fixes the duty to a person, so it stops following bookings.
+    await db.update(dailyTasks).set({ assigneeId: r.targetEmployeeId, autoRole: null }).where(eq(dailyTasks.id, r.taskId));
     await db.update(taskReassignments).set({ status: "approved", decidedBy: actor, decidedAt: new Date() }).where(eq(taskReassignments.id, id));
     await notify(r.targetEmployeeId, "Duty is now yours", `A duty handoff was approved — it's now assigned to you for ${date}.`);
     await notify(r.requestedById, "Handoff approved", "Your duty handoff was approved.");

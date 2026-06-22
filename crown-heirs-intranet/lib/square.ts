@@ -45,6 +45,77 @@ async function fetchPayments(
 
 export type SquareTeamMember = { id: string; name: string; email: string | null; phone: string | null };
 
+// ── Appointments (Square Bookings) ──
+type SquareBooking = {
+  status?: string;
+  start_at?: string;
+  appointment_segments?: { duration_minutes?: number; team_member_id?: string }[];
+};
+
+async function fetchBookings(
+  startMinISO: string,
+  startMaxISO: string,
+  creds: { token: string; locationId?: string; env: "production" | "sandbox" },
+): Promise<SquareBooking[]> {
+  const base = baseFor(creds.env);
+  const out: SquareBooking[] = [];
+  let cursor: string | undefined;
+  do {
+    const url = new URL(base + "/v2/bookings");
+    url.searchParams.set("start_at_min", startMinISO);
+    url.searchParams.set("start_at_max", startMaxISO);
+    url.searchParams.set("limit", "100");
+    if (creds.locationId) url.searchParams.set("location_id", creds.locationId);
+    if (cursor) url.searchParams.set("cursor", cursor);
+    const res = await fetch(url, {
+      headers: { Authorization: `Bearer ${creds.token}`, "Square-Version": "2024-10-17" },
+      next: { revalidate: 300 },
+    });
+    if (!res.ok) throw new Error(`Square Bookings error ${res.status}`);
+    const data = (await res.json()) as { bookings?: SquareBooking[]; cursor?: string };
+    out.push(...(data.bookings ?? []));
+    cursor = data.cursor;
+  } while (cursor);
+  return out;
+}
+
+// The team member with the first appointment of the day (opener) and the one
+// whose appointment finishes last (closer). Arizona doesn't observe DST, so the
+// salon day is a fixed -07:00 window. `configured` is false when Square isn't
+// set up at all.
+export async function getDayOpenerCloser(date: string): Promise<{
+  configured: boolean;
+  openerTeamMemberId: string | null;
+  closerTeamMemberId: string | null;
+}> {
+  const creds = await getSquareCreds();
+  if (!creds) return { configured: false, openerTeamMemberId: null, closerTeamMemberId: null };
+  try {
+    const bookings = await fetchBookings(`${date}T00:00:00-07:00`, `${date}T23:59:59-07:00`, creds);
+    let opener: string | null = null;
+    let openerStart = Infinity;
+    let closer: string | null = null;
+    let closerEnd = -Infinity;
+    for (const b of bookings) {
+      const st = b.status ?? "";
+      if (st.startsWith("CANCELLED") || st === "DECLINED") continue;
+      if (!b.start_at) continue;
+      const startMs = Date.parse(b.start_at);
+      if (Number.isNaN(startMs)) continue;
+      for (const seg of b.appointment_segments ?? []) {
+        if (!seg.team_member_id) continue;
+        const endMs = startMs + (seg.duration_minutes ?? 0) * 60000;
+        if (startMs < openerStart) { openerStart = startMs; opener = seg.team_member_id; }
+        if (endMs > closerEnd) { closerEnd = endMs; closer = seg.team_member_id; }
+      }
+    }
+    return { configured: true, openerTeamMemberId: opener, closerTeamMemberId: closer };
+  } catch {
+    // Square configured but bookings unavailable (scope/feature) — degrade.
+    return { configured: true, openerTeamMemberId: null, closerTeamMemberId: null };
+  }
+}
+
 // Lists active Square team members so an admin can map them to employees.
 export async function listTeamMembers(): Promise<SquareTeamMember[]> {
   const creds = await getSquareCreds();
