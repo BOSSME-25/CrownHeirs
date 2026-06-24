@@ -40,6 +40,13 @@ export async function addLink(v: { category: string; title: string; url: string;
   });
 }
 
+export async function updateLink(id: string, v: { category: string; title: string; url: string }) {
+  await db
+    .update(documentLinks)
+    .set({ category: v.category, title: v.title, url: v.url })
+    .where(eq(documentLinks.id, id));
+}
+
 export async function deleteLink(id: string) {
   await db.delete(documentLinks).where(eq(documentLinks.id, id));
 }
