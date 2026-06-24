@@ -94,7 +94,7 @@ export default function AdminPanel() {
         // Large files must bypass the serverless body limit → client upload
         // straight to Blob (chunked).
         await upload(`documents/${category}/${file.name}`, file, {
-          access: "public",
+          access: "private",
           handleUploadUrl: "/api/upload",
           clientPayload: JSON.stringify({ category }),
           multipart: true,
@@ -182,7 +182,7 @@ export default function AdminPanel() {
       const res = await fetch("/api/documents/delete", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify(doc.isLink ? { linkId: doc.id } : { url: doc.url }),
+        body: JSON.stringify(doc.isLink ? { linkId: doc.id } : { pathname: doc.pathname }),
       });
       if (!res.ok) throw new Error();
       setMsg({ type: "ok", text: `Deleted “${name}”.` });
@@ -308,7 +308,7 @@ export default function AdminPanel() {
                   </div>
                 </div>
                 <div className="doc-actions">
-                  <a className="btn btn-ghost" href={doc.url} target="_blank" rel="noopener noreferrer">Open</a>
+                  <a className="btn btn-ghost" href={doc.openUrl} target="_blank" rel="noopener noreferrer">Open</a>
                   {doc.isLink && <button className="btn btn-ghost" onClick={() => startEdit(doc)}>Edit</button>}
                   <button className="btn btn-danger" onClick={() => onDelete(doc)}>Delete</button>
                 </div>

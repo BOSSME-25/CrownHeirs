@@ -24,6 +24,7 @@ export async function listLinks(category?: string): Promise<DocumentItem[]> {
     category: l.category,
     size: 0,
     uploadedAt: (l.createdAt ?? new Date()).toISOString(),
+    openUrl: l.url,
     isLink: true,
     id: l.id,
   }));

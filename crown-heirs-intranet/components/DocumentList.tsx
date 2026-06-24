@@ -58,7 +58,7 @@ export default function DocumentList({ category }: { category?: string }) {
             </div>
           </div>
           <div className="doc-actions">
-            <a className="btn btn-ghost" href={doc.url} target="_blank" rel="noopener noreferrer">
+            <a className="btn btn-ghost" href={doc.openUrl} target="_blank" rel="noopener noreferrer">
               Open
             </a>
           </div>

@@ -44,6 +44,7 @@ export async function POST(request: Request): Promise<Response> {
           throw new Error("Invalid upload path.");
         }
         return {
+          access: "private",
           addRandomSuffix: true,
           maximumSizeInBytes: MAX_BYTES,
           allowedContentTypes: [
