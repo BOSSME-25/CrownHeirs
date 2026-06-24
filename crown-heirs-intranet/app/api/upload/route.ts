@@ -9,6 +9,18 @@ const MAX_BYTES = 25 * 1024 * 1024; // 25 MB
 // which avoids the ~4.5 MB serverless request-body limit that broke large PDFs.
 // This route only mints a short-lived upload token after checking admin + inputs.
 export async function POST(request: Request): Promise<Response> {
+  // Without a connected Blob store the client upload would otherwise stall at
+  // 0% with no feedback. Fail fast with a clear, actionable message instead.
+  if (!process.env.BLOB_READ_WRITE_TOKEN) {
+    return Response.json(
+      {
+        error:
+          "Document storage isn’t connected yet. In Vercel, open this project → Storage → connect a Blob store, then redeploy.",
+      },
+      { status: 503 },
+    );
+  }
+
   const body = (await request.json()) as HandleUploadBody;
 
   try {
