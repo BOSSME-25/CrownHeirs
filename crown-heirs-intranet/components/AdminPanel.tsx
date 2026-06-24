@@ -9,6 +9,29 @@ const ALLOWED_EXT = [
   ".txt", ".md", ".png", ".jpg", ".jpeg", ".mp4",
 ];
 const MAX_BYTES = 25 * 1024 * 1024;
+const DIRECT_MAX = 4 * 1024 * 1024; // server-side path limit; larger uses client upload
+
+// Reliable server-side upload for normal-sized files, with progress via XHR.
+function uploadDirect(file: File, category: string, onProgress: (pct: number) => void): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const fd = new FormData();
+    fd.append("file", file);
+    fd.append("category", category);
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", "/api/upload/direct");
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable) onProgress(Math.round((e.loaded / e.total) * 100));
+    };
+    xhr.onload = () => {
+      let data: { error?: string } = {};
+      try { data = JSON.parse(xhr.responseText); } catch { /* ignore */ }
+      if (xhr.status >= 200 && xhr.status < 300) resolve();
+      else reject(new Error(data.error || `Upload failed (${xhr.status}).`));
+    };
+    xhr.onerror = () => reject(new Error("Network error during upload."));
+    xhr.send(fd);
+  });
+}
 
 function fmtSize(bytes: number) {
   if (bytes < 1024) return `${bytes} B`;
@@ -61,22 +84,23 @@ export default function AdminPanel() {
     setBusy(true);
     setProgress(0);
     setMsg(null);
+    const bump = (pct: number) => setProgress((p) => Math.max(p ?? 0, pct));
     try {
-      // Upload straight from the browser to Blob (no 4.5 MB function-body limit).
-      // multipart = resilient chunked upload (better for big PDFs / phone networks);
-      // onUploadProgress drives the visible percentage so a slow upload doesn't
-      // look like a hang.
-      await upload(`documents/${category}/${file.name}`, file, {
-        access: "public",
-        handleUploadUrl: "/api/upload",
-        clientPayload: JSON.stringify({ category }),
-        // Chunked upload only helps big files; small ones are most reliable
-        // with a single request.
-        multipart: file.size > 5 * 1024 * 1024,
-        // Only ever move forward — if the client retries (flaky connection),
-        // the bar shouldn't visibly jump backward.
-        onUploadProgress: (e) => setProgress((p) => Math.max(p ?? 0, Math.round(e.percentage))),
-      });
+      if (file.size <= DIRECT_MAX) {
+        // Normal-sized files: upload through our server (finishes on the HTTP
+        // response — the most reliable path).
+        await uploadDirect(file, category, bump);
+      } else {
+        // Large files must bypass the serverless body limit → client upload
+        // straight to Blob (chunked).
+        await upload(`documents/${category}/${file.name}`, file, {
+          access: "public",
+          handleUploadUrl: "/api/upload",
+          clientPayload: JSON.stringify({ category }),
+          multipart: true,
+          onUploadProgress: (e) => bump(Math.round(e.percentage)),
+        });
+      }
       setMsg({ type: "ok", text: `Uploaded “${file.name}”.` });
       setFile(null);
       const input = document.getElementById("file-input") as HTMLInputElement | null;
