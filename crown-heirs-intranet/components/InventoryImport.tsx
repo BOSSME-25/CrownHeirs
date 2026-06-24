@@ -49,6 +49,7 @@ export default function InventoryImport() {
   const [updateExisting, setUpdateExisting] = useState(true);
   const [result, setResult] = useState<ImportResult | null>(null);
   const [error, setError] = useState("");
+  const [reading, setReading] = useState(false);
   const [pending, startTransition] = useTransition();
 
   const parsed = useMemo(() => (raw ? parseCsv(raw) : { headers: [], rows: [] }), [raw]);
@@ -65,8 +66,22 @@ export default function InventoryImport() {
     const file = e.target.files?.[0];
     if (!file) return;
     setFileName(file.name);
+    setError("");
+    setReading(true);
     const reader = new FileReader();
-    reader.onload = () => ingest(String(reader.result ?? ""));
+    reader.onload = () => {
+      setReading(false);
+      const text = String(reader.result ?? "");
+      if (!text.trim()) {
+        setError("That file came through empty. If it's stored in iCloud, open it in the Files app once to download it, then try again — or paste the rows below.");
+        return;
+      }
+      ingest(text);
+    };
+    reader.onerror = () => {
+      setReading(false);
+      setError("Couldn't read that file. On iPhone, make sure the file is downloaded (not just in iCloud), or paste the rows below instead.");
+    };
     reader.readAsText(file);
   }
 
@@ -118,17 +133,22 @@ export default function InventoryImport() {
           <button type="button" className="btn-link" onClick={downloadTemplate}>download a template</button>.
         </p>
         <input type="file" accept=".csv,text/csv,text/plain" onChange={onFile} />
-        {fileName && <span className="muted"> {fileName} · {parsed.rows.length} rows</span>}
-        <details style={{ marginTop: 12 }}>
-          <summary className="muted" style={{ cursor: "pointer" }}>…or paste CSV text</summary>
+        {reading && <span className="muted"> Reading…</span>}
+        {fileName && !reading && <span className="muted"> {fileName} · {parsed.rows.length} rows</span>}
+        {error && <div className="notice" style={{ marginTop: 10 }}>{error}</div>}
+        <div style={{ marginTop: 14 }}>
+          <label htmlFor="csv-paste" className="muted" style={{ display: "block", marginBottom: 6 }}>
+            …or paste your rows here (most reliable on a phone — copy the cells from your spreadsheet and paste):
+          </label>
           <textarea
+            id="csv-paste"
             rows={5}
-            style={{ width: "100%", marginTop: 8, fontFamily: "monospace", fontSize: "0.82rem" }}
-            placeholder="Item name,Cost,On-hand qty&#10;…"
+            style={{ width: "100%", fontFamily: "monospace", fontSize: "0.82rem" }}
+            placeholder="Item name,Cost,On-hand qty&#10;Hydrating Shampoo,8.50,15"
             value={raw}
             onChange={(e) => ingest(e.target.value)}
           />
-        </details>
+        </div>
       </div>
 
       {parsed.headers.length > 0 && (
