@@ -60,7 +60,9 @@ export default function AdminPanel() {
         access: "public",
         handleUploadUrl: "/api/upload",
         clientPayload: JSON.stringify({ category }),
-        multipart: true,
+        // Chunked upload only helps big files; small ones are most reliable
+        // with a single request.
+        multipart: file.size > 5 * 1024 * 1024,
         onUploadProgress: (e) => setProgress(Math.round(e.percentage)),
       });
       setMsg({ type: "ok", text: `Uploaded “${file.name}”.` });
