@@ -30,4 +30,7 @@ export type DocumentItem = {
   category: string;
   size: number;
   uploadedAt: string;
+  // Set for externally-hosted links (Drive/Dropbox); `id` is the link row id.
+  isLink?: boolean;
+  id?: string;
 };

@@ -23,6 +23,11 @@ export default function AdminPanel() {
   const [progress, setProgress] = useState<number | null>(null);
   const [msg, setMsg] = useState<{ type: "ok" | "err"; text: string } | null>(null);
   const [docs, setDocs] = useState<DocumentItem[]>([]);
+  // "Paste a link" form (externally-hosted files — Drive/Dropbox/etc.).
+  const [linkCategory, setLinkCategory] = useState<string>(CATEGORIES[0].id);
+  const [linkTitle, setLinkTitle] = useState("");
+  const [linkUrl, setLinkUrl] = useState("");
+  const [linkBusy, setLinkBusy] = useState(false);
 
   const refresh = useCallback(() => {
     fetch("/api/documents")
@@ -78,19 +83,49 @@ export default function AdminPanel() {
     }
   }
 
-  async function onDelete(url: string, name: string) {
+  async function onAddLink(e: React.FormEvent) {
+    e.preventDefault();
+    const title = linkTitle.trim();
+    const url = linkUrl.trim();
+    if (!title || !url) {
+      setMsg({ type: "err", text: "Add a name and a link." });
+      return;
+    }
+    setLinkBusy(true);
+    setMsg(null);
+    try {
+      const res = await fetch("/api/documents/link", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ category: linkCategory, title, url }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || "Could not add the link.");
+      setMsg({ type: "ok", text: `Added link “${title}”.` });
+      setLinkTitle("");
+      setLinkUrl("");
+      refresh();
+    } catch (err) {
+      setMsg({ type: "err", text: err instanceof Error ? err.message : "Could not add the link." });
+    } finally {
+      setLinkBusy(false);
+    }
+  }
+
+  async function onDelete(doc: DocumentItem) {
+    const name = doc.filename;
     if (!confirm(`Delete “${name}”? This can’t be undone.`)) return;
     try {
       const res = await fetch("/api/documents/delete", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ url }),
+        body: JSON.stringify(doc.isLink ? { linkId: doc.id } : { url: doc.url }),
       });
       if (!res.ok) throw new Error();
       setMsg({ type: "ok", text: `Deleted “${name}”.` });
       refresh();
     } catch {
-      setMsg({ type: "err", text: "Could not delete that file." });
+      setMsg({ type: "err", text: "Could not delete that item." });
     }
   }
 
@@ -134,25 +169,53 @@ export default function AdminPanel() {
         {msg && <div className={`notice ${msg.type}`}>{msg.text}</div>}
       </form>
 
+      <form className="prose" onSubmit={onAddLink} style={{ marginTop: 28 }}>
+        <h2>…or paste a link</h2>
+        <p className="muted" style={{ margin: "0 0 12px" }}>
+          For files hosted in Google Drive, Dropbox, etc. — no upload needed. Make sure the link is
+          shared so the team can open it (“Anyone with the link”).
+        </p>
+
+        <div className="field">
+          <label htmlFor="link-category">Category</label>
+          <select id="link-category" value={linkCategory} onChange={(e) => setLinkCategory(e.target.value)}>
+            {CATEGORIES.map((c) => (
+              <option key={c.id} value={c.id}>{c.label}</option>
+            ))}
+          </select>
+        </div>
+        <div className="field">
+          <label htmlFor="link-title">Name</label>
+          <input id="link-title" value={linkTitle} onChange={(e) => setLinkTitle(e.target.value)} placeholder="e.g. Employee Handbook 2026" />
+        </div>
+        <div className="field">
+          <label htmlFor="link-url">Link (URL)</label>
+          <input id="link-url" type="url" value={linkUrl} onChange={(e) => setLinkUrl(e.target.value)} placeholder="https://drive.google.com/…" />
+        </div>
+        <button className="btn" type="submit" disabled={linkBusy}>
+          {linkBusy ? "Adding…" : "Add link"}
+        </button>
+      </form>
+
       <h2 className="title" style={{ fontSize: "1.4rem", marginTop: 36 }}>Current Documents</h2>
       {docs.length === 0 ? (
         <p className="muted" style={{ marginTop: 16 }}>Nothing uploaded yet.</p>
       ) : (
         <div className="doc-list">
           {docs.map((doc) => (
-            <div className="doc" key={doc.url}>
+            <div className="doc" key={doc.isLink ? `link-${doc.id}` : doc.url}>
               <div className="doc-main">
-                <div className="doc-ico">{doc.category.slice(0, 3)}</div>
+                <div className="doc-ico">{doc.isLink ? "↗" : doc.category.slice(0, 3)}</div>
                 <div style={{ minWidth: 0 }}>
                   <div className="doc-name">{doc.filename}</div>
                   <div className="doc-meta">
-                    {doc.category} · {fmtSize(doc.size)} · {new Date(doc.uploadedAt).toLocaleDateString("en-US", { timeZone: "America/Phoenix" })}
+                    {doc.category} · {doc.isLink ? "Link" : fmtSize(doc.size)} · {new Date(doc.uploadedAt).toLocaleDateString("en-US", { timeZone: "America/Phoenix" })}
                   </div>
                 </div>
               </div>
               <div className="doc-actions">
                 <a className="btn btn-ghost" href={doc.url} target="_blank" rel="noopener noreferrer">Open</a>
-                <button className="btn btn-danger" onClick={() => onDelete(doc.url, doc.filename)}>Delete</button>
+                <button className="btn btn-danger" onClick={() => onDelete(doc)}>Delete</button>
               </div>
             </div>
           ))}

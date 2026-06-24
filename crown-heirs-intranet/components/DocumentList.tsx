@@ -47,13 +47,13 @@ export default function DocumentList({ category }: { category?: string }) {
   return (
     <div className="doc-list">
       {docs.map((doc) => (
-        <div className="doc" key={doc.url}>
+        <div className="doc" key={doc.isLink ? `link-${doc.id}` : doc.url}>
           <div className="doc-main">
-            <div className="doc-ico">{ext(doc.filename)}</div>
+            <div className="doc-ico">{doc.isLink ? "↗" : ext(doc.filename)}</div>
             <div style={{ minWidth: 0 }}>
               <div className="doc-name">{doc.filename}</div>
               <div className="doc-meta">
-                {fmtSize(doc.size)} · {new Date(doc.uploadedAt).toLocaleDateString("en-US", { timeZone: "America/Phoenix" })}
+                {doc.isLink ? "Link" : fmtSize(doc.size)} · {new Date(doc.uploadedAt).toLocaleDateString("en-US", { timeZone: "America/Phoenix" })}
               </div>
             </div>
           </div>
