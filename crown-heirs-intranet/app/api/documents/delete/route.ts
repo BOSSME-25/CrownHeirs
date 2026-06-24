@@ -18,10 +18,13 @@ export async function POST(request: Request) {
     return Response.json({ ok: true });
   }
 
-  const url = typeof body.url === "string" ? body.url : "";
-  if (!url) {
-    return Response.json({ error: "Missing url" }, { status: 400 });
+  // Uploaded files: delete by pathname (works for the private store) or url.
+  const target = typeof body.pathname === "string" && body.pathname
+    ? body.pathname
+    : typeof body.url === "string" ? body.url : "";
+  if (!target) {
+    return Response.json({ error: "Missing pathname" }, { status: 400 });
   }
-  await del(url);
+  await del(target);
   return Response.json({ ok: true });
 }

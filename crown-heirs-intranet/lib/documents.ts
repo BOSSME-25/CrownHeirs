@@ -30,6 +30,9 @@ export type DocumentItem = {
   category: string;
   size: number;
   uploadedAt: string;
+  // Where the UI links to open the file. For uploaded (private) files this is an
+  // authenticated proxy route; for links it's the external URL.
+  openUrl: string;
   // Set for externally-hosted links (Drive/Dropbox); `id` is the link row id.
   isLink?: boolean;
   id?: string;

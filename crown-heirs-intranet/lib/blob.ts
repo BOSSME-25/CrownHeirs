@@ -22,6 +22,8 @@ function toDocument(blob: {
     category,
     size: blob.size,
     uploadedAt: new Date(blob.uploadedAt).toISOString(),
+    // Private store: open through our authenticated proxy, not the raw URL.
+    openUrl: `/api/documents/file?pathname=${encodeURIComponent(blob.pathname)}`,
   };
 }
 

@@ -39,7 +39,7 @@ export async function POST(request: Request): Promise<Response> {
 
   try {
     const blob = await put(`documents/${category}/${file.name}`, file, {
-      access: "public",
+      access: "private",
       addRandomSuffix: true,
       contentType: file.type || undefined,
     });
