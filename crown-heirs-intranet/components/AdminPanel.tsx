@@ -20,6 +20,7 @@ export default function AdminPanel() {
   const [category, setCategory] = useState<string>(CATEGORIES[0].id);
   const [file, setFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
+  const [progress, setProgress] = useState<number | null>(null);
   const [msg, setMsg] = useState<{ type: "ok" | "err"; text: string } | null>(null);
   const [docs, setDocs] = useState<DocumentItem[]>([]);
 
@@ -48,13 +49,19 @@ export default function AdminPanel() {
       return;
     }
     setBusy(true);
+    setProgress(0);
     setMsg(null);
     try {
       // Upload straight from the browser to Blob (no 4.5 MB function-body limit).
+      // multipart = resilient chunked upload (better for big PDFs / phone networks);
+      // onUploadProgress drives the visible percentage so a slow upload doesn't
+      // look like a hang.
       await upload(`documents/${category}/${file.name}`, file, {
         access: "public",
         handleUploadUrl: "/api/upload",
         clientPayload: JSON.stringify({ category }),
+        multipart: true,
+        onUploadProgress: (e) => setProgress(Math.round(e.percentage)),
       });
       setMsg({ type: "ok", text: `Uploaded “${file.name}”.` });
       setFile(null);
@@ -65,6 +72,7 @@ export default function AdminPanel() {
       setMsg({ type: "err", text: err instanceof Error ? err.message : "Upload failed." });
     } finally {
       setBusy(false);
+      setProgress(null);
     }
   }
 
@@ -112,8 +120,14 @@ export default function AdminPanel() {
         </div>
 
         <button className="btn" type="submit" disabled={busy}>
-          {busy ? "Uploading…" : "Upload"}
+          {busy ? (progress !== null ? `Uploading… ${progress}%` : "Uploading…") : "Upload"}
         </button>
+
+        {busy && progress !== null && (
+          <div aria-hidden style={{ marginTop: 10, height: 8, borderRadius: 4, background: "var(--line,#e7ded5)", overflow: "hidden" }}>
+            <div style={{ width: `${progress}%`, height: "100%", background: "var(--olive,#5b7a4b)", transition: "width .2s" }} />
+          </div>
+        )}
 
         {msg && <div className={`notice ${msg.type}`}>{msg.text}</div>}
       </form>
