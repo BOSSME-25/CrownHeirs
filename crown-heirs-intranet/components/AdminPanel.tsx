@@ -68,7 +68,9 @@ export default function AdminPanel() {
         // Chunked upload only helps big files; small ones are most reliable
         // with a single request.
         multipart: file.size > 5 * 1024 * 1024,
-        onUploadProgress: (e) => setProgress(Math.round(e.percentage)),
+        // Only ever move forward — if the client retries (flaky connection),
+        // the bar shouldn't visibly jump backward.
+        onUploadProgress: (e) => setProgress((p) => Math.max(p ?? 0, Math.round(e.percentage))),
       });
       setMsg({ type: "ok", text: `Uploaded “${file.name}”.` });
       setFile(null);
@@ -161,9 +163,16 @@ export default function AdminPanel() {
         </button>
 
         {busy && progress !== null && (
-          <div aria-hidden style={{ marginTop: 10, height: 8, borderRadius: 4, background: "var(--line,#e7ded5)", overflow: "hidden" }}>
-            <div style={{ width: `${progress}%`, height: "100%", background: "var(--olive,#5b7a4b)", transition: "width .2s" }} />
-          </div>
+          <>
+            <div aria-hidden style={{ marginTop: 10, height: 8, borderRadius: 4, background: "var(--line,#e7ded5)", overflow: "hidden" }}>
+              <div style={{ width: `${progress}%`, height: "100%", background: "var(--olive,#5b7a4b)", transition: "width .2s" }} />
+            </div>
+            {progress >= 40 && (
+              <p className="muted" style={{ fontSize: "0.8rem", marginTop: 6 }}>
+                If this stalls or keeps restarting, your connection is dropping mid-upload — try stronger Wi-Fi, upload from a computer, or use the “paste a link” option below instead.
+              </p>
+            )}
+          </>
         )}
 
         {msg && <div className={`notice ${msg.type}`}>{msg.text}</div>}
