@@ -489,6 +489,22 @@ export const inventoryTxns = pgTable("inventory_txns", {
 export type InventoryTxn = typeof inventoryTxns.$inferSelect;
 
 // ───────────────────────────────────────────────
+// Document links — externally-hosted files (Google
+// Drive, Dropbox, etc.) shown alongside uploaded
+// documents, for when Blob storage isn't used.
+// ───────────────────────────────────────────────
+export const documentLinks = pgTable("document_links", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  orgId: uuid("org_id"),
+  category: text("category").notNull().default("general"),
+  title: text("title").notNull(),
+  url: text("url").notNull(),
+  createdBy: text("created_by"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+export type DocumentLink = typeof documentLinks.$inferSelect;
+
+// ───────────────────────────────────────────────
 // Daily duties & checklists — reusable Opening /
 // Closing checklist templates, plus per-day assigned
 // tasks that each get acknowledged on completion.

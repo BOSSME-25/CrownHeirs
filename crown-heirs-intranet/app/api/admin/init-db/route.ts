@@ -381,6 +381,19 @@ export async function POST() {
     `;
     await sql`CREATE INDEX IF NOT EXISTS inventory_txns_item_idx ON inventory_txns (item_id, created_at DESC)`;
 
+    // ── Document links (externally-hosted files) ──
+    await sql`
+      CREATE TABLE IF NOT EXISTS document_links (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        org_id uuid,
+        category text NOT NULL DEFAULT 'general',
+        title text NOT NULL,
+        url text NOT NULL,
+        created_by text,
+        created_at timestamptz DEFAULT now()
+      )
+    `;
+
     // ── Daily duties & checklists ──
     await sql`
       CREATE TABLE IF NOT EXISTS checklist_templates (
