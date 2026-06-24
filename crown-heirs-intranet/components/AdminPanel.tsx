@@ -28,6 +28,11 @@ export default function AdminPanel() {
   const [linkTitle, setLinkTitle] = useState("");
   const [linkUrl, setLinkUrl] = useState("");
   const [linkBusy, setLinkBusy] = useState(false);
+  // Inline editing of an existing link.
+  const [editId, setEditId] = useState<string | null>(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [editUrl, setEditUrl] = useState("");
+  const [editCategory, setEditCategory] = useState<string>(CATEGORIES[0].id);
 
   const refresh = useCallback(() => {
     fetch("/api/documents")
@@ -111,6 +116,38 @@ export default function AdminPanel() {
       setMsg({ type: "err", text: err instanceof Error ? err.message : "Could not add the link." });
     } finally {
       setLinkBusy(false);
+    }
+  }
+
+  function startEdit(doc: DocumentItem) {
+    setEditId(doc.id ?? null);
+    setEditTitle(doc.filename);
+    setEditUrl(doc.url);
+    setEditCategory(doc.category);
+    setMsg(null);
+  }
+
+  async function saveEdit() {
+    if (!editId) return;
+    const title = editTitle.trim();
+    const url = editUrl.trim();
+    if (!title || !url) {
+      setMsg({ type: "err", text: "Add a name and a link." });
+      return;
+    }
+    try {
+      const res = await fetch("/api/documents/link", {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ id: editId, category: editCategory, title, url }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || "Could not save the link.");
+      setMsg({ type: "ok", text: "Link updated." });
+      setEditId(null);
+      refresh();
+    } catch (err) {
+      setMsg({ type: "err", text: err instanceof Error ? err.message : "Could not save the link." });
     }
   }
 
@@ -211,23 +248,49 @@ export default function AdminPanel() {
         <p className="muted" style={{ marginTop: 16 }}>Nothing uploaded yet.</p>
       ) : (
         <div className="doc-list">
-          {docs.map((doc) => (
-            <div className="doc" key={doc.isLink ? `link-${doc.id}` : doc.url}>
-              <div className="doc-main">
-                <div className="doc-ico">{doc.isLink ? "↗" : doc.category.slice(0, 3)}</div>
-                <div style={{ minWidth: 0 }}>
-                  <div className="doc-name">{doc.filename}</div>
-                  <div className="doc-meta">
-                    {doc.category} · {doc.isLink ? "Link" : fmtSize(doc.size)} · {new Date(doc.uploadedAt).toLocaleDateString("en-US", { timeZone: "America/Phoenix" })}
-                  </div>
+          {docs.map((doc) =>
+            doc.isLink && editId === doc.id ? (
+              <div className="doc" key={`link-${doc.id}`} style={{ display: "block" }}>
+                <div className="field" style={{ marginBottom: 8 }}>
+                  <label>Name</label>
+                  <input value={editTitle} onChange={(e) => setEditTitle(e.target.value)} />
+                </div>
+                <div className="field" style={{ marginBottom: 8 }}>
+                  <label>Link (URL)</label>
+                  <input type="url" value={editUrl} onChange={(e) => setEditUrl(e.target.value)} />
+                </div>
+                <div className="field" style={{ marginBottom: 8 }}>
+                  <label>Category</label>
+                  <select value={editCategory} onChange={(e) => setEditCategory(e.target.value)}>
+                    {CATEGORIES.map((c) => (
+                      <option key={c.id} value={c.id}>{c.label}</option>
+                    ))}
+                  </select>
+                </div>
+                <div style={{ display: "flex", gap: 8 }}>
+                  <button className="btn" onClick={saveEdit}>Save</button>
+                  <button className="btn btn-ghost" onClick={() => setEditId(null)}>Cancel</button>
                 </div>
               </div>
-              <div className="doc-actions">
-                <a className="btn btn-ghost" href={doc.url} target="_blank" rel="noopener noreferrer">Open</a>
-                <button className="btn btn-danger" onClick={() => onDelete(doc)}>Delete</button>
+            ) : (
+              <div className="doc" key={doc.isLink ? `link-${doc.id}` : doc.url}>
+                <div className="doc-main">
+                  <div className="doc-ico">{doc.isLink ? "↗" : doc.category.slice(0, 3)}</div>
+                  <div style={{ minWidth: 0 }}>
+                    <div className="doc-name">{doc.filename}</div>
+                    <div className="doc-meta">
+                      {doc.category} · {doc.isLink ? "Link" : fmtSize(doc.size)} · {new Date(doc.uploadedAt).toLocaleDateString("en-US", { timeZone: "America/Phoenix" })}
+                    </div>
+                  </div>
+                </div>
+                <div className="doc-actions">
+                  <a className="btn btn-ghost" href={doc.url} target="_blank" rel="noopener noreferrer">Open</a>
+                  {doc.isLink && <button className="btn btn-ghost" onClick={() => startEdit(doc)}>Edit</button>}
+                  <button className="btn btn-danger" onClick={() => onDelete(doc)}>Delete</button>
+                </div>
               </div>
-            </div>
-          ))}
+            ),
+          )}
         </div>
       )}
     </>
