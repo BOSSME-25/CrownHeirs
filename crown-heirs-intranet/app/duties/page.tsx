@@ -300,24 +300,41 @@ export default async function DutiesPage({
           </div>
         ) : (
           <>
-            {/* Date navigation */}
-            <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap", marginBottom: 18 }}>
-              <Link className="btn btn-ghost" href={`/duties?d=${prev}`}>← Prev</Link>
-              <form method="get" style={{ display: "flex", gap: 6, alignItems: "center" }}>
-                <input type="date" name="d" defaultValue={date} />
-                <button className="btn btn-ghost" type="submit">Go</button>
-              </form>
-              <Link className="btn btn-ghost" href={`/duties?d=${next}`}>Next →</Link>
-              {date !== today && <Link className="btn btn-ghost" href="/duties">Today</Link>}
-              <span style={{ flex: 1 }} />
-              {canManage && <Link className="btn btn-ghost" href="/duties/templates">Manage checklists</Link>}
+            {/* The day — heading + progress */}
+            <div
+              className="card"
+              style={{ cursor: "default", marginBottom: 14, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap" }}
+            >
+              <div>
+                <div style={{ fontFamily: "var(--font-serif)", fontWeight: 600, fontSize: "1.25rem" }}>
+                  {prettyDate(date)}
+                  {date === today && <span className="tag ok" style={{ marginLeft: 8, verticalAlign: "middle" }}>Today</span>}
+                </div>
+                <div className="muted" style={{ fontSize: "0.85rem", marginTop: 2 }}>
+                  {total === 0 ? "No duties yet" : `${done} of ${total} done`}
+                </div>
+              </div>
+              {total > 0 && (
+                <div aria-hidden style={{ minWidth: 120, flex: "0 0 auto" }}>
+                  <div style={{ height: 8, borderRadius: 4, background: "var(--line,#e7ded5)", overflow: "hidden" }}>
+                    <div style={{ width: `${Math.round((done / total) * 100)}%`, height: "100%", background: "var(--olive,#5b7a4b)" }} />
+                  </div>
+                </div>
+              )}
             </div>
 
-            <div className="stat-row" style={{ marginBottom: 18 }}>
-              <div className="stat">
-                <div className="stat-label">{prettyDate(date)}</div>
-                <div className="stat-value">{done}/{total} done</div>
-              </div>
+            {/* Date navigation */}
+            <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", marginBottom: 20 }}>
+              <Link className="btn btn-ghost" href={`/duties?d=${prev}`}>←</Link>
+              <Link className="btn btn-ghost" href={`/duties?d=${next}`}>→</Link>
+              {date !== today && <Link className="btn btn-ghost" href="/duties">Today</Link>}
+              <form method="get" style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                {/* key forces the native input to reset to the current day on Prev/Next */}
+                <input key={date} type="date" name="d" defaultValue={date} aria-label="Jump to date" />
+                <button className="btn btn-ghost" type="submit">Go</button>
+              </form>
+              <span style={{ flex: 1 }} />
+              {canManage && <Link className="btn btn-ghost" href="/duties/templates">Checklists</Link>}
             </div>
 
             {/* Things needing my action */}
