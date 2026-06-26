@@ -249,6 +249,25 @@ export async function POST() {
         UNIQUE (policy_id, employee_id)
       )
     `;
+    // Document sign-off: versioning + two-person (employee signs, manager confirms).
+    await sql`ALTER TABLE policies ADD COLUMN IF NOT EXISTS category text NOT NULL DEFAULT 'policy'`;
+    await sql`ALTER TABLE policies ADD COLUMN IF NOT EXISTS version integer NOT NULL DEFAULT 1`;
+    await sql`ALTER TABLE policies ADD COLUMN IF NOT EXISTS updated_at timestamptz DEFAULT now()`;
+    await sql`ALTER TABLE policy_acks ADD COLUMN IF NOT EXISTS version integer NOT NULL DEFAULT 1`;
+    await sql`ALTER TABLE policy_acks ADD COLUMN IF NOT EXISTS confirmed_by text`;
+    await sql`ALTER TABLE policy_acks ADD COLUMN IF NOT EXISTS confirmed_at timestamptz`;
+    await sql`ALTER TABLE policy_acks ADD COLUMN IF NOT EXISTS last_reminded_at timestamptz`;
+    // Seed the Employee Handbook as the first required sign-off (idempotent).
+    await sql`
+      INSERT INTO policies (org_id, title, body, category, version)
+      SELECT
+        (SELECT id FROM organizations WHERE slug = 'crown-heirs' LIMIT 1),
+        'Employee Handbook',
+        'Read the Crown Heirs Handbook in full, then sign to confirm you understand and agree to uphold these standards.',
+        'handbook',
+        1
+      WHERE NOT EXISTS (SELECT 1 FROM policies WHERE category = 'handbook' AND title = 'Employee Handbook')
+    `;
     await sql`
       CREATE TABLE IF NOT EXISTS onboarding_tasks (
         id uuid PRIMARY KEY DEFAULT gen_random_uuid(),

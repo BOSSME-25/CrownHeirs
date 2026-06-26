@@ -1,9 +1,30 @@
+import Link from "next/link";
+import { auth } from "@/auth";
 import SiteHeader from "@/components/SiteHeader";
 import DocumentList from "@/components/DocumentList";
+import StatusPill from "@/components/StatusPill";
+import { getEmployeeByEmail } from "@/lib/employees";
+import { listMyPolicies, ackState, ackWhen } from "@/lib/policies";
+import { acknowledgePolicy } from "@/app/acknowledgments/actions";
 
+export const dynamic = "force-dynamic";
 export const metadata = { title: "Handbook — Crown Heirs Team Hub" };
 
-export default function HandbookPage() {
+export default async function HandbookPage() {
+  // The handbook's own sign-off state for the signed-in employee.
+  let handbook: Awaited<ReturnType<typeof listMyPolicies>>[number] | undefined;
+  try {
+    const session = await auth();
+    const me = session?.user?.email ? await getEmployeeByEmail(session.user.email) : undefined;
+    if (me) {
+      const mine = await listMyPolicies(me.id);
+      handbook = mine.find((p) => p.policy.category === "handbook");
+    }
+  } catch {
+    // policies not set up yet — no banner
+  }
+  const hbState = handbook ? ackState(handbook.ack, handbook.policy.version) : null;
+
   return (
     <>
       <SiteHeader />
@@ -16,6 +37,28 @@ export default function HandbookPage() {
             another.
           </p>
         </div>
+
+        {handbook && hbState && (
+          <div className="card" style={{ cursor: "default", marginBottom: 22, display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap", borderLeft: `3px solid ${hbState.complete ? "var(--olive,#5b7a4b)" : "var(--gold,#c8a04a)"}` }}>
+            <span style={{ flex: 1, minWidth: 200 }}>
+              <strong>Handbook sign-off.</strong>{" "}
+              {hbState.needsEmployee
+                ? "Read the handbook below, then sign to confirm you understand and agree."
+                : hbState.needsManager
+                  ? `Signed ${ackWhen(handbook.ack?.acknowledgedAt ?? null)} — waiting on a manager to confirm.`
+                  : `Confirmed ${ackWhen(handbook.ack?.confirmedAt ?? null)}. Thank you!`}
+            </span>
+            <StatusPill label={hbState.label} tone={hbState.tone} />
+            {hbState.needsEmployee && (
+              <form action={acknowledgePolicy.bind(null, handbook.policy.id)}>
+                <button className="btn" type="submit">I’ve read &amp; agree</button>
+              </form>
+            )}
+            {!hbState.needsEmployee && (
+              <Link href="/acknowledgments" className="btn btn-ghost">All documents</Link>
+            )}
+          </div>
+        )}
 
         <div className="prose">
           <h2>Handbook Mission Statement</h2>

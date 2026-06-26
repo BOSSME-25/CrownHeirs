@@ -320,16 +320,33 @@ export const policies = pgTable("policies", {
   title: text("title").notNull(),
   body: text("body"),
   fileUrl: text("file_url"),
+  // A short tag for grouping (e.g. "handbook", "policy").
+  category: text("category").notNull().default("policy"),
+  // Bumped each time the document is "pushed out" anew — everyone must re-sign.
+  version: integer("version").notNull().default(1),
   active: boolean("active").notNull().default(true),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 });
+// One row per (policy, employee) — the person's sign-off status for the
+// CURRENT version. Two steps: the employee acknowledges, then a different
+// manager confirms (checks and balances).
 export const policyAcks = pgTable("policy_acks", {
   id: uuid("id").defaultRandom().primaryKey(),
   policyId: uuid("policy_id").notNull().references(() => policies.id, { onDelete: "cascade" }),
   employeeId: uuid("employee_id").notNull().references(() => employees.id, { onDelete: "cascade" }),
-  acknowledgedAt: timestamp("acknowledged_at", { withTimezone: true }).defaultNow(),
+  // Which version this row reflects (re-set when the policy is re-pushed).
+  version: integer("version").notNull().default(1),
+  // Null until the employee reads & signs.
+  acknowledgedAt: timestamp("acknowledged_at", { withTimezone: true }),
+  // Second step: a manager confirms (must differ from the employee).
+  confirmedBy: text("confirmed_by"),
+  confirmedAt: timestamp("confirmed_at", { withTimezone: true }),
+  // Throttles reminder emails.
+  lastRemindedAt: timestamp("last_reminded_at", { withTimezone: true }),
 });
 export type Policy = typeof policies.$inferSelect;
+export type PolicyAck = typeof policyAcks.$inferSelect;
 
 // ───────────────────────────────────────────────
 // Onboarding — a checklist template per org, with

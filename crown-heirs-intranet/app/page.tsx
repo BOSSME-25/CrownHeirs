@@ -9,6 +9,8 @@ import { getAccess } from "@/lib/perms";
 import { getEmployeeKpis, type EmployeeKpi } from "@/lib/square";
 import { listAllCredentials, listCredentialsFor, type CredentialRow } from "@/lib/credentials";
 import { credentialLabel, credentialState, prettyDate } from "@/lib/credentials-constants";
+import StatusPill from "@/components/StatusPill";
+import { listMyPolicies, listAssignments, ackState, policyCategoryLabel, type PolicyWithAck, type AssignmentRow } from "@/lib/policies";
 import type { Credential, Meeting } from "@/lib/db/schema";
 
 const money = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
@@ -105,6 +107,10 @@ export default async function Home() {
   // everyone's that aren't current-and-complete yet.
   let myCredAlerts: Credential[] = [];
   let teamCredAlerts: CredentialRow[] = [];
+  // Document / policy sign-offs.
+  let myDocTodos: PolicyWithAck[] = [];
+  let teamDocOutstanding = 0;
+  let docConfirmQueue = 0;
   let canManage = false;
   const email = session?.user?.email;
   if (email) {
@@ -121,6 +127,12 @@ export default async function Home() {
         } catch {
           // credentials table not set up — skip
         }
+        try {
+          const docs = await listMyPolicies(me.id);
+          myDocTodos = docs.filter((d) => ackState(d.ack, d.policy.version).needsEmployee);
+        } catch {
+          // policies table not set up — skip
+        }
       }
     } catch {
       // Square not set up or DB not migrated — just skip the section.
@@ -133,6 +145,15 @@ export default async function Home() {
           teamCredAlerts = all.filter((r) => credentialState({ status: r.c.status, expiresAt: r.c.expiresAt }).urgent);
         } catch {
           // credentials table not set up — skip
+        }
+        try {
+          const assignments: AssignmentRow[] = await listAssignments();
+          teamDocOutstanding = assignments.filter((a) => !ackState(a.ack, a.policy.version).complete).length;
+          docConfirmQueue = assignments.filter(
+            (a) => ackState(a.ack, a.policy.version).needsManager && a.employeeEmail.toLowerCase() !== email.toLowerCase(),
+          ).length;
+        } catch {
+          // policies table not set up — skip
         }
       }
     } catch {
@@ -218,6 +239,48 @@ export default async function Home() {
                 + {teamCredAlerts.length - 12} more on the <Link href="/credentials">Compliance page</Link>.
               </p>
             )}
+          </section>
+        )}
+
+        {myDocTodos.length > 0 && (
+          <section className="card" style={{ cursor: "default", marginBottom: 24, borderLeft: "3px solid var(--gold,#c8a04a)" }}>
+            <h2 style={{ fontFamily: "var(--font-serif)", fontWeight: 600, fontSize: "1.25rem", margin: "0 0 4px" }}>
+              Documents that need your signature
+            </h2>
+            <p className="muted" style={{ fontSize: "0.85rem", margin: "0 0 12px" }}>
+              Read and sign these on <Link href="/acknowledgments">Acknowledgments</Link>.
+            </p>
+            {myDocTodos.map(({ policy }) => (
+              <div key={policy.id} style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap", padding: "6px 0", borderTop: "1px solid var(--line,#e7ded5)" }}>
+                <span style={{ fontWeight: 600, flex: 1, minWidth: 180 }}>
+                  {policy.title}
+                  <span className="muted" style={{ fontWeight: 400, fontSize: "0.8rem" }}> · {policyCategoryLabel(policy.category)}</span>
+                </span>
+                <StatusPill label="Needs your signature" tone="warn" />
+              </div>
+            ))}
+          </section>
+        )}
+
+        {canManage && (teamDocOutstanding > 0 || docConfirmQueue > 0) && (
+          <section className="card" style={{ cursor: "default", marginBottom: 24, borderLeft: "3px solid var(--terra,#a0624a)" }}>
+            <h2 style={{ fontFamily: "var(--font-serif)", fontWeight: 600, fontSize: "1.25rem", margin: "0 0 4px" }}>
+              Document sign-offs
+            </h2>
+            <p className="muted" style={{ fontSize: "0.85rem", margin: "0 0 4px" }}>
+              {docConfirmQueue > 0 && (
+                <>
+                  <strong>{docConfirmQueue}</strong> sign-off{docConfirmQueue === 1 ? "" : "s"} waiting for your confirmation
+                  {teamDocOutstanding > 0 ? " · " : ". "}
+                </>
+              )}
+              {teamDocOutstanding > 0 && (
+                <>
+                  <strong>{teamDocOutstanding}</strong> still incomplete across the team.{" "}
+                </>
+              )}
+              <Link href="/acknowledgments">Review on Acknowledgments →</Link>
+            </p>
           </section>
         )}
 
