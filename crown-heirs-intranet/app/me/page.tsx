@@ -1,11 +1,16 @@
 import { auth } from "@/auth";
 import SiteHeader from "@/components/SiteHeader";
 import PhotoCropField from "@/components/PhotoCropField";
+import CredentialBadge from "@/components/CredentialBadge";
 import { ensureCalendarToken, updateMyProfile } from "@/app/me/actions";
+import { submitRenewal } from "@/app/credentials/actions";
 import { getEmployeeByEmail } from "@/lib/employees";
+import { listCredentialsFor } from "@/lib/credentials";
+import { credentialLabel, credentialState, prettyDate } from "@/lib/credentials-constants";
 import { APP_URL } from "@/lib/email";
 import { aiConfigured } from "@/lib/ai";
 import BioAssist from "@/components/BioAssist";
+import type { Credential } from "@/lib/db/schema";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "My Profile — Crown Heirs Team Hub" };
@@ -17,8 +22,16 @@ export default async function MyProfilePage() {
 
   let me;
   let setupNeeded = false;
+  let creds: Credential[] = [];
   try {
     me = await getEmployeeByEmail(email);
+    if (me) {
+      try {
+        creds = await listCredentialsFor(me.id);
+      } catch {
+        // credentials table not set up yet — skip the section
+      }
+    }
   } catch {
     setupNeeded = true;
   }
@@ -97,6 +110,71 @@ export default async function MyProfilePage() {
                 <button className="btn btn-ghost" type="submit">Create my calendar link</button>
               </form>
             )}
+          </div>
+        )}
+
+        {me && creds.length > 0 && (
+          <div className="prose" style={{ marginTop: 24 }}>
+            <h2>Licenses &amp; Certifications</h2>
+            <p className="muted" style={{ marginBottom: 12 }}>
+              Keep these current. We’ll remind you starting 90 days before each one is due.
+              Upload your renewed certificate here — a manager reviews it, and a second
+              manager confirms it before it’s marked complete.
+            </p>
+            {creds.map((c) => {
+              const s = credentialState({ status: c.status, expiresAt: c.expiresAt });
+              const pending = c.status === "pending_review" || c.status === "pending_confirm";
+              return (
+                <div key={c.id} className="card" style={{ cursor: "default", padding: "12px 14px", marginBottom: 10 }}>
+                  <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+                    <span style={{ fontWeight: 600, flex: 1, minWidth: 160 }}>{credentialLabel(c.type)}</span>
+                    <CredentialBadge s={s} />
+                    <span className="muted" style={{ fontSize: "0.82rem" }}>
+                      {c.expiresAt ? `Expires ${prettyDate(c.expiresAt)}` : "No date on file"}
+                    </span>
+                  </div>
+                  {c.certificatePathname && (
+                    <div style={{ marginTop: 6 }}>
+                      <a href={`/api/credentials/file?id=${c.id}&which=current`} target="_blank" rel="noopener noreferrer" style={{ fontSize: "0.85rem" }}>
+                        View certificate on file
+                      </a>
+                    </div>
+                  )}
+                  {pending ? (
+                    <p className="muted" style={{ fontSize: "0.85rem", marginTop: 10, marginBottom: 0 }}>
+                      {c.status === "pending_review"
+                        ? "Your uploaded certificate is waiting for a manager to review."
+                        : "Reviewed — waiting for a second manager to confirm. Almost there!"}
+                    </p>
+                  ) : (
+                    <details style={{ marginTop: 10 }}>
+                      <summary className="btn btn-ghost" style={{ display: "inline-block" }}>
+                        {s.key === "current" ? "Upload an updated certificate…" : "Upload my renewed certificate…"}
+                      </summary>
+                      <form action={submitRenewal} style={{ marginTop: 12 }}>
+                        <input type="hidden" name="credentialId" value={c.id} />
+                        <input type="hidden" name="returnTo" value="/me" />
+                        <div className="form-grid">
+                          <div className="field">
+                            <label>New expiration date</label>
+                            <input type="date" name="expiresAt" required />
+                          </div>
+                          <div className="field">
+                            <label>Issued (optional)</label>
+                            <input type="date" name="issuedAt" />
+                          </div>
+                        </div>
+                        <div className="field" style={{ marginTop: 8 }}>
+                          <label>Certificate (PDF or photo)</label>
+                          <input type="file" name="file" accept="application/pdf,image/*" required />
+                        </div>
+                        <button className="btn" type="submit" style={{ marginTop: 10 }}>Submit for review</button>
+                      </form>
+                    </details>
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
       </main>

@@ -505,6 +505,43 @@ export const documentLinks = pgTable("document_links", {
 export type DocumentLink = typeof documentLinks.$inferSelect;
 
 // ───────────────────────────────────────────────
+// Credentials — licenses & certifications per
+// employee (cosmetology, Barbicide, First Aid, CPR,
+// Lifesaving) with expiration tracking and a
+// two-step (review + confirm) renewal workflow.
+// ───────────────────────────────────────────────
+export const credentials = pgTable("credentials", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  orgId: uuid("org_id"),
+  employeeId: uuid("employee_id").notNull().references(() => employees.id, { onDelete: "cascade" }),
+  // Credential type id (see lib/credentials-constants).
+  type: text("type").notNull(),
+  // 'active' | 'pending_review' | 'pending_confirm'
+  status: text("status").notNull().default("active"),
+  issuedAt: date("issued_at"),
+  // Current effective expiration (null = nothing on file yet).
+  expiresAt: date("expires_at"),
+  certificatePathname: text("certificate_pathname"),
+  // A renewal under review (the proposed new cert/date).
+  pendingPathname: text("pending_pathname"),
+  pendingIssuedAt: date("pending_issued_at"),
+  pendingExpiresAt: date("pending_expires_at"),
+  pendingSubmittedAt: timestamp("pending_submitted_at", { withTimezone: true }),
+  pendingSubmittedBy: text("pending_submitted_by"),
+  // First review (manager): cannot also confirm — separation of duties.
+  reviewedBy: text("reviewed_by"),
+  reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
+  // Second confirmation (a different manager/owner).
+  confirmedBy: text("confirmed_by"),
+  confirmedAt: timestamp("confirmed_at", { withTimezone: true }),
+  // Throttles reminder emails.
+  lastRemindedAt: timestamp("last_reminded_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
+export type Credential = typeof credentials.$inferSelect;
+
+// ───────────────────────────────────────────────
 // Daily duties & checklists — reusable Opening /
 // Closing checklist templates, plus per-day assigned
 // tasks that each get acknowledged on completion.
