@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import LangButtons from "@/components/LangButtons";
 import { signOutAction } from "@/app/signout-action";
 
 export default function MobileNav({ isAdmin, canManage, email, unread = 0 }: { isAdmin?: boolean; canManage?: boolean; email?: string | null; unread?: number }) {
@@ -35,6 +36,9 @@ export default function MobileNav({ isAdmin, canManage, email, unread = 0 }: { i
           <Link href="/handbook">Handbook</Link>
           <Link href="/policies">Policies</Link>
           <Link href="/documents">Documents</Link>
+
+          <div className="m-group">Language</div>
+          <LangButtons stacked />
 
           <div className="m-group">You</div>
           <Link href="/me">My Profile</Link>

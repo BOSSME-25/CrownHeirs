@@ -581,3 +581,37 @@ h1.title {
 .role-ceo { background: #6d3b8e; color: #fff; }
 .role-director { background: #a0624a; color: #fff; }
 .role-manager { background: #e3d3c9; color: #6b4636; }
+
+/* ── Whole-site translation (Google) ──────────────── */
+/* Hide Google's injected top banner / tooltip chrome. */
+.goog-te-banner-frame,
+.goog-te-gadget-icon,
+iframe.skiptranslate { display: none !important; }
+#google_translate_element { display: none !important; }
+body { top: 0 !important; }
+.goog-text-highlight {
+  background: none !important;
+  box-shadow: none !important;
+}
+
+/* EN · ES · FR language switcher */
+.lang-switch { display: inline-flex; gap: 4px; align-items: center; }
+.lang-switch.stacked { margin: 4px 0 2px; }
+.lang-btn {
+  border: 1px solid var(--border-mid);
+  background: transparent;
+  color: var(--ink-dim);
+  border-radius: 6px;
+  padding: 3px 8px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  line-height: 1.2;
+}
+.lang-btn:hover { color: var(--ink); border-color: var(--ink-dim); }
+.lang-btn.active {
+  background: var(--gold);
+  color: #fff;
+  border-color: var(--gold);
+}

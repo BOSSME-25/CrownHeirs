@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { auth, signOut } from "@/auth";
 import MobileNav from "@/components/MobileNav";
+import GoogleTranslate from "@/components/GoogleTranslate";
+import LangButtons from "@/components/LangButtons";
 import { getEmployeeByEmail } from "@/lib/employees";
 import { getAccess } from "@/lib/perms";
 import { unreadTotal } from "@/lib/messages";
@@ -50,6 +52,7 @@ export default async function SiteHeader() {
           brandName
         )}
       </Link>
+      <GoogleTranslate />
       <MobileNav isAdmin={isAdmin} canManage={canManage} email={session?.user?.email} unread={unread} />
       <nav className="site-nav">
         <div className="nav-group">
@@ -94,6 +97,8 @@ export default async function SiteHeader() {
         {canManage && <Link href="/credentials" className="nav-top-link">Licenses</Link>}
 
         {isAdmin && <Link href="/admin" className="nav-top-link">Admin</Link>}
+
+        <LangButtons />
 
         {session?.user && (
           <>
