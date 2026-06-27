@@ -2,10 +2,16 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { auth } from "@/auth";
 import SiteHeader from "@/components/SiteHeader";
+import CredentialBadge from "@/components/CredentialBadge";
 import { nextMeeting } from "@/lib/calendar";
 import { getEmployeeByEmail } from "@/lib/employees";
+import { getAccess } from "@/lib/perms";
 import { getEmployeeKpis, type EmployeeKpi } from "@/lib/square";
-import type { Meeting } from "@/lib/db/schema";
+import { listAllCredentials, listCredentialsFor, type CredentialRow } from "@/lib/credentials";
+import { credentialLabel, credentialState, prettyDate } from "@/lib/credentials-constants";
+import StatusPill from "@/components/StatusPill";
+import { listMyPolicies, listAssignments, ackState, policyCategoryLabel, type PolicyWithAck, type AssignmentRow } from "@/lib/policies";
+import type { Credential, Meeting } from "@/lib/db/schema";
 
 const money = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
 
@@ -97,6 +103,15 @@ export default async function Home() {
 
   // Personal KPIs for the signed-in staffer (if linked to Square).
   let myKpis: EmployeeKpi[] | undefined;
+  // Credential alerts: my own (within 90 days / pending), and — for managers —
+  // everyone's that aren't current-and-complete yet.
+  let myCredAlerts: Credential[] = [];
+  let teamCredAlerts: CredentialRow[] = [];
+  // Document / policy sign-offs.
+  let myDocTodos: PolicyWithAck[] = [];
+  let teamDocOutstanding = 0;
+  let docConfirmQueue = 0;
+  let canManage = false;
   const email = session?.user?.email;
   if (email) {
     try {
@@ -105,8 +120,44 @@ export default async function Home() {
         const r = await getEmployeeKpis(me.squareTeamMemberId);
         if (r.configured && "periods" in r) myKpis = r.periods;
       }
+      if (me) {
+        try {
+          const mine = await listCredentialsFor(me.id);
+          myCredAlerts = mine.filter((c) => credentialState({ status: c.status, expiresAt: c.expiresAt }).urgent);
+        } catch {
+          // credentials table not set up — skip
+        }
+        try {
+          const docs = await listMyPolicies(me.id);
+          myDocTodos = docs.filter((d) => ackState(d.ack, d.policy.version).needsEmployee);
+        } catch {
+          // policies table not set up — skip
+        }
+      }
     } catch {
       // Square not set up or DB not migrated — just skip the section.
+    }
+    try {
+      canManage = (await getAccess(email)).canApprove;
+      if (canManage) {
+        try {
+          const all = await listAllCredentials();
+          teamCredAlerts = all.filter((r) => credentialState({ status: r.c.status, expiresAt: r.c.expiresAt }).urgent);
+        } catch {
+          // credentials table not set up — skip
+        }
+        try {
+          const assignments: AssignmentRow[] = await listAssignments();
+          teamDocOutstanding = assignments.filter((a) => !ackState(a.ack, a.policy.version).complete).length;
+          docConfirmQueue = assignments.filter(
+            (a) => ackState(a.ack, a.policy.version).needsManager && a.employeeEmail.toLowerCase() !== email.toLowerCase(),
+          ).length;
+        } catch {
+          // policies table not set up — skip
+        }
+      }
+    } catch {
+      // perms unavailable — treat as staff
     }
   }
 
@@ -136,6 +187,102 @@ export default async function Home() {
             consistent across the team.
           </p>
         </div>
+
+        {myCredAlerts.length > 0 && (
+          <section className="card" style={{ cursor: "default", marginBottom: 24, borderLeft: "3px solid var(--gold,#c8a04a)" }}>
+            <h2 style={{ fontFamily: "var(--font-serif)", fontWeight: 600, fontSize: "1.25rem", margin: "0 0 4px" }}>
+              Your licenses &amp; certifications
+            </h2>
+            <p className="muted" style={{ fontSize: "0.85rem", margin: "0 0 12px" }}>
+              These need attention. Upload your renewed certificate on <Link href="/me">My Profile</Link>.
+            </p>
+            {myCredAlerts.map((c) => {
+              const s = credentialState({ status: c.status, expiresAt: c.expiresAt });
+              return (
+                <div key={c.id} style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap", padding: "6px 0", borderTop: "1px solid var(--line,#e7ded5)" }}>
+                  <span style={{ fontWeight: 600, flex: 1, minWidth: 160 }}>{credentialLabel(c.type)}</span>
+                  <CredentialBadge s={s} />
+                  <span className="muted" style={{ fontSize: "0.82rem" }}>
+                    {c.expiresAt ? `Expires ${prettyDate(c.expiresAt)}` : "No date on file"}
+                  </span>
+                </div>
+              );
+            })}
+          </section>
+        )}
+
+        {canManage && teamCredAlerts.length > 0 && (
+          <section className="card" style={{ cursor: "default", marginBottom: 24, borderLeft: "3px solid var(--terra,#a0624a)" }}>
+            <h2 style={{ fontFamily: "var(--font-serif)", fontWeight: 600, fontSize: "1.25rem", margin: "0 0 4px" }}>
+              Team compliance ({teamCredAlerts.length})
+            </h2>
+            <p className="muted" style={{ fontSize: "0.85rem", margin: "0 0 12px" }}>
+              Credentials that are due, expired, or awaiting review/confirmation. Manage on{" "}
+              <Link href="/credentials">Licenses &amp; Certifications</Link>.
+            </p>
+            {teamCredAlerts.slice(0, 12).map((r) => {
+              const s = credentialState({ status: r.c.status, expiresAt: r.c.expiresAt });
+              return (
+                <div key={r.c.id} style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap", padding: "6px 0", borderTop: "1px solid var(--line,#e7ded5)" }}>
+                  <span style={{ fontWeight: 600, flex: 1, minWidth: 200 }}>
+                    {r.employeeName} <span className="muted" style={{ fontWeight: 400 }}>· {credentialLabel(r.c.type)}</span>
+                  </span>
+                  <CredentialBadge s={s} />
+                  <span className="muted" style={{ fontSize: "0.82rem" }}>
+                    {r.c.expiresAt ? prettyDate(r.c.expiresAt) : "No date"}
+                  </span>
+                </div>
+              );
+            })}
+            {teamCredAlerts.length > 12 && (
+              <p className="muted" style={{ fontSize: "0.82rem", marginTop: 10, marginBottom: 0 }}>
+                + {teamCredAlerts.length - 12} more on the <Link href="/credentials">Compliance page</Link>.
+              </p>
+            )}
+          </section>
+        )}
+
+        {myDocTodos.length > 0 && (
+          <section className="card" style={{ cursor: "default", marginBottom: 24, borderLeft: "3px solid var(--gold,#c8a04a)" }}>
+            <h2 style={{ fontFamily: "var(--font-serif)", fontWeight: 600, fontSize: "1.25rem", margin: "0 0 4px" }}>
+              Documents that need your signature
+            </h2>
+            <p className="muted" style={{ fontSize: "0.85rem", margin: "0 0 12px" }}>
+              Read and sign these on <Link href="/acknowledgments">Acknowledgments</Link>.
+            </p>
+            {myDocTodos.map(({ policy }) => (
+              <div key={policy.id} style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap", padding: "6px 0", borderTop: "1px solid var(--line,#e7ded5)" }}>
+                <span style={{ fontWeight: 600, flex: 1, minWidth: 180 }}>
+                  {policy.title}
+                  <span className="muted" style={{ fontWeight: 400, fontSize: "0.8rem" }}> · {policyCategoryLabel(policy.category)}</span>
+                </span>
+                <StatusPill label="Needs your signature" tone="warn" />
+              </div>
+            ))}
+          </section>
+        )}
+
+        {canManage && (teamDocOutstanding > 0 || docConfirmQueue > 0) && (
+          <section className="card" style={{ cursor: "default", marginBottom: 24, borderLeft: "3px solid var(--terra,#a0624a)" }}>
+            <h2 style={{ fontFamily: "var(--font-serif)", fontWeight: 600, fontSize: "1.25rem", margin: "0 0 4px" }}>
+              Document sign-offs
+            </h2>
+            <p className="muted" style={{ fontSize: "0.85rem", margin: "0 0 4px" }}>
+              {docConfirmQueue > 0 && (
+                <>
+                  <strong>{docConfirmQueue}</strong> sign-off{docConfirmQueue === 1 ? "" : "s"} waiting for your confirmation
+                  {teamDocOutstanding > 0 ? " · " : ". "}
+                </>
+              )}
+              {teamDocOutstanding > 0 && (
+                <>
+                  <strong>{teamDocOutstanding}</strong> still incomplete across the team.{" "}
+                </>
+              )}
+              <Link href="/acknowledgments">Review on Acknowledgments →</Link>
+            </p>
+          </section>
+        )}
 
         {myKpis && (
           <section style={{ marginBottom: 36 }}>
@@ -174,6 +321,15 @@ export default async function Home() {
               <span className="tile-desc">{t.desc}</span>
             </Link>
           ))}
+          {canManage && (
+            <Link href="/credentials" className="tile">
+              <span className="tile-icon gold">
+                <I><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6l7-3z" /><path d="M9 11l2 2 4-4" /></I>
+              </span>
+              <span className="tile-label">Licenses &amp; Certs</span>
+              <span className="tile-desc">Track state licensing, Barbicide, First Aid, CPR &amp; lifesaving.</span>
+            </Link>
+          )}
           {isAdmin && (
             <Link href="/admin" className="tile">
               <span className="tile-icon gold">

@@ -1,13 +1,24 @@
 import Link from "next/link";
 import { auth, signOut } from "@/auth";
 import MobileNav from "@/components/MobileNav";
+import GoogleTranslate from "@/components/GoogleTranslate";
+import LangButtons from "@/components/LangButtons";
 import { getEmployeeByEmail } from "@/lib/employees";
+import { getAccess } from "@/lib/perms";
 import { unreadTotal } from "@/lib/messages";
 import { getOrgSettings } from "@/lib/orgConfig";
 
 export default async function SiteHeader() {
   const session = await auth();
   const isAdmin = session?.user?.isAdmin;
+
+  // Managers/owners get the compliance link.
+  let canManage = false;
+  try {
+    canManage = (await getAccess(session?.user?.email)).canApprove;
+  } catch {
+    canManage = false;
+  }
 
   // Per-tenant brand name / logo.
   let brandName = "Crown Heirs · Team Hub";
@@ -41,7 +52,8 @@ export default async function SiteHeader() {
           brandName
         )}
       </Link>
-      <MobileNav isAdmin={isAdmin} email={session?.user?.email} unread={unread} />
+      <GoogleTranslate />
+      <MobileNav isAdmin={isAdmin} canManage={canManage} email={session?.user?.email} unread={unread} />
       <nav className="site-nav">
         <div className="nav-group">
           <button type="button" className="nav-top">Calendar ▾</button>
@@ -82,7 +94,11 @@ export default async function SiteHeader() {
 
         <Link href="/inventory" className="nav-top-link">Inventory</Link>
 
+        {canManage && <Link href="/credentials" className="nav-top-link">Licenses</Link>}
+
         {isAdmin && <Link href="/admin" className="nav-top-link">Admin</Link>}
+
+        <LangButtons />
 
         {session?.user && (
           <>

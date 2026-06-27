@@ -249,6 +249,25 @@ export async function POST() {
         UNIQUE (policy_id, employee_id)
       )
     `;
+    // Document sign-off: versioning + two-person (employee signs, manager confirms).
+    await sql`ALTER TABLE policies ADD COLUMN IF NOT EXISTS category text NOT NULL DEFAULT 'policy'`;
+    await sql`ALTER TABLE policies ADD COLUMN IF NOT EXISTS version integer NOT NULL DEFAULT 1`;
+    await sql`ALTER TABLE policies ADD COLUMN IF NOT EXISTS updated_at timestamptz DEFAULT now()`;
+    await sql`ALTER TABLE policy_acks ADD COLUMN IF NOT EXISTS version integer NOT NULL DEFAULT 1`;
+    await sql`ALTER TABLE policy_acks ADD COLUMN IF NOT EXISTS confirmed_by text`;
+    await sql`ALTER TABLE policy_acks ADD COLUMN IF NOT EXISTS confirmed_at timestamptz`;
+    await sql`ALTER TABLE policy_acks ADD COLUMN IF NOT EXISTS last_reminded_at timestamptz`;
+    // Seed the Employee Handbook as the first required sign-off (idempotent).
+    await sql`
+      INSERT INTO policies (org_id, title, body, category, version)
+      SELECT
+        (SELECT id FROM organizations WHERE slug = 'crown-heirs' LIMIT 1),
+        'Employee Handbook',
+        'Read the Crown Heirs Handbook in full, then sign to confirm you understand and agree to uphold these standards.',
+        'handbook',
+        1
+      WHERE NOT EXISTS (SELECT 1 FROM policies WHERE category = 'handbook' AND title = 'Employee Handbook')
+    `;
     await sql`
       CREATE TABLE IF NOT EXISTS onboarding_tasks (
         id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -456,6 +475,42 @@ export async function POST() {
         decided_at timestamptz,
         created_at timestamptz DEFAULT now()
       )
+    `;
+
+    // ── Credentials (licenses & certifications) ──
+    await sql`
+      CREATE TABLE IF NOT EXISTS credentials (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        org_id uuid,
+        employee_id uuid NOT NULL REFERENCES employees(id) ON DELETE CASCADE,
+        type text NOT NULL,
+        status text NOT NULL DEFAULT 'active',
+        issued_at date,
+        expires_at date,
+        certificate_pathname text,
+        pending_pathname text,
+        pending_issued_at date,
+        pending_expires_at date,
+        pending_submitted_at timestamptz,
+        pending_submitted_by text,
+        reviewed_by text,
+        reviewed_at timestamptz,
+        confirmed_by text,
+        confirmed_at timestamptz,
+        last_reminded_at timestamptz,
+        created_at timestamptz DEFAULT now(),
+        updated_at timestamptz DEFAULT now(),
+        UNIQUE (employee_id, type)
+      )
+    `;
+    // Auto-assign the universal credentials to every active employee (idempotent).
+    await sql`
+      INSERT INTO credentials (org_id, employee_id, type)
+      SELECT e.org_id, e.id, t.type
+      FROM employees e
+      CROSS JOIN (VALUES ('barbicide'), ('first_aid'), ('cpr'), ('lifesaving')) AS t(type)
+      WHERE e.status = 'active'
+      ON CONFLICT (employee_id, type) DO NOTHING
     `;
 
     // Backfill existing rows to Crown Heirs org + Main location.

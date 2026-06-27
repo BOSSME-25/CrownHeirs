@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import LangButtons from "@/components/LangButtons";
 import { signOutAction } from "@/app/signout-action";
 
-export default function MobileNav({ isAdmin, email, unread = 0 }: { isAdmin?: boolean; email?: string | null; unread?: number }) {
+export default function MobileNav({ isAdmin, canManage, email, unread = 0 }: { isAdmin?: boolean; canManage?: boolean; email?: string | null; unread?: number }) {
   const [open, setOpen] = useState(false);
   const close = () => setOpen(false);
 
@@ -36,8 +37,12 @@ export default function MobileNav({ isAdmin, email, unread = 0 }: { isAdmin?: bo
           <Link href="/policies">Policies</Link>
           <Link href="/documents">Documents</Link>
 
+          <div className="m-group">Language</div>
+          <LangButtons stacked />
+
           <div className="m-group">You</div>
           <Link href="/me">My Profile</Link>
+          {canManage && <Link href="/credentials">Licenses &amp; Certs</Link>}
           {isAdmin && <Link href="/admin">Admin</Link>}
           {email && <div className="m-email">{email}</div>}
           <form action={signOutAction}>

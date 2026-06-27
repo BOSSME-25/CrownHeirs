@@ -320,16 +320,33 @@ export const policies = pgTable("policies", {
   title: text("title").notNull(),
   body: text("body"),
   fileUrl: text("file_url"),
+  // A short tag for grouping (e.g. "handbook", "policy").
+  category: text("category").notNull().default("policy"),
+  // Bumped each time the document is "pushed out" anew — everyone must re-sign.
+  version: integer("version").notNull().default(1),
   active: boolean("active").notNull().default(true),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 });
+// One row per (policy, employee) — the person's sign-off status for the
+// CURRENT version. Two steps: the employee acknowledges, then a different
+// manager confirms (checks and balances).
 export const policyAcks = pgTable("policy_acks", {
   id: uuid("id").defaultRandom().primaryKey(),
   policyId: uuid("policy_id").notNull().references(() => policies.id, { onDelete: "cascade" }),
   employeeId: uuid("employee_id").notNull().references(() => employees.id, { onDelete: "cascade" }),
-  acknowledgedAt: timestamp("acknowledged_at", { withTimezone: true }).defaultNow(),
+  // Which version this row reflects (re-set when the policy is re-pushed).
+  version: integer("version").notNull().default(1),
+  // Null until the employee reads & signs.
+  acknowledgedAt: timestamp("acknowledged_at", { withTimezone: true }),
+  // Second step: a manager confirms (must differ from the employee).
+  confirmedBy: text("confirmed_by"),
+  confirmedAt: timestamp("confirmed_at", { withTimezone: true }),
+  // Throttles reminder emails.
+  lastRemindedAt: timestamp("last_reminded_at", { withTimezone: true }),
 });
 export type Policy = typeof policies.$inferSelect;
+export type PolicyAck = typeof policyAcks.$inferSelect;
 
 // ───────────────────────────────────────────────
 // Onboarding — a checklist template per org, with
@@ -503,6 +520,43 @@ export const documentLinks = pgTable("document_links", {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });
 export type DocumentLink = typeof documentLinks.$inferSelect;
+
+// ───────────────────────────────────────────────
+// Credentials — licenses & certifications per
+// employee (cosmetology, Barbicide, First Aid, CPR,
+// Lifesaving) with expiration tracking and a
+// two-step (review + confirm) renewal workflow.
+// ───────────────────────────────────────────────
+export const credentials = pgTable("credentials", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  orgId: uuid("org_id"),
+  employeeId: uuid("employee_id").notNull().references(() => employees.id, { onDelete: "cascade" }),
+  // Credential type id (see lib/credentials-constants).
+  type: text("type").notNull(),
+  // 'active' | 'pending_review' | 'pending_confirm'
+  status: text("status").notNull().default("active"),
+  issuedAt: date("issued_at"),
+  // Current effective expiration (null = nothing on file yet).
+  expiresAt: date("expires_at"),
+  certificatePathname: text("certificate_pathname"),
+  // A renewal under review (the proposed new cert/date).
+  pendingPathname: text("pending_pathname"),
+  pendingIssuedAt: date("pending_issued_at"),
+  pendingExpiresAt: date("pending_expires_at"),
+  pendingSubmittedAt: timestamp("pending_submitted_at", { withTimezone: true }),
+  pendingSubmittedBy: text("pending_submitted_by"),
+  // First review (manager): cannot also confirm — separation of duties.
+  reviewedBy: text("reviewed_by"),
+  reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
+  // Second confirmation (a different manager/owner).
+  confirmedBy: text("confirmed_by"),
+  confirmedAt: timestamp("confirmed_at", { withTimezone: true }),
+  // Throttles reminder emails.
+  lastRemindedAt: timestamp("last_reminded_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
+export type Credential = typeof credentials.$inferSelect;
 
 // ───────────────────────────────────────────────
 // Daily duties & checklists — reusable Opening /
