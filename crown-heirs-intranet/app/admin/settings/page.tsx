@@ -74,6 +74,11 @@ export default async function SettingsPage() {
                 )}
                 <input id="logo" name="logo" type="file" accept="image/*" />
                 <span className="muted" style={{ fontSize: "0.78rem" }}>Max 4 MB.</span>
+                {settings.logoUrl && (
+                  <label className="muted" style={{ fontSize: "0.78rem", display: "flex", gap: 6, alignItems: "center", marginTop: 4 }}>
+                    <input type="checkbox" name="removeLogo" value="1" /> Remove logo (use the text name instead)
+                  </label>
+                )}
               </div>
               <div className="field">
                 <label htmlFor="favicon">Favicon {settings.faviconUrl && "(set — choose a file to replace)"}</label>
@@ -83,6 +88,11 @@ export default async function SettingsPage() {
                 )}
                 <input id="favicon" name="favicon" type="file" accept="image/*,.ico" />
                 <span className="muted" style={{ fontSize: "0.78rem" }}>Max 4 MB. A small square image works best in the browser tab.</span>
+                {settings.faviconUrl && (
+                  <label className="muted" style={{ fontSize: "0.78rem", display: "flex", gap: 6, alignItems: "center", marginTop: 4 }}>
+                    <input type="checkbox" name="removeFavicon" value="1" /> Remove favicon (use the default CH icon)
+                  </label>
+                )}
               </div>
               <div className="field">
                 <label htmlFor="loginImage">Login background {settings.loginImageUrl && "(set — choose a file to replace)"}</label>
@@ -92,6 +102,11 @@ export default async function SettingsPage() {
                 )}
                 <input id="loginImage" name="loginImage" type="file" accept="image/*" />
                 <span className="muted" style={{ fontSize: "0.78rem" }}>Max 4 MB.</span>
+                {settings.loginImageUrl && (
+                  <label className="muted" style={{ fontSize: "0.78rem", display: "flex", gap: 6, alignItems: "center", marginTop: 4 }}>
+                    <input type="checkbox" name="removeLoginImage" value="1" /> Remove login background
+                  </label>
+                )}
               </div>
             </div>
 
