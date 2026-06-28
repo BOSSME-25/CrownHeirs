@@ -76,12 +76,20 @@ export default async function SettingsPage() {
                 <span className="muted" style={{ fontSize: "0.78rem" }}>Max 4 MB.</span>
               </div>
               <div className="field">
-                <label htmlFor="favicon">Favicon {settings.faviconUrl && "(set — replace)"}</label>
+                <label htmlFor="favicon">Favicon {settings.faviconUrl && "(set — choose a file to replace)"}</label>
+                {settings.faviconUrl && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={settings.faviconUrl} alt="" style={{ height: 32, width: 32, objectFit: "contain", display: "block", marginBottom: 6 }} />
+                )}
                 <input id="favicon" name="favicon" type="file" accept="image/*,.ico" />
                 <span className="muted" style={{ fontSize: "0.78rem" }}>Max 4 MB. A small square image works best in the browser tab.</span>
               </div>
               <div className="field">
-                <label htmlFor="loginImage">Login background {settings.loginImageUrl && "(set — replace)"}</label>
+                <label htmlFor="loginImage">Login background {settings.loginImageUrl && "(set — choose a file to replace)"}</label>
+                {settings.loginImageUrl && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={settings.loginImageUrl} alt="" style={{ height: 40, display: "block", marginBottom: 6, borderRadius: 6 }} />
+                )}
                 <input id="loginImage" name="loginImage" type="file" accept="image/*" />
                 <span className="muted" style={{ fontSize: "0.78rem" }}>Max 4 MB.</span>
               </div>
