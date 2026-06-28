@@ -23,11 +23,12 @@ export async function GET() {
     return new Response("Shop not set up", { status: 200 });
   }
 
-  const header = ["Date", "Order ID", "Employee", "Email", "Product", "Size", "Quantity", "Unit Price", "Line Total", "Note"];
+  const header = ["Date", "Order ID", "Employee", "Email", "Product", "Size", "Quantity", "Unit Price", "Line Total", "Payment", "Status", "Note"];
   const lines = [header.map(csvCell).join(",")];
 
   for (const { order, items } of orders) {
     const date = order.createdAt ? new Date(order.createdAt).toISOString().slice(0, 10) : "";
+    const pay = order.paymentMethod === "square" ? "Square" : "Payroll / in person";
     for (const it of items) {
       const unit = priceNumber(it.unitPrice);
       const lineTotal = unit != null ? unit * it.quantity : null;
@@ -42,6 +43,8 @@ export async function GET() {
           it.quantity,
           unit != null ? formatPrice(unit) : "",
           lineTotal != null ? formatPrice(lineTotal) : "",
+          pay,
+          order.paymentStatus,
           order.note,
         ]
           .map(csvCell)

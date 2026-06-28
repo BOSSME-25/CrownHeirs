@@ -521,13 +521,17 @@ export async function POST() {
         name text NOT NULL,
         description text,
         category text NOT NULL DEFAULT 'merch',
+        stock_mode text NOT NULL DEFAULT 'tracked',
         price numeric,
         image_url text,
+        image_pathname text,
         active boolean NOT NULL DEFAULT true,
         created_at timestamptz DEFAULT now(),
         updated_at timestamptz DEFAULT now()
       )
     `;
+    await sql`ALTER TABLE shop_products ADD COLUMN IF NOT EXISTS stock_mode text NOT NULL DEFAULT 'tracked'`;
+    await sql`ALTER TABLE shop_products ADD COLUMN IF NOT EXISTS image_pathname text`;
     await sql`
       CREATE TABLE IF NOT EXISTS shop_variants (
         id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -548,9 +552,21 @@ export async function POST() {
         employee_email text,
         note text,
         status text NOT NULL DEFAULT 'submitted',
+        payment_method text NOT NULL DEFAULT 'payroll',
+        payment_status text NOT NULL DEFAULT 'unpaid',
+        total_amount numeric,
+        square_order_id text,
+        square_payment_link_id text,
+        payment_url text,
         created_at timestamptz DEFAULT now()
       )
     `;
+    await sql`ALTER TABLE shop_orders ADD COLUMN IF NOT EXISTS payment_method text NOT NULL DEFAULT 'payroll'`;
+    await sql`ALTER TABLE shop_orders ADD COLUMN IF NOT EXISTS payment_status text NOT NULL DEFAULT 'unpaid'`;
+    await sql`ALTER TABLE shop_orders ADD COLUMN IF NOT EXISTS total_amount numeric`;
+    await sql`ALTER TABLE shop_orders ADD COLUMN IF NOT EXISTS square_order_id text`;
+    await sql`ALTER TABLE shop_orders ADD COLUMN IF NOT EXISTS square_payment_link_id text`;
+    await sql`ALTER TABLE shop_orders ADD COLUMN IF NOT EXISTS payment_url text`;
     await sql`
       CREATE TABLE IF NOT EXISTS shop_order_items (
         id uuid PRIMARY KEY DEFAULT gen_random_uuid(),

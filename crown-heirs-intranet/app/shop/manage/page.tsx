@@ -2,7 +2,7 @@ import Link from "next/link";
 import { auth } from "@/auth";
 import SiteHeader from "@/components/SiteHeader";
 import { getAccess } from "@/lib/perms";
-import { formatPrice, listProducts, shopCategoryLabel, SHOP_CATEGORIES, type ProductWithVariants } from "@/lib/shop";
+import { formatPrice, listProducts, productImageSrc, shopCategoryLabel, SHOP_CATEGORIES, STOCK_MODES, type ProductWithVariants } from "@/lib/shop";
 import { addProduct, addVariant, removeVariant, setProductActive, setVariantStock, updateProduct } from "@/app/shop/actions";
 
 export const dynamic = "force-dynamic";
@@ -70,10 +70,21 @@ export default async function ManageShopPage() {
                   </select>
                 </div>
                 <div className="field">
+                  <label htmlFor="stockMode">Type</label>
+                  <select id="stockMode" name="stockMode" defaultValue="tracked">
+                    {STOCK_MODES.map((m) => (
+                      <option key={m.id} value={m.id}>{m.label}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="field">
                   <label htmlFor="price">Price (optional)</label>
                   <input id="price" name="price" inputMode="decimal" placeholder="0.00" />
                 </div>
               </div>
+              <p className="muted" style={{ fontSize: "0.78rem", margin: "2px 0 0" }}>
+                <strong>In-stock</strong> = limited by stock counts. <strong>Made to order</strong> = always orderable, no stock kept (e.g. scrubs).
+              </p>
               <div className="field" style={{ marginTop: 8 }}>
                 <label htmlFor="description">Description (optional)</label>
                 <textarea id="description" name="description" rows={2} />
@@ -87,10 +98,14 @@ export default async function ManageShopPage() {
                   <label htmlFor="initialStock">Starting stock per size</label>
                   <input id="initialStock" name="initialStock" inputMode="numeric" defaultValue={0} />
                 </div>
-                <div className="field">
-                  <label htmlFor="imageUrl">Image link (optional)</label>
-                  <input id="imageUrl" name="imageUrl" placeholder="https://…" />
-                </div>
+              </div>
+              <div className="field" style={{ marginTop: 8 }}>
+                <label htmlFor="image">Product photo (upload from your phone)</label>
+                <input id="image" name="image" type="file" accept="image/*" />
+              </div>
+              <div className="field" style={{ marginTop: 8 }}>
+                <label htmlFor="imageUrl">…or paste an image link</label>
+                <input id="imageUrl" name="imageUrl" placeholder="https://…" />
               </div>
               <button className="btn" type="submit" style={{ marginTop: 12 }}>Add product</button>
             </form>
@@ -108,7 +123,9 @@ export default async function ManageShopPage() {
                       </span>
                     </span>
                     {!product.active && <span className="muted" style={{ fontSize: "0.78rem" }}>· taken down</span>}
-                    <span className="muted" style={{ fontSize: "0.8rem" }}>{variants.reduce((s, v) => s + v.stock, 0)} in stock</span>
+                    <span className="muted" style={{ fontSize: "0.8rem" }}>
+                      {product.stockMode === "made_to_order" ? "made to order" : `${variants.reduce((s, v) => s + v.stock, 0)} in stock`}
+                    </span>
                   </summary>
 
                   {/* Sizes & stock */}
@@ -116,11 +133,15 @@ export default async function ManageShopPage() {
                     {variants.map((v) => (
                       <div key={v.id} style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", padding: "5px 0", borderTop: "1px solid var(--border,#eee)" }}>
                         <span style={{ flex: 1, minWidth: 90, fontWeight: 600 }}>{v.label}</span>
-                        <form action={setVariantStock} style={{ display: "flex", gap: 6, alignItems: "center" }}>
-                          <input type="hidden" name="variantId" value={v.id} />
-                          <input type="number" name="stock" min={0} defaultValue={v.stock} aria-label={`${v.label} stock`} style={{ width: 80 }} />
-                          <button className="btn btn-ghost" type="submit">Set</button>
-                        </form>
+                        {product.stockMode === "made_to_order" ? (
+                          <span className="muted" style={{ fontSize: "0.8rem" }}>made to order</span>
+                        ) : (
+                          <form action={setVariantStock} style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                            <input type="hidden" name="variantId" value={v.id} />
+                            <input type="number" name="stock" min={0} defaultValue={v.stock} aria-label={`${v.label} stock`} style={{ width: 80 }} />
+                            <button className="btn btn-ghost" type="submit">Set</button>
+                          </form>
+                        )}
                         <form action={removeVariant}>
                           <input type="hidden" name="variantId" value={v.id} />
                           <button className="btn-link" type="submit" style={{ color: "var(--terra,#a0624a)" }}>Remove</button>
@@ -130,7 +151,9 @@ export default async function ManageShopPage() {
                     <form action={addVariant} style={{ display: "flex", gap: 6, alignItems: "center", marginTop: 8, flexWrap: "wrap" }}>
                       <input type="hidden" name="productId" value={product.id} />
                       <input name="label" placeholder="Add a size (e.g. 3XL)" required style={{ minWidth: 140 }} />
-                      <input type="number" name="stock" min={0} defaultValue={0} aria-label="New size stock" style={{ width: 80 }} />
+                      {product.stockMode !== "made_to_order" && (
+                        <input type="number" name="stock" min={0} defaultValue={0} aria-label="New size stock" style={{ width: 80 }} />
+                      )}
                       <button className="btn btn-ghost" type="submit">Add size</button>
                     </form>
                   </div>
@@ -154,6 +177,14 @@ export default async function ManageShopPage() {
                           </select>
                         </div>
                         <div className="field">
+                          <label>Type</label>
+                          <select name="stockMode" defaultValue={product.stockMode}>
+                            {STOCK_MODES.map((m) => (
+                              <option key={m.id} value={m.id}>{m.label}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div className="field">
                           <label>Price</label>
                           <input name="price" defaultValue={product.price ?? ""} inputMode="decimal" />
                         </div>
@@ -162,8 +193,16 @@ export default async function ManageShopPage() {
                         <label>Description</label>
                         <textarea name="description" rows={2} defaultValue={product.description ?? ""} />
                       </div>
+                      {productImageSrc(product) && (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={productImageSrc(product)!} alt={product.name} style={{ height: 70, borderRadius: 6, margin: "8px 0" }} />
+                      )}
                       <div className="field" style={{ marginTop: 8 }}>
-                        <label>Image link</label>
+                        <label>Replace photo (upload)</label>
+                        <input name="image" type="file" accept="image/*" />
+                      </div>
+                      <div className="field" style={{ marginTop: 8 }}>
+                        <label>…or image link</label>
                         <input name="imageUrl" defaultValue={product.imageUrl ?? ""} placeholder="https://…" />
                       </div>
                       <div style={{ display: "flex", gap: 8, marginTop: 10, flexWrap: "wrap" }}>

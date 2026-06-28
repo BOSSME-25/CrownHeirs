@@ -5,10 +5,12 @@ import { getAccess } from "@/lib/perms";
 import {
   formatPrice,
   listProducts,
+  productImageSrc,
   shopCategoryLabel,
   SHOP_CATEGORIES,
   type ProductWithVariants,
 } from "@/lib/shop";
+import { squareCheckoutAvailable } from "@/lib/squareCheckout";
 import { placeOrder } from "@/app/shop/actions";
 
 export const dynamic = "force-dynamic";
@@ -25,6 +27,7 @@ export default async function ShopPage() {
   } catch {
     setupNeeded = true;
   }
+  const squareOn = await squareCheckoutAvailable();
 
   // Group by category in our preferred order.
   const order = SHOP_CATEGORIES.map((c) => c.id);
@@ -73,12 +76,15 @@ export default async function ShopPage() {
                   {shopCategoryLabel(cat)}
                 </h2>
                 <div className="grid">
-                  {byCat.get(cat)!.map(({ product, variants }) => (
+                  {byCat.get(cat)!.map(({ product, variants }) => {
+                    const madeToOrder = product.stockMode === "made_to_order";
+                    const img = productImageSrc(product);
+                    return (
                     <div className="card" key={product.id} style={{ cursor: "default" }}>
-                      {product.imageUrl && (
+                      {img && (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
-                          src={product.imageUrl}
+                          src={img}
                           alt={product.name}
                           style={{ width: "100%", height: 150, objectFit: "cover", borderRadius: "var(--r-s,8px)", marginBottom: 10 }}
                         />
@@ -86,6 +92,9 @@ export default async function ShopPage() {
                       <h3 style={{ margin: "0 0 2px" }}>{product.name}</h3>
                       {product.price && (
                         <div style={{ fontWeight: 600, color: "var(--terra,#a0624a)" }}>{formatPrice(product.price)}</div>
+                      )}
+                      {madeToOrder && (
+                        <div className="muted" style={{ fontSize: "0.76rem" }}>Made to order</div>
                       )}
                       {product.description && (
                         <p className="muted" style={{ fontSize: "0.85rem", margin: "6px 0 10px", whiteSpace: "pre-wrap" }}>
@@ -97,20 +106,20 @@ export default async function ShopPage() {
                           <p className="muted" style={{ fontSize: "0.82rem" }}>No sizes set yet.</p>
                         ) : (
                           variants.map((v) => {
-                            const out = v.stock <= 0;
+                            const out = !madeToOrder && v.stock <= 0;
                             return (
                               <div key={v.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "5px 0", borderTop: "1px solid var(--border,#eee)" }}>
                                 <span style={{ flex: 1, minWidth: 0 }}>
                                   {v.label}{" "}
                                   <span className="muted" style={{ fontSize: "0.78rem" }}>
-                                    {out ? "· out of stock" : `· ${v.stock} available`}
+                                    {madeToOrder ? "" : out ? "· out of stock" : `· ${v.stock} available`}
                                   </span>
                                 </span>
                                 <input
                                   type="number"
                                   name={`qty_${v.id}`}
                                   min={0}
-                                  max={v.stock}
+                                  max={madeToOrder ? undefined : v.stock}
                                   defaultValue={0}
                                   disabled={out}
                                   aria-label={`${product.name} ${v.label} quantity`}
@@ -122,7 +131,8 @@ export default async function ShopPage() {
                         )}
                       </div>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </section>
             ))}
@@ -132,9 +142,22 @@ export default async function ShopPage() {
                 <label htmlFor="note">Note for the order (optional)</label>
                 <textarea id="note" name="note" rows={2} placeholder="Anything the team should know — color preference, urgency, etc." />
               </div>
+              <fieldset style={{ border: 0, padding: 0, margin: "4px 0 12px" }}>
+                <legend style={{ fontWeight: 600, fontSize: "0.9rem", marginBottom: 6 }}>How would you like to pay?</legend>
+                {squareOn && (
+                  <label style={{ display: "flex", gap: 8, alignItems: "center", padding: "4px 0" }}>
+                    <input type="radio" name="paymentMethod" value="square" defaultChecked />
+                    <span>Pay now with card (Square) — you’ll be taken to a secure Square page for items that have a price.</span>
+                  </label>
+                )}
+                <label style={{ display: "flex", gap: 8, alignItems: "center", padding: "4px 0" }}>
+                  <input type="radio" name="paymentMethod" value="payroll" defaultChecked={!squareOn} />
+                  <span>Payroll deduction / pay in person — the team will collect from you.</span>
+                </label>
+              </fieldset>
               <button className="btn" type="submit">Place order</button>
               <p className="muted" style={{ fontSize: "0.8rem", marginTop: 8, marginBottom: 0 }}>
-                Set a quantity on the sizes you want, then place your order. You’ll get a confirmation and the team will be emailed.
+                Set a quantity on the sizes you want, choose how to pay, then place your order. You’ll get a confirmation and the team will be emailed.
               </p>
             </div>
           </form>

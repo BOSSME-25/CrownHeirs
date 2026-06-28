@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { eq, inArray } from "drizzle-orm";
+import { put } from "@vercel/blob";
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
 import { shopOrderItems, shopOrders, shopProducts, shopVariants } from "@/lib/db/schema";
@@ -11,9 +12,24 @@ import { getEmployeeByEmail } from "@/lib/employees";
 import { getDefaultOrg } from "@/lib/org";
 import { getAccess } from "@/lib/perms";
 import { logAudit } from "@/lib/audit";
-import { adminEmails, emailLayout, sendEmail } from "@/lib/email";
-import { formatPrice, isShopCategory, parseSizes, priceNumber } from "@/lib/shop-constants";
+import { adminEmails, APP_URL, emailLayout, sendEmail } from "@/lib/email";
+import { dollarsToCents, formatPrice, isShopCategory, isStockMode, parseSizes, paymentStatusLabel, priceNumber } from "@/lib/shop-constants";
 import { orderRecipients } from "@/lib/shop";
+import { createPaymentLink } from "@/lib/squareCheckout";
+
+const IMAGE_MAX = 8 * 1024 * 1024;
+
+// Uploads a product photo to the private blob store; returns its pathname.
+async function putProductImage(file: File): Promise<string> {
+  if (file.size > IMAGE_MAX) throw new Error("Image is too large (max 8 MB). Try a smaller photo.");
+  const safe = file.name.replace(/[^a-zA-Z0-9._-]/g, "_") || "photo";
+  const blob = await put(`shop/${safe}`, file, {
+    access: "private",
+    addRandomSuffix: true,
+    contentType: file.type || undefined,
+  });
+  return blob.pathname;
+}
 
 const str = (fd: FormData, k: string) => {
   const v = fd.get(k);
@@ -52,9 +68,13 @@ export async function addProduct(formData: FormData) {
   if (!name) throw new Error("Product name is required.");
   const org = await getDefaultOrg();
   const category = str(formData, "category") ?? "merch";
+  const stockMode = str(formData, "stockMode") ?? "tracked";
   const price = priceNumber(str(formData, "price"));
   const sizes = parseSizes(str(formData, "sizes"));
   const initialStock = Math.max(0, intOf(formData, "initialStock") ?? 0);
+
+  const file = formData.get("image");
+  const imagePathname = file instanceof File && file.size > 0 ? await putProductImage(file) : null;
 
   const [product] = await db
     .insert(shopProducts)
@@ -63,8 +83,10 @@ export async function addProduct(formData: FormData) {
       name,
       description: str(formData, "description"),
       category: isShopCategory(category) ? category : "merch",
+      stockMode: isStockMode(stockMode) ? stockMode : "tracked",
       price: price != null ? String(price) : null,
-      imageUrl: str(formData, "imageUrl"),
+      imageUrl: imagePathname ? null : str(formData, "imageUrl"),
+      imagePathname,
     })
     .returning();
 
@@ -93,15 +115,23 @@ export async function updateProduct(formData: FormData) {
   const name = str(formData, "name");
   if (!name) throw new Error("Product name is required.");
   const category = str(formData, "category") ?? "merch";
+  const stockMode = str(formData, "stockMode") ?? "tracked";
   const price = priceNumber(str(formData, "price"));
+
+  const file = formData.get("image");
+  const newImage = file instanceof File && file.size > 0 ? await putProductImage(file) : null;
+  const linkUrl = str(formData, "imageUrl");
+
   await db
     .update(shopProducts)
     .set({
       name,
       description: str(formData, "description"),
       category: isShopCategory(category) ? category : "merch",
+      stockMode: isStockMode(stockMode) ? stockMode : "tracked",
       price: price != null ? String(price) : null,
-      imageUrl: str(formData, "imageUrl"),
+      // A newly uploaded photo wins; otherwise keep/replace the external link.
+      ...(newImage ? { imagePathname: newImage, imageUrl: null } : { imageUrl: linkUrl }),
       updatedAt: new Date(),
     })
     .where(eq(shopProducts.id, id));
@@ -190,7 +220,8 @@ export async function placeOrder(formData: FormData) {
     .where(inArray(shopProducts.id, [...new Set(variants.map((v) => v.productId))]));
   const productById = new Map(products.map((p) => [p.id, p] as const));
 
-  // Validate stock before committing anything.
+  // Validate before committing. Tracked items are limited by stock;
+  // made-to-order items are always orderable.
   type Line = { v: ShopVariant; p: ShopProduct; qty: number };
   const lines: Line[] = [];
   const problems: string[] = [];
@@ -202,7 +233,7 @@ export async function placeOrder(formData: FormData) {
       problems.push("An item is no longer available — please refresh the shop.");
       continue;
     }
-    if (r.qty > v.stock) {
+    if (p.stockMode === "tracked" && r.qty > v.stock) {
       problems.push(`${p.name} (${v.label}): only ${v.stock} left.`);
       continue;
     }
@@ -211,8 +242,12 @@ export async function placeOrder(formData: FormData) {
   if (problems.length) throw new Error(problems.join(" "));
   if (!lines.length) throw new Error("Nothing to order.");
 
+  const total = lines.reduce((s, l) => s + (priceNumber(l.p.price) ?? 0) * l.qty, 0);
+  const wantSquare = str(formData, "paymentMethod") === "square";
+  const useSquare = wantSquare && total > 0;
   const org = await getDefaultOrg();
   const note = str(formData, "note");
+
   const [order] = await db
     .insert(shopOrders)
     .values({
@@ -221,6 +256,9 @@ export async function placeOrder(formData: FormData) {
       employeeName: emp.fullName,
       employeeEmail: email,
       note,
+      paymentMethod: useSquare ? "square" : "payroll",
+      paymentStatus: total === 0 ? "paid" : useSquare ? "pending" : "unpaid",
+      totalAmount: total > 0 ? String(total) : null,
     })
     .returning();
 
@@ -237,9 +275,32 @@ export async function placeOrder(formData: FormData) {
     })),
   );
 
-  // Decrement stock.
+  // Decrement stock for tracked items only.
   for (const l of lines) {
-    await db.update(shopVariants).set({ stock: Math.max(0, l.v.stock - l.qty) }).where(eq(shopVariants.id, l.v.id));
+    if (l.p.stockMode === "tracked") {
+      await db.update(shopVariants).set({ stock: Math.max(0, l.v.stock - l.qty) }).where(eq(shopVariants.id, l.v.id));
+    }
+  }
+
+  // If paying with Square, create a hosted payment link.
+  let payUrl: string | null = null;
+  if (useSquare) {
+    const link = await createPaymentLink({
+      amountCents: dollarsToCents(total),
+      name: `Crown Heirs Team Shop — ${emp.fullName}`,
+      buyerEmail: email,
+      redirectUrl: `${APP_URL}/shop/paid?order=${order.id}`,
+    });
+    if (link) {
+      payUrl = link.url;
+      await db
+        .update(shopOrders)
+        .set({ squareOrderId: link.orderId, squarePaymentLinkId: link.linkId, paymentUrl: link.url })
+        .where(eq(shopOrders.id, order.id));
+    } else {
+      // Square unavailable — fall back to "owed" so the order still stands.
+      await db.update(shopOrders).set({ paymentMethod: "payroll", paymentStatus: "unpaid" }).where(eq(shopOrders.id, order.id));
+    }
   }
 
   // Email the owners/directors.
@@ -254,6 +315,9 @@ export async function placeOrder(formData: FormData) {
         </tr>`,
       )
       .join("");
+    const payLine = useSquare && payUrl
+      ? `Paying online via Square (${formatPrice(total)}) — status will show on the Orders page once complete.`
+      : `Payment: ${paymentStatusLabel(useSquare ? "square" : "payroll", total === 0 ? "paid" : useSquare ? "unpaid" : "unpaid")}${total > 0 ? ` — ${formatPrice(total)}` : ""}.`;
     const body =
       `<p><strong>${emp.fullName}</strong> (${email}) placed a Team Shop order.</p>` +
       (note ? `<p><em>Note:</em> ${note}</p>` : "") +
@@ -262,12 +326,13 @@ export async function placeOrder(formData: FormData) {
           <th style="padding:6px 12px">Item</th><th style="padding:6px 12px">Size</th>
           <th style="padding:6px 12px;text-align:right">Qty</th><th style="padding:6px 12px;text-align:right">Price</th>
         </tr></thead><tbody>${rows}</tbody></table>` +
-      `<p style="margin-top:14px">Export all orders to CSV from the Team Shop → Orders page.</p>`;
+      `<p style="margin-top:10px">${payLine}</p>` +
+      `<p style="margin-top:10px">Export all orders to CSV from the Team Shop → Orders page.</p>`;
     const to = await orderRecipients();
     await sendEmail({
       to: to.length ? to : adminEmails(),
       subject: `Team Shop order — ${emp.fullName}`,
-      html: emailLayout("New Team Shop order", body, "/shop/manage"),
+      html: emailLayout("New Team Shop order", body, "/shop/orders"),
     });
   } catch {
     // best-effort — the order is already recorded
@@ -276,5 +341,9 @@ export async function placeOrder(formData: FormData) {
   await logAudit({ actorEmail: email, action: "create", entity: "shop_order", entityId: order.id, detail: `${lines.length} item(s)` });
   revalidatePath("/shop");
   revalidatePath("/shop/manage");
-  back("/shop", "Order placed — thank you! The team has been notified.");
+  revalidatePath("/shop/orders");
+
+  // Send the employee to Square's hosted checkout, or back to the shop.
+  if (payUrl) redirect(payUrl);
+  back("/shop", useSquare ? "Order placed — but online payment was unavailable, so it's recorded as owed." : "Order placed — thank you! The team has been notified.");
 }

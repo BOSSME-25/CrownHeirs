@@ -518,8 +518,13 @@ export const shopProducts = pgTable("shop_products", {
   description: text("description"),
   // 'scrubs' | 'apparel' | 'merch' | 'other'
   category: text("category").notNull().default("merch"),
+  // 'tracked' (limited by size stock) | 'made_to_order' (no stock kept)
+  stockMode: text("stock_mode").notNull().default("tracked"),
   price: numeric("price"),
+  // Either an external link (imageUrl) or an uploaded blob (imagePathname,
+  // served through /api/shop/image).
   imageUrl: text("image_url"),
+  imagePathname: text("image_pathname"),
   active: boolean("active").notNull().default(true),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
@@ -546,6 +551,14 @@ export const shopOrders = pgTable("shop_orders", {
   employeeEmail: text("employee_email"),
   note: text("note"),
   status: text("status").notNull().default("submitted"),
+  // 'square' | 'payroll'
+  paymentMethod: text("payment_method").notNull().default("payroll"),
+  // 'unpaid' | 'pending' | 'paid'
+  paymentStatus: text("payment_status").notNull().default("unpaid"),
+  totalAmount: numeric("total_amount"),
+  squareOrderId: text("square_order_id"),
+  squarePaymentLinkId: text("square_payment_link_id"),
+  paymentUrl: text("payment_url"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });
 export type ShopOrder = typeof shopOrders.$inferSelect;

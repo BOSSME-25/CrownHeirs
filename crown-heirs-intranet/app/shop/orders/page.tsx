@@ -2,7 +2,8 @@ import Link from "next/link";
 import { auth } from "@/auth";
 import SiteHeader from "@/components/SiteHeader";
 import { getAccess } from "@/lib/perms";
-import { formatPrice, listOrders, priceNumber, type OrderWithItems } from "@/lib/shop";
+import StatusPill from "@/components/StatusPill";
+import { formatPrice, listOrders, paymentStatusLabel, priceNumber, type OrderWithItems } from "@/lib/shop";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Team Shop Orders — Crown Heirs Team Hub" };
@@ -65,11 +66,18 @@ export default async function ShopOrdersPage() {
         ) : (
           orders.map(({ order, items }) => (
             <div key={order.id} className="card" style={{ cursor: "default", marginBottom: 10, padding: "14px 16px" }}>
-              <div style={{ display: "flex", gap: 10, alignItems: "baseline", flexWrap: "wrap" }}>
+              <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
                 <strong style={{ flex: 1, minWidth: 160 }}>{order.employeeName ?? "—"}</strong>
+                <StatusPill
+                  label={paymentStatusLabel(order.paymentMethod, order.paymentStatus)}
+                  tone={order.paymentStatus === "paid" ? "ok" : order.paymentStatus === "pending" ? "info" : "warn"}
+                />
                 <span className="muted" style={{ fontSize: "0.82rem" }}>{when(order.createdAt)}</span>
               </div>
-              <div className="muted" style={{ fontSize: "0.82rem", marginBottom: 6 }}>{order.employeeEmail}</div>
+              <div className="muted" style={{ fontSize: "0.82rem", marginBottom: 6 }}>
+                {order.employeeEmail}
+                {order.paymentMethod === "square" ? " · Square" : " · payroll / in person"}
+              </div>
               <ul style={{ margin: "6px 0", paddingLeft: 18 }}>
                 {items.map((it) => (
                   <li key={it.id}>

@@ -53,6 +53,10 @@ export async function getVariant(id: string): Promise<ShopVariant | undefined> {
   return (await db.select().from(shopVariants).where(eq(shopVariants.id, id)))[0];
 }
 
+export async function getOrder(id: string): Promise<ShopOrder | undefined> {
+  return (await db.select().from(shopOrders).where(eq(shopOrders.id, id)))[0];
+}
+
 export async function listOrders(limit = 500): Promise<OrderWithItems[]> {
   const org = await getDefaultOrg();
   const orders = await (org
