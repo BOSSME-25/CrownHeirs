@@ -21,6 +21,7 @@ import {
   removeCredential,
   reviewRenewal,
   setCredentialDates,
+  setCredentialStatus,
   submitRenewal,
 } from "@/app/credentials/actions";
 
@@ -195,6 +196,17 @@ export default async function CredentialsPage() {
                               <> · <a href={credentialRenewUrl(r.c.type)} target="_blank" rel="noopener noreferrer">Renew site →</a></>
                             ) : null}
                           </div>
+
+                          {/* Status: tracking / does not apply / declined */}
+                          <form action={setCredentialStatus} style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap", marginTop: 12 }}>
+                            <input type="hidden" name="credentialId" value={r.c.id} />
+                            <span className="muted" style={{ fontSize: "0.82rem" }}>Mark:</span>
+                            <button className="btn-link" type="submit" name="status" value="active">Tracking</button>
+                            <span className="muted">·</span>
+                            <button className="btn-link" type="submit" name="status" value="not_applicable">Does not apply</button>
+                            <span className="muted">·</span>
+                            <button className="btn-link" type="submit" name="status" value="declined">Declined</button>
+                          </form>
 
                           {/* Record / correct the dates directly (no review needed) */}
                           <form action={setCredentialDates} style={{ marginTop: 12 }}>

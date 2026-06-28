@@ -2,27 +2,44 @@
 
 export type CredentialType = { id: string; label: string; universal: boolean; renewUrl?: string };
 
-// Universal credentials apply to every active employee. Cosmetology is assigned
-// per person (not everyone is licensed). `renewUrl` is the approved site to
-// renew/obtain the certification.
+// Universal credentials apply to every active employee. State licenses are
+// assigned per person (not everyone holds each one). `renewUrl` is the approved
+// site to renew/obtain the certification.
 export const CREDENTIAL_TYPES: CredentialType[] = [
-  { id: "cosmetology", label: "Cosmetology License", universal: false },
+  // Required of everyone on the team.
   { id: "barbicide", label: "Barbicide Certification", universal: true, renewUrl: "https://certifications.kingresearch.com/products/courses/new-course" },
   { id: "first_aid", label: "First Aid", universal: true, renewUrl: "https://nationalcprfoundation.com/" },
   { id: "cpr", label: "CPR", universal: true, renewUrl: "https://nationalcprfoundation.com/" },
   { id: "lifesaving", label: "BLS / AED", universal: true },
+  // Arizona Board of Barbering & Cosmetology — professional licenses, per person.
+  { id: "cosmetologist", label: "Cosmetologist (AZ)", universal: false },
+  { id: "hairstylist", label: "Hairstylist (AZ)", universal: false },
+  { id: "aesthetician", label: "Aesthetician (AZ)", universal: false },
+  { id: "nail_technician", label: "Nail Technician (AZ)", universal: false },
+  { id: "barber", label: "Barber (AZ)", universal: false },
+  { id: "cosmetology_instructor", label: "Cosmetology Instructor (AZ)", universal: false },
+  { id: "aesthetics_instructor", label: "Aesthetics Instructor (AZ)", universal: false },
+  { id: "nail_instructor", label: "Nail Technology Instructor (AZ)", universal: false },
+  { id: "hairstyling_instructor", label: "Hairstyling Instructor (AZ)", universal: false },
+  { id: "barbering_instructor", label: "Barbering Instructor (AZ)", universal: false },
 ];
 export const CREDENTIAL_TYPE_IDS = CREDENTIAL_TYPES.map((c) => c.id);
 export const UNIVERSAL_TYPES = CREDENTIAL_TYPES.filter((c) => c.universal).map((c) => c.id);
 
+// Labels for older rows whose type id is no longer in the active list.
+const LEGACY_LABELS: Record<string, string> = { cosmetology: "Cosmetology License" };
+
 export function credentialLabel(id: string): string {
-  return CREDENTIAL_TYPES.find((c) => c.id === id)?.label ?? id;
+  return CREDENTIAL_TYPES.find((c) => c.id === id)?.label ?? LEGACY_LABELS[id] ?? id;
 }
 export function credentialRenewUrl(id: string): string | undefined {
   return CREDENTIAL_TYPES.find((c) => c.id === id)?.renewUrl;
 }
 export function isCredentialType(id: string): boolean {
   return CREDENTIAL_TYPE_IDS.includes(id);
+}
+export function isUniversalType(id: string): boolean {
+  return UNIVERSAL_TYPES.includes(id);
 }
 
 // How far out we start flagging / reminding.
@@ -54,9 +71,9 @@ export function prettyDate(dateYMD: string | null): string {
 // A credential's display state. `urgent` means it should appear on dashboards
 // (anything that isn't "current and well in date").
 export type CredState = {
-  key: "review" | "confirm" | "missing" | "expired" | "due" | "current";
+  key: "review" | "confirm" | "missing" | "expired" | "due" | "current" | "na" | "declined";
   label: string;
-  tone: "warn" | "bad" | "ok" | "info";
+  tone: "warn" | "bad" | "ok" | "info" | "muted";
   urgent: boolean;
   daysLeft: number | null;
 };
@@ -65,6 +82,13 @@ export function credentialState(
   c: { status: string; expiresAt: string | null },
   todayStr = todayYMD(),
 ): CredState {
+  // Manager/employee-set states that stop tracking & reminders.
+  if (c.status === "not_applicable") {
+    return { key: "na", label: "Does not apply", tone: "muted", urgent: false, daysLeft: null };
+  }
+  if (c.status === "declined") {
+    return { key: "declined", label: "Declined", tone: "muted", urgent: false, daysLeft: null };
+  }
   if (c.status === "pending_review") {
     return { key: "review", label: "Awaiting manager review", tone: "info", urgent: true, daysLeft: daysUntil(c.expiresAt, todayStr) };
   }

@@ -3,10 +3,10 @@ import SiteHeader from "@/components/SiteHeader";
 import PhotoCropField from "@/components/PhotoCropField";
 import CredentialBadge from "@/components/CredentialBadge";
 import { ensureCalendarToken, updateMyProfile } from "@/app/me/actions";
-import { submitRenewal } from "@/app/credentials/actions";
+import { declineCredential, submitRenewal } from "@/app/credentials/actions";
 import { getEmployeeByEmail } from "@/lib/employees";
 import { listCredentialsFor } from "@/lib/credentials";
-import { credentialLabel, credentialRenewUrl, credentialState, prettyDate } from "@/lib/credentials-constants";
+import { credentialLabel, credentialRenewUrl, credentialState, isUniversalType, prettyDate } from "@/lib/credentials-constants";
 import { APP_URL } from "@/lib/email";
 import { aiConfigured } from "@/lib/ai";
 import BioAssist from "@/components/BioAssist";
@@ -145,37 +145,61 @@ export default async function MyProfilePage() {
                       </a>
                     )}
                   </div>
-                  {pending ? (
+                  {c.status === "declined" || c.status === "not_applicable" ? (
+                    <p className="muted" style={{ fontSize: "0.85rem", marginTop: 10, marginBottom: 0 }}>
+                      {c.status === "declined" ? "You’ve marked this as not pursuing. " : "Marked as not applicable by management. "}
+                      {c.status === "declined" && (
+                        <form action={declineCredential} style={{ display: "inline" }}>
+                          <input type="hidden" name="credentialId" value={c.id} />
+                          <input type="hidden" name="decline" value="0" />
+                          <input type="hidden" name="returnTo" value="/me" />
+                          <button className="btn-link" type="submit">Add it back</button>
+                        </form>
+                      )}
+                    </p>
+                  ) : pending ? (
                     <p className="muted" style={{ fontSize: "0.85rem", marginTop: 10, marginBottom: 0 }}>
                       {c.status === "pending_review"
                         ? "Your uploaded certificate is waiting for a manager to review."
                         : "Reviewed — waiting for a second manager to confirm. Almost there!"}
                     </p>
                   ) : (
-                    <details style={{ marginTop: 10 }}>
-                      <summary className="btn btn-ghost" style={{ display: "inline-block" }}>
-                        {s.key === "current" ? "Upload an updated certificate…" : "Upload my renewed certificate…"}
-                      </summary>
-                      <form action={submitRenewal} style={{ marginTop: 12 }}>
-                        <input type="hidden" name="credentialId" value={c.id} />
-                        <input type="hidden" name="returnTo" value="/me" />
-                        <div className="form-grid">
-                          <div className="field">
-                            <label>New expiration date</label>
-                            <input type="date" name="expiresAt" required />
+                    <>
+                      <details style={{ marginTop: 10 }}>
+                        <summary className="btn btn-ghost" style={{ display: "inline-block" }}>
+                          {s.key === "current" ? "Upload an updated certificate…" : "Upload my renewed certificate…"}
+                        </summary>
+                        <form action={submitRenewal} style={{ marginTop: 12 }}>
+                          <input type="hidden" name="credentialId" value={c.id} />
+                          <input type="hidden" name="returnTo" value="/me" />
+                          <div className="form-grid">
+                            <div className="field">
+                              <label>New expiration date</label>
+                              <input type="date" name="expiresAt" required />
+                            </div>
+                            <div className="field">
+                              <label>Issued (optional)</label>
+                              <input type="date" name="issuedAt" />
+                            </div>
                           </div>
-                          <div className="field">
-                            <label>Issued (optional)</label>
-                            <input type="date" name="issuedAt" />
+                          <div className="field" style={{ marginTop: 8 }}>
+                            <label>Certificate (PDF or photo)</label>
+                            <input type="file" name="file" accept="application/pdf,image/*" required />
                           </div>
-                        </div>
-                        <div className="field" style={{ marginTop: 8 }}>
-                          <label>Certificate (PDF or photo)</label>
-                          <input type="file" name="file" accept="application/pdf,image/*" required />
-                        </div>
-                        <button className="btn" type="submit" style={{ marginTop: 10 }}>Submit for review</button>
-                      </form>
-                    </details>
+                          <button className="btn" type="submit" style={{ marginTop: 10 }}>Submit for review</button>
+                        </form>
+                      </details>
+                      {!isUniversalType(c.type) && (
+                        <form action={declineCredential} style={{ marginTop: 8 }}>
+                          <input type="hidden" name="credentialId" value={c.id} />
+                          <input type="hidden" name="decline" value="1" />
+                          <input type="hidden" name="returnTo" value="/me" />
+                          <button className="btn-link" type="submit" style={{ color: "var(--ink-dim,#8a837a)", fontSize: "0.82rem" }}>
+                            Decline (not pursuing this)
+                          </button>
+                        </form>
+                      )}
+                    </>
                   )}
                 </div>
               );
