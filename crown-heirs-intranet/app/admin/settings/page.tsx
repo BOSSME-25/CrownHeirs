@@ -73,14 +73,17 @@ export default async function SettingsPage() {
                   <img src={settings.logoUrl} alt="" style={{ height: 40, display: "block", marginBottom: 6 }} />
                 )}
                 <input id="logo" name="logo" type="file" accept="image/*" />
+                <span className="muted" style={{ fontSize: "0.78rem" }}>Max 4 MB.</span>
               </div>
               <div className="field">
                 <label htmlFor="favicon">Favicon {settings.faviconUrl && "(set — replace)"}</label>
                 <input id="favicon" name="favicon" type="file" accept="image/*,.ico" />
+                <span className="muted" style={{ fontSize: "0.78rem" }}>Max 4 MB. A small square image works best in the browser tab.</span>
               </div>
               <div className="field">
                 <label htmlFor="loginImage">Login background {settings.loginImageUrl && "(set — replace)"}</label>
                 <input id="loginImage" name="loginImage" type="file" accept="image/*" />
+                <span className="muted" style={{ fontSize: "0.78rem" }}>Max 4 MB.</span>
               </div>
             </div>
 
