@@ -34,7 +34,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link href={preset.href} rel="stylesheet" />
-        {faviconUrl && <link rel="icon" href={faviconUrl} />}
+        {/* Uploaded favicon wins; the CH monogram is the fallback. A single
+            icon link avoids the static default overriding the uploaded one. */}
+        <link rel="icon" href={faviconUrl ?? "/favicon.svg"} />
         <style dangerouslySetInnerHTML={{ __html: brandCss }} />
       </head>
       <body>
