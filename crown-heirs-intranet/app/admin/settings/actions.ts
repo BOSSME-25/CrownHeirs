@@ -50,8 +50,8 @@ export async function saveSettings(formData: FormData) {
     if (f.size > max) throw new Error(`${key} is too large.`);
     return putPrivate("branding", f);
   }
-  const logoUrl = await upload("logo", 2 * 1024 * 1024);
-  const faviconUrl = await upload("favicon", 512 * 1024);
+  const logoUrl = await upload("logo", 4 * 1024 * 1024);
+  const faviconUrl = await upload("favicon", 4 * 1024 * 1024);
   const loginImageUrl = await upload("loginImage", 4 * 1024 * 1024);
 
   const font = get("font");

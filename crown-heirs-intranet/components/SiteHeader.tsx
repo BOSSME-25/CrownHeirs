@@ -44,13 +44,12 @@ export default async function SiteHeader() {
 
   return (
     <header className="site-header">
-      <Link href="/" className="site-logo">
-        {logoUrl ? (
+      <Link href="/" className="site-logo" style={{ display: "inline-flex", alignItems: "center", gap: 10 }}>
+        {logoUrl && (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={logoUrl} alt={brandName} style={{ height: 30, verticalAlign: "middle" }} />
-        ) : (
-          brandName
+          <img src={logoUrl} alt="" style={{ height: 30, verticalAlign: "middle" }} />
         )}
+        <span>{brandName}</span>
       </Link>
       <GoogleTranslate />
       <MobileNav isAdmin={isAdmin} canManage={canManage} email={session?.user?.email} unread={unread} />
