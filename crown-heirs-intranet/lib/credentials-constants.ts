@@ -11,17 +11,13 @@ export const CREDENTIAL_TYPES: CredentialType[] = [
   { id: "first_aid", label: "First Aid", universal: true, renewUrl: "https://nationalcprfoundation.com/" },
   { id: "cpr", label: "CPR", universal: true, renewUrl: "https://nationalcprfoundation.com/" },
   { id: "lifesaving", label: "BLS / AED", universal: true },
-  // Arizona Board of Barbering & Cosmetology — professional licenses, per person.
-  { id: "cosmetologist", label: "Cosmetologist (AZ)", universal: false },
-  { id: "hairstylist", label: "Hairstylist (AZ)", universal: false },
-  { id: "aesthetician", label: "Aesthetician (AZ)", universal: false },
-  { id: "nail_technician", label: "Nail Technician (AZ)", universal: false },
-  { id: "barber", label: "Barber (AZ)", universal: false },
-  { id: "cosmetology_instructor", label: "Cosmetology Instructor (AZ)", universal: false },
-  { id: "aesthetics_instructor", label: "Aesthetics Instructor (AZ)", universal: false },
-  { id: "nail_instructor", label: "Nail Technology Instructor (AZ)", universal: false },
-  { id: "hairstyling_instructor", label: "Hairstyling Instructor (AZ)", universal: false },
-  { id: "barbering_instructor", label: "Barbering Instructor (AZ)", universal: false },
+  // Arizona Board of Barbering & Cosmetology licenses — assigned per person.
+  { id: "cosmetology", label: "Cosmetology License", universal: false },
+  { id: "hairstyling", label: "Hairstyling License", universal: false },
+  { id: "aesthetician", label: "Aesthetician License", universal: false },
+  { id: "nail_technology", label: "Nail Technology License", universal: false },
+  { id: "barber", label: "Barber License", universal: false },
+  { id: "instructor", label: "Instructor License", universal: false },
 ];
 export const CREDENTIAL_TYPE_IDS = CREDENTIAL_TYPES.map((c) => c.id);
 export const UNIVERSAL_TYPES = CREDENTIAL_TYPES.filter((c) => c.universal).map((c) => c.id);
