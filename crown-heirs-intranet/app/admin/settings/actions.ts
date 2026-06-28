@@ -61,6 +61,16 @@ export async function saveSettings(formData: FormData) {
   const faviconUrl = await upload("favicon", "Favicon");
   const loginImageUrl = await upload("loginImage", "Login background");
 
+  // Per image: a new upload replaces it; otherwise a "remove" checkbox clears
+  // it back to the default (empty string = falls back to wordmark/monogram).
+  const imagePatch: Record<string, string> = {};
+  if (logoUrl) imagePatch.logoUrl = logoUrl;
+  else if (get("removeLogo")) imagePatch.logoUrl = "";
+  if (faviconUrl) imagePatch.faviconUrl = faviconUrl;
+  else if (get("removeFavicon")) imagePatch.faviconUrl = "";
+  if (loginImageUrl) imagePatch.loginImageUrl = loginImageUrl;
+  else if (get("removeLoginImage")) imagePatch.loginImageUrl = "";
+
   const font = get("font");
   await saveOrgSettings(org.id, {
     businessName: get("businessName"),
@@ -68,9 +78,7 @@ export async function saveSettings(formData: FormData) {
     accent2: get("accent2"),
     font: font && FONT_PRESETS[font] ? font : undefined,
     notifyFrom: get("notifyFrom"),
-    ...(logoUrl ? { logoUrl } : {}),
-    ...(faviconUrl ? { faviconUrl } : {}),
-    ...(loginImageUrl ? { loginImageUrl } : {}),
+    ...imagePatch,
     pos,
   });
   revalidatePath("/admin/settings");
