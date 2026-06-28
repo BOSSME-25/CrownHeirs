@@ -13,7 +13,7 @@ import { getDefaultOrg } from "@/lib/org";
 import { getAccess } from "@/lib/perms";
 import { logAudit } from "@/lib/audit";
 import { adminEmails, emailLayout, sendEmail } from "@/lib/email";
-import { credentialLabel, isCredentialType } from "@/lib/credentials-constants";
+import { credentialLabel, isCredentialType, isUniversalType } from "@/lib/credentials-constants";
 
 const CERT_MAX = 4 * 1024 * 1024;
 
@@ -82,6 +82,47 @@ export async function assignCredential(formData: FormData) {
   await logAudit({ actorEmail: actor, action: "create", entity: "credential", detail: `${credentialLabel(type)}` });
   revalidatePath("/credentials");
   back("/credentials", `Added ${credentialLabel(type)}`);
+}
+
+// Manager sets a credential to active (tracking), "does not apply", or
+// "declined". These last two stop reminders and clear dashboard flags.
+export async function setCredentialStatus(formData: FormData) {
+  const actor = await requireManage();
+  const id = str(formData, "credentialId");
+  const status = str(formData, "status");
+  if (!id || !status || !["active", "not_applicable", "declined"].includes(status)) {
+    throw new Error("Pick a valid status.");
+  }
+  await db
+    .update(credentials)
+    .set({ status, lastRemindedAt: null, updatedAt: new Date() })
+    .where(eq(credentials.id, id));
+  await logAudit({ actorEmail: actor, action: "update", entity: "credential", entityId: id, detail: status });
+  revalidatePath("/credentials");
+  revalidatePath("/me");
+  revalidatePath("/");
+  back("/credentials", "Status updated");
+}
+
+// Employee declines an optional (non-required) credential, or undoes it.
+export async function declineCredential(formData: FormData) {
+  const { emp } = await me();
+  const id = str(formData, "credentialId");
+  const decline = str(formData, "decline") === "1";
+  const returnTo = str(formData, "returnTo") ?? "/me";
+  if (!id) throw new Error("Missing credential.");
+  const cred = await loadCred(id);
+  if (cred.employeeId !== emp.id) throw new Error("You can only update your own credentials.");
+  if (isUniversalType(cred.type)) throw new Error("This one is required and can’t be declined.");
+  await db
+    .update(credentials)
+    .set({ status: decline ? "declined" : "active", lastRemindedAt: null, updatedAt: new Date() })
+    .where(eq(credentials.id, id));
+  await logAudit({ actorEmail: emp.email, action: "update", entity: "credential", entityId: id, detail: decline ? "declined" : "un-declined" });
+  revalidatePath("/me");
+  revalidatePath("/credentials");
+  revalidatePath("/");
+  back(returnTo, decline ? "Marked as declined" : "Back on your list");
 }
 
 export async function removeCredential(formData: FormData) {
