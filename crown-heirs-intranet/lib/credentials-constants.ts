@@ -10,7 +10,7 @@ export const CREDENTIAL_TYPES: CredentialType[] = [
   { id: "barbicide", label: "Barbicide Certification", universal: true, renewUrl: "https://certifications.kingresearch.com/products/courses/new-course" },
   { id: "first_aid", label: "First Aid", universal: true, renewUrl: "https://nationalcprfoundation.com/" },
   { id: "cpr", label: "CPR", universal: true, renewUrl: "https://nationalcprfoundation.com/" },
-  { id: "lifesaving", label: "Lifesaving Certification", universal: true },
+  { id: "lifesaving", label: "BLS / AED", universal: true },
 ];
 export const CREDENTIAL_TYPE_IDS = CREDENTIAL_TYPES.map((c) => c.id);
 export const UNIVERSAL_TYPES = CREDENTIAL_TYPES.filter((c) => c.universal).map((c) => c.id);

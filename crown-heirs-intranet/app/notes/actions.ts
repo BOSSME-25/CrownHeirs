@@ -3,11 +3,11 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { eq } from "drizzle-orm";
-import { put } from "@vercel/blob";
 import { auth } from "@/auth";
 import { isAdmin } from "@/lib/access";
 import { db } from "@/lib/db";
 import { meetingNotes } from "@/lib/db/schema";
+import { putPrivate } from "@/lib/blobUpload";
 
 const MAX_BYTES = 25 * 1024 * 1024;
 
@@ -15,8 +15,7 @@ async function uploadFile(formData: FormData): Promise<string | undefined> {
   const file = formData.get("file");
   if (!(file instanceof File) || file.size === 0) return undefined;
   if (file.size > MAX_BYTES) throw new Error("File exceeds 25 MB.");
-  const blob = await put(`notes/${file.name}`, file, { access: "public", addRandomSuffix: true });
-  return blob.url;
+  return putPrivate("notes", file);
 }
 
 export async function addNote(formData: FormData) {

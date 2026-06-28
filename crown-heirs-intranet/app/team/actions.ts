@@ -4,7 +4,6 @@ import { randomUUID } from "crypto";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { eq } from "drizzle-orm";
-import { put } from "@vercel/blob";
 import { auth } from "@/auth";
 import { isAdmin } from "@/lib/access";
 import { getAccess } from "@/lib/perms";
@@ -12,6 +11,7 @@ import { db } from "@/lib/db";
 import { employees } from "@/lib/db/schema";
 import { listTeamMembers } from "@/lib/square";
 import { getDefaultOrg } from "@/lib/org";
+import { putPrivate } from "@/lib/blobUpload";
 import { logAudit, diffDetail } from "@/lib/audit";
 
 const IMAGE_EXT = [".png", ".jpg", ".jpeg", ".webp", ".gif"];
@@ -26,11 +26,7 @@ async function uploadPhoto(formData: FormData): Promise<string | undefined> {
   if (!IMAGE_EXT.some((ext) => lower.endsWith(ext))) {
     throw new Error("Photo must be an image (PNG, JPG, WEBP, or GIF).");
   }
-  const blob = await put(`avatars/${file.name}`, file, {
-    access: "public",
-    addRandomSuffix: true,
-  });
-  return blob.url;
+  return putPrivate("avatars", file);
 }
 
 // CEO/COO only — system-level actions (imports, integrations).

@@ -2,12 +2,12 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { put } from "@vercel/blob";
 import { auth } from "@/auth";
 import { getAccess } from "@/lib/perms";
 import { getDefaultOrg } from "@/lib/org";
 import { FONT_PRESETS, saveOrgSettings, type PosProvider } from "@/lib/orgConfig";
 import { canEncrypt, encryptSecret } from "@/lib/crypto";
+import { putPrivate } from "@/lib/blobUpload";
 
 async function requireSystem() {
   const session = await auth();
@@ -48,8 +48,7 @@ export async function saveSettings(formData: FormData) {
     const f = formData.get(key);
     if (!(f instanceof File) || f.size === 0) return undefined;
     if (f.size > max) throw new Error(`${key} is too large.`);
-    const blob = await put(`branding/${f.name}`, f, { access: "public", addRandomSuffix: true });
-    return blob.url;
+    return putPrivate("branding", f);
   }
   const logoUrl = await upload("logo", 2 * 1024 * 1024);
   const faviconUrl = await upload("favicon", 512 * 1024);
