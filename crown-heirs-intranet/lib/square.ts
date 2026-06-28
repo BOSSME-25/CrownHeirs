@@ -45,6 +45,44 @@ async function fetchPayments(
 
 export type SquareTeamMember = { id: string; name: string; email: string | null; phone: string | null };
 
+// ── Bookable hours (salon's Square business hours) ──
+const DOW_INDEX: Record<string, number> = { SUN: 0, MON: 1, TUE: 2, WED: 3, THU: 4, FRI: 5, SAT: 6 };
+
+export type BookableHours = {
+  configured: boolean;
+  locationName?: string;
+  // One entry per open weekday (0 = Sunday) with "HH:MM" start/end.
+  periods: { weekday: number; start: string; end: string }[];
+};
+
+// Reads the location's business hours from Square — the salon's bookable hours.
+// Square doesn't expose each stylist's individual working hours via API, so this
+// is the reliable "bookable hours" source to seed the schedule from.
+export async function getBookableHours(): Promise<BookableHours> {
+  const creds = await getSquareCreds();
+  if (!creds || !creds.locationId) return { configured: false, periods: [] };
+  try {
+    const res = await fetch(baseFor(creds.env) + `/v2/locations/${creds.locationId}`, {
+      headers: { Authorization: `Bearer ${creds.token}`, "Square-Version": "2024-10-17" },
+      cache: "no-store",
+    });
+    if (!res.ok) return { configured: false, periods: [] };
+    const data = (await res.json()) as {
+      location?: { name?: string; business_hours?: { periods?: { day_of_week?: string; start_local_time?: string; end_local_time?: string }[] } };
+    };
+    const periods = (data.location?.business_hours?.periods ?? [])
+      .map((p) => ({
+        weekday: DOW_INDEX[p.day_of_week ?? ""] ?? -1,
+        start: (p.start_local_time ?? "").slice(0, 5),
+        end: (p.end_local_time ?? "").slice(0, 5),
+      }))
+      .filter((p) => p.weekday >= 0 && p.start && p.end);
+    return { configured: true, locationName: data.location?.name, periods };
+  } catch {
+    return { configured: false, periods: [] };
+  }
+}
+
 // ── Appointments (Square Bookings) ──
 type SquareBooking = {
   status?: string;
