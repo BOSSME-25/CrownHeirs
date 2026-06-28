@@ -41,10 +41,12 @@ export default function MobileNav({ isAdmin, canManage, email, unread = 0 }: { i
           <div className="m-group">Language</div>
           <LangButtons stacked />
 
+          {(canManage || isAdmin) && <div className="m-group">Admin</div>}
+          {canManage && <Link href="/credentials">Licenses &amp; Certs</Link>}
+          {isAdmin && <Link href="/admin">Admin Console</Link>}
+
           <div className="m-group">You</div>
           <Link href="/me">My Profile</Link>
-          {canManage && <Link href="/credentials">Licenses &amp; Certs</Link>}
-          {isAdmin && <Link href="/admin">Admin</Link>}
           {email && <div className="m-email">{email}</div>}
           <form action={signOutAction}>
             <button type="submit" className="btn-link" style={{ marginTop: 6 }}>Sign out</button>

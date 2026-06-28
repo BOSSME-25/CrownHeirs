@@ -1,14 +1,15 @@
 // Credential / license types and pure helpers (no server-only deps).
 
-export type CredentialType = { id: string; label: string; universal: boolean };
+export type CredentialType = { id: string; label: string; universal: boolean; renewUrl?: string };
 
 // Universal credentials apply to every active employee. Cosmetology is assigned
-// per person (not everyone is licensed).
+// per person (not everyone is licensed). `renewUrl` is the approved site to
+// renew/obtain the certification.
 export const CREDENTIAL_TYPES: CredentialType[] = [
   { id: "cosmetology", label: "Cosmetology License", universal: false },
-  { id: "barbicide", label: "Barbicide Certification", universal: true },
-  { id: "first_aid", label: "First Aid", universal: true },
-  { id: "cpr", label: "CPR", universal: true },
+  { id: "barbicide", label: "Barbicide Certification", universal: true, renewUrl: "https://certifications.kingresearch.com/products/courses/new-course" },
+  { id: "first_aid", label: "First Aid", universal: true, renewUrl: "https://nationalcprfoundation.com/" },
+  { id: "cpr", label: "CPR", universal: true, renewUrl: "https://nationalcprfoundation.com/" },
   { id: "lifesaving", label: "Lifesaving Certification", universal: true },
 ];
 export const CREDENTIAL_TYPE_IDS = CREDENTIAL_TYPES.map((c) => c.id);
@@ -16,6 +17,9 @@ export const UNIVERSAL_TYPES = CREDENTIAL_TYPES.filter((c) => c.universal).map((
 
 export function credentialLabel(id: string): string {
   return CREDENTIAL_TYPES.find((c) => c.id === id)?.label ?? id;
+}
+export function credentialRenewUrl(id: string): string | undefined {
+  return CREDENTIAL_TYPES.find((c) => c.id === id)?.renewUrl;
 }
 export function isCredentialType(id: string): boolean {
   return CREDENTIAL_TYPE_IDS.includes(id);
@@ -77,5 +81,5 @@ export function credentialState(
   if (d !== null && d <= WARN_DAYS) {
     return { key: "due", label: `Due in ${d}d`, tone: "warn", urgent: true, daysLeft: d };
   }
-  return { key: "current", label: "Current", tone: "ok", urgent: false, daysLeft: d };
+  return { key: "current", label: "Active", tone: "ok", urgent: false, daysLeft: d };
 }

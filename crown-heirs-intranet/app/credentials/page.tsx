@@ -11,6 +11,7 @@ import {
 import {
   CREDENTIAL_TYPES,
   credentialLabel,
+  credentialRenewUrl,
   credentialState,
   prettyDate,
 } from "@/lib/credentials-constants";
@@ -190,6 +191,9 @@ export default async function CredentialsPage() {
                               "No certificate on file."
                             )}
                             {r.c.confirmedBy ? <> · confirmed by {r.c.confirmedBy}</> : null}
+                            {credentialRenewUrl(r.c.type) ? (
+                              <> · <a href={credentialRenewUrl(r.c.type)} target="_blank" rel="noopener noreferrer">Renew site →</a></>
+                            ) : null}
                           </div>
 
                           {/* Record / correct the dates directly (no review needed) */}

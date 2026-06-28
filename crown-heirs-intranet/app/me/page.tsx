@@ -6,7 +6,7 @@ import { ensureCalendarToken, updateMyProfile } from "@/app/me/actions";
 import { submitRenewal } from "@/app/credentials/actions";
 import { getEmployeeByEmail } from "@/lib/employees";
 import { listCredentialsFor } from "@/lib/credentials";
-import { credentialLabel, credentialState, prettyDate } from "@/lib/credentials-constants";
+import { credentialLabel, credentialRenewUrl, credentialState, prettyDate } from "@/lib/credentials-constants";
 import { APP_URL } from "@/lib/email";
 import { aiConfigured } from "@/lib/ai";
 import BioAssist from "@/components/BioAssist";
@@ -133,13 +133,18 @@ export default async function MyProfilePage() {
                       {c.expiresAt ? `Expires ${prettyDate(c.expiresAt)}` : "No date on file"}
                     </span>
                   </div>
-                  {c.certificatePathname && (
-                    <div style={{ marginTop: 6 }}>
+                  <div style={{ display: "flex", gap: 14, marginTop: 6, flexWrap: "wrap" }}>
+                    {c.certificatePathname && (
                       <a href={`/api/credentials/file?id=${c.id}&which=current`} target="_blank" rel="noopener noreferrer" style={{ fontSize: "0.85rem" }}>
                         View certificate on file
                       </a>
-                    </div>
-                  )}
+                    )}
+                    {credentialRenewUrl(c.type) && (
+                      <a href={credentialRenewUrl(c.type)} target="_blank" rel="noopener noreferrer" style={{ fontSize: "0.85rem", fontWeight: 600 }}>
+                        Renew / get certified →
+                      </a>
+                    )}
+                  </div>
                   {pending ? (
                     <p className="muted" style={{ fontSize: "0.85rem", marginTop: 10, marginBottom: 0 }}>
                       {c.status === "pending_review"
