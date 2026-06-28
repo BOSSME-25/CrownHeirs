@@ -36,6 +36,7 @@ export default function MobileNav({ isAdmin, canManage, email, unread = 0 }: { i
           <Link href="/handbook">Handbook</Link>
           <Link href="/policies">Policies</Link>
           <Link href="/documents">Documents</Link>
+          <Link href="/shop">Team Shop</Link>
 
           <div className="m-group">Language</div>
           <LangButtons stacked />

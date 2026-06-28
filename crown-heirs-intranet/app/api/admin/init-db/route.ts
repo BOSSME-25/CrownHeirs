@@ -513,6 +513,59 @@ export async function POST() {
       ON CONFLICT (employee_id, type) DO NOTHING
     `;
 
+    // ── Team Shop (scrubs & merch) ──
+    await sql`
+      CREATE TABLE IF NOT EXISTS shop_products (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        org_id uuid,
+        name text NOT NULL,
+        description text,
+        category text NOT NULL DEFAULT 'merch',
+        price numeric,
+        image_url text,
+        active boolean NOT NULL DEFAULT true,
+        created_at timestamptz DEFAULT now(),
+        updated_at timestamptz DEFAULT now()
+      )
+    `;
+    await sql`
+      CREATE TABLE IF NOT EXISTS shop_variants (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        org_id uuid,
+        product_id uuid NOT NULL REFERENCES shop_products(id) ON DELETE CASCADE,
+        label text NOT NULL DEFAULT 'One size',
+        stock integer NOT NULL DEFAULT 0,
+        sort_order integer NOT NULL DEFAULT 0,
+        created_at timestamptz DEFAULT now()
+      )
+    `;
+    await sql`
+      CREATE TABLE IF NOT EXISTS shop_orders (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        org_id uuid,
+        employee_id uuid,
+        employee_name text,
+        employee_email text,
+        note text,
+        status text NOT NULL DEFAULT 'submitted',
+        created_at timestamptz DEFAULT now()
+      )
+    `;
+    await sql`
+      CREATE TABLE IF NOT EXISTS shop_order_items (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        org_id uuid,
+        order_id uuid NOT NULL REFERENCES shop_orders(id) ON DELETE CASCADE,
+        product_id uuid,
+        variant_id uuid,
+        product_name text NOT NULL,
+        variant_label text,
+        unit_price numeric,
+        quantity integer NOT NULL DEFAULT 1,
+        created_at timestamptz DEFAULT now()
+      )
+    `;
+
     // Backfill existing rows to Crown Heirs org + Main location.
     const [{ id: orgId } = { id: null }] = (await sql`
       SELECT id FROM organizations WHERE slug = 'crown-heirs' LIMIT 1

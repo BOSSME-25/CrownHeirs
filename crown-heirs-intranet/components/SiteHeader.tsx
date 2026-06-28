@@ -94,6 +94,8 @@ export default async function SiteHeader() {
 
         <Link href="/inventory" className="nav-top-link">Inventory</Link>
 
+        <Link href="/shop" className="nav-top-link">Team Shop</Link>
+
         {canManage && <Link href="/credentials" className="nav-top-link">Licenses</Link>}
 
         {isAdmin && <Link href="/admin" className="nav-top-link">Admin</Link>}

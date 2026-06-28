@@ -506,6 +506,66 @@ export const inventoryTxns = pgTable("inventory_txns", {
 export type InventoryTxn = typeof inventoryTxns.$inferSelect;
 
 // ───────────────────────────────────────────────
+// Team Shop — employee-facing storefront for scrubs
+// & merch. Products have one or more size variants,
+// each with its own stock. Orders email the owners/
+// directors and export to CSV.
+// ───────────────────────────────────────────────
+export const shopProducts = pgTable("shop_products", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  orgId: uuid("org_id"),
+  name: text("name").notNull(),
+  description: text("description"),
+  // 'scrubs' | 'apparel' | 'merch' | 'other'
+  category: text("category").notNull().default("merch"),
+  price: numeric("price"),
+  imageUrl: text("image_url"),
+  active: boolean("active").notNull().default(true),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
+export type ShopProduct = typeof shopProducts.$inferSelect;
+
+export const shopVariants = pgTable("shop_variants", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  orgId: uuid("org_id"),
+  productId: uuid("product_id").notNull().references(() => shopProducts.id, { onDelete: "cascade" }),
+  // Size or option label, e.g. "Large" or "One size".
+  label: text("label").notNull().default("One size"),
+  stock: integer("stock").notNull().default(0),
+  sortOrder: integer("sort_order").notNull().default(0),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+export type ShopVariant = typeof shopVariants.$inferSelect;
+
+export const shopOrders = pgTable("shop_orders", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  orgId: uuid("org_id"),
+  employeeId: uuid("employee_id"),
+  employeeName: text("employee_name"),
+  employeeEmail: text("employee_email"),
+  note: text("note"),
+  status: text("status").notNull().default("submitted"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+export type ShopOrder = typeof shopOrders.$inferSelect;
+
+// Snapshots the product/size at order time so history survives later edits.
+export const shopOrderItems = pgTable("shop_order_items", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  orgId: uuid("org_id"),
+  orderId: uuid("order_id").notNull().references(() => shopOrders.id, { onDelete: "cascade" }),
+  productId: uuid("product_id"),
+  variantId: uuid("variant_id"),
+  productName: text("product_name").notNull(),
+  variantLabel: text("variant_label"),
+  unitPrice: numeric("unit_price"),
+  quantity: integer("quantity").notNull().default(1),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+export type ShopOrderItem = typeof shopOrderItems.$inferSelect;
+
+// ───────────────────────────────────────────────
 // Document links — externally-hosted files (Google
 // Drive, Dropbox, etc.) shown alongside uploaded
 // documents, for when Blob storage isn't used.
