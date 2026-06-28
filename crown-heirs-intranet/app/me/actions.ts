@@ -4,11 +4,11 @@ import { randomBytes } from "crypto";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { eq } from "drizzle-orm";
-import { put } from "@vercel/blob";
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
 import { employees } from "@/lib/db/schema";
 import { getEmployeeByEmail } from "@/lib/employees";
+import { putPrivate } from "@/lib/blobUpload";
 import { logAudit, diffDetail } from "@/lib/audit";
 
 // Create the private calendar-subscription token if the user doesn't have one.
@@ -35,8 +35,7 @@ async function uploadPhoto(formData: FormData): Promise<string | undefined> {
   if (!IMAGE_EXT.some((ext) => lower.endsWith(ext))) {
     throw new Error("Photo must be an image (PNG, JPG, WEBP, or GIF).");
   }
-  const blob = await put(`avatars/${file.name}`, file, { access: "public", addRandomSuffix: true });
-  return blob.url;
+  return putPrivate("avatars", file);
 }
 
 // A staffer edits their own profile (contact + "about" fields only —

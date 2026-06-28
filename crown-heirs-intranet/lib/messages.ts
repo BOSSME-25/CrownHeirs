@@ -1,7 +1,32 @@
 import "server-only";
-import { and, asc, eq, isNull, or } from "drizzle-orm";
+import { and, asc, eq, inArray, isNull, or } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { employees, messages } from "@/lib/db/schema";
+import { employees, messageReactions, messages } from "@/lib/db/schema";
+
+// The emoji a person can react with.
+export const REACTION_EMOJIS = ["👍", "❤️", "😂", "🎉", "✅"];
+
+export type ReactionSummary = { emoji: string; count: number; mine: boolean };
+
+// Reactions for a set of messages, grouped by message id, with whether the
+// current viewer reacted.
+export async function reactionsFor(messageIds: string[], meId: string): Promise<Map<string, ReactionSummary[]>> {
+  const byMsg = new Map<string, ReactionSummary[]>();
+  if (!messageIds.length) return byMsg;
+  const rows = await db.select().from(messageReactions).where(inArray(messageReactions.messageId, messageIds));
+  for (const r of rows) {
+    const list = byMsg.get(r.messageId) ?? [];
+    let item = list.find((x) => x.emoji === r.emoji);
+    if (!item) {
+      item = { emoji: r.emoji, count: 0, mine: false };
+      list.push(item);
+    }
+    item.count += 1;
+    if (r.employeeId === meId) item.mine = true;
+    byMsg.set(r.messageId, list);
+  }
+  return byMsg;
+}
 
 export type Conversation = {
   employeeId: string;

@@ -63,6 +63,9 @@ const TILES: Tile[] = [
   { href: "/inventory", label: "Inventory", desc: "Stock & merchandise — counts, reorders, history.", icon: (
     <I><path d="M3 8l9-5 9 5v8l-9 5-9-5V8z" /><path d="M3 8l9 5 9-5M12 13v8" /></I>
   ) },
+  { href: "/shop", label: "Team Shop", desc: "Order scrubs and team merch — pick your size.", icon: (
+    <I><path d="M6 2L3 6v14a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V6l-3-4z" /><path d="M3 6h18M16 10a4 4 0 0 1-8 0" /></I>
+  ) },
   { href: "/onboarding", label: "Onboarding", desc: "Your getting-started checklist for new team members.", icon: (
     <I><rect x="5" y="4" width="14" height="17" rx="2" /><path d="M9 4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1" /><path d="M9 13l2 2 4-4" /></I>
   ) },

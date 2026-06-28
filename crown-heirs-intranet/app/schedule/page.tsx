@@ -4,7 +4,9 @@ import { getAccess } from "@/lib/perms";
 import SiteHeader from "@/components/SiteHeader";
 import DeleteShiftButton from "@/components/DeleteShiftButton";
 import PublishWeekButton from "@/components/PublishWeekButton";
+import { importSquareHours } from "@/app/schedule/actions";
 import {
+  activeEmployees,
   addDays,
   dayLabel,
   formatTime,
@@ -34,8 +36,10 @@ export default async function SchedulePage({
 
   let shifts: ShiftWithEmployee[] = [];
   let setupNeeded = false;
+  let roster: { id: string; fullName: string }[] = [];
   try {
     shifts = await shiftsForWeek(ws, admin);
+    if (admin) roster = await activeEmployees();
   } catch {
     setupNeeded = true;
   }
@@ -74,6 +78,27 @@ export default async function SchedulePage({
                 <Link className="btn" href={`/schedule/new?date=${today >= ws && today <= addDays(ws, 6) ? today : ws}`}>+ Add shift</Link>
                 {hasDrafts && <PublishWeekButton weekStart={ws} />}
               </div>
+            )}
+
+            {admin && roster.length > 0 && (
+              <details className="prose" style={{ margin: "4px 0 16px" }}>
+                <summary style={{ cursor: "pointer", fontWeight: 600 }}>Import bookable hours from Square</summary>
+                <form action={importSquareHours} style={{ marginTop: 12 }}>
+                  <input type="hidden" name="weekStart" value={ws} />
+                  <p className="muted" style={{ fontSize: "0.85rem", marginTop: 0 }}>
+                    Creates <strong>draft</strong> shifts for the week of {rangeLabel(ws)} from your salon’s Square bookable hours,
+                    for the stylists you pick. Days that already have a shift are skipped. Review and publish when ready.
+                  </p>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "6px 16px", margin: "10px 0" }}>
+                    {roster.map((e) => (
+                      <label key={e.id} style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                        <input type="checkbox" name="employeeIds" value={e.id} /> {e.fullName}
+                      </label>
+                    ))}
+                  </div>
+                  <button className="btn" type="submit">Import draft shifts</button>
+                </form>
+              </details>
             )}
 
             <div className="week-grid">

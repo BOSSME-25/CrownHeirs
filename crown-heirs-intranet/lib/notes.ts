@@ -1,7 +1,26 @@
 import "server-only";
-import { and, desc, eq } from "drizzle-orm";
+import { and, asc, desc, eq, inArray } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { employees, meetingNotes } from "@/lib/db/schema";
+import { employees, meetingNotes, noteComments } from "@/lib/db/schema";
+
+export type NoteCommentRow = { id: string; noteId: string; authorName: string | null; body: string; createdAt: Date | null };
+
+// Comments grouped by note id (oldest first).
+export async function listCommentsFor(noteIds: string[]): Promise<Map<string, NoteCommentRow[]>> {
+  const byNote = new Map<string, NoteCommentRow[]>();
+  if (!noteIds.length) return byNote;
+  const rows = await db
+    .select()
+    .from(noteComments)
+    .where(inArray(noteComments.noteId, noteIds))
+    .orderBy(asc(noteComments.createdAt));
+  for (const r of rows) {
+    const list = byNote.get(r.noteId) ?? [];
+    list.push({ id: r.id, noteId: r.noteId, authorName: r.authorName, body: r.body, createdAt: r.createdAt });
+    byNote.set(r.noteId, list);
+  }
+  return byNote;
+}
 
 export async function listTeamNotes() {
   return db

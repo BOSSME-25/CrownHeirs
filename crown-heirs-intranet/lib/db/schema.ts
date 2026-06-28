@@ -303,12 +303,53 @@ export const messages = pgTable("messages", {
   recipientId: uuid("recipient_id")
     .notNull()
     .references(() => employees.id, { onDelete: "cascade" }),
-  body: text("body").notNull(),
+  body: text("body").notNull().default(""),
+  // Optional photo attachment (proxy URL via /api/blob).
+  imageUrl: text("image_url"),
   readAt: timestamp("read_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });
 
 export type Message = typeof messages.$inferSelect;
+
+// 👍/❤️ reactions on a message. One row per (message, person, emoji).
+export const messageReactions = pgTable("message_reactions", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  messageId: uuid("message_id").notNull().references(() => messages.id, { onDelete: "cascade" }),
+  employeeId: uuid("employee_id").notNull().references(() => employees.id, { onDelete: "cascade" }),
+  emoji: text("emoji").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+export type MessageReaction = typeof messageReactions.$inferSelect;
+
+// Comments on meeting/1:1 notes — lets employees respond to their 1:1s.
+export const noteComments = pgTable("note_comments", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  noteId: uuid("note_id").notNull().references(() => meetingNotes.id, { onDelete: "cascade" }),
+  authorId: uuid("author_id"),
+  authorName: text("author_name"),
+  body: text("body").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+export type NoteComment = typeof noteComments.$inferSelect;
+
+// A stylist's request for a 1:1 or meeting; management schedules or declines it.
+export const meetingRequests = pgTable("meeting_requests", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  orgId: uuid("org_id"),
+  requesterId: uuid("requester_id"),
+  requesterName: text("requester_name"),
+  requesterEmail: text("requester_email"),
+  // 'one_on_one' | 'meeting'
+  kind: text("kind").notNull().default("one_on_one"),
+  preferredDate: date("preferred_date"),
+  preferredTime: text("preferred_time"),
+  note: text("note"),
+  // 'pending' | 'scheduled' | 'declined'
+  status: text("status").notNull().default("pending"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+export type MeetingRequest = typeof meetingRequests.$inferSelect;
 
 // ───────────────────────────────────────────────
 // Policy acknowledgments — "I've read & agree", with
@@ -504,6 +545,79 @@ export const inventoryTxns = pgTable("inventory_txns", {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });
 export type InventoryTxn = typeof inventoryTxns.$inferSelect;
+
+// ───────────────────────────────────────────────
+// Team Shop — employee-facing storefront for scrubs
+// & merch. Products have one or more size variants,
+// each with its own stock. Orders email the owners/
+// directors and export to CSV.
+// ───────────────────────────────────────────────
+export const shopProducts = pgTable("shop_products", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  orgId: uuid("org_id"),
+  name: text("name").notNull(),
+  description: text("description"),
+  // 'scrubs' | 'apparel' | 'merch' | 'other'
+  category: text("category").notNull().default("merch"),
+  // 'tracked' (limited by size stock) | 'made_to_order' (no stock kept)
+  stockMode: text("stock_mode").notNull().default("tracked"),
+  price: numeric("price"),
+  // Either an external link (imageUrl) or an uploaded blob (imagePathname,
+  // served through /api/shop/image).
+  imageUrl: text("image_url"),
+  imagePathname: text("image_pathname"),
+  active: boolean("active").notNull().default(true),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
+export type ShopProduct = typeof shopProducts.$inferSelect;
+
+export const shopVariants = pgTable("shop_variants", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  orgId: uuid("org_id"),
+  productId: uuid("product_id").notNull().references(() => shopProducts.id, { onDelete: "cascade" }),
+  // Size or option label, e.g. "Large" or "One size".
+  label: text("label").notNull().default("One size"),
+  stock: integer("stock").notNull().default(0),
+  sortOrder: integer("sort_order").notNull().default(0),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+export type ShopVariant = typeof shopVariants.$inferSelect;
+
+export const shopOrders = pgTable("shop_orders", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  orgId: uuid("org_id"),
+  employeeId: uuid("employee_id"),
+  employeeName: text("employee_name"),
+  employeeEmail: text("employee_email"),
+  note: text("note"),
+  status: text("status").notNull().default("submitted"),
+  // 'square' | 'payroll'
+  paymentMethod: text("payment_method").notNull().default("payroll"),
+  // 'unpaid' | 'pending' | 'paid'
+  paymentStatus: text("payment_status").notNull().default("unpaid"),
+  totalAmount: numeric("total_amount"),
+  squareOrderId: text("square_order_id"),
+  squarePaymentLinkId: text("square_payment_link_id"),
+  paymentUrl: text("payment_url"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+export type ShopOrder = typeof shopOrders.$inferSelect;
+
+// Snapshots the product/size at order time so history survives later edits.
+export const shopOrderItems = pgTable("shop_order_items", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  orgId: uuid("org_id"),
+  orderId: uuid("order_id").notNull().references(() => shopOrders.id, { onDelete: "cascade" }),
+  productId: uuid("product_id"),
+  variantId: uuid("variant_id"),
+  productName: text("product_name").notNull(),
+  variantLabel: text("variant_label"),
+  unitPrice: numeric("unit_price"),
+  quantity: integer("quantity").notNull().default(1),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+export type ShopOrderItem = typeof shopOrderItems.$inferSelect;
 
 // ───────────────────────────────────────────────
 // Document links — externally-hosted files (Google

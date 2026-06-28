@@ -222,8 +222,46 @@ export async function POST() {
         id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
         sender_id uuid NOT NULL REFERENCES employees(id) ON DELETE CASCADE,
         recipient_id uuid NOT NULL REFERENCES employees(id) ON DELETE CASCADE,
-        body text NOT NULL,
+        body text NOT NULL DEFAULT '',
+        image_url text,
         read_at timestamptz,
+        created_at timestamptz DEFAULT now()
+      )
+    `;
+    await sql`ALTER TABLE messages ADD COLUMN IF NOT EXISTS image_url text`;
+    await sql`ALTER TABLE messages ALTER COLUMN body SET DEFAULT ''`;
+    await sql`
+      CREATE TABLE IF NOT EXISTS message_reactions (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        message_id uuid NOT NULL REFERENCES messages(id) ON DELETE CASCADE,
+        employee_id uuid NOT NULL REFERENCES employees(id) ON DELETE CASCADE,
+        emoji text NOT NULL,
+        created_at timestamptz DEFAULT now(),
+        UNIQUE (message_id, employee_id, emoji)
+      )
+    `;
+    await sql`
+      CREATE TABLE IF NOT EXISTS note_comments (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        note_id uuid NOT NULL REFERENCES meeting_notes(id) ON DELETE CASCADE,
+        author_id uuid,
+        author_name text,
+        body text NOT NULL,
+        created_at timestamptz DEFAULT now()
+      )
+    `;
+    await sql`
+      CREATE TABLE IF NOT EXISTS meeting_requests (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        org_id uuid,
+        requester_id uuid,
+        requester_name text,
+        requester_email text,
+        kind text NOT NULL DEFAULT 'one_on_one',
+        preferred_date date,
+        preferred_time text,
+        note text,
+        status text NOT NULL DEFAULT 'pending',
         created_at timestamptz DEFAULT now()
       )
     `;
@@ -511,6 +549,75 @@ export async function POST() {
       CROSS JOIN (VALUES ('barbicide'), ('first_aid'), ('cpr'), ('lifesaving')) AS t(type)
       WHERE e.status = 'active'
       ON CONFLICT (employee_id, type) DO NOTHING
+    `;
+
+    // ── Team Shop (scrubs & merch) ──
+    await sql`
+      CREATE TABLE IF NOT EXISTS shop_products (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        org_id uuid,
+        name text NOT NULL,
+        description text,
+        category text NOT NULL DEFAULT 'merch',
+        stock_mode text NOT NULL DEFAULT 'tracked',
+        price numeric,
+        image_url text,
+        image_pathname text,
+        active boolean NOT NULL DEFAULT true,
+        created_at timestamptz DEFAULT now(),
+        updated_at timestamptz DEFAULT now()
+      )
+    `;
+    await sql`ALTER TABLE shop_products ADD COLUMN IF NOT EXISTS stock_mode text NOT NULL DEFAULT 'tracked'`;
+    await sql`ALTER TABLE shop_products ADD COLUMN IF NOT EXISTS image_pathname text`;
+    await sql`
+      CREATE TABLE IF NOT EXISTS shop_variants (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        org_id uuid,
+        product_id uuid NOT NULL REFERENCES shop_products(id) ON DELETE CASCADE,
+        label text NOT NULL DEFAULT 'One size',
+        stock integer NOT NULL DEFAULT 0,
+        sort_order integer NOT NULL DEFAULT 0,
+        created_at timestamptz DEFAULT now()
+      )
+    `;
+    await sql`
+      CREATE TABLE IF NOT EXISTS shop_orders (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        org_id uuid,
+        employee_id uuid,
+        employee_name text,
+        employee_email text,
+        note text,
+        status text NOT NULL DEFAULT 'submitted',
+        payment_method text NOT NULL DEFAULT 'payroll',
+        payment_status text NOT NULL DEFAULT 'unpaid',
+        total_amount numeric,
+        square_order_id text,
+        square_payment_link_id text,
+        payment_url text,
+        created_at timestamptz DEFAULT now()
+      )
+    `;
+    await sql`ALTER TABLE shop_orders ADD COLUMN IF NOT EXISTS payment_method text NOT NULL DEFAULT 'payroll'`;
+    await sql`ALTER TABLE shop_orders ADD COLUMN IF NOT EXISTS payment_status text NOT NULL DEFAULT 'unpaid'`;
+    await sql`ALTER TABLE shop_orders ADD COLUMN IF NOT EXISTS total_amount numeric`;
+    await sql`ALTER TABLE shop_orders ADD COLUMN IF NOT EXISTS square_order_id text`;
+    await sql`ALTER TABLE shop_orders ADD COLUMN IF NOT EXISTS square_payment_link_id text`;
+    await sql`ALTER TABLE shop_orders ADD COLUMN IF NOT EXISTS payment_url text`;
+    await sql`
+      CREATE TABLE IF NOT EXISTS shop_order_items (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        org_id uuid,
+        order_id uuid NOT NULL REFERENCES shop_orders(id) ON DELETE CASCADE,
+        product_id uuid,
+        variant_id uuid,
+        product_name text NOT NULL,
+        variant_label text,
+        unit_price numeric,
+        quantity integer NOT NULL DEFAULT 1,
+        created_at timestamptz DEFAULT now()
+      )
     `;
 
     // Backfill existing rows to Crown Heirs org + Main location.

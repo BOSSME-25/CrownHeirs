@@ -2,13 +2,14 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { and, eq, gte, lte } from "drizzle-orm";
+import { and, eq, gte, inArray, lte } from "drizzle-orm";
 import { auth } from "@/auth";
 import { getAccess } from "@/lib/perms";
 import { db } from "@/lib/db";
 import { employees, shiftDuties, shifts, swapRequests } from "@/lib/db/schema";
 import { getEmployeeByEmail } from "@/lib/employees";
 import { addDays } from "@/lib/schedule";
+import { getBookableHours } from "@/lib/square";
 import { adminEmails, emailLayout, sendEmail } from "@/lib/email";
 
 // Managers and above can build/manage the schedule (day-to-day oversight).
@@ -109,6 +110,42 @@ export async function deleteShift(id: string) {
   await db.delete(shifts).where(eq(shifts.id, id));
   revalidatePath("/schedule");
   redirect(`/schedule?ok=${encodeURIComponent("Shift deleted")}`);
+}
+
+// Seed a week with DRAFT shifts from the salon's Square bookable hours, for the
+// chosen stylists. Existing shifts (same person + day) are left untouched.
+export async function importSquareHours(formData: FormData) {
+  await requireAdmin();
+  const ws = String(formData.get("weekStart") ?? "").trim();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(ws)) throw new Error("Missing week.");
+  const ids = formData.getAll("employeeIds").map(String).filter(Boolean);
+  if (!ids.length) throw new Error("Pick at least one stylist to apply the hours to.");
+
+  const { configured, periods } = await getBookableHours();
+  if (!configured) throw new Error("Square isn’t connected yet (needs a token and location in Admin → Settings).");
+  if (!periods.length) throw new Error("Square didn’t return business hours for your location. Set your hours in Square first.");
+
+  const end = addDays(ws, 6);
+  const existing = await db
+    .select({ employeeId: shifts.employeeId, shiftDate: shifts.shiftDate })
+    .from(shifts)
+    .where(and(gte(shifts.shiftDate, ws), lte(shifts.shiftDate, end), inArray(shifts.employeeId, ids)));
+  const taken = new Set(existing.map((e) => `${e.employeeId}:${e.shiftDate}`));
+
+  const rows: { employeeId: string; shiftDate: string; startTime: string; endTime: string; published: boolean; notes: string }[] = [];
+  for (const employeeId of ids) {
+    for (const p of periods) {
+      const shiftDate = addDays(ws, p.weekday); // ws is Sunday; weekday 0..6
+      const key = `${employeeId}:${shiftDate}`;
+      if (taken.has(key)) continue; // don't double up on a day that already has a shift
+      taken.add(key);
+      rows.push({ employeeId, shiftDate, startTime: p.start, endTime: p.end, published: false, notes: "Imported from Square hours" });
+    }
+  }
+  if (rows.length) await db.insert(shifts).values(rows);
+
+  revalidatePath("/schedule");
+  redirect(backToWeek(ws, rows.length ? `Imported ${rows.length} draft shift(s) from Square — review and publish` : "Nothing to import (those days already have shifts)"));
 }
 
 /** Publish every shift in the given week so staff can see it. */
