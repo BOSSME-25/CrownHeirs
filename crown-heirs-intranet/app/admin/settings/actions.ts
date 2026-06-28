@@ -44,15 +44,22 @@ export async function saveSettings(formData: FormData) {
   }
 
   // Optional image uploads (logo, favicon, login background).
-  async function upload(key: string, max: number): Promise<string | undefined> {
+  const MAX_BYTES = 4 * 1024 * 1024;
+  const MAX_LABEL = "4 MB";
+  async function upload(key: string, label: string): Promise<string | undefined> {
     const f = formData.get(key);
     if (!(f instanceof File) || f.size === 0) return undefined;
-    if (f.size > max) throw new Error(`${key} is too large.`);
+    if (f.size > MAX_BYTES) {
+      const mb = (f.size / (1024 * 1024)).toFixed(1);
+      redirect(
+        `/admin/settings?err=${encodeURIComponent(`${label} is too big (${mb} MB). The maximum is ${MAX_LABEL} — please choose a smaller image.`)}`,
+      );
+    }
     return putPrivate("branding", f);
   }
-  const logoUrl = await upload("logo", 4 * 1024 * 1024);
-  const faviconUrl = await upload("favicon", 4 * 1024 * 1024);
-  const loginImageUrl = await upload("loginImage", 4 * 1024 * 1024);
+  const logoUrl = await upload("logo", "Logo");
+  const faviconUrl = await upload("favicon", "Favicon");
+  const loginImageUrl = await upload("loginImage", "Login background");
 
   const font = get("font");
   await saveOrgSettings(org.id, {

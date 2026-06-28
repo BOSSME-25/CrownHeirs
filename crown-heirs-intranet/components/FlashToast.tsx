@@ -7,20 +7,25 @@ function FlashToastInner() {
   const params = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
-  const msg = params.get("ok");
+  const ok = params.get("ok");
+  const err = params.get("err");
+  const msg = ok ?? err;
+  const isError = !!err && !ok;
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
     if (!msg) return;
     setVisible(true);
-    const hide = setTimeout(() => setVisible(false), 3500);
-    // Strip ?ok from the URL so a refresh won't re-show it.
+    // Errors linger a little longer so they're easy to read.
+    const hide = setTimeout(() => setVisible(false), isError ? 6000 : 3500);
+    // Strip ?ok/?err from the URL so a refresh won't re-show it.
     const clean = setTimeout(() => {
       const sp = new URLSearchParams(Array.from(params.entries()));
       sp.delete("ok");
+      sp.delete("err");
       const qs = sp.toString();
       router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
-    }, 3800);
+    }, (isError ? 6000 : 3500) + 300);
     return () => {
       clearTimeout(hide);
       clearTimeout(clean);
@@ -30,8 +35,13 @@ function FlashToastInner() {
 
   if (!msg || !visible) return null;
   return (
-    <div className="flash-toast" role="status" aria-live="polite">
-      <span className="flash-toast-check">✓</span> {msg}
+    <div
+      className="flash-toast"
+      role="status"
+      aria-live="polite"
+      style={isError ? { background: "#a0392a", color: "#fff" } : undefined}
+    >
+      <span className="flash-toast-check">{isError ? "⚠" : "✓"}</span> {msg}
     </div>
   );
 }
