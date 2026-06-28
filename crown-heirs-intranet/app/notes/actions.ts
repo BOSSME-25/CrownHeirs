@@ -6,7 +6,8 @@ import { eq } from "drizzle-orm";
 import { auth } from "@/auth";
 import { isAdmin } from "@/lib/access";
 import { db } from "@/lib/db";
-import { meetingNotes } from "@/lib/db/schema";
+import { meetingNotes, noteComments } from "@/lib/db/schema";
+import { getEmployeeByEmail } from "@/lib/employees";
 import { putPrivate } from "@/lib/blobUpload";
 
 const MAX_BYTES = 25 * 1024 * 1024;
@@ -48,6 +49,34 @@ export async function addNote(formData: FormData) {
   });
   revalidatePath("/notes");
   redirect(`/notes?ok=${encodeURIComponent("Note posted")}`);
+}
+
+// An employee comments on their own 1:1 (or a manager on any). Keeps the
+// conversation attached to the note.
+export async function addNoteComment(formData: FormData) {
+  const session = await auth();
+  const email = session?.user?.email;
+  if (!email) throw new Error("Not signed in.");
+  const noteId = String(formData.get("noteId") ?? "");
+  const body = String(formData.get("body") ?? "").trim();
+  if (!noteId || !body) return;
+
+  const note = (await db.select().from(meetingNotes).where(eq(meetingNotes.id, noteId)))[0];
+  if (!note) throw new Error("Note not found.");
+
+  const me = await getEmployeeByEmail(email);
+  const admin = isAdmin(email);
+  const isOwnerOfNote = !!me && note.employeeId === me.id;
+  if (!admin && !isOwnerOfNote) throw new Error("You can only comment on your own 1:1 notes.");
+
+  await db.insert(noteComments).values({
+    noteId,
+    authorId: me?.id ?? null,
+    authorName: me?.fullName ?? email,
+    body,
+  });
+  revalidatePath("/notes");
+  redirect(`/notes?ok=${encodeURIComponent("Comment added")}`);
 }
 
 export async function deleteNote(id: string) {

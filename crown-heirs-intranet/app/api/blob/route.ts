@@ -8,7 +8,7 @@ export const runtime = "nodejs";
 // store also holds sensitive files (e.g. credentials/) that must never be
 // reachable here.
 const PUBLIC_PREFIXES = ["branding/"];
-const AUTHED_PREFIXES = ["avatars/", "notes/"];
+const AUTHED_PREFIXES = ["avatars/", "notes/", "messages/"];
 
 export async function GET(request: Request): Promise<Response> {
   const pathname = new URL(request.url).searchParams.get("p") ?? "";

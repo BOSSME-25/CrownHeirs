@@ -303,12 +303,53 @@ export const messages = pgTable("messages", {
   recipientId: uuid("recipient_id")
     .notNull()
     .references(() => employees.id, { onDelete: "cascade" }),
-  body: text("body").notNull(),
+  body: text("body").notNull().default(""),
+  // Optional photo attachment (proxy URL via /api/blob).
+  imageUrl: text("image_url"),
   readAt: timestamp("read_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });
 
 export type Message = typeof messages.$inferSelect;
+
+// 👍/❤️ reactions on a message. One row per (message, person, emoji).
+export const messageReactions = pgTable("message_reactions", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  messageId: uuid("message_id").notNull().references(() => messages.id, { onDelete: "cascade" }),
+  employeeId: uuid("employee_id").notNull().references(() => employees.id, { onDelete: "cascade" }),
+  emoji: text("emoji").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+export type MessageReaction = typeof messageReactions.$inferSelect;
+
+// Comments on meeting/1:1 notes — lets employees respond to their 1:1s.
+export const noteComments = pgTable("note_comments", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  noteId: uuid("note_id").notNull().references(() => meetingNotes.id, { onDelete: "cascade" }),
+  authorId: uuid("author_id"),
+  authorName: text("author_name"),
+  body: text("body").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+export type NoteComment = typeof noteComments.$inferSelect;
+
+// A stylist's request for a 1:1 or meeting; management schedules or declines it.
+export const meetingRequests = pgTable("meeting_requests", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  orgId: uuid("org_id"),
+  requesterId: uuid("requester_id"),
+  requesterName: text("requester_name"),
+  requesterEmail: text("requester_email"),
+  // 'one_on_one' | 'meeting'
+  kind: text("kind").notNull().default("one_on_one"),
+  preferredDate: date("preferred_date"),
+  preferredTime: text("preferred_time"),
+  note: text("note"),
+  // 'pending' | 'scheduled' | 'declined'
+  status: text("status").notNull().default("pending"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+export type MeetingRequest = typeof meetingRequests.$inferSelect;
 
 // ───────────────────────────────────────────────
 // Policy acknowledgments — "I've read & agree", with

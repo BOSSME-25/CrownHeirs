@@ -222,8 +222,46 @@ export async function POST() {
         id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
         sender_id uuid NOT NULL REFERENCES employees(id) ON DELETE CASCADE,
         recipient_id uuid NOT NULL REFERENCES employees(id) ON DELETE CASCADE,
-        body text NOT NULL,
+        body text NOT NULL DEFAULT '',
+        image_url text,
         read_at timestamptz,
+        created_at timestamptz DEFAULT now()
+      )
+    `;
+    await sql`ALTER TABLE messages ADD COLUMN IF NOT EXISTS image_url text`;
+    await sql`ALTER TABLE messages ALTER COLUMN body SET DEFAULT ''`;
+    await sql`
+      CREATE TABLE IF NOT EXISTS message_reactions (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        message_id uuid NOT NULL REFERENCES messages(id) ON DELETE CASCADE,
+        employee_id uuid NOT NULL REFERENCES employees(id) ON DELETE CASCADE,
+        emoji text NOT NULL,
+        created_at timestamptz DEFAULT now(),
+        UNIQUE (message_id, employee_id, emoji)
+      )
+    `;
+    await sql`
+      CREATE TABLE IF NOT EXISTS note_comments (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        note_id uuid NOT NULL REFERENCES meeting_notes(id) ON DELETE CASCADE,
+        author_id uuid,
+        author_name text,
+        body text NOT NULL,
+        created_at timestamptz DEFAULT now()
+      )
+    `;
+    await sql`
+      CREATE TABLE IF NOT EXISTS meeting_requests (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        org_id uuid,
+        requester_id uuid,
+        requester_name text,
+        requester_email text,
+        kind text NOT NULL DEFAULT 'one_on_one',
+        preferred_date date,
+        preferred_time text,
+        note text,
+        status text NOT NULL DEFAULT 'pending',
         created_at timestamptz DEFAULT now()
       )
     `;

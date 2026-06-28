@@ -1,10 +1,14 @@
 import Link from "next/link";
 import { auth } from "@/auth";
 import { isAdmin } from "@/lib/access";
+import { getAccess } from "@/lib/perms";
 import SiteHeader from "@/components/SiteHeader";
 import DeleteMeetingButton from "@/components/DeleteMeetingButton";
-import { addMeeting } from "@/app/calendar/actions";
+import { addMeeting, decideMeetingRequest, requestMeeting } from "@/app/calendar/actions";
+import { getEmployeeByEmail } from "@/lib/employees";
+import { listPendingRequests } from "@/lib/meetingRequests";
 import { monthEvents, upcomingEvents, type CalendarItem } from "@/lib/calendar";
+import type { MeetingRequest } from "@/lib/db/schema";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Calendar — Crown Heirs Team Hub" };
@@ -37,7 +41,19 @@ export default async function CalendarPage({
 }) {
   const session = await auth();
   const admin = isAdmin(session?.user?.email);
+  const canManage = (await getAccess(session?.user?.email)).canApprove;
   const { month } = await searchParams;
+
+  // Signed-in employee + (for managers) the pending request queue.
+  let onRoster = false;
+  let pendingRequests: MeetingRequest[] = [];
+  try {
+    const meEmp = session?.user?.email ? await getEmployeeByEmail(session.user.email) : undefined;
+    onRoster = !!meEmp;
+    if (canManage) pendingRequests = await listPendingRequests();
+  } catch {
+    // tables not ready — skip request UI
+  }
 
   // Today (in Arizona) and the month being viewed.
   const todayYmd = new Date().toLocaleDateString("en-CA", { timeZone: "America/Phoenix" });
@@ -121,6 +137,59 @@ export default async function CalendarPage({
               <button className="btn" type="submit">Add to calendar</button>
             </form>
           </details>
+        )}
+
+        {/* Stylist: request a 1:1 or meeting */}
+        {onRoster && !setupNeeded && (
+          <details className="prose" style={{ marginBottom: 20 }}>
+            <summary style={{ cursor: "pointer", fontWeight: 600 }}>+ Request a 1:1 or meeting</summary>
+            <form action={requestMeeting} style={{ marginTop: 14 }}>
+              <div className="form-grid">
+                <div className="field">
+                  <label htmlFor="kind">Type</label>
+                  <select id="kind" name="kind" defaultValue="one_on_one">
+                    <option value="one_on_one">1:1 with management</option>
+                    <option value="meeting">Meeting</option>
+                  </select>
+                </div>
+                <div className="field">
+                  <label htmlFor="preferredDate">Preferred date</label>
+                  <input id="preferredDate" name="preferredDate" type="date" />
+                </div>
+                <div className="field">
+                  <label htmlFor="preferredTime">Preferred time</label>
+                  <input id="preferredTime" name="preferredTime" type="time" />
+                </div>
+              </div>
+              <div className="field">
+                <label htmlFor="reqNote">What’s it about? (optional)</label>
+                <textarea id="reqNote" name="note" rows={2} />
+              </div>
+              <button className="btn" type="submit">Send request</button>
+              <p className="muted" style={{ fontSize: "0.8rem", marginTop: 6 }}>This emails management; they’ll confirm a time with you.</p>
+            </form>
+          </details>
+        )}
+
+        {/* Management: pending requests */}
+        {canManage && pendingRequests.length > 0 && (
+          <div className="card" style={{ cursor: "default", marginBottom: 20, borderLeft: "3px solid var(--gold,#c8952a)" }}>
+            <h3 style={{ marginTop: 0 }}>Meeting requests ({pendingRequests.length})</h3>
+            {pendingRequests.map((r) => (
+              <div key={r.id} style={{ borderTop: "1px solid var(--border,#e7ded5)", paddingTop: 10, marginTop: 10, display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
+                <span style={{ flex: 1, minWidth: 200 }}>
+                  <strong>{r.requesterName}</strong> — {r.kind === "meeting" ? "meeting" : "1:1"}
+                  {r.preferredDate ? ` · ${r.preferredDate}${r.preferredTime ? ` at ${r.preferredTime}` : ""}` : ""}
+                  {r.note ? <span className="muted"> · “{r.note}”</span> : null}
+                </span>
+                <form action={decideMeetingRequest} style={{ display: "flex", gap: 6 }}>
+                  <input type="hidden" name="requestId" value={r.id} />
+                  <button className="btn" type="submit" name="decision" value="scheduled">Mark scheduled</button>
+                  <button className="btn btn-ghost" type="submit" name="decision" value="declined">Decline</button>
+                </form>
+              </div>
+            ))}
+          </div>
         )}
 
         {setupNeeded ? (
