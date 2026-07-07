@@ -127,7 +127,8 @@ export default async function CompliancePage() {
               <StatusPill label={`${compliant} compliant`} tone="ok" />
               {toVerify > 0 && <StatusPill label={`${toVerify} to verify`} tone="warn" />}
               <span style={{ flex: 1 }} />
-              <Link className="btn btn-ghost" href="/admin/audit">View audit log →</Link>
+              <Link className="btn btn-ghost" href="/admin/compliance/report">Report / export →</Link>
+              <Link className="btn btn-ghost" href="/admin/audit">Audit log →</Link>
             </div>
 
             {/* Attestation — two-person sign-off */}
