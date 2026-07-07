@@ -5,12 +5,13 @@ import { redirect } from "next/navigation";
 import { eq } from "drizzle-orm";
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
-import { complianceEvidence, complianceItems } from "@/lib/db/schema";
+import { complianceAttestations, complianceEvidence, complianceItems } from "@/lib/db/schema";
 import { getAccess } from "@/lib/perms";
 import { getDefaultOrg } from "@/lib/org";
 import { logAudit } from "@/lib/audit";
 import { putPrivate } from "@/lib/blobUpload";
 import { isCadence, isLevel } from "@/lib/compliance-constants";
+import { complianceState, listComplianceItems, todayYMD, type AttestationSnapshot } from "@/lib/compliance";
 
 const str = (fd: FormData, k: string) => {
   const v = fd.get(k);
@@ -143,4 +144,57 @@ export async function removeEvidence(formData: FormData) {
   await logAudit({ actorEmail: actor, action: "delete", entity: "compliance_evidence", entityId: id });
   revalidatePath("/admin/compliance");
   back("Evidence removed");
+}
+
+// ── Attestations (two-person sign-off) ──
+
+// A director/owner attests that the register is accurate right now; this
+// snapshots the whole register and awaits a second person's confirmation.
+export async function attestCompliance(formData: FormData) {
+  const actor = await requireLeadership();
+  const items = await listComplianceItems();
+  const today = todayYMD();
+  const snapItems = items.map((i) => {
+    const s = complianceState({ status: i.status, dueAt: i.dueAt }, today);
+    return { id: i.id, title: i.title, level: i.level, status: i.status, dueAt: i.dueAt, key: s.key, label: s.label };
+  });
+  const counts = { total: snapItems.length, compliant: 0, attention: 0, overdue: 0, due: 0, na: 0 };
+  for (const si of snapItems) {
+    if (si.key in counts) (counts as Record<string, number>)[si.key] += 1;
+  }
+  const snapshot: AttestationSnapshot = { counts, items: snapItems };
+  const org = await getDefaultOrg();
+  await db.insert(complianceAttestations).values({
+    orgId: org?.id ?? null,
+    periodLabel: str(formData, "periodLabel"),
+    attestedBy: actor,
+    attestedAt: new Date(),
+    note: str(formData, "note"),
+    snapshot,
+  });
+  await logAudit({ actorEmail: actor, action: "attest", entity: "compliance", detail: `${counts.total} items` });
+  revalidatePath("/admin/compliance");
+  back("Attested — a different director/owner must now confirm");
+}
+
+// A different director/owner confirms (or sends back for re-attestation).
+export async function decideAttestation(formData: FormData) {
+  const actor = await requireLeadership();
+  const id = str(formData, "attestationId");
+  const decision = str(formData, "decision"); // confirm | reject
+  if (!id) throw new Error("Missing attestation.");
+  const row = (await db.select().from(complianceAttestations).where(eq(complianceAttestations.id, id)))[0];
+  if (!row || !row.attestedAt || row.confirmedAt) throw new Error("This attestation isn’t awaiting confirmation.");
+  if (row.attestedBy && actor && row.attestedBy.toLowerCase() === actor.toLowerCase()) {
+    throw new Error("For checks and balances, a different person must confirm the attestation.");
+  }
+  if (decision === "confirm") {
+    await db.update(complianceAttestations).set({ confirmedBy: actor, confirmedAt: new Date() }).where(eq(complianceAttestations.id, id));
+    await logAudit({ actorEmail: actor, action: "confirm", entity: "compliance", entityId: id });
+    back("Attestation confirmed");
+  } else {
+    await db.delete(complianceAttestations).where(eq(complianceAttestations.id, id));
+    await logAudit({ actorEmail: actor, action: "reject", entity: "compliance", entityId: id, detail: "attestation returned" });
+    back("Sent back — the register can be corrected and re-attested");
+  }
 }
