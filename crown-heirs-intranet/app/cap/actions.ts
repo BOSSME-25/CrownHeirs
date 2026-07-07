@@ -5,14 +5,14 @@ import { redirect } from "next/navigation";
 import { eq } from "drizzle-orm";
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
-import { capFlags, capPoints, employees } from "@/lib/db/schema";
+import { capActions, capFlags, capPoints, employees } from "@/lib/db/schema";
 import { getEmployeeByEmail } from "@/lib/employees";
 import { getDefaultOrg } from "@/lib/org";
 import { getAccess } from "@/lib/perms";
 import { logAudit } from "@/lib/audit";
 import { adminEmails, emailLayout, sendEmail } from "@/lib/email";
-import { canApproveProposal, DISPUTE_DAYS, infractionById, infractionLabel, CAP_WINDOW_DAYS } from "@/lib/cap-constants";
-import { getPoint } from "@/lib/cap";
+import { canApproveProposal, CAP_LEVELS, DISPUTE_DAYS, infractionById, infractionLabel, CAP_WINDOW_DAYS } from "@/lib/cap-constants";
+import { balanceForEmployee, getCapAction, getPoint } from "@/lib/cap";
 
 const str = (fd: FormData, k: string) => {
   const v = fd.get(k);
@@ -200,6 +200,79 @@ export async function resolveDispute(formData: FormData) {
   await logAudit({ actorEmail: email, action: "resolve", entity: "cap_point", entityId: id, detail: decision ?? "" });
   revalidatePath("/cap");
   back("/cap", decision === "remove" ? "Point removed" : "Point upheld");
+}
+
+// ── Level corrective actions (phase 4) ──
+
+// Manager documents the response when a threshold is reached; the employee
+// then acknowledges and a second leader confirms.
+export async function createCapAction(formData: FormData) {
+  const { email, access } = await actor();
+  if (!access.canApprove) throw new Error("Only managers and above can start a corrective action.");
+  const employeeId = str(formData, "employeeId");
+  const levelKey = str(formData, "levelKey");
+  const plan = str(formData, "plan");
+  if (!employeeId || !levelKey || !CAP_LEVELS.some((l) => l.key === levelKey)) throw new Error("Pick a team member and a level.");
+  const balance = await balanceForEmployee(employeeId);
+  const org = await getDefaultOrg();
+  await db.insert(capActions).values({
+    orgId: org?.id ?? null,
+    employeeId,
+    levelKey,
+    balanceAt: String(balance),
+    plan,
+    createdBy: email,
+    status: "pending_ack",
+  });
+  const subj = (await db.select({ email: employees.email, name: employees.fullName }).from(employees).where(eq(employees.id, employeeId)))[0];
+  const label = CAP_LEVELS.find((l) => l.key === levelKey)?.label ?? levelKey;
+  if (subj?.email) await notify(subj.email, `Corrective action to review — ${label}`, `Leadership documented a <strong>${label}</strong> corrective action. Please review and acknowledge it under Discipline &amp; Advancement.`, "/discipline");
+  await logAudit({ actorEmail: email, action: "create", entity: "cap_action", detail: `${label} — ${subj?.name ?? ""}` });
+  revalidatePath("/cap");
+  revalidatePath("/discipline");
+  back("/cap", "Corrective action started — awaiting the employee’s acknowledgment");
+}
+
+// Employee acknowledges their own corrective action.
+export async function acknowledgeCapAction(formData: FormData) {
+  const { email, emp } = await actor();
+  if (!emp) throw new Error("You’re not on the team roster yet.");
+  const id = str(formData, "actionId");
+  if (!id) throw new Error("Missing action.");
+  const a = await getCapAction(id);
+  if (!a || a.employeeId !== emp.id) throw new Error("That isn’t your record.");
+  if (a.status !== "pending_ack") throw new Error("This isn’t awaiting your acknowledgment.");
+  await db.update(capActions).set({ acknowledgedAt: new Date(), status: "pending_confirm" }).where(eq(capActions.id, id));
+  await notify(await leadershipEmails(), "Corrective action acknowledged", `${emp.fullName} acknowledged their corrective action. A second leader now confirms it on the Corrective Action page.`);
+  await logAudit({ actorEmail: email, action: "acknowledge", entity: "cap_action", entityId: id });
+  revalidatePath("/discipline");
+  revalidatePath("/cap");
+  back("/discipline", "Acknowledged — thank you");
+}
+
+// A different leader confirms (checks & balances) or voids the action.
+export async function confirmCapAction(formData: FormData) {
+  const { email, access } = await actor();
+  if (!access.canManageTeam) throw new Error("Only a director or owner can confirm a corrective action.");
+  const id = str(formData, "actionId");
+  const decision = str(formData, "decision"); // confirm | void
+  if (!id) throw new Error("Missing action.");
+  const a = await getCapAction(id);
+  if (!a || a.status !== "pending_confirm") throw new Error("This isn’t awaiting confirmation.");
+  if (a.createdBy && a.createdBy.toLowerCase() === email.toLowerCase()) {
+    throw new Error("For checks and balances, a different leader must confirm the corrective action.");
+  }
+  if (decision === "confirm") {
+    await db.update(capActions).set({ confirmedBy: email, confirmedAt: new Date(), status: "confirmed" }).where(eq(capActions.id, id));
+    const subj = (await db.select({ email: employees.email }).from(employees).where(eq(employees.id, a.employeeId)))[0];
+    if (subj?.email) await notify(subj.email, "Corrective action confirmed", "Your corrective action has been confirmed and is on file. Leadership is here to support your path forward.", "/discipline");
+    await logAudit({ actorEmail: email, action: "confirm", entity: "cap_action", entityId: id });
+    back("/cap", "Confirmed and on file");
+  } else {
+    await db.update(capActions).set({ status: "void" }).where(eq(capActions.id, id));
+    await logAudit({ actorEmail: email, action: "void", entity: "cap_action", entityId: id });
+    back("/cap", "Corrective action voided");
+  }
 }
 
 // ── Leadership: set a team member's advancement tier ──

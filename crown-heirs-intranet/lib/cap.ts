@@ -1,8 +1,8 @@
 import "server-only";
-import { desc, eq, inArray } from "drizzle-orm";
+import { and, desc, eq, inArray, ne } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { capFlags, capPoints, employees } from "@/lib/db/schema";
-import type { CapFlag, CapPoint } from "@/lib/db/schema";
+import { capActions, capFlags, capPoints, employees } from "@/lib/db/schema";
+import type { CapAction, CapFlag, CapPoint } from "@/lib/db/schema";
 import { todayYMD } from "@/lib/credentials-constants";
 
 export * from "@/lib/cap-constants";
@@ -54,6 +54,25 @@ export async function listByStatus(status: string): Promise<Named<CapPoint>[]> {
   const rows = await db.select().from(capPoints).where(eq(capPoints.status, status)).orderBy(desc(capPoints.createdAt));
   const names = await nameMap(rows.map((r) => r.employeeId));
   return rows.map((row) => ({ row, subjectName: names.get(row.employeeId) ?? "—" }));
+}
+
+// ── Level corrective actions (phase 4) ──
+export async function getCapAction(id: string): Promise<CapAction | undefined> {
+  return (await db.select().from(capActions).where(eq(capActions.id, id)))[0];
+}
+export async function capActionsForEmployee(employeeId: string): Promise<CapAction[]> {
+  return db.select().from(capActions).where(eq(capActions.employeeId, employeeId)).orderBy(desc(capActions.createdAt));
+}
+// All non-void corrective actions (for the console), with subject names.
+export async function listCapActions(): Promise<{ row: CapAction; subjectName: string }[]> {
+  const rows = await db.select().from(capActions).where(ne(capActions.status, "void")).orderBy(desc(capActions.createdAt));
+  const names = await nameMap(rows.map((r) => r.employeeId));
+  return rows.map((row) => ({ row, subjectName: names.get(row.employeeId) ?? "—" }));
+}
+// Set of `${employeeId}:${levelKey}` that already have an action (any status).
+export async function existingActionKeys(): Promise<Set<string>> {
+  const rows = await db.select({ e: capActions.employeeId, k: capActions.levelKey }).from(capActions);
+  return new Set(rows.map((r) => `${r.e}:${r.k}`));
 }
 
 export async function activeEmployeeTiers(): Promise<{ id: string; tier: string | null }[]> {

@@ -5,9 +5,11 @@ import StatusPill from "@/components/StatusPill";
 import { getEmployeeByEmail } from "@/lib/employees";
 import {
   balanceFromRows,
+  capActionsForEmployee,
   capLevelFor,
   categoryLabel,
   CAP_CATEGORIES,
+  CAP_LEVELS,
   DISPUTE_DAYS,
   infractionById,
   infractionLabel,
@@ -16,7 +18,11 @@ import {
   pointsForEmployee,
   tierById,
 } from "@/lib/cap";
-import { disputePoint } from "@/app/cap/actions";
+import { acknowledgeCapAction, disputePoint } from "@/app/cap/actions";
+
+function levelLabel(key: string) {
+  return CAP_LEVELS.find((l) => l.key === key)?.label ?? key;
+}
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Discipline & Advancement — Crown Heirs Team Hub" };
@@ -45,11 +51,14 @@ export default async function DisciplinePage() {
 
   let setupNeeded = false;
   let allPoints: Awaited<ReturnType<typeof pointsForEmployee>> = [];
+  let capActions: Awaited<ReturnType<typeof capActionsForEmployee>> = [];
   try {
     allPoints = await pointsForEmployee(me.id);
+    capActions = await capActionsForEmployee(me.id);
   } catch {
     setupNeeded = true;
   }
+  const toAck = capActions.filter((a) => a.status === "pending_ack");
 
   const balance = balanceFromRows(allPoints);
   const level = capLevelFor(balance);
@@ -96,6 +105,24 @@ export default async function DisciplinePage() {
                     : "Reach out to leadership — let’s build your path back."}
               </p>
             </section>
+
+            {/* ── Corrective actions to acknowledge ── */}
+            {toAck.map((a) => (
+              <section key={a.id} className="card" style={{ cursor: "default", marginBottom: 18, borderLeft: "3px solid var(--terra,#a0624a)" }}>
+                <h2 style={{ margin: "0 0 6px", fontFamily: "var(--font-serif)", fontWeight: 600, fontSize: "1.2rem" }}>
+                  {levelLabel(a.levelKey)} — please review &amp; acknowledge
+                </h2>
+                {a.plan && <p style={{ whiteSpace: "pre-wrap", margin: "0 0 10px" }}>{a.plan}</p>}
+                <p className="muted" style={{ fontSize: "0.82rem", marginTop: 0 }}>
+                  Acknowledging confirms you&rsquo;ve read and discussed this — it isn&rsquo;t an admission of fault, and a second leader
+                  confirms it after you.
+                </p>
+                <form action={acknowledgeCapAction}>
+                  <input type="hidden" name="actionId" value={a.id} />
+                  <button className="btn" type="submit">I acknowledge</button>
+                </form>
+              </section>
+            ))}
 
             {/* ── Areas for awareness (color-highlighted) ── */}
             {active.length > 0 && (

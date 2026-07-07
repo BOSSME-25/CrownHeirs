@@ -10,14 +10,19 @@ import {
   canApproveProposal,
   capLevelFor,
   CAP_CATEGORIES,
+  CAP_LEVELS,
+  existingActionKeys,
   INFRACTIONS,
   infractionLabel,
   listByStatus,
+  listCapActions,
   listOpenFlags,
   rosterBalances,
   TIER_LADDER,
 } from "@/lib/cap";
 import {
+  confirmCapAction,
+  createCapAction,
   decidePoint,
   dismissFlag,
   proposePoint,
@@ -26,6 +31,10 @@ import {
   resolveDispute,
   setTier,
 } from "@/app/cap/actions";
+
+function levelLabel(key: string) {
+  return CAP_LEVELS.find((l) => l.key === key)?.label ?? key;
+}
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Corrective Action — Crown Heirs Team Hub" };
@@ -129,9 +138,18 @@ async function ManagerConsole({
   const disputes = canManageTeam ? await listByStatus("disputed") : [];
   const balances = await rosterBalances();
   const rosterFull = await activeEmployeeTiers();
+  const capActionRows = await listCapActions();
+  const existingKeys = await existingActionKeys();
 
   // Which proposals can *this* leader approve?
   const issuerLevels = await Promise.all(proposals.map((p) => getAccess(p.row.issuedBy)));
+
+  // Employees at a level with no corrective action yet started.
+  const toStart = balances
+    .map((b) => ({ b, level: capLevelFor(b.balance) }))
+    .filter((x) => x.level && !existingKeys.has(`${x.b.id}:${x.level!.key}`));
+  const awaitingAck = capActionRows.filter((a) => a.row.status === "pending_ack");
+  const awaitingConfirm = capActionRows.filter((a) => a.row.status === "pending_confirm");
 
   return (
     <>
@@ -199,6 +217,56 @@ async function ManagerConsole({
               </form>
             </div>
           ))}
+        </section>
+      )}
+
+      {/* Corrective actions */}
+      {(toStart.length > 0 || awaitingAck.length > 0 || awaitingConfirm.length > 0) && (
+        <section className="card" style={{ cursor: "default", marginBottom: 18, borderLeft: "3px solid var(--terra,#a0624a)" }}>
+          <h3 style={{ marginTop: 0 }}>Corrective actions</h3>
+
+          {toStart.map(({ b, level }) => (
+            <details key={b.id} style={{ borderTop: "1px solid var(--border,#e7ded5)", paddingTop: 10, marginTop: 10 }}>
+              <summary style={{ cursor: "pointer" }}>
+                <strong>{b.name}</strong> reached <strong>{level!.label}</strong> ({b.balance} pts) — start a corrective action
+              </summary>
+              <p className="muted" style={{ fontSize: "0.84rem", margin: "8px 0" }}>{level!.response}</p>
+              <form action={createCapAction} style={{ marginTop: 6 }}>
+                <input type="hidden" name="employeeId" value={b.id} />
+                <input type="hidden" name="levelKey" value={level!.key} />
+                <div className="field">
+                  <label>Documented plan</label>
+                  <textarea name="plan" rows={3} placeholder="What happened, what change is expected, the check-in plan…" required />
+                </div>
+                <button className="btn" type="submit" style={{ marginTop: 8 }}>Start &amp; send to employee</button>
+              </form>
+            </details>
+          ))}
+
+          {awaitingAck.map(({ row, subjectName }) => (
+            <div key={row.id} className="muted" style={{ fontSize: "0.84rem", borderTop: "1px solid var(--border,#e7ded5)", paddingTop: 8, marginTop: 8 }}>
+              <strong>{subjectName}</strong> · {levelLabel(row.levelKey)} — awaiting the employee’s acknowledgment.
+            </div>
+          ))}
+
+          {awaitingConfirm.map(({ row, subjectName }) => {
+            const mine = row.createdBy && row.createdBy.toLowerCase() === email.toLowerCase();
+            return (
+              <div key={row.id} style={{ borderTop: "1px solid var(--border,#e7ded5)", paddingTop: 10, marginTop: 10 }}>
+                <div><strong>{subjectName}</strong> · {levelLabel(row.levelKey)} — acknowledged, needs a second leader.</div>
+                {row.plan && <div className="muted" style={{ fontSize: "0.84rem", margin: "2px 0 6px" }}>{row.plan}</div>}
+                {canManageTeam && !mine ? (
+                  <form action={confirmCapAction} style={{ display: "flex", gap: 6 }}>
+                    <input type="hidden" name="actionId" value={row.id} />
+                    <button className="btn" type="submit" name="decision" value="confirm">Confirm</button>
+                    <button className="btn-link" type="submit" name="decision" value="void" style={{ color: "var(--terra,#a0624a)" }}>Void</button>
+                  </form>
+                ) : (
+                  <span className="muted" style={{ fontSize: "0.82rem" }}>{mine ? "You created this — a different leader must confirm." : "Awaiting a director or owner."}</span>
+                )}
+              </div>
+            );
+          })}
         </section>
       )}
 
