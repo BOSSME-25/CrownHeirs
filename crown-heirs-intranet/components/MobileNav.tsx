@@ -46,7 +46,10 @@ export default function MobileNav({ isAdmin, canManage, canManageTeam, email, un
           {canManageTeam && <Link href="/admin/compliance">Compliance</Link>}
           {isAdmin && <Link href="/admin">Admin Console</Link>}
 
+          {(canManage || isAdmin) && <Link href="/cap">Corrective Action</Link>}
+
           <div className="m-group">You</div>
+          <Link href="/discipline">Discipline &amp; Advancement</Link>
           <Link href="/me">My Profile</Link>
           {email && <div className="m-email">{email}</div>}
           <form action={signOutAction}>

@@ -97,7 +97,7 @@ export default function CareerPathHandbookPage() {
           </p>
 
           <p className="muted">
-            Track your tier and what the next one requires under <strong>Discipline &amp; Advancement</strong>.
+            Track your tier and what the next one requires under <Link href="/discipline">Discipline &amp; Advancement</Link>.
           </p>
         </div>
       </main>

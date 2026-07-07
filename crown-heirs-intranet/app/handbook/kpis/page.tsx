@@ -104,7 +104,7 @@ export default function KpisHandbookPage() {
             is reviewed in the monthly 1:1.
           </p>
           <p className="muted">
-            See your live standing anytime under <strong>Discipline &amp; Advancement</strong>.
+            See your live standing anytime under <Link href="/discipline">Discipline &amp; Advancement</Link>.
           </p>
         </div>
       </main>

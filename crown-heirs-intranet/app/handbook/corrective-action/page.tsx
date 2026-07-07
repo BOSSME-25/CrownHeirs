@@ -43,7 +43,7 @@ export default function CapHandbookPage() {
           </p>
           <ul>
             <li><strong>Points attach to behaviors, never outcomes.</strong> Revenue, rebooking, and retail are outcomes, handled through your monthly 1:1 — missing a revenue target will never earn you a point.</li>
-            <li><strong>Clarity is kindness.</strong> Every point is communicated within 48 hours, in private, in writing. Your balance is visible to you at all times in the <strong>Crown Heirs Team Hub</strong> under <strong>Discipline &amp; Advancement</strong>.</li>
+            <li><strong>Clarity is kindness.</strong> Every point is communicated within 48 hours, in private, in writing. Your balance is visible to you at all times in the <strong>Crown Heirs Team Hub</strong> under <Link href="/discipline">Discipline &amp; Advancement</Link>.</li>
           </ul>
 
           <h2>What earns points</h2>
@@ -126,7 +126,7 @@ export default function CapHandbookPage() {
 
           <p className="muted">
             <strong>Clarity is kindness. Consistency protects the culture.</strong> See your live standing under{" "}
-            <strong>Discipline &amp; Advancement</strong>.
+            <Link href="/discipline">Discipline &amp; Advancement</Link>.
           </p>
         </div>
       </main>
