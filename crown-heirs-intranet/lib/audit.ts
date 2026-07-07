@@ -1,7 +1,8 @@
 import "server-only";
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq, gte, ilike, lte, or, type SQL } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { auditLog } from "@/lib/db/schema";
+import type { AuditEntry } from "@/lib/db/schema";
 import { getDefaultOrg } from "@/lib/org";
 
 // Record a change for the audit trail. Never throws — auditing must not
@@ -58,4 +59,32 @@ export async function recentAudit(limit = 200) {
     .where(eq(auditLog.orgId, org.id))
     .orderBy(desc(auditLog.createdAt))
     .limit(limit);
+}
+
+// Filtered audit query: by actor (substring), free text over action/entity/
+// detail, and a date range. Used by the filterable audit view + CSV export.
+export async function searchAudit(opts: {
+  actor?: string | null;
+  q?: string | null;
+  since?: string | null;
+  until?: string | null;
+  limit?: number;
+}): Promise<AuditEntry[]> {
+  const org = await getDefaultOrg();
+  const conds: (SQL | undefined)[] = [];
+  if (org) conds.push(eq(auditLog.orgId, org.id));
+  if (opts.actor) conds.push(ilike(auditLog.actorEmail, `%${opts.actor}%`));
+  if (opts.q) {
+    const like = `%${opts.q}%`;
+    conds.push(or(ilike(auditLog.action, like), ilike(auditLog.entity, like), ilike(auditLog.detail, like)));
+  }
+  if (opts.since) conds.push(gte(auditLog.createdAt, new Date(opts.since + "T00:00:00")));
+  if (opts.until) conds.push(lte(auditLog.createdAt, new Date(opts.until + "T23:59:59")));
+  const where = conds.filter(Boolean) as SQL[];
+  return db
+    .select()
+    .from(auditLog)
+    .where(where.length ? and(...where) : undefined)
+    .orderBy(desc(auditLog.createdAt))
+    .limit(opts.limit ?? 500);
 }
