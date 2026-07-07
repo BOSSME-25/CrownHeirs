@@ -100,6 +100,22 @@ export default async function HandbookPage() {
           </p>
         </div>
 
+        <h2 className="title" style={{ fontSize: "1.4rem", marginTop: 36 }}>In this handbook</h2>
+        <div className="tiles" style={{ marginTop: 12 }}>
+          <Link href="/handbook/kpis" className="tile">
+            <span className="tile-label">KPIs &amp; Expectations</span>
+            <span className="tile-desc">Standards and targets for every tier.</span>
+          </Link>
+          <Link href="/handbook/career-path" className="tile">
+            <span className="tile-label">Career Path</span>
+            <span className="tile-desc">The Specialty Stylist framework and how you grow.</span>
+          </Link>
+          <Link href="/handbook/corrective-action" className="tile">
+            <span className="tile-label">Corrective Action Program</span>
+            <span className="tile-desc">How accountability works — points, levels, and restoration.</span>
+          </Link>
+        </div>
+
         <h2 className="title" style={{ fontSize: "1.4rem", marginTop: 36 }}>Handbook Documents</h2>
         <DocumentList category="handbook" />
       </main>
