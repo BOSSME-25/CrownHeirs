@@ -1,11 +1,33 @@
 import "server-only";
-import { asc, eq, inArray } from "drizzle-orm";
+import { asc, desc, eq, inArray } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { complianceEvidence, complianceItems } from "@/lib/db/schema";
-import type { ComplianceEvidence, ComplianceItem } from "@/lib/db/schema";
+import { complianceAttestations, complianceEvidence, complianceItems } from "@/lib/db/schema";
+import type { ComplianceAttestation, ComplianceEvidence, ComplianceItem } from "@/lib/db/schema";
 import { getDefaultOrg } from "@/lib/org";
 
 export * from "@/lib/compliance-constants";
+
+// Shape of the register snapshot captured at attestation time.
+export type AttestationSnapshot = {
+  counts: { total: number; compliant: number; attention: number; overdue: number; due: number; na: number };
+  items: { id: string; title: string; level: string; status: string; dueAt: string | null; key: string; label: string }[];
+};
+
+export async function listAttestations(limit = 50): Promise<ComplianceAttestation[]> {
+  const org = await getDefaultOrg();
+  const q = db.select().from(complianceAttestations).orderBy(desc(complianceAttestations.createdAt)).limit(limit);
+  if (!org) return q;
+  return db
+    .select()
+    .from(complianceAttestations)
+    .where(eq(complianceAttestations.orgId, org.id))
+    .orderBy(desc(complianceAttestations.createdAt))
+    .limit(limit);
+}
+
+export async function getAttestation(id: string): Promise<ComplianceAttestation | undefined> {
+  return (await db.select().from(complianceAttestations).where(eq(complianceAttestations.id, id)))[0];
+}
 
 export async function listComplianceItems(): Promise<ComplianceItem[]> {
   const org = await getDefaultOrg();
