@@ -70,6 +70,8 @@ export const employees = pgTable("employees", {
   status: text("status").notNull().default("active"),
   // App role: 'admin' | 'manager' | 'staff'
   role: text("role").notNull().default("staff"),
+  // Career-path tier (see cap-constants TIER_LADDER), set by leadership.
+  tier: text("tier"),
   startDate: date("start_date"),
   // Sensitive — only admins ever see these.
   wage: numeric("wage", { precision: 10, scale: 2 }),
@@ -506,6 +508,69 @@ export const complianceAttestations = pgTable("compliance_attestations", {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });
 export type ComplianceAttestation = typeof complianceAttestations.$inferSelect;
+
+// ───────────────────────────────────────────────
+// Corrective Action Program (CAP) — behavior points
+// with an approval chain. Flags (from any staffer) →
+// proposed points (manager) → approved by next level
+// up → active & visible to the employee.
+// ───────────────────────────────────────────────
+export const capFlags = pgTable("cap_flags", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  orgId: uuid("org_id"),
+  subjectEmployeeId: uuid("subject_employee_id").notNull().references(() => employees.id, { onDelete: "cascade" }),
+  reporterEmail: text("reporter_email"),
+  infractionType: text("infraction_type"),
+  note: text("note"),
+  // 'open' | 'actioned' | 'dismissed'
+  status: text("status").notNull().default("open"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+export type CapFlag = typeof capFlags.$inferSelect;
+
+export const capPoints = pgTable("cap_points", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  orgId: uuid("org_id"),
+  employeeId: uuid("employee_id").notNull().references(() => employees.id, { onDelete: "cascade" }),
+  infractionType: text("infraction_type"),
+  points: numeric("points").notNull(),
+  note: text("note"),
+  issuedBy: text("issued_by"),
+  // 'proposed' | 'active' | 'rejected' | 'disputed' | 'removed' | 'expired'
+  status: text("status").notNull().default("proposed"),
+  approvedBy: text("approved_by"),
+  approvedAt: timestamp("approved_at", { withTimezone: true }),
+  activeAt: timestamp("active_at", { withTimezone: true }),
+  expiresAt: date("expires_at"),
+  disputeNote: text("dispute_note"),
+  disputedAt: timestamp("disputed_at", { withTimezone: true }),
+  disputeResolution: text("dispute_resolution"),
+  disputeResolvedBy: text("dispute_resolved_by"),
+  sourceFlagId: uuid("source_flag_id"),
+  // Restoration credits are system rows with negative points.
+  isCredit: boolean("is_credit").notNull().default(false),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
+export type CapPoint = typeof capPoints.$inferSelect;
+
+// Level corrective actions (phase 4): documented response at each threshold
+// with employee acknowledgment and a second-leader confirmation.
+export const capActions = pgTable("cap_actions", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  orgId: uuid("org_id"),
+  employeeId: uuid("employee_id").notNull().references(() => employees.id, { onDelete: "cascade" }),
+  levelKey: text("level_key").notNull(),
+  balanceAt: numeric("balance_at"),
+  plan: text("plan"),
+  createdBy: text("created_by"),
+  acknowledgedAt: timestamp("acknowledged_at", { withTimezone: true }),
+  confirmedBy: text("confirmed_by"),
+  confirmedAt: timestamp("confirmed_at", { withTimezone: true }),
+  status: text("status").notNull().default("open"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+export type CapAction = typeof capActions.$inferSelect;
 
 // ───────────────────────────────────────────────
 // Time clock — punch in/out, the basis for hours,

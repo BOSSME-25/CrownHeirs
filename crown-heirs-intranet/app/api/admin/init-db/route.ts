@@ -313,6 +313,62 @@ export async function POST() {
         created_at timestamptz DEFAULT now()
       )
     `;
+
+    // ── Corrective Action Program ──
+    await sql`
+      CREATE TABLE IF NOT EXISTS cap_flags (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        org_id uuid,
+        subject_employee_id uuid NOT NULL REFERENCES employees(id) ON DELETE CASCADE,
+        reporter_email text,
+        infraction_type text,
+        note text,
+        status text NOT NULL DEFAULT 'open',
+        created_at timestamptz DEFAULT now()
+      )
+    `;
+    await sql`
+      CREATE TABLE IF NOT EXISTS cap_points (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        org_id uuid,
+        employee_id uuid NOT NULL REFERENCES employees(id) ON DELETE CASCADE,
+        infraction_type text,
+        points numeric NOT NULL,
+        note text,
+        issued_by text,
+        status text NOT NULL DEFAULT 'proposed',
+        approved_by text,
+        approved_at timestamptz,
+        active_at timestamptz,
+        expires_at date,
+        dispute_note text,
+        disputed_at timestamptz,
+        dispute_resolution text,
+        dispute_resolved_by text,
+        source_flag_id uuid,
+        is_credit boolean NOT NULL DEFAULT false,
+        created_at timestamptz DEFAULT now(),
+        updated_at timestamptz DEFAULT now()
+      )
+    `;
+    await sql`
+      CREATE TABLE IF NOT EXISTS cap_actions (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        org_id uuid,
+        employee_id uuid NOT NULL REFERENCES employees(id) ON DELETE CASCADE,
+        level_key text NOT NULL,
+        balance_at numeric,
+        plan text,
+        created_by text,
+        acknowledged_at timestamptz,
+        confirmed_by text,
+        confirmed_at timestamptz,
+        status text NOT NULL DEFAULT 'open',
+        created_at timestamptz DEFAULT now()
+      )
+    `;
+    await sql`ALTER TABLE employees ADD COLUMN IF NOT EXISTS tier text`;
+
     // Seed starter compliance items (flagged for verification) — only if empty.
     {
       const [{ n } = { n: "0" }] = (await sql`SELECT count(*)::int AS n FROM compliance_items`) as { n: number | string }[];

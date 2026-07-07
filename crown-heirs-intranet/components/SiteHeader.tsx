@@ -103,6 +103,7 @@ export default async function SiteHeader() {
             <button type="button" className="nav-top">Admin ▾</button>
             <div className="nav-menu">
               {canManage && <Link href="/credentials">Licenses &amp; Certs</Link>}
+              {canManage && <Link href="/cap">Corrective Action</Link>}
               {canManageTeam && <Link href="/admin/compliance">Compliance</Link>}
               {isAdmin && <Link href="/admin">Admin Console</Link>}
             </div>
@@ -113,6 +114,7 @@ export default async function SiteHeader() {
 
         {session?.user && (
           <>
+            <Link href="/discipline" className="nav-top-link">Discipline &amp; Advancement</Link>
             <Link href="/me" className="nav-top-link">My Profile</Link>
             <span className="who">{session.user.email}</span>
             <form
