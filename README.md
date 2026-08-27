@@ -11,8 +11,8 @@ The internal employee Team Hub lives in its own **private** repository,
 | Path | What it is |
 |---|---|
 | `/` | The "Find Your Service" experience |
-| `/tv` | **Salon TV display** — full-screen auto-rotating slideshow (photos of work, memberships, products, announcements). AirPlay or open this URL on the TV and leave it. |
-| `/admin` | **Bethany's editor** — password-protected. Add/swap photos, edit memberships, products, announcements, and slide timing. Works great from a phone. |
+| `/tv` | **Salon TV display** — full-screen auto-rotating slideshow (photos & videos of work, Instagram-framed posts, a "Follow us" slide, memberships, products, announcements). AirPlay or open this URL on the TV and leave it. |
+| `/admin` | **Bethany's editor** — password-protected. Add/swap photos and short videos (≤100 MB, direct-to-storage upload), mark any as an Instagram-style post, edit memberships, products, announcements, the IG handle, and slide timing. Works great from a phone. |
 
 The TV re-checks for new content every 3 minutes, so saves in `/admin` show up
 on screen without touching the TV.

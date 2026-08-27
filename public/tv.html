@@ -62,6 +62,53 @@ html, body { height: 100%; overflow: hidden; background: var(--ink); color: var(
   content: ''; display: block; width: 8vh; height: 1px;
   background: var(--gold); margin: 0 auto 2vh;
 }
+.slide.photo video.media {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+}
+
+/* ── Instagram-style post slides ─────────── */
+.igcard {
+  background: #ffffff; color: #1a1816; border-radius: 2.2vh; overflow: hidden;
+  width: 62vh; max-width: 88vw; text-align: left;
+  box-shadow: 0 3vh 9vh rgba(0,0,0,0.55);
+}
+.ig-head { display: flex; align-items: center; gap: 1.8vh; padding: 1.8vh 2.4vh; }
+.ig-av {
+  display: inline-flex; padding: 0.45vh; border-radius: 50%;
+  background: conic-gradient(from 210deg, #f9ce34, #ee2a7b, #6228d7, #f9ce34);
+}
+.ig-av img {
+  width: 5.6vh; height: 5.6vh; border-radius: 50%; background: #14120f;
+  object-fit: contain; padding: 0.7vh; border: 0.35vh solid #fff;
+}
+.ig-user { font-family: var(--font-ui); font-weight: 500; font-size: 2.3vh; }
+.ig-sub  { font-size: 1.8vh; color: #8a837a; }
+.ig-follow {
+  margin-left: auto; font-family: var(--font-ui); font-weight: 500;
+  font-size: 2vh; color: #ffffff; background: #b8714f;
+  padding: 0.9vh 2.2vh; border-radius: 1.2vh;
+}
+.ig-media { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; display: block; background: #000; }
+.ig-actions { display: flex; gap: 2.4vh; padding: 1.8vh 2.4vh 0.6vh; }
+.ig-actions svg { width: 3.4vh; height: 3.4vh; stroke: #1a1816; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.ig-cap { padding: 0.6vh 2.4vh 2.2vh; font-size: 2.2vh; font-weight: 300; line-height: 1.4; }
+.ig-cap b { font-weight: 500; }
+
+/* ── Follow-us slide ─────────────────────── */
+.follow .ring {
+  display: inline-flex; padding: 1vh; border-radius: 50%; margin-bottom: 4vh;
+  background: conic-gradient(from 210deg, #f9ce34, #ee2a7b, #6228d7, #f9ce34);
+}
+.follow .ring span {
+  display: flex; align-items: center; justify-content: center;
+  width: 24vh; height: 24vh; border-radius: 50%; background: var(--ink);
+  border: 0.8vh solid var(--ink);
+}
+.follow .ring img { height: 15vh; }
+.follow .tag {
+  font-family: var(--font-serif); font-style: italic; font-weight: 300;
+  font-size: 4vh; color: var(--paper-dim); margin-top: 1vh;
+}
 
 /* ── Shared text-slide furniture ─────────── */
 .kicker {
@@ -182,9 +229,35 @@ function buildSlides(c) {
      <div class="kicker">Crown Heirs Hair Den</div>
      <div class="tag">Your throne awaits.</div>`));
 
-  const photos = (c.gallery || []).map(g => mk('photo',
-    `<div class="img" style="background-image:url('${esc(g.url)}')"></div>
-     ${g.caption ? `<div class="photo-caption">${esc(g.caption)}</div>` : ''}`));
+  const handle = String(c.settings?.instagramHandle || '').replace(/^@/, '').trim();
+  const isVideo = g => g.type === 'video' || /\.(mp4|webm|mov)(\?|$)/i.test(g.url);
+  const IG_ICONS = `
+    <svg viewBox="0 0 24 24"><path d="M20.8 4.6c-2-2-5.3-2-7.3 0L12 6.1l-1.5-1.5c-2-2-5.3-2-7.3 0s-2 5.3 0 7.3L12 20.7l8.8-8.8c2-2 2-5.3 0-7.3z"/></svg>
+    <svg viewBox="0 0 24 24"><path d="M21 11.5c0 4.7-4 8.5-9 8.5-1 0-2-.1-2.9-.4L3 21l1.6-4.8C3.6 14.9 3 13.3 3 11.5 3 6.8 7 3 12 3s9 3.8 9 8.5z"/></svg>
+    <svg viewBox="0 0 24 24"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7"/></svg>`;
+
+  const photos = (c.gallery || []).map(g => {
+    const media = isVideo(g)
+      ? (cls) => `<video class="${cls}" src="${esc(g.url)}" muted loop playsinline preload="auto"></video>`
+      : null;
+    if (g.ig) {
+      return mk('igpost',
+        `<div class="igcard">
+           <div class="ig-head">
+             <span class="ig-av"><img src="/images/logo-1.png" alt=""></span>
+             <div><div class="ig-user">${handle ? '@' + esc(handle) : 'Crown Heirs Hair Den'}</div>
+                  <div class="ig-sub">Crown Heirs Hair Den</div></div>
+             <div class="ig-follow">Follow</div>
+           </div>
+           ${media ? media('ig-media') : `<img class="ig-media" src="${esc(g.url)}" alt="">`}
+           <div class="ig-actions">${IG_ICONS}</div>
+           ${g.caption ? `<div class="ig-cap">${handle ? `<b>@${esc(handle)}</b> ` : ''}${esc(g.caption)}</div>` : ''}
+         </div>`);
+    }
+    return mk('photo',
+      `${media ? media('media') : `<div class="img" style="background-image:url('${esc(g.url)}')"></div>`}
+       ${g.caption ? `<div class="photo-caption">${esc(g.caption)}</div>` : ''}`);
+  });
 
   const textSlides = [];
 
@@ -219,6 +292,14 @@ function buildSlides(c) {
        <div class="body">${esc(s.body)}</div>`));
   });
 
+  if (handle) {
+    textSlides.push(mk('follow',
+      `<div class="ring"><span><img src="/images/logo-1.png" alt=""></span></div>
+       <div class="kicker">Find us on Instagram</div>
+       <h1>@${esc(handle)}</h1>
+       <div class="tag">Fresh crowns daily — tag us in yours</div>`));
+  }
+
   // Interleave: a couple of photos between each text slide so the loop
   // always feels alive even with lots of copy.
   let p = 0;
@@ -232,9 +313,21 @@ function buildSlides(c) {
 }
 
 function show(next) {
-  const secs = window.__secs || 9;
-  slides.forEach((s, i) => s.classList.toggle('on', i === next));
+  slides.forEach((s, i) => {
+    const on = i === next;
+    s.classList.toggle('on', on);
+    s.querySelectorAll('video').forEach(v => {
+      if (on) { try { v.currentTime = 0; } catch (e) {} v.play().catch(() => {}); }
+      else v.pause();
+    });
+  });
   idx = next;
+  // Video slides hold for the clip's length (4s–60s); everything else uses the setting.
+  let secs = window.__secs || 9;
+  const v = slides[next].querySelector('video');
+  if (v && isFinite(v.duration) && v.duration > 1) {
+    secs = Math.min(Math.max(v.duration, 4), 60);
+  }
   bar.classList.remove('run'); void bar.offsetWidth;
   bar.style.animationDuration = secs + 's';
   bar.classList.add('run');

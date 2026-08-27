@@ -57,7 +57,12 @@ header.top p { color: var(--ink-dim); margin-top: 6px; }
 /* Photo grid */
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; }
 .ph { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--surface-dim); }
-.ph img { width: 100%; aspect-ratio: 4/3; object-fit: cover; display: block; }
+.ph img, .ph video { width: 100%; aspect-ratio: 4/3; object-fit: cover; display: block; background: #000; }
+.igtog {
+  display: flex; align-items: center; gap: 7px; margin-top: 8px;
+  font-size: 13px; color: var(--ink-mid); cursor: pointer;
+}
+.igtog input { width: auto; accent-color: var(--terra); }
 .ph .ph-body { padding: 8px; }
 .ph input { padding: 8px 10px; font-size: 14px; }
 .ph .ph-btns { display: flex; gap: 6px; margin-top: 8px; }
@@ -109,13 +114,13 @@ header.top p { color: var(--ink-dim); margin-top: 6px; }
   </header>
 
   <div class="card">
-    <h2>Photos</h2>
-    <div class="hint">Photos of your work. They rotate between the other slides. Use ‹ › to reorder — first photo plays first.</div>
+    <h2>Photos &amp; Videos</h2>
+    <div class="hint">Photos and short clips of your work — they rotate between the other slides. Use ‹ › to reorder. Tick “Show as IG post” to frame one like an Instagram post on the TV. Videos: up to ~60 seconds / 100&nbsp;MB.</div>
     <div class="grid" id="photoGrid"></div>
     <div id="uploading">Uploading…</div>
     <div style="margin-top:14px;">
-      <button class="btn btn-terra" onclick="document.getElementById('file').click()">＋ Add photos</button>
-      <input id="file" type="file" accept="image/*" multiple class="hidden" onchange="addPhotos(this.files)">
+      <button class="btn btn-terra" onclick="document.getElementById('file').click()">＋ Add photos / videos</button>
+      <input id="file" type="file" accept="image/*,video/mp4,video/quicktime,video/webm" multiple class="hidden" onchange="addPhotos(this.files)">
     </div>
   </div>
 
@@ -141,9 +146,11 @@ header.top p { color: var(--ink-dim); margin-top: 6px; }
   </div>
 
   <div class="card">
-    <h2>Timing</h2>
-    <label>Seconds each slide stays on screen</label>
+    <h2>Settings</h2>
+    <label>Seconds each slide stays on screen (videos play their full length)</label>
     <input id="secs" type="number" min="4" max="60" style="max-width:120px;">
+    <label>Instagram handle (shown on IG-framed slides and the “Follow us” slide — leave blank to hide)</label>
+    <input id="igHandle" placeholder="crownheirs" style="max-width:280px;">
   </div>
 </div>
 
@@ -188,19 +195,26 @@ async function enter() {
   C.gallery ??= []; C.memberships ??= []; C.products ??= []; C.infoSlides ??= [];
   C.settings ??= {};
   $('secs').value = C.settings.secondsPerSlide || 9;
+  $('igHandle').value = C.settings.instagramHandle ?? 'crownheirs';
   renderAll();
 }
 
 function renderAll() { renderPhotos(); renderMembers(); renderProds(); renderInfos(); }
 
 /* ── Photos ── */
+const isVideo = g => g.type === 'video' || /\.(mp4|webm|mov)(\?|$)/i.test(g.url);
+
 function renderPhotos() {
   $('photoGrid').innerHTML = C.gallery.map((g, i) => `
     <div class="ph">
-      <img src="${esc(g.url)}" alt="" loading="lazy">
+      ${isVideo(g)
+        ? `<video src="${esc(g.url)}" muted playsinline preload="metadata"></video>`
+        : `<img src="${esc(g.url)}" alt="" loading="lazy">`}
       <div class="ph-body">
         <input value="${esc(g.caption || '')}" placeholder="Caption (optional)"
                onchange="C.gallery[${i}].caption=this.value">
+        <label class="igtog"><input type="checkbox" ${g.ig ? 'checked' : ''}
+               onchange="C.gallery[${i}].ig=this.checked"> Show as IG post</label>
         <div class="ph-btns">
           <button onclick="movePhoto(${i},-1)" ${i === 0 ? 'disabled' : ''}>‹</button>
           <button onclick="movePhoto(${i},1)" ${i === C.gallery.length - 1 ? 'disabled' : ''}>›</button>
@@ -246,6 +260,33 @@ async function addPhotos(files) {
   $('uploading').style.display = 'block';
   try {
     for (const f of files) {
+      if (f.type.startsWith('video/')) {
+        // Videos go straight from the browser to Blob storage (too big for
+        // the serverless upload route). Token is minted by /api/upload.
+        if (!window.blobUpload) {
+          alert('Video uploads need a moment to initialize — check your connection, refresh, and try again.');
+          continue;
+        }
+        if (f.size > 100 * 1024 * 1024) {
+          alert(`"${f.name}" is over 100 MB. Trim it shorter (aim for under a minute) and try again.`);
+          continue;
+        }
+        try {
+          $('uploading').textContent = `Uploading ${f.name}… (videos take a little longer)`;
+          const safe = (f.name || 'video').replace(/[^a-zA-Z0-9._-]/g, '_');
+          const blob = await window.blobUpload('gallery/' + safe, f, {
+            access: 'public',
+            handleUploadUrl: '/api/upload',
+            clientPayload: KEY,
+            contentType: f.type || 'video/mp4'
+          });
+          C.gallery.push({ url: blob.url, caption: '', type: 'video' });
+        } catch (e) {
+          alert('Video upload failed: ' + e.message);
+        }
+        continue;
+      }
+      $('uploading').textContent = 'Uploading…';
       const small = await shrink(f);
       const name = (f.name || 'photo').replace(/\.[^.]+$/, '') + '.jpg';
       const r = await fetch('/api/photos?filename=' + encodeURIComponent(name), {
@@ -260,6 +301,7 @@ async function addPhotos(files) {
     renderPhotos();
   } finally {
     $('uploading').style.display = 'none';
+    $('uploading').textContent = 'Uploading…';
     $('file').value = '';
   }
 }
@@ -329,6 +371,7 @@ async function saveAll() {
   const st = $('saveStatus');
   st.className = 'status'; st.textContent = 'Saving…';
   C.settings.secondsPerSlide = Math.max(4, Number($('secs').value) || 9);
+  C.settings.instagramHandle = $('igHandle').value.replace(/^@/, '').trim();
   // Drop empty rows so the TV never shows blanks
   C.memberships = C.memberships.filter(m => m.name || m.price || (m.perks || []).length);
   C.products    = C.products.filter(p => p.name || p.blurb);
@@ -353,6 +396,15 @@ async function saveAll() {
 if (KEY) {
   fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: KEY }) })
     .then(r => { if (r.ok) enter(); else sessionStorage.removeItem('chKey'); });
+}
+</script>
+<script type="module">
+// Direct-to-storage uploader for videos (Vercel Blob client).
+try {
+  const { upload } = await import('https://esm.sh/@vercel/blob@0.27.0/client');
+  window.blobUpload = upload;
+} catch (e) {
+  console.warn('Blob client failed to load; video uploads disabled.', e);
 }
 </script>
 </body>
