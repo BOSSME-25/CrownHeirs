@@ -5,6 +5,14 @@
 // clientPayload over HTTPS).
 const { handleUpload } = require('@vercel/blob/client');
 
+// Accept any *_READ_WRITE_TOKEN, not just the default name (custom store
+// prefixes rename it).
+function blobToken() {
+  if (process.env.BLOB_READ_WRITE_TOKEN) return process.env.BLOB_READ_WRITE_TOKEN;
+  const k = Object.keys(process.env).find(n => n.endsWith('_READ_WRITE_TOKEN'));
+  return k ? process.env[k] : undefined;
+}
+
 module.exports = async (req, res) => {
   if (req.method !== 'POST') {
     res.status(405).json({ error: 'Method not allowed' });
@@ -14,6 +22,7 @@ module.exports = async (req, res) => {
     const jsonResponse = await handleUpload({
       body: req.body,
       request: req,
+      token: blobToken(),
       onBeforeGenerateToken: async (pathname, clientPayload) => {
         const key = process.env.ADMIN_PASSWORD;
         if (!key || clientPayload !== key) {
