@@ -43,10 +43,26 @@ function isAuthed(req) {
   return Boolean(key) && req.headers['x-admin-key'] === key;
 }
 
+// The SDK looks for BLOB_READ_WRITE_TOKEN, but connecting a store with a
+// custom prefix names it differently (e.g. MYSTORE_READ_WRITE_TOKEN) —
+// accept whatever *_READ_WRITE_TOKEN this project has.
+function blobToken() {
+  if (process.env.BLOB_READ_WRITE_TOKEN) return process.env.BLOB_READ_WRITE_TOKEN;
+  const k = Object.keys(process.env).find(n => n.endsWith('_READ_WRITE_TOKEN'));
+  return k ? process.env[k] : undefined;
+}
+
+function blobDiagnostic() {
+  const names = Object.keys(process.env).filter(n => /BLOB|_READ_WRITE_TOKEN$/i.test(n));
+  return names.length
+    ? 'Storage-related env vars on this deployment: ' + names.join(', ')
+    : 'No storage token env vars exist on this deployment — the Blob store is not connected to the crown-heirs project (or no redeploy has happened since connecting).';
+}
+
 module.exports = async (req, res) => {
   if (req.method === 'GET') {
     try {
-      const { blobs } = await list({ prefix: CONTENT_PATH, limit: 1 });
+      const { blobs } = await list({ prefix: CONTENT_PATH, limit: 1, token: blobToken() });
       if (blobs.length > 0) {
         const r = await fetch(blobs[0].url + '?t=' + Date.now(), { cache: 'no-store' });
         if (r.ok) {
@@ -79,11 +95,12 @@ module.exports = async (req, res) => {
         contentType: 'application/json',
         addRandomSuffix: false,
         allowOverwrite: true,
-        cacheControlMaxAge: 60
+        cacheControlMaxAge: 60,
+        token: blobToken()
       });
       res.status(200).json({ ok: true });
     } catch (e) {
-      res.status(500).json({ error: 'Could not save. Is the Blob store connected to this project? (' + e.message + ')' });
+      res.status(500).json({ error: 'Could not save. ' + blobDiagnostic() + ' (' + e.message + ')' });
     }
     return;
   }
