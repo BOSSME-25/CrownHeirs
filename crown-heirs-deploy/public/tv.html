@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Crown Heirs — The Den</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Cinzel:wght@400;500;600&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+/* Brand tokens — same palette as crownheirs.com, tuned dark for TV */
+:root {
+  --ink:      #14120f;
+  --ink-2:    #1e1a16;
+  --paper:    #ece8e2;
+  --paper-dim:#c9c2b8;
+  --terra:    #b8714f;
+  --terra-hi: #d08a63;
+  --gold:     #d4a017;
+  --gold-hi:  #e8b83a;
+  --font-ui:      'Jost', sans-serif;
+  --font-serif:   'Cormorant Garamond', serif;
+  --font-display: 'Cinzel', serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; background: var(--ink); color: var(--paper); font-family: var(--font-ui); cursor: none; }
+
+/* ── Slide stage ─────────────────────────── */
+#stage { position: fixed; inset: 0; }
+.slide {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  opacity: 0; visibility: hidden;
+  transition: opacity 1.4s ease, visibility 1.4s;
+  padding: 5vh 6vw;
+  text-align: center;
+}
+.slide.on { opacity: 1; visibility: visible; }
+
+/* ── Photo slides (full bleed + Ken Burns) ── */
+.slide.photo { padding: 0; }
+.slide.photo .img {
+  position: absolute; inset: 0;
+  background-size: cover; background-position: center 30%;
+}
+.slide.on .img { animation: kenburns 14s ease-out forwards; }
+@keyframes kenburns {
+  from { transform: scale(1.02); }
+  to   { transform: scale(1.12); }
+}
+.slide.photo::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(20,18,15,0.75) 0%, rgba(20,18,15,0) 32%),
+              linear-gradient(to bottom, rgba(20,18,15,0.4) 0%, rgba(20,18,15,0) 18%);
+}
+.photo-caption {
+  position: absolute; bottom: 7vh; left: 0; right: 0; z-index: 2;
+  font-family: var(--font-serif); font-weight: 300; font-style: italic;
+  font-size: 4.2vh; letter-spacing: 0.04em; color: var(--paper);
+  text-shadow: 0 2px 24px rgba(0,0,0,0.6);
+}
+.photo-caption::before {
+  content: ''; display: block; width: 8vh; height: 1px;
+  background: var(--gold); margin: 0 auto 2vh;
+}
+
+/* ── Shared text-slide furniture ─────────── */
+.kicker {
+  font-family: var(--font-display); font-weight: 400;
+  font-size: 2.2vh; letter-spacing: 0.55em; text-indent: 0.55em;
+  color: var(--gold); text-transform: uppercase; margin-bottom: 3.5vh;
+}
+.kicker::after {
+  content: ''; display: block; width: 9vh; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  margin: 2.2vh auto 0;
+}
+h1 {
+  font-family: var(--font-serif); font-weight: 300;
+  font-size: 9vh; line-height: 1.08; margin-bottom: 3vh; color: var(--paper);
+}
+h1 em { font-style: italic; color: var(--terra-hi); }
+
+/* ── Welcome slide ───────────────────────── */
+.welcome .logo { height: 24vh; margin-bottom: 4vh; filter: drop-shadow(0 6px 40px rgba(212,160,23,0.25)); }
+.welcome .tag {
+  font-family: var(--font-serif); font-style: italic; font-weight: 300;
+  font-size: 4.6vh; color: var(--paper-dim);
+}
+
+/* ── Membership slide ────────────────────── */
+.tiers { display: flex; gap: 4vw; justify-content: center; align-items: stretch; width: 100%; max-width: 88vw; }
+.tier {
+  flex: 1; max-width: 34vw;
+  background: linear-gradient(165deg, rgba(236,232,226,0.055), rgba(236,232,226,0.015));
+  border: 1px solid rgba(212,160,23,0.28);
+  border-radius: 14px; padding: 4.5vh 3vw 5vh;
+  display: flex; flex-direction: column; align-items: center;
+}
+.tier .t-name {
+  font-family: var(--font-display); font-size: 3.4vh; font-weight: 500;
+  letter-spacing: 0.18em; color: var(--gold-hi); text-transform: uppercase; margin-bottom: 1.4vh;
+}
+.tier .t-price { font-family: var(--font-serif); font-size: 5.4vh; font-weight: 300; margin-bottom: 3vh; }
+.tier ul { list-style: none; }
+.tier li {
+  font-size: 2.5vh; font-weight: 300; color: var(--paper-dim);
+  padding: 1.15vh 0; line-height: 1.35;
+}
+.tier li + li { border-top: 1px solid rgba(236,232,226,0.09); }
+
+/* ── Products slide ──────────────────────── */
+.prods { display: flex; flex-wrap: wrap; gap: 3vh 3vw; justify-content: center; max-width: 86vw; }
+.prod {
+  min-width: 24vw; max-width: 38vw;
+  background: rgba(236,232,226,0.045);
+  border: 1px solid rgba(184,113,79,0.35);
+  border-radius: 12px; padding: 3.4vh 2.6vw;
+}
+.prod .p-head { display: flex; justify-content: center; gap: 1.2vw; align-items: baseline; flex-wrap: wrap; }
+.prod .p-name { font-family: var(--font-serif); font-size: 3.8vh; font-weight: 400; }
+.prod .p-price { font-family: var(--font-display); font-size: 2.6vh; color: var(--terra-hi); }
+.prod .p-blurb { font-size: 2.3vh; font-weight: 300; color: var(--paper-dim); margin-top: 1.2vh; line-height: 1.45; }
+
+/* ── Info slide ──────────────────────────── */
+.info .body {
+  font-family: var(--font-serif); font-weight: 300;
+  font-size: 4.4vh; line-height: 1.5; color: var(--paper-dim);
+  max-width: 70vw; white-space: pre-line;
+}
+
+/* ── Chrome: clock + brand mark + progress ─ */
+#clock {
+  position: fixed; top: 3.4vh; right: 3vw; z-index: 10;
+  font-family: var(--font-display); font-size: 2.4vh; letter-spacing: 0.2em;
+  color: rgba(236,232,226,0.72); text-shadow: 0 1px 12px rgba(0,0,0,0.5);
+}
+#brand {
+  position: fixed; top: 3.2vh; left: 3vw; z-index: 10;
+  display: flex; align-items: center; gap: 1vw;
+}
+#brand img { height: 5.4vh; filter: drop-shadow(0 1px 10px rgba(0,0,0,0.5)); }
+#brand span {
+  font-family: var(--font-display); font-size: 2.1vh; letter-spacing: 0.34em;
+  color: rgba(236,232,226,0.72); text-transform: uppercase; text-shadow: 0 1px 12px rgba(0,0,0,0.5);
+}
+#bar { position: fixed; bottom: 0; left: 0; height: 3px; width: 0; background: linear-gradient(90deg, var(--terra), var(--gold)); z-index: 10; }
+#bar.run { animation: fill linear forwards; }
+@keyframes fill { from { width: 0; } to { width: 100%; } }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<div id="brand"><img src="/images/logo-1.png" alt=""><span>Crown Heirs Hair Den</span></div>
+<div id="clock"></div>
+<div id="bar"></div>
+
+<script>
+/* ════════════════════════════════════════════
+   Crown Heirs — TV display
+   Content comes from /api/content (edited at /admin).
+   Auto-rotates; re-checks for new content every 3 min.
+════════════════════════════════════════════ */
+const stage = document.getElementById('stage');
+const bar   = document.getElementById('bar');
+
+let slides = [], idx = -1, timer = null, contentRaw = '';
+
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+function buildSlides(c) {
+  const els = [];
+  const mk = (cls, html) => {
+    const d = document.createElement('div');
+    d.className = 'slide ' + cls;
+    d.innerHTML = html;
+    return d;
+  };
+
+  // Welcome
+  els.push(mk('welcome',
+    `<img class="logo" src="/images/logo-1.png" alt="Crown Heirs">
+     <div class="kicker">Crown Heirs Hair Den</div>
+     <div class="tag">Your throne awaits.</div>`));
+
+  const photos = (c.gallery || []).map(g => mk('photo',
+    `<div class="img" style="background-image:url('${esc(g.url)}')"></div>
+     ${g.caption ? `<div class="photo-caption">${esc(g.caption)}</div>` : ''}`));
+
+  const textSlides = [];
+
+  if ((c.memberships || []).length) {
+    textSlides.push(mk('memberships',
+      `<div class="kicker">Memberships</div>
+       <h1>Wear the <em>crown</em> all year</h1>
+       <div class="tiers">${c.memberships.map(m => `
+         <div class="tier">
+           <div class="t-name">${esc(m.name)}</div>
+           <div class="t-price">${esc(m.price)}</div>
+           <ul>${(m.perks || []).map(p => `<li>${esc(p)}</li>`).join('')}</ul>
+         </div>`).join('')}</div>`));
+  }
+
+  if ((c.products || []).length) {
+    textSlides.push(mk('products',
+      `<div class="kicker">Take the Den Home</div>
+       <h1>Products we <em>trust</em></h1>
+       <div class="prods">${c.products.map(p => `
+         <div class="prod">
+           <div class="p-head"><span class="p-name">${esc(p.name)}</span>
+           ${p.price ? `<span class="p-price">${esc(p.price)}</span>` : ''}</div>
+           ${p.blurb ? `<div class="p-blurb">${esc(p.blurb)}</div>` : ''}
+         </div>`).join('')}</div>`));
+  }
+
+  (c.infoSlides || []).forEach(s => {
+    textSlides.push(mk('info',
+      `<div class="kicker">The Den</div>
+       <h1>${esc(s.title)}</h1>
+       <div class="body">${esc(s.body)}</div>`));
+  });
+
+  // Interleave: a couple of photos between each text slide so the loop
+  // always feels alive even with lots of copy.
+  let p = 0;
+  const takePhotos = n => { const out = []; for (let i = 0; i < n && photos.length; i++) out.push(photos[p++ % photos.length]); return out; };
+  textSlides.forEach(t => { els.push(...takePhotos(2), t); });
+  // Any photos never shown yet get appended so nothing is skipped.
+  while (p < photos.length) els.push(photos[p++]);
+  if (els.length === 1) els.push(...photos); // welcome only — just play photos
+
+  return els;
+}
+
+function show(next) {
+  const secs = window.__secs || 9;
+  slides.forEach((s, i) => s.classList.toggle('on', i === next));
+  idx = next;
+  bar.classList.remove('run'); void bar.offsetWidth;
+  bar.style.animationDuration = secs + 's';
+  bar.classList.add('run');
+  clearTimeout(timer);
+  timer = setTimeout(() => show((idx + 1) % slides.length), secs * 1000);
+}
+
+async function load(first) {
+  try {
+    const r = await fetch('/api/content', { cache: 'no-store' });
+    const raw = await r.text();
+    if (raw === contentRaw) return;            // nothing changed
+    contentRaw = raw;
+    const c = JSON.parse(raw);
+    window.__secs = Math.max(4, Number(c.settings?.secondsPerSlide) || 9);
+    // Preload photos before swapping so nothing flashes
+    await Promise.all((c.gallery || []).map(g => new Promise(res => {
+      const im = new Image(); im.onload = im.onerror = res; im.src = g.url;
+    })));
+    const fresh = buildSlides(c);
+    stage.replaceChildren(...fresh);
+    slides = fresh;
+    show(0);
+  } catch (e) {
+    if (first) setTimeout(() => load(true), 5000); // retry until first success
+  }
+}
+
+load(true);
+setInterval(() => load(false), 3 * 60 * 1000);
+
+// Clock
+const clock = document.getElementById('clock');
+function tick() {
+  clock.textContent = new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+}
+tick(); setInterval(tick, 15000);
+
+// Keep the screen awake where the browser allows it (kiosk / AirPlay setups)
+if ('wakeLock' in navigator) {
+  const grab = () => navigator.wakeLock.request('screen').catch(() => {});
+  grab();
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) grab(); });
+}
+</script>
+</body>
+</html>
