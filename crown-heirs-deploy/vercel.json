@@ -1,6 +1,8 @@
 {
   "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
+    { "source": "/tv", "destination": "/tv.html" },
+    { "source": "/admin", "destination": "/admin.html" },
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
   ],
   "headers": [
     {

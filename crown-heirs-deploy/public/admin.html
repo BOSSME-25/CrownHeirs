@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Crown Heirs — TV Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Cinzel:wght@400;500&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #ece8e2; --surface: #ffffff; --surface-dim: #f5f2ee;
+  --terra: #a0624a; --terra-hi: #b8714f;
+  --gold: #c8952a;
+  --ink: #1a1816; --ink-mid: #4a4540; --ink-dim: #8a837a;
+  --border: rgba(26,24,22,0.12);
+  --font-ui: 'Jost', sans-serif; --font-serif: 'Cormorant Garamond', serif; --font-display: 'Cinzel', serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-ui); font-weight: 300; font-size: 16px; }
+button { font-family: var(--font-ui); cursor: pointer; }
+input, textarea {
+  font-family: var(--font-ui); font-size: 16px; font-weight: 300; color: var(--ink);
+  width: 100%; padding: 12px 14px; border: 1px solid var(--border); border-radius: 10px;
+  background: var(--surface);
+}
+input:focus, textarea:focus { outline: 2px solid var(--terra); outline-offset: -1px; }
+textarea { resize: vertical; min-height: 80px; }
+label { display: block; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-dim); margin: 14px 0 6px; }
+
+.wrap { max-width: 680px; margin: 0 auto; padding: 24px 18px 120px; }
+header.top { text-align: center; padding: 26px 0 10px; }
+header.top img { height: 64px; }
+header.top h1 { font-family: var(--font-display); font-weight: 400; font-size: 22px; letter-spacing: 0.22em; text-transform: uppercase; margin-top: 10px; }
+header.top p { color: var(--ink-dim); margin-top: 6px; }
+
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-top: 20px; }
+.card > h2 { font-family: var(--font-serif); font-weight: 600; font-size: 26px; margin-bottom: 4px; }
+.card > .hint { color: var(--ink-dim); font-size: 14px; margin-bottom: 12px; }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  border: none; border-radius: 100px; padding: 13px 24px;
+  font-size: 15px; font-weight: 400; letter-spacing: 0.04em;
+}
+.btn-terra { background: var(--terra); color: #fff; }
+.btn-terra:active { background: var(--terra-hi); }
+.btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--ink-mid); }
+.btn-sm { padding: 8px 14px; font-size: 13px; }
+.btn-danger { background: transparent; border: 1px solid rgba(160,50,40,0.4); color: #a03228; }
+
+/* Login */
+#login { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+#login .card { width: 100%; max-width: 380px; text-align: center; padding: 34px 26px; }
+#login img { height: 80px; margin-bottom: 14px; }
+#login .err { color: #a03228; font-size: 14px; margin-top: 10px; min-height: 18px; }
+
+/* Photo grid */
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; }
+.ph { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--surface-dim); }
+.ph img { width: 100%; aspect-ratio: 4/3; object-fit: cover; display: block; }
+.ph .ph-body { padding: 8px; }
+.ph input { padding: 8px 10px; font-size: 14px; }
+.ph .ph-btns { display: flex; gap: 6px; margin-top: 8px; }
+.ph .ph-btns button { flex: 1; border: 1px solid var(--border); background: var(--surface); border-radius: 8px; padding: 7px 0; font-size: 15px; color: var(--ink-mid); }
+.ph .ph-btns button.del { color: #a03228; border-color: rgba(160,50,40,0.35); }
+
+.item { border: 1px solid var(--border); border-radius: 12px; padding: 14px; margin-top: 12px; background: var(--surface-dim); }
+.item .row-end { display: flex; justify-content: space-between; gap: 8px; margin-top: 12px; }
+.move { display: flex; gap: 6px; }
+.move button { border: 1px solid var(--border); background: var(--surface); border-radius: 8px; width: 40px; height: 36px; font-size: 16px; color: var(--ink-mid); }
+
+/* Sticky save bar */
+#savebar {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 50;
+  background: rgba(255,255,255,0.96); backdrop-filter: blur(8px);
+  border-top: 1px solid var(--border);
+  display: none; align-items: center; justify-content: center; gap: 14px;
+  padding: 14px 18px calc(14px + env(safe-area-inset-bottom));
+}
+#savebar .status { font-size: 14px; color: var(--ink-dim); min-width: 90px; text-align: center; }
+#savebar .status.ok { color: #3d7a45; }
+#savebar .status.err { color: #a03228; }
+
+#uploading { font-size: 14px; color: var(--terra); margin-top: 10px; display: none; }
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<!-- ═══ LOGIN ═══ -->
+<div id="login">
+  <div class="card">
+    <img src="/images/logo-1.png" alt="Crown Heirs">
+    <h2 style="font-family:var(--font-display);font-weight:400;letter-spacing:0.18em;font-size:18px;">TV Admin</h2>
+    <p style="color:var(--ink-dim);margin:8px 0 18px;">Sign in to edit what plays on the salon TV.</p>
+    <input id="pw" type="password" placeholder="Password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+    <div class="err" id="loginErr"></div>
+    <button class="btn btn-terra" style="width:100%;margin-top:8px;" onclick="doLogin()">Sign in</button>
+  </div>
+</div>
+
+<!-- ═══ EDITOR ═══ -->
+<div id="editor" class="wrap hidden">
+  <header class="top">
+    <img src="/images/logo-1.png" alt="">
+    <h1>TV Display Admin</h1>
+    <p>Changes appear on the TV within a few minutes of saving.<br>
+       <a href="/tv" target="_blank" style="color:var(--terra);">Open the TV page ↗</a> to preview.</p>
+  </header>
+
+  <div class="card">
+    <h2>Photos</h2>
+    <div class="hint">Photos of your work. They rotate between the other slides. Use ‹ › to reorder — first photo plays first.</div>
+    <div class="grid" id="photoGrid"></div>
+    <div id="uploading">Uploading…</div>
+    <div style="margin-top:14px;">
+      <button class="btn btn-terra" onclick="document.getElementById('file').click()">＋ Add photos</button>
+      <input id="file" type="file" accept="image/*" multiple class="hidden" onchange="addPhotos(this.files)">
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Memberships</h2>
+    <div class="hint">Shown side-by-side on one slide. One perk per line.</div>
+    <div id="memberList"></div>
+    <button class="btn btn-ghost btn-sm" style="margin-top:12px;" onclick="addMember()">＋ Add membership</button>
+  </div>
+
+  <div class="card">
+    <h2>Products</h2>
+    <div class="hint">What you sell at the front. Price and description are optional.</div>
+    <div id="prodList"></div>
+    <button class="btn btn-ghost btn-sm" style="margin-top:12px;" onclick="addProd()">＋ Add product</button>
+  </div>
+
+  <div class="card">
+    <h2>Announcements</h2>
+    <div class="hint">Extra slides — specials, events, holiday hours, anything.</div>
+    <div id="infoList"></div>
+    <button class="btn btn-ghost btn-sm" style="margin-top:12px;" onclick="addInfo()">＋ Add announcement</button>
+  </div>
+
+  <div class="card">
+    <h2>Timing</h2>
+    <label>Seconds each slide stays on screen</label>
+    <input id="secs" type="number" min="4" max="60" style="max-width:120px;">
+  </div>
+</div>
+
+<div id="savebar">
+  <span class="status" id="saveStatus"></span>
+  <button class="btn btn-terra" style="min-width:160px;" onclick="saveAll()">Save to TV</button>
+</div>
+
+<script>
+/* ════════════════════════════════════════════
+   Crown Heirs TV admin. Talks to /api/content
+   and /api/photos with the x-admin-key header.
+════════════════════════════════════════════ */
+let KEY = sessionStorage.getItem('chKey') || '';
+let C = null; // content being edited
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+async function doLogin() {
+  const pw = $('pw').value;
+  $('loginErr').textContent = '';
+  const r = await fetch('/api/login', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ password: pw })
+  });
+  if (r.ok) {
+    KEY = pw; sessionStorage.setItem('chKey', pw);
+    enter();
+  } else {
+    const j = await r.json().catch(() => ({}));
+    $('loginErr').textContent = j.error || 'Wrong password';
+  }
+}
+
+async function enter() {
+  $('login').classList.add('hidden');
+  $('editor').classList.remove('hidden');
+  $('savebar').style.display = 'flex';
+  const r = await fetch('/api/content', { cache: 'no-store' });
+  C = await r.json();
+  C.gallery ??= []; C.memberships ??= []; C.products ??= []; C.infoSlides ??= [];
+  C.settings ??= {};
+  $('secs').value = C.settings.secondsPerSlide || 9;
+  renderAll();
+}
+
+function renderAll() { renderPhotos(); renderMembers(); renderProds(); renderInfos(); }
+
+/* ── Photos ── */
+function renderPhotos() {
+  $('photoGrid').innerHTML = C.gallery.map((g, i) => `
+    <div class="ph">
+      <img src="${esc(g.url)}" alt="" loading="lazy">
+      <div class="ph-body">
+        <input value="${esc(g.caption || '')}" placeholder="Caption (optional)"
+               onchange="C.gallery[${i}].caption=this.value">
+        <div class="ph-btns">
+          <button onclick="movePhoto(${i},-1)" ${i === 0 ? 'disabled' : ''}>‹</button>
+          <button onclick="movePhoto(${i},1)" ${i === C.gallery.length - 1 ? 'disabled' : ''}>›</button>
+          <button class="del" onclick="delPhoto(${i})">✕</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+function movePhoto(i, d) {
+  const j = i + d;
+  [C.gallery[i], C.gallery[j]] = [C.gallery[j], C.gallery[i]];
+  renderPhotos();
+}
+async function delPhoto(i) {
+  if (!confirm('Remove this photo from the TV?')) return;
+  const g = C.gallery[i];
+  C.gallery.splice(i, 1);
+  renderPhotos();
+  // Clean up the stored file too (no-op for the built-in starter photos)
+  fetch('/api/photos?url=' + encodeURIComponent(g.url), { method: 'DELETE', headers: { 'x-admin-key': KEY } });
+}
+
+// Resize on the phone before upload: TVs are 1080p, so 1600px wide is plenty
+// and keeps uploads fast + under the server's size limit.
+function shrink(file) {
+  return new Promise(resolve => {
+    const img = new Image();
+    img.onload = () => {
+      const max = 1600;
+      const scale = Math.min(1, max / Math.max(img.width, img.height));
+      const cv = document.createElement('canvas');
+      cv.width = Math.round(img.width * scale);
+      cv.height = Math.round(img.height * scale);
+      cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+      cv.toBlob(b => resolve(b || file), 'image/jpeg', 0.85);
+    };
+    img.onerror = () => resolve(file);
+    img.src = URL.createObjectURL(file);
+  });
+}
+
+async function addPhotos(files) {
+  $('uploading').style.display = 'block';
+  try {
+    for (const f of files) {
+      const small = await shrink(f);
+      const name = (f.name || 'photo').replace(/\.[^.]+$/, '') + '.jpg';
+      const r = await fetch('/api/photos?filename=' + encodeURIComponent(name), {
+        method: 'POST',
+        headers: { 'x-admin-key': KEY, 'Content-Type': 'image/jpeg' },
+        body: small
+      });
+      const j = await r.json();
+      if (!r.ok) { alert(j.error || 'Upload failed'); continue; }
+      C.gallery.push({ url: j.url, caption: '' });
+    }
+    renderPhotos();
+  } finally {
+    $('uploading').style.display = 'none';
+    $('file').value = '';
+  }
+}
+
+/* ── Memberships ── */
+function renderMembers() {
+  $('memberList').innerHTML = C.memberships.map((m, i) => `
+    <div class="item">
+      <label>Name</label><input value="${esc(m.name)}" onchange="C.memberships[${i}].name=this.value">
+      <label>Price</label><input value="${esc(m.price)}" placeholder="e.g. $150/mo" onchange="C.memberships[${i}].price=this.value">
+      <label>Perks — one per line</label>
+      <textarea onchange="C.memberships[${i}].perks=this.value.split('\\n').map(s=>s.trim()).filter(Boolean)">${esc((m.perks || []).join('\n'))}</textarea>
+      <div class="row-end">
+        <div class="move">
+          <button onclick="moveItem(C.memberships,${i},-1,renderMembers)" ${i === 0 ? 'disabled' : ''}>↑</button>
+          <button onclick="moveItem(C.memberships,${i},1,renderMembers)" ${i === C.memberships.length - 1 ? 'disabled' : ''}>↓</button>
+        </div>
+        <button class="btn btn-danger btn-sm" onclick="rmItem(C.memberships,${i},renderMembers)">Remove</button>
+      </div>
+    </div>`).join('');
+}
+function addMember() { C.memberships.push({ name: '', price: '', perks: [] }); renderMembers(); }
+
+/* ── Products ── */
+function renderProds() {
+  $('prodList').innerHTML = C.products.map((p, i) => `
+    <div class="item">
+      <label>Name</label><input value="${esc(p.name)}" onchange="C.products[${i}].name=this.value">
+      <label>Price (optional)</label><input value="${esc(p.price)}" onchange="C.products[${i}].price=this.value">
+      <label>Description (optional)</label>
+      <textarea onchange="C.products[${i}].blurb=this.value">${esc(p.blurb || '')}</textarea>
+      <div class="row-end">
+        <div class="move">
+          <button onclick="moveItem(C.products,${i},-1,renderProds)" ${i === 0 ? 'disabled' : ''}>↑</button>
+          <button onclick="moveItem(C.products,${i},1,renderProds)" ${i === C.products.length - 1 ? 'disabled' : ''}>↓</button>
+        </div>
+        <button class="btn btn-danger btn-sm" onclick="rmItem(C.products,${i},renderProds)">Remove</button>
+      </div>
+    </div>`).join('');
+}
+function addProd() { C.products.push({ name: '', price: '', blurb: '' }); renderProds(); }
+
+/* ── Announcements ── */
+function renderInfos() {
+  $('infoList').innerHTML = C.infoSlides.map((s, i) => `
+    <div class="item">
+      <label>Headline</label><input value="${esc(s.title)}" onchange="C.infoSlides[${i}].title=this.value">
+      <label>Text</label>
+      <textarea onchange="C.infoSlides[${i}].body=this.value">${esc(s.body || '')}</textarea>
+      <div class="row-end">
+        <div class="move">
+          <button onclick="moveItem(C.infoSlides,${i},-1,renderInfos)" ${i === 0 ? 'disabled' : ''}>↑</button>
+          <button onclick="moveItem(C.infoSlides,${i},1,renderInfos)" ${i === C.infoSlides.length - 1 ? 'disabled' : ''}>↓</button>
+        </div>
+        <button class="btn btn-danger btn-sm" onclick="rmItem(C.infoSlides,${i},renderInfos)">Remove</button>
+      </div>
+    </div>`).join('');
+}
+function addInfo() { C.infoSlides.push({ title: '', body: '' }); renderInfos(); }
+
+/* ── Shared list helpers ── */
+function moveItem(arr, i, d, rerender) { const j = i + d; [arr[i], arr[j]] = [arr[j], arr[i]]; rerender(); }
+function rmItem(arr, i, rerender) { if (confirm('Remove this?')) { arr.splice(i, 1); rerender(); } }
+
+/* ── Save ── */
+async function saveAll() {
+  const st = $('saveStatus');
+  st.className = 'status'; st.textContent = 'Saving…';
+  C.settings.secondsPerSlide = Math.max(4, Number($('secs').value) || 9);
+  // Drop empty rows so the TV never shows blanks
+  C.memberships = C.memberships.filter(m => m.name || m.price || (m.perks || []).length);
+  C.products    = C.products.filter(p => p.name || p.blurb);
+  C.infoSlides  = C.infoSlides.filter(s => s.title || s.body);
+  const r = await fetch('/api/content', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-admin-key': KEY },
+    body: JSON.stringify(C)
+  });
+  const j = await r.json().catch(() => ({}));
+  if (r.ok) {
+    st.className = 'status ok'; st.textContent = 'Saved ✓';
+    renderAll();
+  } else {
+    st.className = 'status err'; st.textContent = 'Failed';
+    alert(j.error || 'Save failed — try signing in again.');
+  }
+  setTimeout(() => { st.textContent = ''; }, 4000);
+}
+
+// Already signed in this session? Skip the login screen.
+if (KEY) {
+  fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: KEY }) })
+    .then(r => { if (r.ok) enter(); else sessionStorage.removeItem('chKey'); });
+}
+</script>
+</body>
+</html>
