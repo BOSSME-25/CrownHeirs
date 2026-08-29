@@ -237,8 +237,12 @@ function buildSlides(c) {
     <svg viewBox="0 0 24 24"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7"/></svg>`;
 
   const photos = (c.gallery || []).map(g => {
+    // Declare the source as mp4 regardless of the file's extension: iPhone
+    // .mov clips are H.264 in a QuickTime container, which browsers will
+    // decode when they aren't told it's video/quicktime (which they refuse).
     const media = isVideo(g)
-      ? (cls) => `<video class="${cls}" src="${esc(g.url)}" muted loop playsinline preload="auto"></video>`
+      ? (cls) => `<video class="${cls}" muted loop playsinline preload="auto">
+                    <source src="${esc(g.url)}" type="video/mp4"></video>`
       : null;
     if (g.ig) {
       return mk('igpost',
@@ -312,6 +316,13 @@ function buildSlides(c) {
   return els;
 }
 
+function runBar(secs) {
+  bar.classList.remove('run'); void bar.offsetWidth;
+  bar.style.animationDuration = secs + 's';
+  bar.classList.add('run');
+}
+const advance = () => show((idx + 1) % slides.length);
+
 function show(next) {
   slides.forEach((s, i) => {
     const on = i === next;
@@ -322,17 +333,35 @@ function show(next) {
     });
   });
   idx = next;
-  // Video slides hold for the clip's length (4s–60s); everything else uses the setting.
-  let secs = window.__secs || 9;
-  const v = slides[next].querySelector('video');
-  if (v && isFinite(v.duration) && v.duration > 1) {
-    secs = Math.min(Math.max(v.duration, 4), 60);
-  }
-  bar.classList.remove('run'); void bar.offsetWidth;
-  bar.style.animationDuration = secs + 's';
-  bar.classList.add('run');
   clearTimeout(timer);
-  timer = setTimeout(() => show((idx + 1) % slides.length), secs * 1000);
+
+  const v = slides[next].querySelector('video');
+  if (!v) {
+    const secs = window.__secs || 9;
+    runBar(secs);
+    timer = setTimeout(advance, secs * 1000);
+    return;
+  }
+
+  // Video slides hold for the clip's length (4s–60s). Duration is often not
+  // known yet on the first pass, so start on the default and re-time once
+  // metadata lands. A clip the browser can't decode is skipped rather than
+  // left as a dead slide.
+  const hold = d => {
+    const secs = Math.min(Math.max(isFinite(d) && d > 1 ? d : (window.__secs || 9), 4), 60);
+    runBar(secs);
+    clearTimeout(timer);
+    timer = setTimeout(advance, secs * 1000);
+  };
+  hold(v.duration);
+  if (!(isFinite(v.duration) && v.duration > 1)) {
+    v.addEventListener('loadedmetadata', () => { if (idx === next) hold(v.duration); }, { once: true });
+  }
+  v.addEventListener('error', () => {
+    if (idx !== next) return;
+    clearTimeout(timer);
+    timer = setTimeout(advance, 1500);
+  }, { once: true });
 }
 
 async function load(first) {
