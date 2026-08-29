@@ -372,6 +372,8 @@ async function load(first) {
     contentRaw = raw;
     const c = JSON.parse(raw);
     window.__secs = Math.max(4, Number(c.settings?.secondsPerSlide) || 9);
+    window.__tz = c.settings?.timeZone || 'America/Phoenix';
+    tick();
     // Preload photos before swapping so nothing flashes
     await Promise.all((c.gallery || []).map(g => new Promise(res => {
       const im = new Image(); im.onload = im.onerror = res; im.src = g.url;
@@ -389,9 +391,20 @@ load(true);
 setInterval(() => load(false), 3 * 60 * 1000);
 
 // Clock
+// Pinned to the salon's timezone, not the TV's — a screen plugged in with the
+// wrong system clock (or a browser reporting UTC) would otherwise show the
+// wrong time to everyone in the room.
 const clock = document.getElementById('clock');
 function tick() {
-  clock.textContent = new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+  const opts = { hour: 'numeric', minute: '2-digit' };
+  const tz = window.__tz || 'America/Phoenix';
+  let text;
+  try {
+    text = new Date().toLocaleTimeString([], { ...opts, timeZone: tz });
+  } catch (e) {
+    text = new Date().toLocaleTimeString([], opts); // unknown zone → device time
+  }
+  clock.textContent = text;
 }
 tick(); setInterval(tick, 15000);
 

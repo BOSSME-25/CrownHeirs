@@ -151,6 +151,16 @@ header.top p { color: var(--ink-dim); margin-top: 6px; }
     <input id="secs" type="number" min="4" max="60" style="max-width:120px;">
     <label>Instagram handle (shown on IG-framed slides and the “Follow us” slide — leave blank to hide)</label>
     <input id="igHandle" placeholder="crownheirs" style="max-width:280px;">
+    <label>Time zone for the clock on the TV</label>
+    <select id="tz" style="max-width:320px;">
+      <option value="America/Phoenix">Arizona — Phoenix (no daylight saving)</option>
+      <option value="America/Los_Angeles">Pacific — Los Angeles</option>
+      <option value="America/Denver">Mountain — Denver</option>
+      <option value="America/Chicago">Central — Chicago</option>
+      <option value="America/New_York">Eastern — New York</option>
+      <option value="America/Anchorage">Alaska — Anchorage</option>
+      <option value="Pacific/Honolulu">Hawaii — Honolulu</option>
+    </select>
   </div>
 </div>
 
@@ -196,6 +206,7 @@ async function enter() {
   C.settings ??= {};
   $('secs').value = C.settings.secondsPerSlide || 9;
   $('igHandle').value = C.settings.instagramHandle ?? 'crownheirs';
+  $('tz').value = C.settings.timeZone || 'America/Phoenix';
   renderAll();
 }
 
@@ -383,6 +394,7 @@ async function saveAll() {
   st.className = 'status'; st.textContent = 'Saving…';
   C.settings.secondsPerSlide = Math.max(4, Number($('secs').value) || 9);
   C.settings.instagramHandle = $('igHandle').value.replace(/^@/, '').trim();
+  C.settings.timeZone = $('tz').value;
   // Drop empty rows so the TV never shows blanks
   C.memberships = C.memberships.filter(m => m.name || m.price || (m.perks || []).length);
   C.products    = C.products.filter(p => p.name || p.blurb);

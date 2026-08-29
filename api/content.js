@@ -8,7 +8,7 @@ const { put, list } = require('@vercel/blob');
 const CONTENT_PATH = 'data/content.json';
 
 const DEFAULT_CONTENT = {
-  settings: { secondsPerSlide: 9, instagramHandle: 'crownheirs' },
+  settings: { secondsPerSlide: 9, instagramHandle: 'crownheirs', timeZone: 'America/Phoenix' },
   gallery: [
     { url: '/images/inspo/silk-press.jpg',    caption: 'Silk Press' },
     { url: '/images/inspo/natural-curls.jpg', caption: 'Natural Curls' },
