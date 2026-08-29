@@ -1,9 +1,8 @@
-// POST   ?filename=foo.jpg  (body: raw image bytes) → { url } — upload a gallery photo
-// DELETE ?url=<blob url>                             → { ok }  — remove a photo
-// Both require the x-admin-key header. Images are stored in Vercel Blob
-// under gallery/. The admin page resizes photos client-side before upload,
-// so files stay well under the 4.5 MB serverless body limit.
-const { put, del } = require('@vercel/blob');
+// DELETE ?url=<blob url> → { ok } — remove a gallery photo or video.
+// Requires the x-admin-key header. Uploads do NOT come through here: the
+// admin page sends files straight to Blob storage via /api/upload, which
+// avoids the serverless body-size limit and body-parsing of binary data.
+const { del } = require('@vercel/blob');
 
 function isAuthed(req) {
   const key = process.env.ADMIN_PASSWORD;
@@ -21,27 +20,6 @@ function blobToken() {
 module.exports = async (req, res) => {
   if (!isAuthed(req)) {
     res.status(401).json({ error: 'Not authorized' });
-    return;
-  }
-
-  if (req.method === 'POST') {
-    const filename = (req.query.filename || 'photo.jpg').replace(/[^a-zA-Z0-9._-]/g, '_');
-    const body = req.body;
-    if (!body || !body.length) {
-      res.status(400).json({ error: 'Empty upload' });
-      return;
-    }
-    try {
-      const blob = await put('gallery/' + filename, body, {
-        access: 'public',
-        contentType: req.headers['content-type'] || 'image/jpeg',
-        addRandomSuffix: true,
-        token: blobToken()
-      });
-      res.status(200).json({ url: blob.url });
-    } catch (e) {
-      res.status(500).json({ error: 'Upload failed. Is the Blob store connected? (' + e.message + ')' });
-    }
     return;
   }
 
