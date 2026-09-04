@@ -140,7 +140,7 @@ header.top p { color: var(--ink-dim); margin-top: 6px; }
 
   <div class="card">
     <h2>Announcements</h2>
-    <div class="hint">Extra slides — specials, events, holiday hours, anything.</div>
+    <div class="hint">Extra slides — specials, events, holiday hours, a sister brand. Add a link and the slide gains a big scannable QR code beside the text.</div>
     <div id="infoList"></div>
     <button class="btn btn-ghost btn-sm" style="margin-top:12px;" onclick="addInfo()">＋ Add announcement</button>
   </div>
@@ -370,9 +370,24 @@ function addProd() { C.products.push({ name: '', price: '', blurb: '' }); render
 function renderInfos() {
   $('infoList').innerHTML = C.infoSlides.map((s, i) => `
     <div class="item">
+      <label>Small label above the headline</label>
+      <input value="${esc(s.kicker || '')}" placeholder="The Den" onchange="C.infoSlides[${i}].kicker=this.value">
       <label>Headline</label><input value="${esc(s.title)}" onchange="C.infoSlides[${i}].title=this.value">
       <label>Text</label>
       <textarea onchange="C.infoSlides[${i}].body=this.value">${esc(s.body || '')}</textarea>
+      <label>Link for a QR code (optional — adds a scannable code to this slide)</label>
+      <input value="${esc(s.qrUrl || '')}" placeholder="https://houseoffigs.org"
+             onchange="C.infoSlides[${i}].qrUrl=this.value.trim(); renderInfos()">
+      ${s.qrUrl ? `
+        <div style="display:flex;align-items:center;gap:12px;margin-top:10px;">
+          <img src="/api/qr?text=${encodeURIComponent(s.qrUrl)}" alt=""
+               style="width:88px;height:88px;background:#fff;border-radius:8px;padding:4px;border:1px solid var(--border);">
+          <div>
+            <label style="margin:0 0 6px;">Words under the code</label>
+            <input value="${esc(s.qrLabel || '')}" placeholder="Scan to visit"
+                   onchange="C.infoSlides[${i}].qrLabel=this.value">
+          </div>
+        </div>` : ''}
       <div class="row-end">
         <div class="move">
           <button onclick="moveItem(C.infoSlides,${i},-1,renderInfos)" ${i === 0 ? 'disabled' : ''}>↑</button>
@@ -382,7 +397,7 @@ function renderInfos() {
       </div>
     </div>`).join('');
 }
-function addInfo() { C.infoSlides.push({ title: '', body: '' }); renderInfos(); }
+function addInfo() { C.infoSlides.push({ kicker: '', title: '', body: '', qrUrl: '', qrLabel: '' }); renderInfos(); }
 
 /* ── Shared list helpers ── */
 function moveItem(arr, i, d, rerender) { const j = i + d; [arr[i], arr[j]] = [arr[j], arr[i]]; rerender(); }
@@ -398,7 +413,7 @@ async function saveAll() {
   // Drop empty rows so the TV never shows blanks
   C.memberships = C.memberships.filter(m => m.name || m.price || (m.perks || []).length);
   C.products    = C.products.filter(p => p.name || p.blurb);
-  C.infoSlides  = C.infoSlides.filter(s => s.title || s.body);
+  C.infoSlides  = C.infoSlides.filter(s => s.title || s.body || s.qrUrl);
   const r = await fetch('/api/content', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'x-admin-key': KEY },
