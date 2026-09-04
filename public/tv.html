@@ -94,6 +94,31 @@ html, body { height: 100%; overflow: hidden; background: var(--ink); color: var(
 .ig-cap { padding: 0.6vh 2.4vh 2.2vh; font-size: 2.2vh; font-weight: 300; line-height: 1.4; }
 .ig-cap b { font-weight: 500; }
 
+/* ── Promo slide (partner / QR) ──────────── */
+.promo-wrap {
+  display: flex; align-items: center; justify-content: center;
+  gap: 6vw; max-width: 88vw; text-align: left;
+}
+.promo-text { flex: 1; min-width: 0; }
+.promo-text .kicker { margin-bottom: 3vh; }
+.promo-text .kicker::after { margin-left: 0; }
+.promo-text h1 { font-size: 7.5vh; }
+.promo-text .body {
+  font-family: var(--font-serif); font-weight: 300;
+  font-size: 3.7vh; line-height: 1.5; color: var(--paper-dim);
+  white-space: pre-line;
+}
+.promo-qr {
+  flex: none; background: #fff; border-radius: 2.2vh; padding: 3vh 3vh 2.6vh;
+  text-align: center; box-shadow: 0 3vh 8vh rgba(0,0,0,0.5);
+}
+.promo-qr img { width: 32vh; height: 32vh; display: block; }
+.promo-qr .qr-cap {
+  font-family: var(--font-display); font-size: 2.1vh; font-weight: 500;
+  letter-spacing: 0.2em; text-transform: uppercase; color: #1a1816; margin-top: 2.2vh;
+}
+.promo-qr .qr-host { font-family: var(--font-ui); font-size: 2vh; color: #8a837a; margin-top: 0.5vh; }
+
 /* ── Follow-us slide ─────────────────────── */
 .follow .ring {
   display: inline-flex; padding: 1vh; border-radius: 50%; margin-bottom: 4vh;
@@ -290,10 +315,32 @@ function buildSlides(c) {
   }
 
   (c.infoSlides || []).forEach(s => {
-    textSlides.push(mk('info',
-      `<div class="kicker">The Den</div>
-       <h1>${esc(s.title)}</h1>
-       <div class="body">${esc(s.body)}</div>`));
+    const kicker = esc(s.kicker || 'The Den');
+    const qr = String(s.qrUrl || '').trim();
+    if (!qr) {
+      textSlides.push(mk('info',
+        `<div class="kicker">${kicker}</div>
+         <h1>${esc(s.title)}</h1>
+         <div class="body">${esc(s.body)}</div>`));
+      return;
+    }
+    // With a link, the slide becomes a scannable promo: copy on the left,
+    // QR on a white card (needed for contrast against the dark screen).
+    let host = '';
+    try { host = new URL(qr).hostname.replace(/^www\./, ''); } catch (e) { /* not a URL — skip the caption */ }
+    textSlides.push(mk('promo',
+      `<div class="promo-wrap">
+         <div class="promo-text">
+           <div class="kicker">${kicker}</div>
+           <h1>${esc(s.title)}</h1>
+           <div class="body">${esc(s.body)}</div>
+         </div>
+         <div class="promo-qr">
+           <img src="/api/qr?text=${encodeURIComponent(qr)}" alt="">
+           <div class="qr-cap">${esc(s.qrLabel || 'Scan to visit')}</div>
+           ${host ? `<div class="qr-host">${esc(host)}</div>` : ''}
+         </div>
+       </div>`));
   });
 
   if (handle) {
