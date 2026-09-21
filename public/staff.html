@@ -142,7 +142,7 @@ h2 { font-family: var(--font-serif); font-weight: 600; font-size: 25px; margin-b
 </div>
 
 <!-- ═══ MODALS ═══ -->
-<div id="mNew" class="modal-bg hidden" onclick="if(event.target===this)close('mNew')">
+<div id="mNew" class="modal-bg hidden" onclick="if(event.target===this)closeModal('mNew')">
   <div class="modal">
     <h2>New appointment</h2>
     <div class="hint">Phone or walk-in booking. Same rules as online, minus the lead time.</div>
@@ -161,13 +161,13 @@ h2 { font-family: var(--font-serif); font-weight: 600; font-size: 25px; margin-b
     <label>Notes</label><textarea id="nNotes" rows="2"></textarea>
     <div class="err" id="nErr"></div>
     <div class="row" style="justify-content:space-between;margin-top:12px;">
-      <button class="btn btn-ghost" onclick="close('mNew')">Cancel</button>
+      <button class="btn btn-ghost" onclick="closeModal('mNew')">Cancel</button>
       <button class="btn btn-terra" id="nGo" onclick="nBook()">Book it</button>
     </div>
   </div>
 </div>
 
-<div id="mBlock" class="modal-bg hidden" onclick="if(event.target===this)close('mBlock')">
+<div id="mBlock" class="modal-bg hidden" onclick="if(event.target===this)closeModal('mBlock')">
   <div class="modal">
     <h2>Block time</h2>
     <div class="hint">Lunch, a day off, a class. Existing bookings in the window aren't moved — you'll get a list to call.</div>
@@ -179,13 +179,13 @@ h2 { font-family: var(--font-serif); font-weight: 600; font-size: 25px; margin-b
     <label>Reason (optional)</label><input id="bReason" placeholder="Lunch, vacation…">
     <div class="err" id="bErr"></div>
     <div class="row" style="justify-content:space-between;margin-top:12px;">
-      <button class="btn btn-ghost" onclick="close('mBlock')">Cancel</button>
+      <button class="btn btn-ghost" onclick="closeModal('mBlock')">Cancel</button>
       <button class="btn btn-terra" onclick="bSave()">Block</button>
     </div>
   </div>
 </div>
 
-<div id="mTicket" class="modal-bg hidden" onclick="if(event.target===this){close('mTicket');loadDay();}">
+<div id="mTicket" class="modal-bg hidden" onclick="if(event.target===this){closeModal('mTicket');loadDay();}">
   <div class="modal">
     <h2 id="tTitle">Ticket</h2>
     <div class="hint" id="tSub"></div>
@@ -210,13 +210,13 @@ h2 { font-family: var(--font-serif); font-weight: 600; font-size: 25px; margin-b
     </div>
     <div class="err" id="tErr"></div>
     <div class="row" style="justify-content:space-between;margin-top:12px;">
-      <button class="btn btn-ghost" onclick="close('mTicket');loadDay()">Close</button>
+      <button class="btn btn-ghost" onclick="closeModal('mTicket');loadDay()">Close</button>
       <span class="row" id="tActions"></span>
     </div>
   </div>
 </div>
 
-<div id="mStylist" class="modal-bg hidden" onclick="if(event.target===this)close('mStylist')">
+<div id="mStylist" class="modal-bg hidden" onclick="if(event.target===this)closeModal('mStylist')">
   <div class="modal">
     <h2 id="sTitle">Stylist</h2>
     <div class="grid2">
@@ -233,7 +233,7 @@ h2 { font-family: var(--font-serif); font-weight: 600; font-size: 25px; margin-b
     <div class="svcgrid" id="sServices"></div>
     <div class="err" id="sErr"></div>
     <div class="row" style="justify-content:space-between;margin-top:12px;">
-      <button class="btn btn-ghost" onclick="close('mStylist')">Cancel</button>
+      <button class="btn btn-ghost" onclick="closeModal('mStylist')">Cancel</button>
       <button class="btn btn-terra" onclick="sSave()">Save</button>
     </div>
   </div>
@@ -262,8 +262,8 @@ const fmtD = ymd => { const [y, m, d] = ymd.split('-').map(Number); return new D
 const today = () => new Intl.DateTimeFormat('en-CA', { timeZone: TZ, year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
 const addDays = (ymd, n) => { const [y, m, d] = ymd.split('-').map(Number); return new Date(Date.UTC(y, m - 1, d + n)).toISOString().slice(0, 10); };
 const dur = m => m >= 60 ? `${Math.floor(m / 60)}h${m % 60 ? ' ' + (m % 60) + 'm' : ''}` : `${m}m`;
-const close = id => $(id).classList.add('hidden');
-const open = id => $(id).classList.remove('hidden');
+const closeModal = id => $(id).classList.add('hidden');   // not 'close': inline handlers would resolve document.close() first
+const openModal = id => $(id).classList.remove('hidden');
 // Local datetime-local value → ISO in the salon zone (not the browser's).
 function localToIso(v) { const [d, t] = v.split('T'); const [h, m] = t.split(':').map(Number); const probe = new Date(`${d}T${t}:00Z`); const off = (new Date(probe.toLocaleString('en-US', { timeZone: TZ })) - new Date(probe.toLocaleString('en-US', { timeZone: 'UTC' }))) / 60000; return new Date(probe.getTime() - off * 60000).toISOString(); }
 
@@ -356,7 +356,7 @@ async function openWalkIn() {
   catch (e) { alert(e.message); }
 }
 async function openTicket(code) {
-  try { await ensureRetail(); TICKET = await api('GET', { action: 'ticket.get', code }); renderTicket(); open('mTicket'); }
+  try { await ensureRetail(); TICKET = await api('GET', { action: 'ticket.get', code }); renderTicket(); openModal('mTicket'); }
   catch (e) { alert(e.message); }
 }
 function provOptions(sel) { return STYLISTS.filter(s => s.active || s.slug === sel).map(s => `<option value="${esc(s.slug)}" ${s.slug === sel ? 'selected' : ''}>${esc(s.name)}</option>`).join(''); }
@@ -450,7 +450,7 @@ function openNew() {
   $('nDate').value = DATE;
   $('nService').innerHTML = CATS.map(c => `<optgroup label="${esc(c.category)}">${c.services.map(s => `<option value="${esc(s.slug)}">${esc(s.name)}</option>`).join('')}</optgroup>`).join('');
   ['nName', 'nPhone', 'nEmail', 'nNotes'].forEach(id => $(id).value = ''); $('nErr').textContent = '';
-  nVariations(); open('mNew');
+  nVariations(); openModal('mNew');
 }
 function nVariations() {
   const s = CATS.flatMap(c => c.services).find(x => x.slug === $('nService').value);
@@ -473,7 +473,7 @@ async function nBook() {
     if (!$('nTime').value) throw new Error('Pick a time');
     const j = await api('POST', null, { action: 'book', service: $('nService').value, variation: Number($('nVariation').value), stylist: $('nStylist').value,
       startAt: $('nTime').value, client: { name: $('nName').value, phone: $('nPhone').value, email: $('nEmail').value }, notes: $('nNotes').value });
-    close('mNew'); toast(`Booked · ${j.code}`); DATE = $('nDate').value; renderDates(); loadDay();
+    closeModal('mNew'); toast(`Booked · ${j.code}`); DATE = $('nDate').value; renderDates(); loadDay();
   } catch (e) { $('nErr').textContent = e.message; }
   finally { $('nGo').disabled = false; }
 }
@@ -482,13 +482,13 @@ async function nBook() {
 function openBlock() {
   stylistOptions($('bStylist'), false); if (STYLIST !== 'all') $('bStylist').value = STYLIST;
   $('bStart').value = `${DATE}T12:00`; $('bEnd').value = `${DATE}T13:00`; $('bReason').value = ''; $('bErr').textContent = '';
-  open('mBlock');
+  openModal('mBlock');
 }
 async function bSave() {
   $('bErr').textContent = '';
   try {
     const j = await api('POST', null, { action: 'timeoff.add', stylist: $('bStylist').value, startsAt: localToIso($('bStart').value), endsAt: localToIso($('bEnd').value), reason: $('bReason').value });
-    close('mBlock'); loadDay();
+    closeModal('mBlock'); loadDay();
     if (j.conflicts.length) alert(`Blocked. ${j.conflicts.length} existing booking(s) fall inside this window — they were NOT moved:\n\n` + j.conflicts.map(a => `${fmtT(a.startsAt)} ${a.client.name} (${a.client.phone}) — ${a.service.name}`).join('\n'));
     else toast('Time blocked');
   } catch (e) { $('bErr').textContent = e.message; }
@@ -517,7 +517,7 @@ function openStylist(slug) {
   const has = new Set(EDITING.services);
   $('sServices').innerHTML = CATS.map(c => `<div class="cat"><span>${esc(c.category)}</span><button onclick="toggleCat(this)">all / none</button></div>` +
     c.services.map(s => `<label><input type="checkbox" data-svc="${esc(s.slug)}" ${has.has(s.slug) ? 'checked' : ''}> ${esc(s.name)}</label>`).join('')).join('');
-  open('mStylist');
+  openModal('mStylist');
 }
 function toggleCat(btn) {
   let el = btn.parentElement.nextElementSibling; const boxes = [];
@@ -531,7 +531,7 @@ async function sSave() {
     const services = [...document.querySelectorAll('#sServices input[data-svc]:checked')].map(b => b.dataset.svc);
     await api('POST', null, { action: 'stylist.save', slug: EDITING.slug || null, name: $('sName').value, title: $('sTitleIn').value, active: $('sActive').checked, hours, services,
       email: $('sEmail').value, hoursSource: $('sHub').checked ? 'hub' : 'local' });
-    close('mStylist'); toast('Saved'); renderTeam(); renderDates();
+    closeModal('mStylist'); toast('Saved'); renderTeam(); renderDates();
   } catch (e) { $('sErr').textContent = e.message; }
 }
 async function runReminders() {
