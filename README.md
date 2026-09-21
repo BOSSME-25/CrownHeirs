@@ -42,6 +42,16 @@ save.
 - The page keeps the screen awake where the browser allows it and shows a
   small clock so it's useful at checkout.
 
+## Booking mode — Square until switch-over
+
+`BOOKING_MODE` decides where bookings happen. **`square`** (the default): a
+customer reaching `/book` — including every "Book now" in the finder — is
+sent to Square, to the specific service where a deep link is known
+(`lib/square-links.json`); nothing is booked here, so making the site public
+for the TV can't open a second booking system. **`site`**: switch-over —
+bookings are taken here, confirmations go out, Team Hub is fed. Set it in
+Vercel and redeploy; Settings shows which mode is live.
+
 ## Online booking (`/book`)
 
 A self-hosted booking system — no Square, HighLevel, or Google in the loop.

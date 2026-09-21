@@ -10,6 +10,7 @@ if (!url) {
 } else {
   process.env.DATABASE_URL = url;
   process.env.ADMIN_PASSWORD = 'test-admin-key';
+  process.env.BOOKING_MODE = 'site';          // these tests exercise booking here, not the Square hand-off
   const db = require('../lib/db');
   const { addDays, todayIn, weekdayOf } = require('../lib/tz');
   const H = {

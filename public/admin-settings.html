@@ -35,6 +35,12 @@ table { width:100%; border-collapse:collapse; font-size:14px; margin-top:6px; } 
   </div>
 
   <div class="card">
+    <h2>Booking mode</h2>
+    <div class="status" id="modeStatus">Checking…</div>
+    <div class="hint">Set <code>BOOKING_MODE</code> in Vercel and redeploy. <b>square</b> (the default): customers who reach <code>/book</code> — including every “Book now” in the finder — are sent to Square, to the matching service where one is known; nothing is booked here. <b>site</b>: switch-over — bookings are taken here, confirmations go out, and Team Hub is fed.</div>
+  </div>
+
+  <div class="card">
     <h2>Team Hub</h2>
     <div class="hint">Every booking, cancellation, completion and no-show made here is pushed to Team Hub — it takes the seat HighLevel had, so payroll reconciliation, today's outlook and service hours keep working. A stylist can also take their hours and time off from the hub (Team → edit → “Hours come from Team Hub”).<br><br>
       Set <code>TEAMHUB_URL</code> (e.g. <code>https://team.crownheirs.com</code>) and <code>TEAMHUB_SECRET</code> — the secret shown on the hub's Admin → HighLevel page — in Vercel, then redeploy. Then in the hub's Admin → HighLevel table, give each stylist their id from this site's Team tab as the <em>calendar ID</em> and their work email as the <em>user ID</em>; that's how the hub credits appointments to them.</div>
@@ -83,6 +89,14 @@ async function bookingSetup() {
     : 'Error: ' + (j.error || r.status);
 }
 const ymd = (offsetDays) => { const d = new Date(Date.now() + offsetDays * 86400000); return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Phoenix', year: 'numeric', month: '2-digit', day: '2-digit' }).format(d); };
+async function modeStatus() {
+  const j = await fetch('/api/book/services').then(r => r.json()).catch(() => ({}));
+  const open = j.bookingOpen === true;
+  $('modeStatus').className = 'status ' + (open ? 'ok' : '');
+  $('modeStatus').textContent = open
+    ? 'SITE — bookings are taken here.'
+    : `SQUARE — customers are sent to Square to book (${j.squareUrl || 'link not set'}). Flip BOOKING_MODE to "site" on switch-over day.`;
+}
 async function hubStatus() {
   const r = await fetch('/api/book/staff?action=hub.status', { headers: { 'x-admin-key': KEY } });
   const j = await r.json().catch(() => ({}));
@@ -103,7 +117,7 @@ async function runReminders() {
   const j = await r.json().catch(() => ({}));
   $('remStatus').textContent = r.ok ? `Sent ${j.count} reminder(s).` : (j.error || 'Failed');
 }
-AdminShell.requireAuth().then(k => { KEY = k; $('app').classList.remove('hidden'); bookingStatus(); hubStatus(); });
+AdminShell.requireAuth().then(k => { KEY = k; $('app').classList.remove('hidden'); modeStatus(); bookingStatus(); hubStatus(); });
 </script>
 </body>
 </html>
