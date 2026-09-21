@@ -2,8 +2,13 @@
   "name": "crown-heirs-deploy",
   "version": "1.0.0",
   "private": true,
+  "scripts": {
+    "test": "node --test test/availability.test.js test/booking.integration.test.js test/api.smoke.test.js",
+    "setup": "node scripts/setup.js"
+  },
   "dependencies": {
     "@vercel/blob": "^0.27.0",
+    "pg": "^8.23.0",
     "qrcode": "^1.5.4"
   }
 }

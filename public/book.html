@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Book — Crown Heirs Hair Den</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=Cinzel:wght@400;500&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #ece8e2; --surface: #ffffff; --surface-dim: #f5f2ee;
+  --terra: #a0624a; --terra-hi: #b8714f; --gold: #c8952a;
+  --ink: #1a1816; --ink-mid: #4a4540; --ink-dim: #8a837a;
+  --border: rgba(26,24,22,0.12); --ok: #3d7a45; --err: #a03228;
+  --font-ui: 'Jost', sans-serif; --font-serif: 'Cormorant Garamond', serif; --font-display: 'Cinzel', serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-ui); font-weight: 300; font-size: 16px; }
+button { font-family: var(--font-ui); cursor: pointer; }
+input, textarea { font-family: var(--font-ui); font-size: 16px; font-weight: 300; color: var(--ink); width: 100%; padding: 13px 14px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); }
+input:focus, textarea:focus { outline: 2px solid var(--terra); outline-offset: -1px; }
+label { display: block; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-dim); margin: 14px 0 6px; }
+
+.wrap { max-width: 640px; margin: 0 auto; padding: 22px 18px 60px; }
+header.top { text-align: center; padding: 18px 0 8px; }
+header.top img { height: 58px; }
+header.top h1 { font-family: var(--font-display); font-weight: 400; font-size: 19px; letter-spacing: 0.22em; text-transform: uppercase; margin-top: 8px; }
+
+/* Step indicator */
+.steps { display: flex; gap: 6px; margin: 18px 0 22px; }
+.steps span { flex: 1; height: 3px; border-radius: 3px; background: var(--border); }
+.steps span.done { background: var(--gold); }
+.steps span.now  { background: var(--terra); }
+
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-top: 16px; }
+h2 { font-family: var(--font-serif); font-weight: 600; font-size: 27px; margin-bottom: 4px; }
+.hint { color: var(--ink-dim); font-size: 14px; margin-bottom: 12px; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: none; border-radius: 100px; padding: 14px 26px; font-size: 15px; font-weight: 400; letter-spacing: 0.04em; }
+.btn-terra { background: var(--terra); color: #fff; }
+.btn-terra:disabled { background: #c8a898; cursor: default; }
+.btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--ink-mid); }
+.row { display: flex; gap: 10px; align-items: center; justify-content: space-between; margin-top: 18px; }
+.err { color: var(--err); font-size: 14px; margin-top: 10px; min-height: 18px; }
+.hidden { display: none !important; }
+
+/* Category pills */
+.pills { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; scrollbar-width: none; }
+.pills::-webkit-scrollbar { display: none; }
+.pill { flex: none; border: 1px solid var(--border); background: var(--surface); border-radius: 100px; padding: 9px 16px; font-size: 14px; color: var(--ink-mid); white-space: nowrap; }
+.pill.on { background: var(--ink); color: #fff; border-color: var(--ink); }
+
+/* Option lists */
+.opt { display: flex; align-items: center; gap: 14px; width: 100%; text-align: left; background: var(--surface-dim); border: 1px solid var(--border); border-radius: 12px; padding: 14px; margin-top: 10px; color: var(--ink); }
+.opt:active, .opt.on { border-color: var(--terra); outline: 1px solid var(--terra); }
+.opt .t { flex: 1; min-width: 0; }
+.opt .n { font-family: var(--font-serif); font-size: 21px; font-weight: 600; }
+.opt .d { font-size: 13.5px; color: var(--ink-dim); margin-top: 2px; line-height: 1.4; }
+.opt .p { text-align: right; flex: none; }
+.opt .p b { display: block; font-weight: 500; color: var(--terra); }
+.opt .p small { color: var(--ink-dim); font-size: 12px; }
+
+/* Date strip + times */
+.dates { display: flex; gap: 8px; overflow-x: auto; padding: 4px 2px 8px; scrollbar-width: none; }
+.dates::-webkit-scrollbar { display: none; }
+.day { flex: none; width: 66px; border: 1px solid var(--border); background: var(--surface); border-radius: 12px; padding: 10px 0; text-align: center; color: var(--ink-mid); }
+.day small { display: block; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; }
+.day b { display: block; font-size: 20px; font-weight: 400; margin: 2px 0; color: var(--ink); }
+.day.on { background: var(--ink); border-color: var(--ink); color: #fff; }
+.day.on b { color: #fff; }
+.tgroup { margin-top: 16px; }
+.tgroup h4 { font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-dim); margin-bottom: 8px; }
+.times { display: grid; grid-template-columns: repeat(auto-fill, minmax(88px, 1fr)); gap: 8px; }
+.time { border: 1px solid var(--border); background: var(--surface); border-radius: 10px; padding: 11px 0; font-size: 15px; color: var(--ink); }
+.time.on { background: var(--terra); border-color: var(--terra); color: #fff; }
+.empty { color: var(--ink-dim); font-size: 15px; padding: 18px 0; text-align: center; }
+
+/* Summary + confirmation */
+.sum { background: var(--surface-dim); border-radius: 12px; padding: 14px 16px; margin-top: 12px; line-height: 1.6; }
+.sum b { font-weight: 500; }
+.code { font-family: var(--font-display); font-size: 30px; letter-spacing: 0.18em; color: var(--terra); text-align: center; margin: 10px 0; }
+.ok-badge { display: inline-block; background: rgba(61,122,69,0.1); color: var(--ok); border-radius: 100px; padding: 6px 14px; font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; }
+.consult { background: rgba(200,149,42,0.12); border-left: 3px solid var(--gold); padding: 10px 12px; font-size: 14px; border-radius: 6px; margin-top: 12px; }
+.spin { color: var(--ink-dim); font-size: 14px; padding: 12px 0; }
+a.manage { color: var(--terra); font-size: 14px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <img src="/images/logo-1.png" alt="Crown Heirs">
+    <h1>Book Your Visit</h1>
+  </header>
+  <div class="steps" id="steps"><span></span><span></span><span></span><span></span></div>
+
+  <!-- 1 · Service -->
+  <section id="s1" class="card">
+    <h2>What are we doing today?</h2>
+    <div class="hint">Pick a category, then your service.</div>
+    <div class="pills" id="cats"></div>
+    <div id="svcList"><div class="spin">Loading services…</div></div>
+    <div class="err" id="e1"></div>
+    <div style="margin-top:14px;text-align:center;"><a class="manage" href="#" onclick="showManage();return false;">Already booked? Look up or cancel →</a></div>
+  </section>
+
+  <!-- 2 · Stylist -->
+  <section id="s2" class="card hidden">
+    <h2>Who would you like?</h2>
+    <div class="hint">“First available” shows the most openings.</div>
+    <div id="stylistList"></div>
+    <div class="row"><button class="btn btn-ghost" onclick="go(1)">← Back</button></div>
+  </section>
+
+  <!-- 3 · Date & time -->
+  <section id="s3" class="card hidden">
+    <h2>When works for you?</h2>
+    <div class="hint" id="s3hint"></div>
+    <div class="dates" id="dates"></div>
+    <div id="timesWrap"><div class="spin">Pick a day above.</div></div>
+    <div class="err" id="e3"></div>
+    <div class="row"><button class="btn btn-ghost" onclick="go(2)">← Back</button></div>
+  </section>
+
+  <!-- 4 · Details -->
+  <section id="s4" class="card hidden">
+    <h2>Almost there.</h2>
+    <div class="sum" id="summary"></div>
+    <div id="consultNote" class="consult hidden">This service starts with a quick consultation — we’ll confirm the details and final quote when you arrive.</div>
+    <label>Your name</label><input id="fName" autocomplete="name" placeholder="First and last name">
+    <label>Mobile number</label><input id="fPhone" type="tel" autocomplete="tel" inputmode="tel" placeholder="(602) 555-0100">
+    <label>Email <span style="text-transform:none;letter-spacing:0;">(optional, for your confirmation)</span></label><input id="fEmail" type="email" autocomplete="email" placeholder="you@example.com">
+    <label>Anything we should know? <span style="text-transform:none;letter-spacing:0;">(optional)</span></label><textarea id="fNotes" rows="2" placeholder="Hair length, allergies, a photo you’ll bring…"></textarea>
+    <div class="err" id="e4"></div>
+    <div class="row">
+      <button class="btn btn-ghost" onclick="go(3)">← Back</button>
+      <button class="btn btn-terra" id="bookBtn" onclick="book()">Book appointment</button>
+    </div>
+  </section>
+
+  <!-- Done -->
+  <section id="s5" class="card hidden" style="text-align:center;">
+    <span class="ok-badge">Confirmed</span>
+    <h2 style="margin-top:10px;">You’re on the books.</h2>
+    <div class="hint">Save this code — it’s how you look up or cancel.</div>
+    <div class="code" id="doneCode"></div>
+    <div class="sum" id="doneSum" style="text-align:left;"></div>
+    <div class="row" style="justify-content:center;flex-wrap:wrap;">
+      <button class="btn btn-ghost" onclick="downloadIcs()">Add to calendar</button>
+      <button class="btn btn-terra" onclick="location.href='/book'">Book another</button>
+    </div>
+  </section>
+
+  <!-- Manage -->
+  <section id="sm" class="card hidden">
+    <h2>Find your appointment</h2>
+    <div class="hint">Enter the confirmation code from your booking.</div>
+    <input id="mCode" placeholder="CH-XXXXX" style="text-transform:uppercase;letter-spacing:0.12em;" onkeydown="if(event.key==='Enter')lookup()">
+    <div class="err" id="em"></div>
+    <div id="mResult"></div>
+    <div class="row">
+      <button class="btn btn-ghost" onclick="location.href='/book'">← Book instead</button>
+      <button class="btn btn-terra" onclick="lookup()">Look up</button>
+    </div>
+  </section>
+</div>
+
+<script>
+/* ════════════════════════════════════════════
+   Crown Heirs — online booking
+   Talks to /api/book/*. No frameworks.
+════════════════════════════════════════════ */
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+let TZ = 'America/Phoenix', MAX_DAYS = 60;
+let CATS = [], SEL = { cat: null, service: null, stylist: 'any', date: null, startAt: null, avail: null }, DONE = null;
+
+const money = c => c == null ? 'Ask us' : 'From $' + Math.round(c / 100);
+const dur = m => m >= 60 ? `${Math.floor(m / 60)}h${m % 60 ? ' ' + (m % 60) + 'm' : ''}` : `${m}m`;
+const fmtTime = iso => new Date(iso).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZone: TZ });
+const fmtDate = iso => new Date(iso).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', timeZone: TZ });
+const ymdToday = () => { const p = new Intl.DateTimeFormat('en-CA', { timeZone: TZ, year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date()); return p; };
+const addDays = (ymd, n) => { const [y, m, d] = ymd.split('-').map(Number); return new Date(Date.UTC(y, m - 1, d + n)).toISOString().slice(0, 10); };
+const ymdParts = ymd => { const [y, m, d] = ymd.split('-').map(Number); const dt = new Date(Date.UTC(y, m - 1, d)); return { dow: dt.toLocaleDateString('en-US', { weekday: 'short', timeZone: 'UTC' }), day: d, mon: dt.toLocaleDateString('en-US', { month: 'short', timeZone: 'UTC' }) }; };
+
+function go(n) {
+  ['s1', 's2', 's3', 's4', 's5', 'sm'].forEach(id => $(id).classList.add('hidden'));
+  $('s' + n).classList.remove('hidden');
+  [...$('steps').children].forEach((el, i) => { el.className = i + 1 < n ? 'done' : i + 1 === n ? 'now' : ''; });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* ── 1 · services ── */
+async function loadServices() {
+  try {
+    const r = await fetch('/api/book/services');
+    const j = await r.json();
+    // 503 = database not connected yet. That's a setup detail for the owner,
+    // not something a customer should read.
+    if (r.status === 503) throw new Error('Online booking is almost ready — for now, please call or text the salon to book.');
+    if (!r.ok) throw new Error(j.error || 'Could not load services');
+    CATS = j.categories; TZ = j.timeZone || TZ; MAX_DAYS = j.maxDaysAhead || MAX_DAYS;
+    SEL.cat = CATS[0]?.category || null;
+    renderCats();
+  } catch (e) {
+    $('svcList').innerHTML = ''; $('e1').textContent = e.message;
+  }
+}
+function renderCats() {
+  $('cats').innerHTML = CATS.map(c => `<button class="pill ${c.category === SEL.cat ? 'on' : ''}" onclick="SEL.cat=${JSON.stringify(c.category)};renderCats()">${esc(c.category)}</button>`).join('');
+  const cat = CATS.find(c => c.category === SEL.cat);
+  $('svcList').innerHTML = (cat?.services || []).map(s => `
+    <button class="opt" onclick='pickService(${JSON.stringify(s.slug)})'>
+      <div class="t"><div class="n">${esc(s.name)}</div>${s.description ? `<div class="d">${esc(s.description)}</div>` : ''}</div>
+      <div class="p"><b>${money(s.price_from_cents)}</b><small>${dur(s.duration_min)}</small></div>
+    </button>`).join('');
+}
+function pickService(slug) {
+  SEL.service = CATS.flatMap(c => c.services).find(s => s.slug === slug);
+  SEL.stylist = 'any'; SEL.date = null; SEL.startAt = null;
+  loadStylists();
+}
+
+/* ── 2 · stylist ── */
+async function loadStylists() {
+  go(2);
+  $('stylistList').innerHTML = '<div class="spin">Checking who offers this…</div>';
+  // Stylists come back with availability; ask for today's to learn who's on the roster.
+  const r = await fetch(`/api/book/availability?service=${encodeURIComponent(SEL.service.slug)}&date=${ymdToday()}`);
+  const j = await r.json();
+  const list = r.ok ? j.stylists : [];
+  const opts = [{ slug: 'any', name: 'First available', title: 'Any stylist who offers this' }, ...list];
+  $('stylistList').innerHTML = opts.map(s => `
+    <button class="opt" onclick='pickStylist(${JSON.stringify(s.slug)})'>
+      <div class="t"><div class="n">${esc(s.name)}</div><div class="d">${esc(s.title || '')}</div></div>
+    </button>`).join('');
+  if (!list.length) $('stylistList').innerHTML += `<div class="empty">No stylist is set up for this service yet — please call the salon.</div>`;
+}
+function pickStylist(slug) { SEL.stylist = slug; SEL.date = null; SEL.startAt = null; renderDates(); go(3); }
+
+/* ── 3 · date & time ── */
+function renderDates() {
+  const today = ymdToday();
+  const days = Array.from({ length: Math.min(MAX_DAYS, 60) }, (_, i) => addDays(today, i));
+  $('s3hint').textContent = `${SEL.service.name} · ${dur(SEL.service.duration_min)}${SEL.stylist !== 'any' ? ' · ' + (SEL.avail?.stylists.find(s => s.slug === SEL.stylist)?.name || '') : ''}`;
+  $('dates').innerHTML = days.map(d => { const p = ymdParts(d); return `<button class="day ${d === SEL.date ? 'on' : ''}" onclick='pickDate(${JSON.stringify(d)})'><small>${p.dow}</small><b>${p.day}</b><small>${p.mon}</small></button>`; }).join('');
+  if (!SEL.date) pickDate(days[0]);
+}
+async function pickDate(d) {
+  SEL.date = d; SEL.startAt = null;
+  [...$('dates').children].forEach(el => el.classList.toggle('on', el.textContent.replace(/\s/g, '') === (ymdParts(d).dow + ymdParts(d).day + ymdParts(d).mon).replace(/\s/g, '')));
+  $('timesWrap').innerHTML = '<div class="spin">Finding openings…</div>'; $('e3').textContent = '';
+  try {
+    const q = `service=${encodeURIComponent(SEL.service.slug)}&date=${d}` + (SEL.stylist !== 'any' ? `&stylist=${encodeURIComponent(SEL.stylist)}` : '');
+    const r = await fetch('/api/book/availability?' + q);
+    const j = await r.json();
+    if (!r.ok) throw new Error(j.error || 'Could not load times');
+    SEL.avail = j;
+    const slots = SEL.stylist === 'any' ? j.any : (j.stylists[0]?.slots || []);
+    if (!slots.length) { $('timesWrap').innerHTML = '<div class="empty">No openings this day — try another date.</div>'; return; }
+    const groups = { Morning: [], Afternoon: [], Evening: [] };
+    for (const iso of slots) {
+      const h = Number(new Date(iso).toLocaleTimeString('en-US', { hour: 'numeric', hour12: false, timeZone: TZ }));
+      (h < 12 ? groups.Morning : h < 17 ? groups.Afternoon : groups.Evening).push(iso);
+    }
+    $('timesWrap').innerHTML = Object.entries(groups).filter(([, v]) => v.length).map(([k, v]) => `
+      <div class="tgroup"><h4>${k}</h4><div class="times">${v.map(iso => `<button class="time" onclick='pickTime(${JSON.stringify(iso)})'>${fmtTime(iso)}</button>`).join('')}</div></div>`).join('');
+  } catch (e) { $('timesWrap').innerHTML = ''; $('e3').textContent = e.message; }
+}
+function pickTime(iso) {
+  SEL.startAt = iso;
+  const s = SEL.service;
+  const who = SEL.stylist === 'any' ? 'First available stylist' : (SEL.avail.stylists.find(x => x.slug === SEL.stylist)?.name || '');
+  $('summary').innerHTML = `<b>${esc(s.name)}</b> · ${money(s.price_from_cents)} · ${dur(s.duration_min)}<br>${esc(who)}<br>${fmtDate(iso)} at <b>${fmtTime(iso)}</b>`;
+  $('consultNote').classList.toggle('hidden', !s.requires_consult);
+  $('e4').textContent = '';
+  go(4);
+}
+
+/* ── 4 · book ── */
+async function book() {
+  const btn = $('bookBtn'); btn.disabled = true; btn.textContent = 'Booking…'; $('e4').textContent = '';
+  try {
+    const r = await fetch('/api/book/create', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        service: SEL.service.slug, stylist: SEL.stylist, startAt: SEL.startAt,
+        client: { name: $('fName').value, phone: $('fPhone').value, email: $('fEmail').value },
+        notes: $('fNotes').value
+      })
+    });
+    const j = await r.json();
+    if (!r.ok) {
+      $('e4').textContent = j.error || 'Something went wrong';
+      if (r.status === 409) { setTimeout(() => { pickDate(SEL.date); go(3); }, 1200); } // slot gone → refresh times
+      return;
+    }
+    DONE = j;
+    $('doneCode').textContent = j.code;
+    $('doneSum').innerHTML = `<b>${esc(j.service.name)}</b> with ${esc(j.stylist.name)}<br>${fmtDate(j.startsAt)}<br><b>${fmtTime(j.startsAt)}</b> – ${fmtTime(j.endsAt)}`;
+    go(5);
+  } catch (e) { $('e4').textContent = e.message; }
+  finally { btn.disabled = false; btn.textContent = 'Book appointment'; }
+}
+
+function downloadIcs() {
+  if (!DONE) return;
+  const z = d => new Date(d).toISOString().replace(/[-:]|\.\d{3}/g, '');
+  const ics = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Crown Heirs//Booking//EN', 'BEGIN:VEVENT',
+    `UID:${DONE.code}@crownheirs`, `DTSTAMP:${z(new Date())}`, `DTSTART:${z(DONE.startsAt)}`, `DTEND:${z(DONE.endsAt)}`,
+    `SUMMARY:Crown Heirs — ${DONE.service.name}`, `DESCRIPTION:With ${DONE.stylist.name}. Confirmation ${DONE.code}.`,
+    'END:VEVENT', 'END:VCALENDAR'].join('\r\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([ics], { type: 'text/calendar' })); a.download = `crown-heirs-${DONE.code}.ics`; a.click();
+}
+
+/* ── manage ── */
+function showManage(code) {
+  ['s1', 's2', 's3', 's4', 's5'].forEach(id => $(id).classList.add('hidden'));
+  $('sm').classList.remove('hidden'); $('steps').classList.add('hidden');
+  if (code) { $('mCode').value = code; lookup(); }
+}
+async function lookup() {
+  $('em').textContent = ''; $('mResult').innerHTML = '<div class="spin">Looking…</div>';
+  const code = $('mCode').value.trim().toUpperCase();
+  const r = await fetch('/api/book/lookup?code=' + encodeURIComponent(code));
+  const j = await r.json();
+  if (!r.ok) { $('mResult').innerHTML = ''; $('em').textContent = j.error || 'Not found'; return; }
+  const future = new Date(j.startsAt) > new Date();
+  $('mResult').innerHTML = `
+    <div class="sum"><b>${esc(j.service.name)}</b> with ${esc(j.stylist.name)}<br>${fmtDate(j.startsAt)} at <b>${fmtTime(j.startsAt)}</b><br>
+      Status: <b>${esc(j.status)}</b> · ${esc(j.client.name)} (…${esc(j.client.phoneLast4)})</div>
+    ${j.status === 'confirmed' && future ? `<div class="row"><button class="btn btn-ghost" style="border-color:rgba(160,50,40,.4);color:var(--err);" onclick='cancelAppt(${JSON.stringify(j.code)})'>Cancel this appointment</button></div>` : ''}`;
+}
+async function cancelAppt(code) {
+  if (!confirm('Cancel this appointment?')) return;
+  const r = await fetch('/api/book/lookup', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code, action: 'cancel' }) });
+  const j = await r.json();
+  if (!r.ok) { $('em').textContent = j.error; return; }
+  lookup();
+}
+
+/* ── boot ── */
+const qs = new URLSearchParams(location.search);
+if (qs.get('code')) showManage(qs.get('code')); else { go(1); loadServices(); }
+</script>
+</body>
+</html>

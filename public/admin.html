@@ -146,6 +146,13 @@ header.top p { color: var(--ink-dim); margin-top: 6px; }
   </div>
 
   <div class="card">
+    <h2>Booking database</h2>
+    <div class="hint">Online booking at <a href="/book" target="_blank" style="color:var(--terra);">/book</a> runs on its own database. Press once after connecting Postgres in Vercel; safe to press again any time.</div>
+    <div id="bkStatus" style="font-size:14px;color:var(--ink-mid);margin:6px 0 12px;">Checking…</div>
+    <button class="btn btn-ghost btn-sm" onclick="bookingSetup()">Set up / refresh booking database</button>
+  </div>
+
+  <div class="card">
     <h2>Settings</h2>
     <label>Seconds each slide stays on screen (videos play their full length)</label>
     <input id="secs" type="number" min="4" max="60" style="max-width:120px;">
@@ -208,6 +215,7 @@ async function enter() {
   $('igHandle').value = C.settings.instagramHandle ?? 'crownheirs';
   $('tz').value = C.settings.timeZone || 'America/Phoenix';
   renderAll();
+  bookingStatus();
 }
 
 function renderAll() { renderPhotos(); renderMembers(); renderProds(); renderInfos(); }
@@ -402,6 +410,22 @@ function addInfo() { C.infoSlides.push({ kicker: '', title: '', body: '', qrUrl:
 /* ── Shared list helpers ── */
 function moveItem(arr, i, d, rerender) { const j = i + d; [arr[i], arr[j]] = [arr[j], arr[i]]; rerender(); }
 function rmItem(arr, i, rerender) { if (confirm('Remove this?')) { arr.splice(i, 1); rerender(); } }
+
+/* ── Booking database ── */
+const bkSummary = j => `Ready — ${j.services} services, ${j.stylists} stylist(s), ${j.appointments} upcoming appointment(s).`;
+async function bookingStatus() {
+  const r = await fetch('/api/book/setup', { headers: { 'x-admin-key': KEY } });
+  const j = await r.json().catch(() => ({}));
+  $('bkStatus').textContent = r.ok ? bkSummary(j) : (j.error || 'Not set up yet.');
+}
+async function bookingSetup() {
+  $('bkStatus').textContent = 'Setting up…';
+  const r = await fetch('/api/book/setup', { method: 'POST', headers: { 'x-admin-key': KEY } });
+  const j = await r.json().catch(() => ({}));
+  $('bkStatus').textContent = r.ok
+    ? bkSummary(j) + (j.servicesAdded ? ` Added ${j.servicesAdded} services.` : '') + (j.stylistCreated ? ' Created a starter stylist (Bethany, Tue–Sat 9–6).' : '')
+    : 'Error: ' + (j.error || r.status);
+}
 
 /* ── Save ── */
 async function saveAll() {
