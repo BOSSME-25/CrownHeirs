@@ -1,7 +1,11 @@
 {
+  "functions": {
+    "api/**/*.js": { "includeFiles": "lib/**" }
+  },
   "rewrites": [
     { "source": "/tv", "destination": "/tv.html" },
     { "source": "/admin", "destination": "/admin.html" },
+    { "source": "/book", "destination": "/book.html" },
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ],
   "headers": [

@@ -37,3 +37,62 @@ save.
   and go full-screen.
 - The page keeps the screen awake where the browser allows it and shows a
   small clock so it's useful at checkout.
+
+## Online booking (`/book`)
+
+A self-hosted booking system — no Square, HighLevel, or Google in the loop.
+Customers pick a service → stylist (or first available) → date & time →
+enter their details, and get a confirmation code they can use at
+`/book?code=CH-XXXXX` to look up or cancel.
+
+**What's underneath**
+
+| Piece | Where |
+|---|---|
+| Scheduling engine (pure, unit-tested) | `lib/availability.js` |
+| Time-zone handling (Phoenix, no DST) | `lib/tz.js` |
+| Schema — with a DB-level guard against double-booking | `lib/schema.sql` |
+| Booking operations | `lib/booking.js` |
+| HTTP routes | `api/book/*.js` |
+| Starting catalog (67 services, prices from the site, **default durations**) | `lib/seed-data.json` |
+
+Double-booking is impossible by construction: `appointments` carries an
+exclusion constraint on `(stylist, time range)`, so if two people submit the
+same slot in the same instant, the database accepts one and rejects the other.
+
+### One-time setup on Vercel
+
+1. **Postgres** — in the Vercel dashboard: **Storage → Create Database →
+   Postgres (Neon)**, connect it to `crown-heirs` for all environments, then
+   **redeploy**. This adds `DATABASE_URL` (or `POSTGRES_URL`) automatically.
+2. Open **`/admin`** → **Booking database → Set up / refresh**. That creates
+   the tables and loads the catalog. It's safe to press again any time; it
+   never overwrites edited rows.
+
+Until step 1 is done, `/book` shows a plain "not connected yet" message
+instead of the flow.
+
+### Things to review after setup
+
+- **Durations are defaults**, inferred from the service name (a retwist is
+  90 min, knotless braids 5 h, a line-up 30 min…). They drive every open
+  slot, so check them against how you actually book. Edit in the `services`
+  table (`duration_min`, `buffer_min`).
+- The seed creates **one stylist, "Bethany", Tue–Sat 9–6, offering
+  everything**. Add the real team and their hours in `stylists`,
+  `stylist_services`, and `schedules` (minutes from midnight; weekday 0 =
+  Sunday). Vacations go in `time_off`.
+- `settings` holds the time zone, the 2-hour lead time, the 60-day booking
+  window and the 15-minute slot grid.
+
+### Running the tests
+
+```
+npm test                                   # engine tests only
+TEST_DATABASE_URL=postgres://… npm test    # + integration and API tests against a real Postgres
+```
+
+### Not built yet (natural next steps)
+
+Staff calendar/admin for appointments and hours · SMS/email confirmations
+and reminders · deposits · per-stylist pricing · reschedule-by-code.
