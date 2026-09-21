@@ -54,7 +54,14 @@ enter their details, and get a confirmation code they can use at
 | Schema — with a DB-level guard against double-booking | `lib/schema.sql` |
 | Booking operations | `lib/booking.js` |
 | HTTP routes | `api/book/*.js` |
-| Starting catalog (67 services, prices from the site, **default durations**) | `lib/seed-data.json` |
+| Catalog — from the Square export: 66 services, 322 variations, **real durations** | `lib/seed-data.json` |
+
+**Variations.** A service is what the customer browses ("Braids (Knotless)");
+a variation is what they book ("Medium 24in", "New Client"), and each carries
+its own duration from Square. Services with one option skip that step.
+Variations Square marks *not bookable online* are stored but never offered;
+a service with none left is hidden from `/book` entirely (Threading, Classes,
+the Back II School menu, …).
 
 Double-booking is impossible by construction: `appointments` carries an
 exclusion constraint on `(stylist, time range)`, so if two people submit the
@@ -72,12 +79,25 @@ same slot in the same instant, the database accepts one and rejects the other.
 Until step 1 is done, `/book` shows a plain "not connected yet" message
 instead of the flow.
 
+**Which Vercel project?** Two projects (`crown-heirs`, `crown-heirs-booking`)
+deploy this same repo, so the code is identical on both — only environment
+variables differ. `crown-heirs` already holds the Blob store and
+`ADMIN_PASSWORD` that `/tv` and `/admin` use, so connect Postgres **there**
+and treat it as the one live project. `crown-heirs-booking` can be ignored or
+deleted; if you'd rather it serve booking on its own URL, it needs all three
+(`ADMIN_PASSWORD`, the Blob store, Postgres) added to it as well.
+
 ### Things to review after setup
 
-- **Durations are defaults**, inferred from the service name (a retwist is
-  90 min, knotless braids 5 h, a line-up 30 min…). They drive every open
-  slot, so check them against how you actually book. Edit in the `services`
-  table (`duration_min`, `buffer_min`).
+- **Durations come from Square** per variation, so slots are offered the way
+  you already book. If you change one in Square, re-export and re-run Set up
+  — the catalog file is the authority for durations and bookability.
+- **Prices** are still the site's "From $" figures, matched to 31 of the 66
+  services by name (the export has no price column). The rest show "Ask us"
+  until filled in (`services.price_from_cents`); Set up never overwrites a
+  price that's already there.
+- Cleanup **buffer** between clients defaults to 15 min (0 for add-ons and
+  consultations): `services.buffer_min`.
 - The seed creates **one stylist, "Bethany", Tue–Sat 9–6, offering
   everything**. Add the real team and their hours in `stylists`,
   `stylist_services`, and `schedules` (minutes from midnight; weekday 0 =

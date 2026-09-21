@@ -1,298 +1,1310 @@
 {
+ "source": "Square services export (services-with-variation-names.csv), 2026-09-21",
  "services": [
   {
-   "slug": "braiding-add-ons",
-   "name": "Braiding Add-Ons",
+   "slug": "box-braids-traditional",
+   "name": "Box Braids (Traditional)",
    "category": "Braids & Twists",
-   "description": "Add-ons to your existing braid service — edges, beads, partial re-braids.",
-   "price_from_cents": 2000,
-   "duration_min": 30,
-   "buffer_min": 0,
+   "description": "Extension Service that includes: Shampoo, Detangle, Blow Dry, and Traditional Braiding Hair (Natural Colors).\nBeads are an additional fee an additional time.\nNatural Hair color of choice must be provided 24hrs of appointment.\n\nSmall: ~96 Braids\nSmedium: ~73 Braids\nMedium: ~48 Braids\nLarge: ~35 Braids\nJumbo: ~22 Braids",
+   "variations": [
+    {
+     "name": "Large/Jumbo '18",
+     "duration_min": 150,
+     "bookable": true,
+     "sort": 0
+    },
+    {
+     "name": "Large/Jumbo 24'",
+     "duration_min": 180,
+     "bookable": true,
+     "sort": 1
+    },
+    {
+     "name": "Large/Jumbo 36'",
+     "duration_min": 210,
+     "bookable": true,
+     "sort": 2
+    },
+    {
+     "name": "Medium '18",
+     "duration_min": 210,
+     "bookable": true,
+     "sort": 3
+    },
+    {
+     "name": "Medium 24'",
+     "duration_min": 240,
+     "bookable": true,
+     "sort": 4
+    },
+    {
+     "name": "Medium 36'",
+     "duration_min": 270,
+     "bookable": true,
+     "sort": 5
+    },
+    {
+     "name": "Small 24'",
+     "duration_min": 360,
+     "bookable": true,
+     "sort": 6
+    },
+    {
+     "name": "Small 36'",
+     "duration_min": 390,
+     "bookable": true,
+     "sort": 7
+    },
+    {
+     "name": "Smedium '18",
+     "duration_min": 270,
+     "bookable": true,
+     "sort": 8
+    },
+    {
+     "name": "Smedium 24'",
+     "duration_min": 300,
+     "bookable": true,
+     "sort": 9
+    },
+    {
+     "name": "Smedium 36'",
+     "duration_min": 330,
+     "bookable": true,
+     "sort": 10
+    },
+    {
+     "name": "XSmall 24\u2019",
+     "duration_min": 480,
+     "bookable": true,
+     "sort": 11
+    }
+   ],
+   "duration_min": 150,
+   "active": true,
+   "price_from_cents": null,
+   "buffer_min": 15,
    "requires_consult": false,
    "sort": 0
   },
   {
-   "slug": "curl-definition-restoration",
-   "name": "Curl Definition + Restoration",
+   "slug": "braids-knotless",
+   "name": "Braids (Knotless)",
    "category": "Braids & Twists",
-   "description": "Intentional definition and hydration for your curls. Includes shampoo + conditioning and curl definition.",
-   "price_from_cents": 6500,
-   "duration_min": 90,
+   "description": "Extension Service that includes: Shampoo, Detangle, Blow Dry, and Traditional Braiding Hair (Natural Colors).\nBeads are an additional fee an additional time.\nNatural Hair color of choice must be provided 24hrs of appointment.\n\nSmall: ~96 Braids\nSmedium: ~73 Braids\nMedium: ~48 Braids\nLarge: ~35 Braids\nJumbo: ~22 Braids",
+   "variations": [
+    {
+     "name": "Large/Jumbo 18'",
+     "duration_min": 150,
+     "bookable": true,
+     "sort": 0
+    },
+    {
+     "name": "Large/Jumbo 24'",
+     "duration_min": 180,
+     "bookable": true,
+     "sort": 1
+    },
+    {
+     "name": "Large/Jumbo 36'",
+     "duration_min": 210,
+     "bookable": true,
+     "sort": 2
+    },
+    {
+     "name": "Medium 18'",
+     "duration_min": 210,
+     "bookable": true,
+     "sort": 3
+    },
+    {
+     "name": "Medium 24'",
+     "duration_min": 240,
+     "bookable": true,
+     "sort": 4
+    },
+    {
+     "name": "Medium 36'",
+     "duration_min": 270,
+     "bookable": true,
+     "sort": 5
+    },
+    {
+     "name": "Small 18'",
+     "duration_min": 330,
+     "bookable": true,
+     "sort": 6
+    },
+    {
+     "name": "Small 24'",
+     "duration_min": 360,
+     "bookable": true,
+     "sort": 7
+    },
+    {
+     "name": "Small 36'",
+     "duration_min": 390,
+     "bookable": true,
+     "sort": 8
+    },
+    {
+     "name": "Smedium 18'",
+     "duration_min": 270,
+     "bookable": true,
+     "sort": 9
+    },
+    {
+     "name": "Smedium 24'",
+     "duration_min": 300,
+     "bookable": true,
+     "sort": 10
+    },
+    {
+     "name": "Smedium 36'",
+     "duration_min": 330,
+     "bookable": true,
+     "sort": 11
+    }
+   ],
+   "duration_min": 150,
+   "active": true,
+   "price_from_cents": 17500,
    "buffer_min": 15,
    "requires_consult": false,
    "sort": 1
   },
   {
-   "slug": "feed-in-style-braids",
-   "name": "Feed-In Style Braids",
+   "slug": "crochet-styles",
+   "name": "Crochet Styles",
    "category": "Braids & Twists",
-   "description": "Cornrow-based feed-in braids with natural-color hair. Includes shampoo & conditioning.",
-   "price_from_cents": 9500,
-   "duration_min": 240,
+   "description": "Hair extension styling that is added using a crochet method.\nShampoo and Conditioning included.\n\nHair not included.",
+   "variations": [
+    {
+     "name": "Individuals Crochet",
+     "duration_min": 210,
+     "bookable": true,
+     "sort": 0
+    },
+    {
+     "name": "Traditional Crochet",
+     "duration_min": 150,
+     "bookable": true,
+     "sort": 1
+    }
+   ],
+   "duration_min": 150,
+   "active": true,
+   "price_from_cents": 18000,
    "buffer_min": 15,
    "requires_consult": false,
    "sort": 2
   },
   {
-   "slug": "knotless-braids",
-   "name": "Knotless Braids",
+   "slug": "feed-in-style-braids",
+   "name": "Feed-In Style Braids",
    "category": "Braids & Twists",
-   "description": "Tension-free box braids with added hair. Any natural length. Lasts 6–8 weeks.",
-   "price_from_cents": 17500,
-   "duration_min": 300,
+   "description": "Includes: Shampoo and Conditioning and Natural Color hair (24inch). \n\nPerfect for Cornrow style, Lemonade style, Tribal Braids, Buns, simple braids with additional hair added. Pricing listed as the base and times may vary depending on complexity of request.  Confirm",
+   "variations": [
+    {
+     "name": "10 - 15 Feed - Ins (Straight back)",
+     "duration_min": 180,
+     "bookable": true,
+     "sort": 0
+    },
+    {
+     "name": "16 - 25 Feed - Ins",
+     "duration_min": 225,
+     "bookable": true,
+     "sort": 1
+    },
+    {
+     "name": "26 - 35 Feed - Ins",
+     "duration_min": 270,
+     "bookable": true,
+     "sort": 2
+    },
+    {
+     "name": "3 - 6 Braids",
+     "duration_min": 120,
+     "bookable": true,
+     "sort": 3
+    },
+    {
+     "name": "6 - 9 Braids",
+     "duration_min": 150,
+     "bookable": true,
+     "sort": 4
+    },
+    {
+     "name": "Bun",
+     "duration_min": 165,
+     "bookable": true,
+     "sort": 5
+    },
+    {
+     "name": "Fulani Style Braids (Front) + Sew-in or Quick Weave (Back)",
+     "duration_min": 300,
+     "bookable": false,
+     "sort": 6
+    },
+    {
+     "name": "Long Ponytail",
+     "duration_min": 210,
+     "bookable": true,
+     "sort": 7
+    },
+    {
+     "name": "Tribal Style (Half to Scalp and Singles in Back)",
+     "duration_min": 270,
+     "bookable": true,
+     "sort": 8
+    },
+    {
+     "name": "Two Feed-In Braids",
+     "duration_min": 90,
+     "bookable": true,
+     "sort": 9
+    }
+   ],
+   "duration_min": 90,
+   "active": true,
+   "price_from_cents": 9500,
    "buffer_min": 15,
    "requires_consult": false,
    "sort": 3
   },
   {
-   "slug": "mini-twists-two-strands",
-   "name": "Mini Twists (Two Strands)",
+   "slug": "fulani-tribal-braids-half-braided-to-scalp-individuals-in-back",
+   "name": "Fulani/Tribal Braids (Half Braided to Scalp, Individuals in Back)",
    "category": "Braids & Twists",
-   "description": "Loose-natural protective mini twists with your own hair. Shampoo, conditioning, and blow dry included.",
-   "price_from_cents": 12500,
-   "duration_min": 240,
+   "description": "Braid Extension Service that includes: Shampoo, Blow Dry, and Traditional Braiding Hair (Natural Colors 1-4). Tribal styling combines feed-in braids to the scalp in the front with singles in the back.\n\nDesign complexity may affect final time. Beads are an additional fee and additional time. Natural hair color of choice must be provided 24hrs before appointment.\n\nSizing Guide:\nLarge/Jumbo: Up to 8 feed-in rows + ~11\u201318 singles\nMedium: 8\u201310 feed-in rows + ~24 singles\nSmedium: 10\u201312 feed-in rows + ~36 singles\nSmall: 12\u201314 feed-in rows + ~48 singles\nXSmall: 14\u201316 feed-in rows + ~60 singles",
+   "variations": [
+    {
+     "name": "Large/Jumbo 18\"",
+     "duration_min": 180,
+     "bookable": true,
+     "sort": 0
+    },
+    {
+     "name": "Large/Jumbo 24'",
+     "duration_min": 210,
+     "bookable": true,
+     "sort": 1
+    },
+    {
+     "name": "Large/Jumbo 36\"",
+     "duration_min": 240,
+     "bookable": true,
+     "sort": 2
+    },
+    {
+     "name": "Medium 18\"",
+     "duration_min": 240,
+     "bookable": true,
+     "sort": 3
+    },
+    {
+     "name": "Medium 24\"",
+     "duration_min": 270,
+     "bookable": true,
+     "sort": 4
+    },
+    {
+     "name": "Medium 36\"",
+     "duration_min": 300,
+     "bookable": true,
+     "sort": 5
+    },
+    {
+     "name": "Small 18\"",
+     "duration_min": 360,
+     "bookable": true,
+     "sort": 6
+    },
+    {
+     "name": "Small 24\"",
+     "duration_min": 390,
+     "bookable": true,
+     "sort": 7
+    },
+    {
+     "name": "Small 36\"",
+     "duration_min": 420,
+     "bookable": true,
+     "sort": 8
+    },
+    {
+     "name": "Smedium 18\"",
+     "duration_min": 300,
+     "bookable": true,
+     "sort": 9
+    },
+    {
+     "name": "Smedium 24\"",
+     "duration_min": 330,
+     "bookable": true,
+     "sort": 10
+    },
+    {
+     "name": "Smedium 36\"",
+     "duration_min": 360,
+     "bookable": true,
+     "sort": 11
+    },
+    {
+     "name": "Xsmall 24\"",
+     "duration_min": 480,
+     "bookable": true,
+     "sort": 12
+    }
+   ],
+   "duration_min": 180,
+   "active": true,
+   "price_from_cents": null,
    "buffer_min": 15,
    "requires_consult": false,
    "sort": 4
   },
   {
-   "slug": "mini-twists-w-added-hair",
-   "name": "Mini Twists w/ Added Hair",
+   "slug": "mini-twists-two-strands",
+   "name": "Mini Twists (Two Strands)",
    "category": "Braids & Twists",
-   "description": "Loose-natural protective style with added hair. Shampoo, condition, and blow dry included.",
-   "price_from_cents": 22500,
-   "duration_min": 300,
+   "description": "Loose natural, protective style. Shampoo, Conditioning, and blow dry included in service.\n\nAdded hair: \nNot included in pricing:  + $100 (Small parts), +150 (Extra Small Parts) + $200 (Micro parts)\nHair type needed: Kinky Bulk Hair \nBring 24hrs before service\n\nSizing guide:\n\u2022 Hair measured by Volume x Length. Final length after finished product listed in options.\n\n\u2022 Small Parts (80- 90 twists)\n\u2022 Extra Parts (91 - 110 twists)\n\u2022 Micro Parts (111+ twists)",
+   "variations": [
+    {
+     "name": "Extra Small Parts (Long Hair / Shoulder Length)",
+     "duration_min": 195,
+     "bookable": true,
+     "sort": 0
+    },
+    {
+     "name": "Extra Small Parts (Medium / Neck Length)",
+     "duration_min": 165,
+     "bookable": true,
+     "sort": 1
+    },
+    {
+     "name": "Extra Small Parts (Short Hair / Top of Nape Length)",
+     "duration_min": 135,
+     "bookable": true,
+     "sort": 2
+    },
+    {
+     "name": "Micro Parts (Long Hair / Shoulder Length)",
+     "duration_min": 240,
+     "bookable": true,
+     "sort": 3
+    },
+    {
+     "name": "Micro Parts (Medium / Neck Length)",
+     "duration_min": 210,
+     "bookable": true,
+     "sort": 4
+    },
+    {
+     "name": "Micro Parts (Short Hair / Top of Nape Length)",
+     "duration_min": 165,
+     "bookable": true,
+     "sort": 5
+    },
+    {
+     "name": "Small Parts (Long Hair / Shoulder Length)",
+     "duration_min": 150,
+     "bookable": true,
+     "sort": 6
+    },
+    {
+     "name": "Small Parts (Medium / Neck Length)",
+     "duration_min": 120,
+     "bookable": true,
+     "sort": 7
+    },
+    {
+     "name": "Small Parts (Short Hair / Top of Nape Length)",
+     "duration_min": 90,
+     "bookable": true,
+     "sort": 8
+    }
+   ],
+   "duration_min": 90,
+   "active": true,
+   "price_from_cents": 12500,
    "buffer_min": 15,
    "requires_consult": false,
    "sort": 5
   },
   {
-   "slug": "natural-hair-braiding",
-   "name": "Natural Hair Braiding",
+   "slug": "mini-twists-two-strands-with-added-hair",
+   "name": "Mini Twists (Two Strands) with Added Hair",
    "category": "Braids & Twists",
-   "description": "Braiding using your own natural hair — no extensions. Includes shampoo, condition, and blow dry.",
-   "price_from_cents": null,
-   "duration_min": 240,
+   "description": "Loose natural, protective style. Shampoo, Conditioning, and blow dry included in service.\n\nAdded hair instructions:\nHair needed: Kinky Bulk Hair (for natural, Afro feel) or QVR Afro Kinky Bulk Hair for a Looser curl pattern and feel\nBring 24hrs before service\nAmount: Depending on what parting and length selected, \n\nSizing guide:\n\u2022  Select the desired Final length after finished product listed\n\n\u2022 Small Parts (80- 90 twists)\n\u2022 Extra Parts (91 - 110 twists)\n\u2022 Micro Parts (111+ twists)",
+   "variations": [
+    {
+     "name": "Extra Small Parts (Long Hair / Shoulder Length)",
+     "duration_min": 270,
+     "bookable": true,
+     "sort": 0
+    },
+    {
+     "name": "Extra Small Parts (Medium / Neck Length)",
+     "duration_min": 225,
+     "bookable": true,
+     "sort": 1
+    },
+    {
+     "name": "Extra Small Parts (Short / Top of Nape Length)",
+     "duration_min": 195,
+     "bookable": true,
+     "sort": 2
+    },
+    {
+     "name": "Micro Parts (Long Hair / Shoulder Length)",
+     "duration_min": 390,
+     "bookable": true,
+     "sort": 3
+    },
+    {
+     "name": "Micro Parts (Medium / Neck Length)",
+     "duration_min": 270,
+     "bookable": true,
+     "sort": 4
+    },
+    {
+     "name": "Micro Parts (Short / Top of Nape Length)",
+     "duration_min": 285,
+     "bookable": true,
+     "sort": 5
+    },
+    {
+     "name": "Small Parts (Long Hair / Shoulder Length)",
+     "duration_min": 210,
+     "bookable": true,
+     "sort": 6
+    },
+    {
+     "name": "Small Parts (Medium / Neck Length)",
+     "duration_min": 180,
+     "bookable": true,
+     "sort": 7
+    },
+    {
+     "name": "Small Parts (Short / Top of Nape Length)",
+     "duration_min": 150,
+     "bookable": true,
+     "sort": 8
+    }
+   ],
+   "duration_min": 150,
+   "active": true,
+   "price_from_cents": 22500,
    "buffer_min": 15,
    "requires_consult": false,
    "sort": 6
   },
   {
-   "slug": "senegalese-box-twists",
-   "name": "Senegalese / Box Twists",
+   "slug": "miracle-knots-braids-natural-braids",
+   "name": "Miracle Knots Braids (Natural Braids)",
    "category": "Braids & Twists",
-   "description": "Long, smooth rope-like twists with added hair. Lightweight, versatile, lasts 6–8 weeks.",
-   "price_from_cents": 18500,
-   "duration_min": 300,
+   "description": "A premium, knotless-style protective braid installed using pre-threaded human hair for a flatter, lighter, more natural finish. Boho curls and waves are built into every braid . Includes shampoo, condition, and blow-dry. Hair is not included in the price. Sizing is based on braid count and parting precision. Pricing reflects mid-back length. \n\nHair type needed: Pre-threaded Human Hair\nAmount: 3 Packs (More packs needed for longer and fuller looks)\nRecommended Brands: Ywigs, YG Wigs, and Ula\n\nSizing Guide: \nJumbo: ~22 Braids\nLarge: ~35 Braids\nMedium: ~48 Braids\nSmedium: ~73 Braids \nSmall: ~96 Braids",
+   "variations": [
+    {
+     "name": "Jumbo Miracle Knots",
+     "duration_min": 150,
+     "bookable": true,
+     "sort": 0
+    },
+    {
+     "name": "Large Miracle Knots",
+     "duration_min": 210,
+     "bookable": true,
+     "sort": 1
+    },
+    {
+     "name": "Medium Miracle Knots",
+     "duration_min": 270,
+     "bookable": true,
+     "sort": 2
+    },
+    {
+     "name": "Small Miracle Knots",
+     "duration_min": 450,
+     "bookable": true,
+     "sort": 3
+    },
+    {
+     "name": "Smedium Miracle Knots",
+     "duration_min": 360,
+     "bookable": true,
+     "sort": 4
+    }
+   ],
+   "duration_min": 150,
+   "active": true,
+   "price_from_cents": null,
    "buffer_min": 15,
    "requires_consult": false,
    "sort": 7
   },
   {
-   "slug": "two-strand-twists",
-   "name": "Two-Strand Twists",
+   "slug": "natural-hair-braiding",
+   "name": "Natural Hair Braiding",
    "category": "Braids & Twists",
-   "description": "Worn as-is or unraveled for a twist-out. No extensions needed.",
-   "price_from_cents": 8000,
-   "duration_min": 150,
+   "description": "Includes Shampoo, Condition and Blow Dry.\nBeads are an additional fee an additional time.\nSizing is based on Length x Volume\n\nPricing is based on medium parting. Small size parting and designs are additional pricing.\n*Reach out to stylist to confirm pricing*",
+   "variations": [
+    {
+     "name": "Braiding- with hair added. Price varies",
+     "duration_min": 180,
+     "bookable": false,
+     "sort": 0
+    },
+    {
+     "name": "Long - Extra Long Natural Hair Braiding",
+     "duration_min": 195,
+     "bookable": true,
+     "sort": 1
+    },
+    {
+     "name": "Medium - Long Natural Hair Braiding",
+     "duration_min": 150,
+     "bookable": true,
+     "sort": 2
+    },
+    {
+     "name": "Short - Medium Natural Hair Braiding",
+     "duration_min": 90,
+     "bookable": true,
+     "sort": 3
+    }
+   ],
+   "duration_min": 90,
+   "active": true,
+   "price_from_cents": null,
    "buffer_min": 15,
    "requires_consult": false,
    "sort": 8
   },
   {
-   "slug": "faux-locs-butterfly",
-   "name": "Faux Locs — Butterfly",
+   "slug": "faux-locs-butterfly-and-soft-locs",
+   "name": "Faux Locs (Butterfly & Soft Locs)",
    "category": "Locs",
-   "description": "Lightweight, bohemian faux locs with a textured, wispy finish. Added hair.",
+   "description": "Extension Service that includes: Shampoo, Detangle, Blow Dry, and Hair (common colors).\n* Specify Color in Notes.",
+   "variations": [
+    {
+     "name": "Large/Jumbo 24'",
+     "duration_min": 300,
+     "bookable": true,
+     "sort": 0
+    },
+    {
+     "name": "Largo/Jumbo 36'",
+     "duration_min": 300,
+     "bookable": true,
+     "sort": 1
+    },
+    {
+     "name": "Medium 24'",
+     "duration_min": 360,
+     "bookable": true,
+     "sort": 2
+    },
+    {
+     "name": "Medium 36'",
+     "duration_min": 360,
+     "bookable": true,
+     "sort": 3
+    },
+    {
+     "name": "Small 24'",
+     "duration_min": 420,
+     "bookable": true,
+     "sort": 4
+    },
+    {
+     "name": "Small 36'",
+     "duration_min": 420,
+     "bookable": true,
+     "sort": 5
+    }
+   ],
+   "duration_min": 300,
+   "active": true,
    "price_from_cents": 26500,
-   "duration_min": 360,
    "buffer_min": 15,
    "requires_consult": false,
    "sort": 9
   },
   {
-   "slug": "faux-locs-soft",
-   "name": "Faux Locs — Soft",
+   "slug": "individuals-over-locs",
+   "name": "Individuals Over Locs",
    "category": "Locs",
-   "description": "Softer-textured faux locs — clean, smooth, long-lasting protective style.",
-   "price_from_cents": 26500,
-   "duration_min": 360,
+   "description": "Perfect for protective styling over Locs!\n\nPricing listed for Medium Size Parts and 24in (For different sizing, reach out to updated pricing and est service)\nLocs can be combined to make different sizes. Minimum sizes is dependent on individual locs sizes.\nBooking requires consultation prior\n\nIncluded: Shampoo and Conditioning & Hair (Natural hair color selections)\n\n*For Loc Maintenance in addition to service select Loc Retwist in addition to service*",
+   "variations": [
+    {
+     "name": "Braids Over Locs",
+     "duration_min": 300,
+     "bookable": true,
+     "sort": 0
+    },
+    {
+     "name": "Faux Locs Over Locs",
+     "duration_min": 300,
+     "bookable": true,
+     "sort": 1
+    },
+    {
+     "name": "Marley Twist Over Locs",
+     "duration_min": 300,
+     "bookable": true,
+     "sort": 2
+    }
+   ],
+   "duration_min": 300,
+   "active": true,
+   "price_from_cents": 27500,
    "buffer_min": 15,
    "requires_consult": false,
    "sort": 10
   },
   {
-   "slug": "freeform-locs",
-   "name": "Freeform Locs",
-   "category": "Locs",
-   "description": "Transitioning to organic, free-growing locs. We consult on the switch and support your hair health along the way.",
-   "price_from_cents": null,
-   "duration_min": 90,
-   "buffer_min": 15,
-   "requires_consult": false,
-   "sort": 11
-  },
-  {
-   "slug": "individuals-over-locs",
-   "name": "Individuals Over Locs",
-   "category": "Locs",
-   "description": "Protective individual braids or twists installed over existing locs.",
-   "price_from_cents": 27500,
-   "duration_min": 240,
-   "buffer_min": 15,
-   "requires_consult": false,
-   "sort": 12
-  },
-  {
    "slug": "instant-locs",
    "name": "Instant Locs",
    "category": "Locs",
-   "description": "Skip the budding stage. A needle crochets hair for an instant lock-and-hold. Wash & condition included.",
+   "description": "Skip the budding stage as a needle is used to crochet hair for an instant lock and hold. Wash and Condition is included. Standard sizing.\n25% deposit to secure appointment.",
+   "variations": [
+    {
+     "name": "Regular",
+     "duration_min": 240,
+     "bookable": true,
+     "sort": 0
+    }
+   ],
+   "duration_min": 240,
+   "active": true,
    "price_from_cents": 50000,
-   "duration_min": 300,
    "buffer_min": 15,
    "requires_consult": true,
-   "sort": 13
-  },
-  {
-   "slug": "interlocking",
-   "name": "Interlocking",
-   "category": "Locs",
-   "description": "Long-lasting loc maintenance using interlocking instead of palm rolling. Ideal if you swim or work out often.",
-   "price_from_cents": 8500,
-   "duration_min": 120,
-   "buffer_min": 15,
-   "requires_consult": false,
-   "sort": 14
+   "sort": 11
   },
   {
    "slug": "loc-color",
    "name": "Loc Color",
    "category": "Locs",
-   "description": "Highlights, full color, or toning on existing locs. Consultation required before service.",
+   "description": "*Requires consultation appointment*\n*Pricing may varies on length and volume*\n*Color demo/testing maybe necessary*",
+   "variations": [
+    {
+     "name": "Deposit Only (No Bleach Needed)",
+     "duration_min": 75,
+     "bookable": true,
+     "sort": 0
+    },
+    {
+     "name": "Double Processing (Bleach Needed)",
+     "duration_min": 100,
+     "bookable": true,
+     "sort": 1
+    },
+    {
+     "name": "Just the Tips / Root Touch Up",
+     "duration_min": 75,
+     "bookable": true,
+     "sort": 2
+    }
+   ],
+   "duration_min": 75,
+   "active": true,
    "price_from_cents": null,
-   "duration_min": 150,
    "buffer_min": 15,
    "requires_consult": true,
+   "sort": 12
+  },
+  {
+   "slug": "loc-comb-out-services",
+   "name": "Loc Comb Out Services",
+   "category": "Locs",
+   "description": "Mandatory Consultation: in-salon, video, or photo submission with detailed intake. The three variables (maturity, length, density) cannot be quoted without an assessment.\n\nStarter/Immature Locs (up to 3 years)\nEstimated 4\u20138 hours \u2022 $460 \u2013 $920\n\nMature Locs (3\u20136 years)\nEstimated 10\u201320 hours \u2022 $1,150 \u2013 $2,300 Typically split across 2 sessions.\n\nEstablished Locs (6+ years)\nEstimated 25\u201350+ hours \u2022 $2,875 \u2013 $5,750+ Scheduled across 3\u20134 sessions.",
+   "variations": [
+    {
+     "name": "Established Locs: Chin to Shoulder",
+     "duration_min": 480,
+     "bookable": true,
+     "sort": 0
+    },
+    {
+     "name": "Established Locs: Mid-Back + Beyond",
+     "duration_min": 480,
+     "bookable": true,
+     "sort": 1
+    },
+    {
+     "name": "Established Locs: Shoulder to Mid-back",
+     "duration_min": 480,
+     "bookable": true,
+     "sort": 2
+    },
+    {
+     "name": "Immature Locs : Chin to Shoulder",
+     "duration_min": 480,
+     "bookable": true,
+     "sort": 3
+    },
+    {
+     "name": "Immature Locs: Mid-back + Beyond",
+     "duration_min": 480,
+     "bookable": true,
+     "sort": 4
+    },
+    {
+     "name": "Immature Locs: Shoulder to Mid-Back",
+     "duration_min": 480,
+     "bookable": true,
+     "sort": 5
+    },
+    {
+     "name": "Mature Locs: Chin to Shoulder",
+     "duration_min": 480,
+     "bookable": true,
+     "sort": 6
+    },
+    {
+     "name": "Mature Locs: Mid-Back + Beyond",
+     "duration_min": 480,
+     "bookable": true,
+     "sort": 7
+    },
+    {
+     "name": "Mature Locs: Shoulder to Mid-Back",
+     "duration_min": 480,
+     "bookable": true,
+     "sort": 8
+    }
+   ],
+   "duration_min": 480,
+   "active": true,
+   "price_from_cents": null,
+   "buffer_min": 15,
+   "requires_consult": false,
+   "sort": 13
+  },
+  {
+   "slug": "loc-crochet-retighten",
+   "name": "Loc Crochet Retighten",
+   "category": "Locs",
+   "description": "Base retightening with crochet needle. Shampoo & Condition included. \nPrices vary. Price listed is the starting rate. Send picture to confirm appointment estimate and price.",
+   "variations": [
+    {
+     "name": "Regular",
+     "duration_min": 180,
+     "bookable": true,
+     "sort": 0
+    }
+   ],
+   "duration_min": 180,
+   "active": true,
+   "price_from_cents": null,
+   "buffer_min": 15,
+   "requires_consult": false,
+   "sort": 14
+  },
+  {
+   "slug": "loc-detoxes",
+   "name": "Loc Detoxes",
+   "category": "Locs",
+   "description": "Add on service to any Loc Maintenance service.\n\nGeneral Detox: Apple Cider Vinegar, Lemon Juice, Baking Soda and Clarifying Shampoo\n\nSignature Detox: General detox ingredients including our Signature Crown Detox Bath Powder\n\nCrown Lux Detox: Signature Detox experience in the Shampoo Massage Chair with Therapeutic Shampoo.\n\n\nused to provide a cleansing experience to lift compacted product build up, dirt and residue not only from the scalp but throughout the locs.",
+   "variations": [
+    {
+     "name": "Crown Lux Detox (Includes Massage Chair/Add-On)",
+     "duration_min": 45,
+     "bookable": true,
+     "sort": 0
+    },
+    {
+     "name": "General Detox",
+     "duration_min": 45,
+     "bookable": true,
+     "sort": 1
+    },
+    {
+     "name": "General Detox (Add-On Service)",
+     "duration_min": 30,
+     "bookable": true,
+     "sort": 2
+    },
+    {
+     "name": "Signature Detox (Add-on Service)",
+     "duration_min": 30,
+     "bookable": true,
+     "sort": 3
+    }
+   ],
+   "duration_min": 30,
+   "active": true,
+   "price_from_cents": null,
+   "buffer_min": 15,
+   "requires_consult": false,
    "sort": 15
   },
   {
    "slug": "loc-extensions",
    "name": "Loc Extensions",
    "category": "Locs",
-   "description": "Add length or fullness to your existing locs with expert extension techniques.",
+   "description": "Skip the stages and get the desired length and body. Locs made based on preference. Hair price included.\n**Requires consultation prior to appointment to determine length, amount and to secure 25% deposit**",
+   "variations": [
+    {
+     "name": "Regular",
+     "duration_min": 360,
+     "bookable": true,
+     "sort": 0
+    }
+   ],
+   "duration_min": 360,
+   "active": true,
    "price_from_cents": null,
-   "duration_min": 300,
    "buffer_min": 15,
    "requires_consult": false,
    "sort": 16
   },
   {
-   "slug": "loc-maintenance",
-   "name": "Loc Maintenance",
+   "slug": "loc-interlocking",
+   "name": "Loc Interlocking",
    "category": "Locs",
-   "description": "",
-   "price_from_cents": null,
-   "duration_min": 90,
+   "description": "Use of unique needle to tighten hair to scalp by taking the end of the loc and pulling through the root to maintenance new growth.\n**Price listed is for standard size locs. Contact Stylist to verify size of your crown**",
+   "variations": [
+    {
+     "name": "Interlocking (Microlocs / over 150)",
+     "duration_min": 300,
+     "bookable": true,
+     "sort": 0
+    },
+    {
+     "name": "Interlocking (Small / Under 150 over 90 locs)",
+     "duration_min": 240,
+     "bookable": true,
+     "sort": 1
+    },
+    {
+     "name": "Interlocking (Traditional Size / under 90 locs)",
+     "duration_min": 180,
+     "bookable": true,
+     "sort": 2
+    }
+   ],
+   "duration_min": 180,
+   "active": true,
+   "price_from_cents": 8500,
    "buffer_min": 15,
    "requires_consult": false,
    "sort": 17
   },
   {
-   "slug": "loc-moisturizing-treatment",
-   "name": "Loc Moisturizing Treatment",
+   "slug": "loc-repairs",
+   "name": "Loc Repairs",
    "category": "Locs",
-   "description": "Deep hydration for dry or neglected locs — restores moisture, softness, and shine.",
-   "price_from_cents": 5000,
-   "duration_min": 60,
+   "description": "$15 per loc. Includes reattachments, merges, and simple repairs. Prices vary depending severity.",
+   "variations": [
+    {
+     "name": "Multiple Repairs",
+     "duration_min": 30,
+     "bookable": true,
+     "sort": 0
+    },
+    {
+     "name": "Regular",
+     "duration_min": 15,
+     "bookable": true,
+     "sort": 1
+    }
+   ],
+   "duration_min": 15,
+   "active": true,
+   "price_from_cents": null,
    "buffer_min": 15,
    "requires_consult": false,
    "sort": 18
   },
   {
-   "slug": "loc-repair-and-combine",
-   "name": "Loc Repair & Combine",
+   "slug": "loc-retwist",
+   "name": "Loc Retwist",
    "category": "Locs",
-   "description": "Rebuild thinning locs, combine, reinforce weak points — keep your locs thriving.",
-   "price_from_cents": null,
-   "duration_min": 120,
+   "description": "Clean parts, tighten roots and new growth. Shampoo & Condition included.\nMethod: Palm Roll",
+   "variations": [
+    {
+     "name": "Brother/Sisterlocks (Palm roll)",
+     "duration_min": 210,
+     "bookable": true,
+     "sort": 0
+    },
+    {
+     "name": "Existing Client (Over 45 days)",
+     "duration_min": 90,
+     "bookable": true,
+     "sort": 1
+    },
+    {
+     "name": "Existing Client (within 45 days)",
+     "duration_min": 90,
+     "bookable": true,
+     "sort": 2
+    },
+    {
+     "name": "Microlocs (New Client/Over 45 days)",
+     "duration_min": 150,
+     "bookable": true,
+     "sort": 3
+    },
+    {
+     "name": "Microlocs (Over 135 locs)",
+     "duration_min": 150,
+     "bookable": true,
+     "sort": 4
+    },
+    {
+     "name": "New Client",
+     "duration_min": 90,
+     "bookable": true,
+     "sort": 5
+    }
+   ],
+   "duration_min": 90,
+   "active": true,
+   "price_from_cents": 6500,
    "buffer_min": 15,
    "requires_consult": false,
    "sort": 19
   },
   {
-   "slug": "loc-retwist",
-   "name": "Loc Retwist",
+   "slug": "loc-sparkles",
+   "name": "Loc Sparkles",
    "category": "Locs",
-   "description": "Keep locs neat, defined, and thriving with a traditional palm-roll retwist. Foundation of loc care.",
-   "price_from_cents": 6500,
-   "duration_min": 90,
+   "description": "Adorn your locs by adding shimmer with your choice of silver or gold beads sewn into each loc.\n**Priced per loc",
+   "variations": [
+    {
+     "name": "10 Locs",
+     "duration_min": 90,
+     "bookable": true,
+     "sort": 0
+    },
+    {
+     "name": "15 Locs",
+     "duration_min": 120,
+     "bookable": true,
+     "sort": 1
+    },
+    {
+     "name": "5 Locs",
+     "duration_min": 40,
+     "bookable": true,
+     "sort": 2
+    },
+    {
+     "name": "Fully Sparked",
+     "duration_min": 240,
+     "bookable": true,
+     "sort": 3
+    },
+    {
+     "name": "Per Loc",
+     "duration_min": 20,
+     "bookable": true,
+     "sort": 4
+    }
+   ],
+   "duration_min": 20,
+   "active": true,
+   "price_from_cents": 1200,
    "buffer_min": 15,
    "requires_consult": false,
    "sort": 20
   },
   {
-   "slug": "loc-sparkles",
-   "name": "Loc Sparkles",
+   "slug": "loc-starters",
+   "name": "Loc Starters",
    "category": "Locs",
-   "description": "Adorn your locs with silver or gold beads sewn into each loc.",
-   "price_from_cents": 1200,
-   "duration_min": 30,
-   "buffer_min": 0,
+   "description": "Comb Coil method. Shampoo and Condition Included.\n\nContact stylist to varify pricing. Pricing based on Length x Volume.",
+   "variations": [
+    {
+     "name": "Micro Starters (Extra Long)",
+     "duration_min": 360,
+     "bookable": true,
+     "sort": 0
+    },
+    {
+     "name": "Micro Starters (Long)",
+     "duration_min": 270,
+     "bookable": true,
+     "sort": 1
+    },
+    {
+     "name": "Micro Starters (Short)",
+     "duration_min": 210,
+     "bookable": true,
+     "sort": 2
+    },
+    {
+     "name": "Regular",
+     "duration_min": 150,
+     "bookable": true,
+     "sort": 3
+    },
+    {
+     "name": "Starters - Just the top",
+     "duration_min": 90,
+     "bookable": true,
+     "sort": 4
+    },
+    {
+     "name": "Starters - Long Hair",
+     "duration_min": 180,
+     "bookable": true,
+     "sort": 5
+    }
+   ],
+   "duration_min": 90,
+   "active": true,
+   "price_from_cents": null,
+   "buffer_min": 15,
    "requires_consult": false,
    "sort": 21
   },
   {
-   "slug": "loc-styling",
-   "name": "Loc Styling",
+   "slug": "loc-styles",
+   "name": "Loc Styles",
    "category": "Locs",
-   "description": "Your locs, elevated — updo, pinned, wrapped, or braided designs for events or everyday.",
+   "description": "Price may vary depending on style complexity. Send stylist picture of preference ahead of time.",
+   "variations": [
+    {
+     "name": "Exclusive Style (Two strand twists, ropes, halos etc)",
+     "duration_min": 30,
+     "bookable": true,
+     "sort": 0
+    },
+    {
+     "name": "Loc Curls - Flexirods (Requires extended dryer time)",
+     "duration_min": 45,
+     "bookable": true,
+     "sort": 1
+    },
+    {
+     "name": "Loc Curls - Pipecleaners",
+     "duration_min": 60,
+     "bookable": true,
+     "sort": 2
+    },
+    {
+     "name": "Loc Two Strands/Ropes - Long + Small",
+     "duration_min": 50,
+     "bookable": true,
+     "sort": 3
+    },
+    {
+     "name": "Loc Two Strands/Ropes - Long or Small",
+     "duration_min": 40,
+     "bookable": true,
+     "sort": 4
+    },
+    {
+     "name": "Regular",
+     "duration_min": 20,
+     "bookable": true,
+     "sort": 5
+    }
+   ],
+   "duration_min": 20,
+   "active": true,
    "price_from_cents": 9000,
-   "duration_min": 60,
    "buffer_min": 15,
    "requires_consult": false,
    "sort": 22
   },
   {
-   "slug": "starter-locs",
-   "name": "Starter Locs",
-   "category": "Locs",
-   "description": "Begin your loc journey. We choose the best method for your texture and length — palm roll, two-strand start, or interlock.",
-   "price_from_cents": null,
-   "duration_min": 240,
+   "slug": "curl-definition-restoration",
+   "name": "Curl Definition + Restoration",
+   "category": "Cuts & Styling",
+   "description": "Looking for intentional definition and hydration for your curls? This service include Shampoo + Conditioning and Curl definition.\n\nService Guide:\n\tCurl Quick Reset: For your Curly wash + go\n\tCurl Shape + Define: Light Trim\n\tSignature Curl Definition: Curly Refresh with an intentional Curl Set. Curl Diffusion included.\n\tExclusive Curl Restoration: Your Signature Curl Definition with a Full Trim.\n\tDeluxe Curl Definition: For your curls that need restorative TLC. Ideal for curls that need renewal and ultimate hydration. Includes Curl Set, Deep conditioning, Steam Hydration treatment, and Curl Diffusion\n\nFor Additional Restoration options, please use Hair + Scalp Treatment Add-ons.",
+   "variations": [
+    {
+     "name": "Curl Shape + Define (Includes Light Trim)",
+     "duration_min": 75,
+     "bookable": true,
+     "sort": 0
+    },
+    {
+     "name": "Curly Quick Reset (Shampoo + Glow)",
+     "duration_min": 45,
+     "bookable": true,
+     "sort": 1
+    },
+    {
+     "name": "Deluxe Curl Definition (Steam Hydration + Deep Conditioning)",
+     "duration_min": 210,
+     "bookable": true,
+     "sort": 2
+    },
+    {
+     "name": "Exclusive Curl Restoration (Refresh, Curl Set + Trim)",
+     "duration_min": 180,
+     "bookable": true,
+     "sort": 3
+    },
+    {
+     "name": "Signature Curl Definition (Refresh + Curl Set)",
+     "duration_min": 150,
+     "bookable": true,
+     "sort": 4
+    }
+   ],
+   "duration_min": 45,
+   "active": true,
+   "price_from_cents": 6500,
    "buffer_min": 15,
    "requires_consult": false,
    "sort": 23
   },
   {
-   "slug": "hot-towel-treatment",
-   "name": "Hot Towel Treatment",
+   "slug": "hair-cut",
+   "name": "Hair Cut",
    "category": "Cuts & Styling",
-   "description": "Warm towel therapy to open pores, soothe scalp, and prep for any service. Add-on or standalone.",
-   "price_from_cents": 2000,
-   "duration_min": 30,
+   "description": "Haircut that alters shape and provides transformative look.",
+   "variations": [
+    {
+     "name": "Barber Cut",
+     "duration_min": 40,
+     "bookable": true,
+     "sort": 0
+    },
+    {
+     "name": "Extra Long/Thick Cut",
+     "duration_min": 75,
+     "bookable": true,
+     "sort": 1
+    },
+    {
+     "name": "Medium to Long (Shoulder) Cut",
+     "duration_min": 60,
+     "bookable": true,
+     "sort": 2
+    },
+    {
+     "name": "Short Length (Pixie/Above Earlobe) Cut",
+     "duration_min": 45,
+     "bookable": true,
+     "sort": 3
+    }
+   ],
+   "duration_min": 40,
+   "active": true,
+   "price_from_cents": 4000,
    "buffer_min": 15,
    "requires_consult": false,
    "sort": 24
   },
   {
-   "slug": "natural-hair-styling",
-   "name": "Natural Hair Styling",
+   "slug": "individuals-singles",
+   "name": "Individuals (Singles)",
    "category": "Cuts & Styling",
-   "description": "Wash-and-gos, braid-outs, defined sets — your natural texture in full expression.",
-   "price_from_cents": 5500,
-   "duration_min": 90,
+   "description": "Single Braids, Senegalese, Marley & Passion Twists, Faux Locs\nBeads are an additional fee and additional time.\nPriced varies based on amount of locs and/or sizing. Base price is listed for medium sized parting and 24inches. Booking requires consultation prior.\nExtension Service that includes: Shampoo, Detangle, Blow Dry, and Hair\nSpecify Color in Notes.",
+   "variations": [
+    {
+     "name": "Braids over Locs",
+     "duration_min": 360,
+     "bookable": true,
+     "sort": 0
+    },
+    {
+     "name": "Faux Locs over Locs",
+     "duration_min": 360,
+     "bookable": true,
+     "sort": 1
+    },
+    {
+     "name": "Invisible Locs (Two strands with Added Hair)",
+     "duration_min": 210,
+     "bookable": true,
+     "sort": 2
+    },
+    {
+     "name": "Marley Twists",
+     "duration_min": 240,
+     "bookable": true,
+     "sort": 3
+    },
+    {
+     "name": "Marley Twists (Over Locs)",
+     "duration_min": 240,
+     "bookable": true,
+     "sort": 4
+    },
+    {
+     "name": "Passion Twists",
+     "duration_min": 300,
+     "bookable": true,
+     "sort": 5
+    },
+    {
+     "name": "Senegalese Twists",
+     "duration_min": 300,
+     "bookable": true,
+     "sort": 6
+    }
+   ],
+   "duration_min": 210,
+   "active": true,
+   "price_from_cents": 18500,
    "buffer_min": 15,
    "requires_consult": false,
    "sort": 25
   },
   {
-   "slug": "natural-styling",
-   "name": "Natural Styling",
+   "slug": "loose-natural-styles",
+   "name": "Loose Natural Styles",
    "category": "Cuts & Styling",
-   "description": "Defined curls and coils in full expression.",
+   "description": "Ideal for individuals looking for Two Strand Twists, finger coils, flat twists, bantu knots, flexi rod sets and etc. Includes Shampoo and Condition.\nPlease specify in notes when booking.\n\nList pricing is for medium size parts.\n\nHair is categorized by Length x Volume.\n\n*Reach out to stylist to verify pricing and hair length*",
+   "variations": [
+    {
+     "name": "Extra Long",
+     "duration_min": 180,
+     "bookable": true,
+     "sort": 0
+    },
+    {
+     "name": "Extra Long Exclusive Style (Combos, Invisible Locs, Flexi Rod, Bantu Knots, etc)",
+     "duration_min": 210,
+     "bookable": true,
+     "sort": 1
+    },
+    {
+     "name": "Long Exclusive Style (Combos, Invisible Locs, Flexi Rod, Bantu Knots, etc)",
+     "duration_min": 150,
+     "bookable": true,
+     "sort": 2
+    },
+    {
+     "name": "Long Hair",
+     "duration_min": 120,
+     "bookable": true,
+     "sort": 3
+    },
+    {
+     "name": "Medium Exclusive Style (Combos, Invisible Locs, Flexi Rod, Bantu Knots, etc)",
+     "duration_min": 120,
+     "bookable": true,
+     "sort": 4
+    },
+    {
+     "name": "Medium Length",
+     "duration_min": 90,
+     "bookable": true,
+     "sort": 5
+    },
+    {
+     "name": "Short Hair",
+     "duration_min": 75,
+     "bookable": true,
+     "sort": 6
+    }
+   ],
+   "duration_min": 75,
+   "active": true,
    "price_from_cents": 5500,
-   "duration_min": 45,
    "buffer_min": 15,
    "requires_consult": false,
    "sort": 26
@@ -301,441 +1313,1549 @@
    "slug": "perimeter-touch-up",
    "name": "Perimeter Touch Up",
    "category": "Cuts & Styling",
-   "description": "First two/three rows of braids, faux locs, or singles — stretches any install.",
+   "description": "For individuals: Braids, Faux Locs, Passion Twists, etc\nFirst two/three rows depending on sizing (front and back)\n\nHair included for returning clients. Not included if original service was not done at Crown Heirs.",
+   "variations": [
+    {
+     "name": "Regular",
+     "duration_min": 120,
+     "bookable": false,
+     "sort": 0
+    }
+   ],
+   "duration_min": 120,
+   "active": false,
    "price_from_cents": 12000,
-   "duration_min": 60,
    "buffer_min": 15,
    "requires_consult": false,
    "sort": 27
   },
   {
-   "slug": "pixie-and-tapered-cut",
-   "name": "Pixie & Tapered Cut",
+   "slug": "shampoo-and-style",
+   "name": "Shampoo & Style",
    "category": "Cuts & Styling",
-   "description": "Sculpted short cut shaped to your face — soft and feminine or bold and strong.",
-   "price_from_cents": 6500,
+   "description": "Short relaxed hair that is serviced with a signature shampoo, conditioned and molded to desired style with dryer time included.",
+   "variations": [
+    {
+     "name": "Regular",
+     "duration_min": 60,
+     "bookable": true,
+     "sort": 0
+    }
+   ],
    "duration_min": 60,
+   "active": true,
+   "price_from_cents": 9000,
    "buffer_min": 15,
    "requires_consult": false,
    "sort": 28
   },
   {
-   "slug": "scalp-detox-and-steam",
-   "name": "Scalp Detox & Steam",
+   "slug": "shampoo-and-blow-dry",
+   "name": "Shampoo and Blow Dry",
    "category": "Cuts & Styling",
-   "description": "Removes buildup, soothes irritation, rebalances your scalp. Works at any length.",
-   "price_from_cents": 6000,
-   "duration_min": 45,
+   "description": "Clarifying Shampoo, Conditioning and Blow Dry. Ideal for when in between protective styles or preparation of the same.\n\n**Book Add-ons Seperately under \"Hair and Scalp Treatments\"**",
+   "variations": [
+    {
+     "name": "Shampoo & Blow Dry with Trim",
+     "duration_min": 75,
+     "bookable": true,
+     "sort": 0
+    },
+    {
+     "name": "Shampoo & Braid Down w/ Trim - Regular",
+     "duration_min": 120,
+     "bookable": true,
+     "sort": 1
+    },
+    {
+     "name": "Shampoo & Braid Down w/ Trim -Long Hair (Past Shoulder)",
+     "duration_min": 135,
+     "bookable": true,
+     "sort": 2
+    },
+    {
+     "name": "Shampoo & Braid Down-Long Hair (Past Shoulder)",
+     "duration_min": 105,
+     "bookable": true,
+     "sort": 3
+    },
+    {
+     "name": "Shampoo & Braid Down-Regular",
+     "duration_min": 90,
+     "bookable": true,
+     "sort": 4
+    },
+    {
+     "name": "Shampoo and Blow Dry Only",
+     "duration_min": 50,
+     "bookable": true,
+     "sort": 5
+    },
+    {
+     "name": "Shampoo ONLY (Walkout Wet)",
+     "duration_min": 30,
+     "bookable": true,
+     "sort": 6
+    }
+   ],
+   "duration_min": 30,
+   "active": true,
+   "price_from_cents": null,
    "buffer_min": 15,
    "requires_consult": false,
    "sort": 29
   },
   {
-   "slug": "shampoo-and-style",
-   "name": "Shampoo & Style",
+   "slug": "silk-press-flat-iron-straightening",
+   "name": "Silk Press (Flat Iron Straightening)",
    "category": "Cuts & Styling",
-   "description": "Signature shampoo, conditioning, and molded to your desired style. Perfect between protective styles.",
-   "price_from_cents": 9000,
-   "duration_min": 60,
+   "description": "Heat process to natural hair that emphasizes body, sleekness and movement without the use of chemicals. Includes Shampoo and Condition.\n\nRequest Luxury Add-ons: \nMassage Shampoo Bowl \nHair + Scalp Treatments (Hot Oil, Deep Conditioning, etc)",
+   "variations": [
+    {
+     "name": "Children's Press",
+     "duration_min": 105,
+     "bookable": false,
+     "sort": 0
+    },
+    {
+     "name": "Silk Press and Trim",
+     "duration_min": 120,
+     "bookable": true,
+     "sort": 1
+    },
+    {
+     "name": "Silk Press Deluxe (Trim & Hydration Treatment)",
+     "duration_min": 150,
+     "bookable": true,
+     "sort": 2
+    },
+    {
+     "name": "Silk Press Exclusive (Trim, Hydro Treatment + Massage Chair)",
+     "duration_min": 165,
+     "bookable": true,
+     "sort": 3
+    },
+    {
+     "name": "Silk Press Gold (Hot Oil Treatment + Trim)",
+     "duration_min": 150,
+     "bookable": true,
+     "sort": 4
+    },
+    {
+     "name": "Silk Press Only",
+     "duration_min": 105,
+     "bookable": true,
+     "sort": 5
+    },
+    {
+     "name": "Silk Press w/ Steam Hydration Treatment",
+     "duration_min": 120,
+     "bookable": true,
+     "sort": 6
+    }
+   ],
+   "duration_min": 105,
+   "active": true,
+   "price_from_cents": 8500,
    "buffer_min": 15,
    "requires_consult": false,
    "sort": 30
   },
   {
-   "slug": "shape-up-and-trim",
-   "name": "Shape Up & Trim",
+   "slug": "sleek-ponytail",
+   "name": "Sleek Ponytail",
    "category": "Cuts & Styling",
-   "description": "Precision trim or edge-up that gives any existing style a clean, fresh finish.",
-   "price_from_cents": 3500,
-   "duration_min": 30,
+   "description": "Ponytail is styled with a sleek with your choice of braid, curled, straight at specified length. Feed In style includes sleek pony includes up to 4 feed ins wherever you choose alongside a sleek finish.\n\nHair not included for Curled/Straight ponytail selection. (1 Bundle is standard)\n\nSpecify Length at time of Booking.",
+   "variations": [
+    {
+     "name": "Loose Hair: Curled/Straight",
+     "duration_min": 75,
+     "bookable": true,
+     "sort": 0
+    },
+    {
+     "name": "Synthetic Braid",
+     "duration_min": 90,
+     "bookable": true,
+     "sort": 1
+    },
+    {
+     "name": "W/ Feed In Designs",
+     "duration_min": 95,
+     "bookable": true,
+     "sort": 2
+    }
+   ],
+   "duration_min": 75,
+   "active": true,
+   "price_from_cents": 11500,
    "buffer_min": 15,
    "requires_consult": false,
    "sort": 31
   },
   {
-   "slug": "silk-press",
-   "name": "Silk Press",
+   "slug": "style-upgrade",
+   "name": "Style Upgrade",
    "category": "Cuts & Styling",
-   "description": "Silky straight hair using heat — no chemicals. Best for medium to long natural hair.",
-   "price_from_cents": 8500,
-   "duration_min": 120,
+   "description": "Want to try the next style \u201cfuller\u201d?",
+   "variations": [
+    {
+     "name": "Regular",
+     "duration_min": 30,
+     "bookable": false,
+     "sort": 0
+    }
+   ],
+   "duration_min": 30,
+   "active": false,
+   "price_from_cents": null,
    "buffer_min": 15,
    "requires_consult": false,
    "sort": 32
   },
   {
-   "slug": "sleek-ponytail",
-   "name": "Sleek Ponytail",
+   "slug": "takedown",
+   "name": "Takedown",
    "category": "Cuts & Styling",
-   "description": "Sleek ponytail at any length — your choice of braided, curled, or straight finish.",
-   "price_from_cents": 11500,
-   "duration_min": 60,
+   "description": "In between styles? Need help getting ready for the next?\n\nPricing listed is base price and varies based on amount of hair being taken down. Please send picture to confirm pricing for hair.",
+   "variations": [
+    {
+     "name": "Faux Locs",
+     "duration_min": 90,
+     "bookable": true,
+     "sort": 0
+    },
+    {
+     "name": "Individuals (Individual Braids, Crochets etc)  Takedown",
+     "duration_min": 90,
+     "bookable": true,
+     "sort": 1
+    },
+    {
+     "name": "Loc Style Takedown",
+     "duration_min": 30,
+     "bookable": true,
+     "sort": 2
+    },
+    {
+     "name": "Natural Hair Braids Takedown",
+     "duration_min": 35,
+     "bookable": true,
+     "sort": 3
+    },
+    {
+     "name": "Perimeter Takedown",
+     "duration_min": 40,
+     "bookable": true,
+     "sort": 4
+    },
+    {
+     "name": "Weave Takedown",
+     "duration_min": 40,
+     "bookable": true,
+     "sort": 5
+    }
+   ],
+   "duration_min": 30,
+   "active": true,
+   "price_from_cents": 3000,
    "buffer_min": 15,
    "requires_consult": false,
    "sort": 33
   },
   {
-   "slug": "takedown",
-   "name": "Takedown",
+   "slug": "trim",
+   "name": "Trim",
    "category": "Cuts & Styling",
-   "description": "",
-   "price_from_cents": 3000,
-   "duration_min": 90,
+   "description": "Simple cut that retains shape of hair but eliminates damage for healthy hair.",
+   "variations": [
+    {
+     "name": "Bang Trim",
+     "duration_min": 30,
+     "bookable": true,
+     "sort": 0
+    },
+    {
+     "name": "Edge Up",
+     "duration_min": 30,
+     "bookable": true,
+     "sort": 1
+    },
+    {
+     "name": "Full Trim",
+     "duration_min": 30,
+     "bookable": true,
+     "sort": 2
+    },
+    {
+     "name": "Shampoo + Trim",
+     "duration_min": 60,
+     "bookable": true,
+     "sort": 3
+    }
+   ],
+   "duration_min": 30,
+   "active": true,
+   "price_from_cents": 3500,
    "buffer_min": 15,
    "requires_consult": false,
    "sort": 34
   },
   {
-   "slug": "updo-and-special-occasion",
-   "name": "Updo & Special Occasion",
-   "category": "Cuts & Styling",
-   "description": "Elevated looks for elevated moments — bridal, prom, event styling.",
-   "price_from_cents": 9500,
-   "duration_min": 90,
+   "slug": "hair-extensions",
+   "name": "Hair Extensions",
+   "category": "Weaves & Extensions",
+   "description": "Hair extension installation service using your choice of Tape-In or Microlinks methods. This service ensures a natural look and secure fit tailored to your hair type and style preferences. Perfect for adding volume, length, or both, appointments are available for one person per session.\n\nInstallation includes Shampoo and Blow dry. \nHair not included.\nConsultation recommended.\n\nHourly Add-On: For high-density hair or intricate placements $75/hour",
+   "variations": [
+    {
+     "name": "Micro- links Installation",
+     "duration_min": 300,
+     "bookable": true,
+     "sort": 0
+    },
+    {
+     "name": "Micro-Link Retightening",
+     "duration_min": 150,
+     "bookable": true,
+     "sort": 1
+    },
+    {
+     "name": "Tape - Ins Installation",
+     "duration_min": 120,
+     "bookable": true,
+     "sort": 2
+    }
+   ],
+   "duration_min": 120,
+   "active": true,
+   "price_from_cents": 20000,
    "buffer_min": 15,
    "requires_consult": false,
    "sort": 35
   },
   {
-   "slug": "updo-and-special-styling",
-   "name": "Updo & Special Styling",
-   "category": "Cuts & Styling",
+   "slug": "partial-sew-in",
+   "name": "Partial Sew In",
+   "category": "Weaves & Extensions",
    "description": "",
+   "variations": [
+    {
+     "name": "Regular",
+     "duration_min": 120,
+     "bookable": false,
+     "sort": 0
+    }
+   ],
+   "duration_min": 120,
+   "active": false,
    "price_from_cents": null,
-   "duration_min": 90,
    "buffer_min": 15,
    "requires_consult": false,
    "sort": 36
   },
   {
-   "slug": "crochet-styles",
-   "name": "Crochet Styles",
+   "slug": "quick-weave",
+   "name": "Quick Weave",
    "category": "Weaves & Extensions",
-   "description": "Hair extension styling installed using the crochet method. Shampoo & conditioning included.",
-   "price_from_cents": 18000,
-   "duration_min": 150,
+   "description": "Shampoo and Condition included.",
+   "variations": [
+    {
+     "name": "Regular",
+     "duration_min": 180,
+     "bookable": true,
+     "sort": 0
+    }
+   ],
+   "duration_min": 180,
+   "active": true,
+   "price_from_cents": 20000,
    "buffer_min": 15,
    "requires_consult": false,
    "sort": 37
   },
   {
-   "slug": "hair-extensions",
-   "name": "Hair Extensions",
+   "slug": "weave-installation",
+   "name": "Weave Installation",
    "category": "Weaves & Extensions",
-   "description": "Tape-in or microlinks extension install. Long-lasting, natural-looking length.",
-   "price_from_cents": 20000,
-   "duration_min": 240,
+   "description": "Services include install and styling. Hair not included\n\nTraditional Sew in: Standard sew-in with small leave-out (2 fingers width for part line) and\nminimal edge leave-out. \n\nVersatile/Vixen Sew In: This install requires significantly more time than a traditional sew-in\ndue to perimeter leave-out, detailed track placement and blending for\nupdos (buns, ponytails). The extra detailing is what creates the\nseamless finish. \n\nClosure/Frontal Sew in: This includes install + lace piece application, customization + blending\nof lace. No leave-out.\n\nNo leave out/Flip over method: This method requires detailed tiny track placement, illusion of hairline, styling for flip and movement.",
+   "variations": [
+    {
+     "name": "Closure/Frontal Sew in",
+     "duration_min": 240,
+     "bookable": true,
+     "sort": 0
+    },
+    {
+     "name": "No leave out/Flip over method",
+     "duration_min": 330,
+     "bookable": true,
+     "sort": 1
+    },
+    {
+     "name": "Partial Sew-In",
+     "duration_min": 150,
+     "bookable": true,
+     "sort": 2
+    },
+    {
+     "name": "Quick Weave",
+     "duration_min": 180,
+     "bookable": true,
+     "sort": 3
+    },
+    {
+     "name": "Traditional Sew in",
+     "duration_min": 270,
+     "bookable": true,
+     "sort": 4
+    },
+    {
+     "name": "Versatile/Vixen Sew In",
+     "duration_min": 270,
+     "bookable": true,
+     "sort": 5
+    }
+   ],
+   "duration_min": 150,
+   "active": true,
+   "price_from_cents": 37500,
    "buffer_min": 15,
    "requires_consult": false,
    "sort": 38
   },
   {
-   "slug": "partial-sew-in",
-   "name": "Partial Sew-In",
-   "category": "Weaves & Extensions",
-   "description": "Partial install — leave-out natural hair blended with added hair.",
-   "price_from_cents": 17500,
-   "duration_min": 120,
-   "buffer_min": 15,
-   "requires_consult": false,
-   "sort": 39
-  },
-  {
-   "slug": "quick-weave",
-   "name": "Quick Weave",
-   "category": "Weaves & Extensions",
-   "description": "Bonded quick weave install with shampoo and conditioning included.",
-   "price_from_cents": 20000,
-   "duration_min": 120,
-   "buffer_min": 15,
-   "requires_consult": false,
-   "sort": 40
-  },
-  {
-   "slug": "sew-in-maintenance",
-   "name": "Sew-In Maintenance",
-   "category": "Weaves & Extensions",
-   "description": "Tighten, wash, and restyle your existing sew-in.",
-   "price_from_cents": 3500,
-   "duration_min": 120,
-   "buffer_min": 15,
-   "requires_consult": false,
-   "sort": 41
-  },
-  {
-   "slug": "sew-in-weave-installation",
-   "name": "Sew-In Weave Installation",
-   "category": "Weaves & Extensions",
-   "description": "Full sew-in install with styling. Hair not included. Consultation recommended.",
-   "price_from_cents": 37500,
-   "duration_min": 240,
-   "buffer_min": 15,
-   "requires_consult": false,
-   "sort": 42
-  },
-  {
    "slug": "chemical-perm",
    "name": "Chemical Perm",
    "category": "Chemical & Color",
-   "description": "Classic rod-set perm — defined curls or waves via traditional texture service.",
+   "description": "Classic Perm: Our signature texture service that delivers defined curls or waves with a traditional rod set. Includes a clarifying cleanse, perm solution, neutralizing treatment,\n\nSpiral Perm: Perfect for clients seeking tighter, more defined curls or a custom curl pattern. This includes a consultation to ensure your texture goals are met, plus our full perm care ritual. Best for long or thick hair.\n\nLuxury Texture Transformation:  A luxurious, all-inclusive perm experience for those with resistant or heavily processed hair. Tailored to your texture, this service includes bond-protecting treatment, extended processing time,",
+   "variations": [
+    {
+     "name": "Basic Perm (Wave Pattern) - Long",
+     "duration_min": 150,
+     "bookable": true,
+     "sort": 0
+    },
+    {
+     "name": "Basic Perm (Wave Pattern) - Medium",
+     "duration_min": 90,
+     "bookable": true,
+     "sort": 1
+    },
+    {
+     "name": "Basic Perm (Wave) - Short Hair",
+     "duration_min": 90,
+     "bookable": true,
+     "sort": 2
+    },
+    {
+     "name": "Luxury Texture Transformation",
+     "duration_min": 210,
+     "bookable": true,
+     "sort": 3
+    },
+    {
+     "name": "Spiral Perm (Tight Curl) - Long",
+     "duration_min": 150,
+     "bookable": true,
+     "sort": 4
+    },
+    {
+     "name": "Spiral Perm (Tight Curl) - Medium",
+     "duration_min": 150,
+     "bookable": true,
+     "sort": 5
+    },
+    {
+     "name": "Spiral Perm (Tight Curl) - Short Hair",
+     "duration_min": 90,
+     "bookable": true,
+     "sort": 6
+    }
+   ],
+   "duration_min": 90,
+   "active": true,
    "price_from_cents": 8000,
-   "duration_min": 150,
    "buffer_min": 15,
    "requires_consult": true,
-   "sort": 43
+   "sort": 39
   },
   {
    "slug": "chemical-relaxer",
    "name": "Chemical Relaxer",
    "category": "Chemical & Color",
-   "description": "Straighten curly and coiled hair using professional chemical relaxer.",
+   "description": "Service designed to straighten curly and coiled hair using chemicals.\n\nRoot touch up = up to 4inches",
+   "variations": [
+    {
+     "name": "Long Hair (Virgin) Relaxer + Style",
+     "duration_min": 105,
+     "bookable": true,
+     "sort": 0
+    },
+    {
+     "name": "Relaxer Edge Up (Perimeter)",
+     "duration_min": 25,
+     "bookable": true,
+     "sort": 1
+    },
+    {
+     "name": "Root Touch Up",
+     "duration_min": 45,
+     "bookable": true,
+     "sort": 2
+    },
+    {
+     "name": "Root Touch Up + Style",
+     "duration_min": 75,
+     "bookable": true,
+     "sort": 3
+    },
+    {
+     "name": "Short Hair (Virgin) Relaxer + Style",
+     "duration_min": 90,
+     "bookable": true,
+     "sort": 4
+    },
+    {
+     "name": "Virgin Relaxer (Long)",
+     "duration_min": 70,
+     "bookable": true,
+     "sort": 5
+    },
+    {
+     "name": "Virgin Relaxer (Short)",
+     "duration_min": 60,
+     "bookable": true,
+     "sort": 6
+    }
+   ],
+   "duration_min": 25,
+   "active": true,
    "price_from_cents": 4500,
-   "duration_min": 120,
    "buffer_min": 15,
    "requires_consult": true,
+   "sort": 40
+  },
+  {
+   "slug": "color",
+   "name": "Color",
+   "category": "Chemical & Color",
+   "description": "Service designed to alter hair color using dye for loose hair.\n\nSemi Permanent \u2022 Demi \u2022 Permanent\n\nBase Prices listed \u2022 Root Touch Up includes up to 4inches of hair\n\nAll over color > Includes up to 2 hours. Each additional hour: $100",
+   "variations": [
+    {
+     "name": "All Over Color (Deposit Only)",
+     "duration_min": 105,
+     "bookable": true,
+     "sort": 0
+    },
+    {
+     "name": "All over Color (Double Processing)",
+     "duration_min": 150,
+     "bookable": true,
+     "sort": 1
+    },
+    {
+     "name": "All Over Color w/ Highlights",
+     "duration_min": 135,
+     "bookable": true,
+     "sort": 2
+    },
+    {
+     "name": "Cellophane/Rinse",
+     "duration_min": 60,
+     "bookable": true,
+     "sort": 3
+    },
+    {
+     "name": "Full Highlights",
+     "duration_min": 90,
+     "bookable": true,
+     "sort": 4
+    },
+    {
+     "name": "Partial Highlight",
+     "duration_min": 70,
+     "bookable": true,
+     "sort": 5
+    },
+    {
+     "name": "Root Touch Ups",
+     "duration_min": 50,
+     "bookable": true,
+     "sort": 6
+    },
+    {
+     "name": "Toner",
+     "duration_min": 35,
+     "bookable": true,
+     "sort": 7
+    }
+   ],
+   "duration_min": 35,
+   "active": true,
+   "price_from_cents": 7500,
+   "buffer_min": 15,
+   "requires_consult": true,
+   "sort": 41
+  },
+  {
+   "slug": "keratin-treatment-crown-smooth-experience",
+   "name": "Keratin Treatment - Crown Smooth Experience",
+   "category": "Chemical & Color",
+   "description": "Keratin Complex smoothing treatments designed for textured hair. Smoothing is a semi-permanent conditioning service that infuses keratin protein into the hair to reduce frizz, strengthen each strand, and cut daily styling time. It is not a relaxer, and it does not permanently alter your texture. Results last three to five months.\n\nFinal pricing is confirmed at your consultation, based on length and density.",
+   "variations": [
+    {
+     "name": "Extra Long or High Density",
+     "duration_min": 300,
+     "bookable": true,
+     "sort": 0
+    },
+    {
+     "name": "Long",
+     "duration_min": 240,
+     "bookable": true,
+     "sort": 1
+    },
+    {
+     "name": "Short to Medium",
+     "duration_min": 195,
+     "bookable": true,
+     "sort": 2
+    }
+   ],
+   "duration_min": 195,
+   "active": true,
+   "price_from_cents": null,
+   "buffer_min": 15,
+   "requires_consult": true,
+   "sort": 42
+  },
+  {
+   "slug": "barber-s-corner",
+   "name": "Barber's Corner",
+   "category": "Barber",
+   "description": "- Ultimate Cuts includes: Razor lining, Hot towel treatment,  enhancements and shampoo with massage chair\n- Beard Shave includes: Hot Towel Treatments, Razor Lining,\n* Ask your barber about addons seperately: Razor Lining, Shampoo and Enhancements upon request",
+   "variations": [
+    {
+     "name": "Beard Shave",
+     "duration_min": 30,
+     "bookable": true,
+     "sort": 0
+    },
+    {
+     "name": "Edge Up",
+     "duration_min": 30,
+     "bookable": true,
+     "sort": 1
+    },
+    {
+     "name": "Traditional Cut - Child",
+     "duration_min": 30,
+     "bookable": true,
+     "sort": 2
+    },
+    {
+     "name": "Traditionial Cut",
+     "duration_min": 30,
+     "bookable": true,
+     "sort": 3
+    },
+    {
+     "name": "Ultimate Cut - Adult",
+     "duration_min": 60,
+     "bookable": true,
+     "sort": 4
+    },
+    {
+     "name": "Ultimate Cut - Child",
+     "duration_min": 45,
+     "bookable": true,
+     "sort": 5
+    },
+    {
+     "name": "Undercut",
+     "duration_min": 30,
+     "bookable": true,
+     "sort": 6
+    },
+    {
+     "name": "Undercut w/ design",
+     "duration_min": 30,
+     "bookable": true,
+     "sort": 7
+    }
+   ],
+   "duration_min": 30,
+   "active": true,
+   "price_from_cents": 2500,
+   "buffer_min": 15,
+   "requires_consult": false,
+   "sort": 43
+  },
+  {
+   "slug": "facials",
+   "name": "Facials",
+   "category": "Beauty",
+   "description": "An intro to establish skincare needs.  Customized to skin type. Signature treatments are beneficial for all skin types, including those who have sensitive skin. The process includes cleansing, gentle exfoliation, massage, mask, and re-hydration. Signature treatments leave your skin feeling refreshed and smooth with a healthy, youthful glow.\nNote: All treatments are customized due to specific need. Spa treatments such as dermaplane, extractions, microdermabrasion, and chemical peels may be recommended and are a separate \u201cadd on\u201d treatment.",
+   "variations": [
+    {
+     "name": "Acne Facials",
+     "duration_min": 75,
+     "bookable": true,
+     "sort": 0
+    },
+    {
+     "name": "Back Facial",
+     "duration_min": 60,
+     "bookable": true,
+     "sort": 1
+    },
+    {
+     "name": "Signature Facial",
+     "duration_min": 70,
+     "bookable": true,
+     "sort": 2
+    },
+    {
+     "name": "Vajacial",
+     "duration_min": 45,
+     "bookable": true,
+     "sort": 3
+    },
+    {
+     "name": "Vajacial + Brazilian",
+     "duration_min": 80,
+     "bookable": true,
+     "sort": 4
+    },
+    {
+     "name": "Vitamin C hydration/Ageless facial",
+     "duration_min": 70,
+     "bookable": true,
+     "sort": 5
+    }
+   ],
+   "duration_min": 45,
+   "active": true,
+   "price_from_cents": null,
+   "buffer_min": 15,
+   "requires_consult": false,
    "sort": 44
   },
   {
-   "slug": "color-loose-hair",
-   "name": "Color (Loose Hair)",
-   "category": "Chemical & Color",
-   "description": "Professional hair color on loose hair — single process, highlights, or toning.",
-   "price_from_cents": 7500,
-   "duration_min": 150,
+   "slug": "foreign-fill",
+   "name": "Foreign Fill",
+   "category": "Beauty",
+   "description": "Add-On: Please use this add on (in addition to the style) if filling a set not originally done with same Lash Tech",
+   "variations": [
+    {
+     "name": "Regular",
+     "duration_min": 30,
+     "bookable": true,
+     "sort": 0
+    }
+   ],
+   "duration_min": 30,
+   "active": true,
+   "price_from_cents": null,
    "buffer_min": 15,
-   "requires_consult": true,
+   "requires_consult": false,
    "sort": 45
-  },
-  {
-   "slug": "barber-cut-and-fade",
-   "name": "Barber Cut & Fade",
-   "category": "Barber",
-   "description": "Precision fade, taper, or shape — any level, any guard. Crisp every time.",
-   "price_from_cents": 4000,
-   "duration_min": 45,
-   "buffer_min": 15,
-   "requires_consult": false,
-   "sort": 46
-  },
-  {
-   "slug": "line-up-and-beard-sculpt",
-   "name": "Line-up & Beard Sculpt",
-   "category": "Barber",
-   "description": "Crisp hairline and clean beard shape — the finishing touch that makes any cut land.",
-   "price_from_cents": 2500,
-   "duration_min": 30,
-   "buffer_min": 15,
-   "requires_consult": false,
-   "sort": 47
-  },
-  {
-   "slug": "men-s-cornrows-and-braids",
-   "name": "Men's Cornrows & Braids",
-   "category": "Barber",
-   "description": "Custom cornrows or braids built for you — classic straight-back to intricate designs.",
-   "price_from_cents": 9500,
-   "duration_min": 60,
-   "buffer_min": 15,
-   "requires_consult": false,
-   "sort": 48
-  },
-  {
-   "slug": "men-s-loc-retwist",
-   "name": "Men's Loc Retwist",
-   "category": "Barber",
-   "description": "Fresh, defined retwist built for men.",
-   "price_from_cents": 6500,
-   "duration_min": 90,
-   "buffer_min": 15,
-   "requires_consult": false,
-   "sort": 49
-  },
-  {
-   "slug": "men-s-natural-styling",
-   "name": "Men's Natural Styling",
-   "category": "Barber",
-   "description": "Wash-and-go, twist-out, braid-out, or defined curls shaped to you. No chemicals.",
-   "price_from_cents": 5500,
-   "duration_min": 45,
-   "buffer_min": 15,
-   "requires_consult": false,
-   "sort": 50
-  },
-  {
-   "slug": "men-s-silk-press",
-   "name": "Men's Silk Press",
-   "category": "Barber",
-   "description": "Heat-smooth straight style — no chemicals. For men with medium to long natural hair.",
-   "price_from_cents": 7500,
-   "duration_min": 120,
-   "buffer_min": 15,
-   "requires_consult": false,
-   "sort": 51
-  },
-  {
-   "slug": "tiny-heirs-braids-and-twists",
-   "name": "Tiny Heirs Braids & Twists",
-   "category": "Tiny Heirs",
-   "description": "Age-appropriate protective braiding or twists — gentle tension, comfortable sessions.",
-   "price_from_cents": 7500,
-   "duration_min": 120,
-   "buffer_min": 15,
-   "requires_consult": false,
-   "sort": 52
-  },
-  {
-   "slug": "tiny-heirs-cut",
-   "name": "Tiny Heirs Cut",
-   "category": "Tiny Heirs",
-   "description": "First cuts, shape-ups, and trims at kid pace.",
-   "price_from_cents": 3500,
-   "duration_min": 60,
-   "buffer_min": 15,
-   "requires_consult": false,
-   "sort": 53
-  },
-  {
-   "slug": "tiny-heirs-first-cut",
-   "name": "Tiny Heirs First Cut",
-   "category": "Tiny Heirs",
-   "description": "Their very first haircut — celebrated, calm, with photo keepsakes if you want.",
-   "price_from_cents": 3000,
-   "duration_min": 30,
-   "buffer_min": 15,
-   "requires_consult": false,
-   "sort": 54
-  },
-  {
-   "slug": "tiny-heirs-loc-maintenance",
-   "name": "Tiny Heirs Loc Maintenance",
-   "category": "Tiny Heirs",
-   "description": "Gentle retwist or loc care adapted for little heads. Calm, quick sessions.",
-   "price_from_cents": 5000,
-   "duration_min": 90,
-   "buffer_min": 15,
-   "requires_consult": false,
-   "sort": 55
-  },
-  {
-   "slug": "tiny-heirs-natural-care",
-   "name": "Tiny Heirs Natural Care",
-   "category": "Tiny Heirs",
-   "description": "Wash, deep condition, detangle, and twist-out or curl definition — teaching curl care.",
-   "price_from_cents": 4500,
-   "duration_min": 45,
-   "buffer_min": 15,
-   "requires_consult": false,
-   "sort": 56
-  },
-  {
-   "slug": "tiny-heirs-shape-up-and-line-up",
-   "name": "Tiny Heirs Shape-Up & Line-up",
-   "category": "Tiny Heirs",
-   "description": "Fresh cut, taper, or clean line-up for boys — kid-pace, crisp result.",
-   "price_from_cents": 3000,
-   "duration_min": 30,
-   "buffer_min": 15,
-   "requires_consult": false,
-   "sort": 57
-  },
-  {
-   "slug": "tiny-heirs-trim-and-shape",
-   "name": "Tiny Heirs Trim & Shape",
-   "category": "Tiny Heirs",
-   "description": "Trim to keep length healthy or shape for a fresh look. Gentle and confidence-building.",
-   "price_from_cents": 3500,
-   "duration_min": 30,
-   "buffer_min": 15,
-   "requires_consult": false,
-   "sort": 58
-  },
-  {
-   "slug": "tiny-heirs-wash-and-style",
-   "name": "Tiny Heirs Wash & Style",
-   "category": "Tiny Heirs",
-   "description": "Gentle shampoo, condition, and style — soft hands, calm pace.",
-   "price_from_cents": 3500,
-   "duration_min": 45,
-   "buffer_min": 15,
-   "requires_consult": false,
-   "sort": 59
   },
   {
    "slug": "lash-2-3-week-fill",
    "name": "Lash 2/3 Week Fill",
    "category": "Beauty",
-   "description": "",
-   "price_from_cents": null,
+   "description": "About 50% of lashes remaining. Routine touch up",
+   "variations": [
+    {
+     "name": "Classic",
+     "duration_min": 60,
+     "bookable": true,
+     "sort": 0
+    },
+    {
+     "name": "Classic PLUS",
+     "duration_min": 60,
+     "bookable": true,
+     "sort": 1
+    },
+    {
+     "name": "Hybrid",
+     "duration_min": 60,
+     "bookable": true,
+     "sort": 2
+    },
+    {
+     "name": "Volume",
+     "duration_min": 60,
+     "bookable": true,
+     "sort": 3
+    }
+   ],
    "duration_min": 60,
+   "active": true,
+   "price_from_cents": null,
    "buffer_min": 15,
    "requires_consult": false,
-   "sort": 60
+   "sort": 46
   },
   {
-   "slug": "lash-extensions-full-set",
-   "name": "Lash Extensions — Full Set",
+   "slug": "lash-extension-removal",
+   "name": "Lash Extension Removal",
    "category": "Beauty",
-   "description": "",
+   "description": "Professional removal of Lashes",
+   "variations": [
+    {
+     "name": "Regular",
+     "duration_min": 30,
+     "bookable": true,
+     "sort": 0
+    }
+   ],
+   "duration_min": 30,
+   "active": true,
    "price_from_cents": null,
-   "duration_min": 120,
    "buffer_min": 15,
    "requires_consult": false,
-   "sort": 61
+   "sort": 47
+  },
+  {
+   "slug": "lash-extensions-full-sets",
+   "name": "Lash Extensions Full Sets",
+   "category": "Beauty",
+   "description": "Take a nap, or chat through it all. Experience a glam session in a chair as your lashes are transformed one by one.\n\nClassic sets mimic the fullness of your natural lashes. Perfect for wanting to add length. Does not create fuller look\nClassic PLUS sets add a bit of fullness while maintaining a \u201cClassic\u201d look. Perfect for Adding length.\nHybrid Sets add fullness and length to natural lashes. Perfect for those who like fuller lashes but not a lot of drama added.\nVolume Sets add length and maximum fullness.",
+   "variations": [
+    {
+     "name": "Classic",
+     "duration_min": 150,
+     "bookable": true,
+     "sort": 0
+    },
+    {
+     "name": "Classic PLUS",
+     "duration_min": 150,
+     "bookable": true,
+     "sort": 1
+    },
+    {
+     "name": "Hybrid",
+     "duration_min": 150,
+     "bookable": true,
+     "sort": 2
+    },
+    {
+     "name": "Mega Volume",
+     "duration_min": 180,
+     "bookable": true,
+     "sort": 3
+    },
+    {
+     "name": "Volume",
+     "duration_min": 150,
+     "bookable": true,
+     "sort": 4
+    }
+   ],
+   "duration_min": 150,
+   "active": true,
+   "price_from_cents": null,
+   "buffer_min": 15,
+   "requires_consult": false,
+   "sort": 48
+  },
+  {
+   "slug": "lash-lift-and-tint",
+   "name": "Lash Lift and Tint",
+   "category": "Beauty",
+   "description": "One way to think of a lash lift is like a perm for your eyelashes. Unlike lash extensions, a lash lift simply alters the shape and color of your natural lashes making them curlier and longer!",
+   "variations": [
+    {
+     "name": "Regular",
+     "duration_min": 60,
+     "bookable": false,
+     "sort": 0
+    }
+   ],
+   "duration_min": 60,
+   "active": false,
+   "price_from_cents": null,
+   "buffer_min": 15,
+   "requires_consult": false,
+   "sort": 49
   },
   {
    "slug": "lash-mini-fill",
    "name": "Lash Mini Fill",
    "category": "Beauty",
-   "description": "",
+   "description": "Refresh your Set. Recommended 1 week touch up.",
+   "variations": [
+    {
+     "name": "Classic",
+     "duration_min": 30,
+     "bookable": false,
+     "sort": 0
+    },
+    {
+     "name": "Classic PLUS",
+     "duration_min": 30,
+     "bookable": false,
+     "sort": 1
+    },
+    {
+     "name": "Hybrid",
+     "duration_min": 30,
+     "bookable": false,
+     "sort": 2
+    },
+    {
+     "name": "Volume",
+     "duration_min": 30,
+     "bookable": false,
+     "sort": 3
+    }
+   ],
+   "duration_min": 30,
+   "active": false,
    "price_from_cents": null,
-   "duration_min": 45,
    "buffer_min": 15,
+   "requires_consult": false,
+   "sort": 50
+  },
+  {
+   "slug": "make-up-full-face",
+   "name": "Make Up: Full Face",
+   "category": "Beauty",
+   "description": "The whole bag. From Foundation to lashes and the concealer in between.",
+   "variations": [
+    {
+     "name": "Full Glam",
+     "duration_min": 60,
+     "bookable": true,
+     "sort": 0
+    },
+    {
+     "name": "Natural Glam",
+     "duration_min": 60,
+     "bookable": true,
+     "sort": 1
+    },
+    {
+     "name": "Soft Glam",
+     "duration_min": 60,
+     "bookable": true,
+     "sort": 2
+    },
+    {
+     "name": "Ultimate Glamour",
+     "duration_min": 90,
+     "bookable": true,
+     "sort": 3
+    }
+   ],
+   "duration_min": 60,
+   "active": true,
+   "price_from_cents": null,
+   "buffer_min": 15,
+   "requires_consult": false,
+   "sort": 51
+  },
+  {
+   "slug": "make-up-half-face",
+   "name": "Make Up: Half Face",
+   "category": "Beauty",
+   "description": "Includes Eyebrows, Lashes and Liner",
+   "variations": [
+    {
+     "name": "Dramatic Eye",
+     "duration_min": 30,
+     "bookable": true,
+     "sort": 0
+    },
+    {
+     "name": "Natural Eye",
+     "duration_min": 30,
+     "bookable": true,
+     "sort": 1
+    },
+    {
+     "name": "Soft Eye",
+     "duration_min": 30,
+     "bookable": true,
+     "sort": 2
+    }
+   ],
+   "duration_min": 30,
+   "active": true,
+   "price_from_cents": null,
+   "buffer_min": 15,
+   "requires_consult": false,
+   "sort": 52
+  },
+  {
+   "slug": "threading",
+   "name": "Threading",
+   "category": "Beauty",
+   "description": "Hair removal process that\u00a0removes the entire hair, including the root, rather than cutting it.",
+   "variations": [
+    {
+     "name": "Chin Only",
+     "duration_min": 10,
+     "bookable": false,
+     "sort": 0
+    },
+    {
+     "name": "Eyebrow & Upper Lip",
+     "duration_min": 30,
+     "bookable": false,
+     "sort": 1
+    },
+    {
+     "name": "Eyebrows Only",
+     "duration_min": 15,
+     "bookable": false,
+     "sort": 2
+    },
+    {
+     "name": "Forehead Only",
+     "duration_min": 10,
+     "bookable": false,
+     "sort": 3
+    },
+    {
+     "name": "Full Face",
+     "duration_min": 45,
+     "bookable": false,
+     "sort": 4
+    },
+    {
+     "name": "Neck Only",
+     "duration_min": 15,
+     "bookable": false,
+     "sort": 5
+    },
+    {
+     "name": "Side Burns Only",
+     "duration_min": 15,
+     "bookable": false,
+     "sort": 6
+    },
+    {
+     "name": "Upper Lip Only",
+     "duration_min": 10,
+     "bookable": false,
+     "sort": 7
+    }
+   ],
+   "duration_min": 10,
+   "active": false,
+   "price_from_cents": null,
+   "buffer_min": 15,
+   "requires_consult": false,
+   "sort": 53
+  },
+  {
+   "slug": "tinting-and-lamination-services",
+   "name": "Tinting and Lamination Services",
+   "category": "Beauty",
+   "description": "Eyebrow Lamination is a beauty treatment that straightens, and sets eyebrows to create a fuller, and more uniformed look. Tinting of the brows is a semipermanent dye applied to the brows to add a darker and more visible look to the brows. Lamination will last approximately 3-4 weeks, with the tint lasting for 2-3 weeks before needing a retouch . Eyebrow Lamination, and Tinting services include shaping the brows to the clients face using brow mapping. Waxing will be included with our Brow Lamination and Tinting service.",
+   "variations": [
+    {
+     "name": "Brow Lamination",
+     "duration_min": 30,
+     "bookable": true,
+     "sort": 0
+    },
+    {
+     "name": "Brow Lamination & Tint",
+     "duration_min": 60,
+     "bookable": false,
+     "sort": 1
+    },
+    {
+     "name": "Brow Tint",
+     "duration_min": 30,
+     "bookable": true,
+     "sort": 2
+    }
+   ],
+   "duration_min": 30,
+   "active": true,
+   "price_from_cents": null,
+   "buffer_min": 15,
+   "requires_consult": false,
+   "sort": 54
+  },
+  {
+   "slug": "waxing-body",
+   "name": "Waxing (Body)",
+   "category": "Beauty",
+   "description": "Hair removal from the root to provide smooth, long lasting results!",
+   "variations": [
+    {
+     "name": "Brazilian",
+     "duration_min": 30,
+     "bookable": true,
+     "sort": 0
+    },
+    {
+     "name": "Full Leg",
+     "duration_min": 45,
+     "bookable": true,
+     "sort": 1
+    },
+    {
+     "name": "Full Lower Half (Brazilian + Legs)",
+     "duration_min": 60,
+     "bookable": true,
+     "sort": 2
+    },
+    {
+     "name": "Lower Legs",
+     "duration_min": 30,
+     "bookable": true,
+     "sort": 3
+    },
+    {
+     "name": "Underarms",
+     "duration_min": 30,
+     "bookable": true,
+     "sort": 4
+    }
+   ],
+   "duration_min": 30,
+   "active": true,
+   "price_from_cents": null,
+   "buffer_min": 15,
+   "requires_consult": false,
+   "sort": 55
+  },
+  {
+   "slug": "waxing-face",
+   "name": "Waxing (Face)",
+   "category": "Beauty",
+   "description": "Hair removal from the root to provide smooth, long lasting results!",
+   "variations": [
+    {
+     "name": "Chin",
+     "duration_min": 10,
+     "bookable": true,
+     "sort": 0
+    },
+    {
+     "name": "Eyebrow",
+     "duration_min": 15,
+     "bookable": true,
+     "sort": 1
+    },
+    {
+     "name": "Full Face",
+     "duration_min": 35,
+     "bookable": true,
+     "sort": 2
+    },
+    {
+     "name": "Lip and Brows",
+     "duration_min": 20,
+     "bookable": true,
+     "sort": 3
+    },
+    {
+     "name": "Side burns",
+     "duration_min": 15,
+     "bookable": true,
+     "sort": 4
+    },
+    {
+     "name": "Upper Lip",
+     "duration_min": 10,
+     "bookable": true,
+     "sort": 5
+    }
+   ],
+   "duration_min": 10,
+   "active": true,
+   "price_from_cents": null,
+   "buffer_min": 15,
+   "requires_consult": false,
+   "sort": 56
+  },
+  {
+   "slug": "consultations",
+   "name": "Consultations",
+   "category": "Consultations",
+   "description": "In person assessment of hair and recommendations for the next steps/appointments. Required for all color, extension, perm services, curly hair restoration and recommended for Starter Locs. Used to determine appointment timing, price and eligibility.",
+   "variations": [
+    {
+     "name": "Braiding Consultation",
+     "duration_min": 15,
+     "bookable": true,
+     "sort": 0
+    },
+    {
+     "name": "Curly Hair Consultation",
+     "duration_min": 20,
+     "bookable": true,
+     "sort": 1
+    },
+    {
+     "name": "General Color",
+     "duration_min": 20,
+     "bookable": true,
+     "sort": 2
+    },
+    {
+     "name": "General Consultation",
+     "duration_min": 20,
+     "bookable": true,
+     "sort": 3
+    },
+    {
+     "name": "Loc Color",
+     "duration_min": 20,
+     "bookable": true,
+     "sort": 4
+    },
+    {
+     "name": "Loc Consult",
+     "duration_min": 15,
+     "bookable": true,
+     "sort": 5
+    },
+    {
+     "name": "Zoom Consultation",
+     "duration_min": 30,
+     "bookable": true,
+     "sort": 6
+    }
+   ],
+   "duration_min": 15,
+   "active": true,
+   "price_from_cents": null,
+   "buffer_min": 0,
+   "requires_consult": false,
+   "sort": 57
+  },
+  {
+   "slug": "braiding-add-ons",
+   "name": "Braiding Add-Ons",
+   "category": "Add-Ons",
+   "description": "Intended to be booked in addition to a braiding service.\n\nBoho Styling: Includes hair and styling time.",
+   "variations": [
+    {
+     "name": "Beading Add-On",
+     "duration_min": 30,
+     "bookable": true,
+     "sort": 0
+    },
+    {
+     "name": "Boho Styling - A little more than Sprinkles, but a dash",
+     "duration_min": 60,
+     "bookable": true,
+     "sort": 1
+    },
+    {
+     "name": "Boho Styling - Full Bohemian",
+     "duration_min": 120,
+     "bookable": true,
+     "sort": 2
+    },
+    {
+     "name": "Boho Styling - Splash (loose hair througout)",
+     "duration_min": 90,
+     "bookable": true,
+     "sort": 3
+    },
+    {
+     "name": "Boho Styling - Sprinkles of Loose Hair",
+     "duration_min": 30,
+     "bookable": true,
+     "sort": 4
+    },
+    {
+     "name": "Bora Bora Style - Hair not Included",
+     "duration_min": 150,
+     "bookable": true,
+     "sort": 5
+    },
+    {
+     "name": "Curls for the Bottom (For Knotless/Box braids)",
+     "duration_min": 30,
+     "bookable": true,
+     "sort": 6
+    },
+    {
+     "name": "Stitch Style Braiding Add-On",
+     "duration_min": 40,
+     "bookable": true,
+     "sort": 7
+    },
+    {
+     "name": "Triangle Parts",
+     "duration_min": 30,
+     "bookable": true,
+     "sort": 8
+    }
+   ],
+   "duration_min": 30,
+   "active": true,
+   "price_from_cents": 2000,
+   "buffer_min": 0,
+   "requires_consult": false,
+   "sort": 58
+  },
+  {
+   "slug": "hair-and-scalp-treatments-add-ons",
+   "name": "Hair & Scalp Treatments (Add-ons)",
+   "category": "Add-Ons",
+   "description": "Deluxe Therapeutic Shampoo: Deep cleanse Tri-Shampoo process.\nDeep Conditioning Treatment:\nHot Oil Treatment: Therapeuthic treatment to hair that allows oil penetration to scalp. Recommended for individuals experiencing dry scalp, dandruff, eczema, and to reduce frizz.\nLoc Detox: Apple Cider Vinegar, Baking Soda and Clarifying Shampoo used to provide a cleansing experience to lift build up, dirt and residue not only from the scalp but throughout the locs.\nOlaplex Treatment: This hydrating treatment is salon professional and adds as a triple protective barrier for hair that has high level color or highlights that require extra conditioning to repair dry, brittle and overprocessed hair due to chemically treated hair.",
+   "variations": [
+    {
+     "name": "Deep Conditioning Treatment",
+     "duration_min": 30,
+     "bookable": true,
+     "sort": 0
+    },
+    {
+     "name": "Deluxe Therapeutic Shampoo",
+     "duration_min": 10,
+     "bookable": true,
+     "sort": 1
+    },
+    {
+     "name": "Detangle",
+     "duration_min": 45,
+     "bookable": true,
+     "sort": 2
+    },
+    {
+     "name": "Hot Oil Treatment",
+     "duration_min": 30,
+     "bookable": true,
+     "sort": 3
+    },
+    {
+     "name": "Olaplex Treatment",
+     "duration_min": 30,
+     "bookable": true,
+     "sort": 4
+    },
+    {
+     "name": "Steam Hydration Treatment",
+     "duration_min": 20,
+     "bookable": true,
+     "sort": 5
+    }
+   ],
+   "duration_min": 10,
+   "active": true,
+   "price_from_cents": null,
+   "buffer_min": 0,
+   "requires_consult": false,
+   "sort": 59
+  },
+  {
+   "slug": "lash-add-on",
+   "name": "Lash Add-on",
+   "category": "Add-Ons",
+   "description": "Addition of Color, Glitter, or Decals",
+   "variations": [
+    {
+     "name": "Regular",
+     "duration_min": 30,
+     "bookable": false,
+     "sort": 0
+    }
+   ],
+   "duration_min": 30,
+   "active": false,
+   "price_from_cents": null,
+   "buffer_min": 0,
+   "requires_consult": false,
+   "sort": 60
+  },
+  {
+   "slug": "luxury-experience-add-ons",
+   "name": "Luxury Experience Add-Ons",
+   "category": "Add-Ons",
+   "description": "Wanting to elevate your experience? Wanting to treat yourself? High Frequency Treatments, Massage Chair, and more!",
+   "variations": [
+    {
+     "name": "High Frequency Treatment",
+     "duration_min": 20,
+     "bookable": true,
+     "sort": 0
+    },
+    {
+     "name": "Shampoo Massage Chair",
+     "duration_min": 5,
+     "bookable": true,
+     "sort": 1
+    },
+    {
+     "name": "Steamer and Botanical Mixer",
+     "duration_min": 20,
+     "bookable": true,
+     "sort": 2
+    }
+   ],
+   "duration_min": 5,
+   "active": true,
+   "price_from_cents": null,
+   "buffer_min": 0,
+   "requires_consult": false,
+   "sort": 61
+  },
+  {
+   "slug": "make-up-add-ons",
+   "name": "Make Up: Add-ons",
+   "category": "Add-Ons",
+   "description": "",
+   "variations": [
+    {
+     "name": "Eyebrows",
+     "duration_min": 10,
+     "bookable": false,
+     "sort": 0
+    },
+    {
+     "name": "Glitter",
+     "duration_min": 5,
+     "bookable": false,
+     "sort": 1
+    },
+    {
+     "name": "Lashes",
+     "duration_min": 5,
+     "bookable": false,
+     "sort": 2
+    },
+    {
+     "name": "Rhinestones",
+     "duration_min": 10,
+     "bookable": false,
+     "sort": 3
+    }
+   ],
+   "duration_min": 5,
+   "active": false,
+   "price_from_cents": null,
+   "buffer_min": 0,
    "requires_consult": false,
    "sort": 62
   },
   {
-   "slug": "makeup-full-face",
-   "name": "Makeup — Full Face",
-   "category": "Beauty",
+   "slug": "sew-in-maintenance-add-on-service",
+   "name": "Sew-In Maintenance (Add-on Service)",
+   "category": "Add-Ons",
    "description": "",
-   "price_from_cents": null,
-   "duration_min": 90,
-   "buffer_min": 15,
+   "variations": [
+    {
+     "name": "Regular",
+     "duration_min": 45,
+     "bookable": true,
+     "sort": 0
+    }
+   ],
+   "duration_min": 45,
+   "active": true,
+   "price_from_cents": 3500,
+   "buffer_min": 0,
    "requires_consult": false,
    "sort": 63
   },
   {
-   "slug": "makeup-half-face",
-   "name": "Makeup — Half Face",
-   "category": "Beauty",
-   "description": "",
+   "slug": "back-ii-school-service-menu-limited-time",
+   "name": "Back II School Service Menu - Limited Time",
+   "category": "Specials",
+   "description": "Start the school year with styles that set the tone for confidence, care, and crown-worthy excellence.\nAt Crown Heirs Hair Den, we know the back-to-school rush is real\u2014especially for families with multiple children. That\u2019s why we\u2019re offering a special menu of discounted services tailored just for our Tiny Heirs and the families who raise them.",
+   "variations": [
+    {
+     "name": "Boy's Haircuts",
+     "duration_min": 30,
+     "bookable": false,
+     "sort": 0
+    },
+    {
+     "name": "Children's Press (Silk Press for Children)",
+     "duration_min": 120,
+     "bookable": false,
+     "sort": 1
+    },
+    {
+     "name": "Feed - In Style Braids (2 Braids)",
+     "duration_min": 90,
+     "bookable": false,
+     "sort": 2
+    },
+    {
+     "name": "Feed - In Style Braids (3-6)",
+     "duration_min": 120,
+     "bookable": false,
+     "sort": 3
+    },
+    {
+     "name": "Natural Braids + Line Up (Straightbacks/Cornrows up to 6 braids)",
+     "duration_min": 150,
+     "bookable": false,
+     "sort": 4
+    },
+    {
+     "name": "Retwist + Basic Style",
+     "duration_min": 120,
+     "bookable": false,
+     "sort": 5
+    },
+    {
+     "name": "Traditional or Knotless Braids - Large 18'",
+     "duration_min": 150,
+     "bookable": false,
+     "sort": 6
+    },
+    {
+     "name": "Traditional or Knotless Braids - Large 24'",
+     "duration_min": 150,
+     "bookable": false,
+     "sort": 7
+    }
+   ],
+   "duration_min": 30,
+   "active": false,
    "price_from_cents": null,
-   "duration_min": 45,
    "buffer_min": 15,
    "requires_consult": false,
    "sort": 64
   },
   {
-   "slug": "waxing-body",
-   "name": "Waxing — Body",
-   "category": "Beauty",
+   "slug": "classes",
+   "name": "Classes",
+   "category": "Classes",
    "description": "",
-   "price_from_cents": null,
+   "variations": [
+    {
+     "name": "Lash Basics",
+     "duration_min": 30,
+     "bookable": false,
+     "sort": 0
+    },
+    {
+     "name": "Loc Basics",
+     "duration_min": 30,
+     "bookable": false,
+     "sort": 1
+    },
+    {
+     "name": "Loc Styling - 1 on 1",
+     "duration_min": 180,
+     "bookable": false,
+     "sort": 2
+    }
+   ],
    "duration_min": 30,
+   "active": false,
+   "price_from_cents": null,
    "buffer_min": 15,
    "requires_consult": false,
    "sort": 65
-  },
-  {
-   "slug": "waxing-face",
-   "name": "Waxing — Face",
-   "category": "Beauty",
-   "description": "",
-   "price_from_cents": null,
-   "duration_min": 30,
-   "buffer_min": 15,
-   "requires_consult": false,
-   "sort": 66
   }
  ]
 }

@@ -36,12 +36,15 @@ if (!url) {
     while (weekdayOf(d) !== 2) d = addDays(d, 1);
     return d;
   }
+  let PONY;
 
   test.before(async () => {
     const s = await call(H.setup, req('POST', { headers: ADMIN }));
     assert.equal(s.statusCode, 200, JSON.stringify(s.body));
     await db.query(`DELETE FROM appointments WHERE client_id IN (SELECT id FROM clients WHERE phone = '16025559999')`);
     await db.query(`DELETE FROM clients WHERE phone = '16025559999'`);
+    const cat = await call(H.services, req('GET'));
+    PONY = cat.body.categories.flatMap(c => c.services).find(s => s.slug === 'sleek-ponytail');
   });
   test.after(async () => { await db.getPool().end(); });
 
@@ -49,50 +52,57 @@ if (!url) {
     assert.equal((await call(H.setup, req('GET'))).statusCode, 401);
     const s = await call(H.setup, req('GET', { headers: ADMIN }));
     assert.equal(s.statusCode, 200);
-    assert.ok(s.body.services >= 60 && s.body.stylists >= 1);
+    assert.ok(s.body.services >= 50 && s.body.variations >= 250 && s.body.stylists >= 1);
   });
 
-  test('services: grouped catalog with timezone', async () => {
+  test('services: grouped catalog with variations and timezone', async () => {
     const s = await call(H.services, req('GET'));
     assert.equal(s.statusCode, 200);
     assert.equal(s.body.timeZone, 'America/Phoenix');
-    assert.ok(s.body.categories.length >= 6);
+    assert.ok(s.body.categories.length >= 8);
     assert.ok(s.body.categories.every(c => c.services.length > 0));
+    assert.ok(s.body.categories.flatMap(c => c.services).every(sv => sv.variations.length > 0 && sv.variations[0].duration_min > 0));
     assert.equal((await call(H.services, req('POST'))).statusCode, 405);
   });
 
   test('availability: validation and shape', async () => {
     assert.equal((await call(H.availability, req('GET'))).statusCode, 400);
     assert.equal((await call(H.availability, req('GET', { query: { service: 'nope', date: nextTuesday() } }))).statusCode, 404);
-    const s = await call(H.availability, req('GET', { query: { service: 'silk-press', date: nextTuesday() } }));
-    assert.equal(s.statusCode, 200);
+    const multi = await call(H.availability, req('GET', { query: { service: 'loc-retwist', date: nextTuesday() } }));
+    assert.equal(multi.statusCode, 400, 'multi-option service without a variation');
+    const s = await call(H.availability, req('GET', { query: { service: PONY.slug, variation: String(PONY.variations[0].id), date: nextTuesday() } }));
+    assert.equal(s.statusCode, 200, JSON.stringify(s.body));
     assert.equal(s.headers['Cache-Control'], 'no-store');
+    assert.equal(s.body.variation.id, PONY.variations[0].id);
     assert.ok(Array.isArray(s.body.any) && s.body.any.length > 0);
     assert.ok(s.body.stylists[0].slots.length > 0);
   });
 
   test('create → lookup → cancel through the handlers', async () => {
     const date = nextTuesday();
-    const a = await call(H.availability, req('GET', { query: { service: 'silk-press', date } }));
+    const v = PONY.variations[0].id;
+    const a = await call(H.availability, req('GET', { query: { service: PONY.slug, variation: String(v), date } }));
     const startAt = a.body.any[2];
 
     assert.equal((await call(H.create, req('POST', { body: {} }))).statusCode, 404, 'no service → 404');
-    const bad = await call(H.create, req('POST', { body: { service: 'silk-press', startAt, client: { name: 'A', phone: '1' } } }));
+    const bad = await call(H.create, req('POST', { body: { service: PONY.slug, variation: v, startAt, client: { name: 'A', phone: '1' } } }));
     assert.equal(bad.statusCode, 400);
 
     const c = await call(H.create, req('POST', { body: {
-      service: 'silk-press', stylist: 'any', startAt,
+      service: PONY.slug, variation: v, stylist: 'any', startAt,
       client: { name: 'Smoke Test', phone: '602-555-9999', email: 'smoke@example.com' }, notes: 'via handler'
     } }));
     assert.equal(c.statusCode, 201, JSON.stringify(c.body));
     assert.match(c.body.code, /^CH-/);
+    assert.equal(c.body.variation.id, v);
 
-    const dup = await call(H.create, req('POST', { body: { service: 'silk-press', startAt, client: { name: 'Smoke Test', phone: '602-555-9999' } } }));
+    const dup = await call(H.create, req('POST', { body: { service: PONY.slug, variation: v, startAt, client: { name: 'Smoke Test', phone: '602-555-9999' } } }));
     assert.equal(dup.statusCode, 409);
 
     const l = await call(H.lookup, req('GET', { query: { code: c.body.code.toLowerCase() } }));
     assert.equal(l.statusCode, 200);
     assert.equal(l.body.status, 'confirmed');
+    assert.equal(l.body.variation.name, PONY.variations[0].name);
     assert.equal(l.body.client.phoneLast4, '9999');
 
     const x = await call(H.lookup, req('POST', { body: { code: c.body.code, action: 'cancel' } }));

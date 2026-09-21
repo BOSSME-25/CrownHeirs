@@ -172,7 +172,7 @@ const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
 let TZ = 'America/Phoenix', MAX_DAYS = 60;
-let CATS = [], SEL = { cat: null, service: null, stylist: 'any', date: null, startAt: null, avail: null }, DONE = null;
+let CATS = [], SEL = { cat: null, service: null, variation: null, stylist: 'any', date: null, startAt: null, avail: null }, DONE = null;
 
 const money = c => c == null ? 'Ask us' : 'From $' + Math.round(c / 100);
 const dur = m => m >= 60 ? `${Math.floor(m / 60)}h${m % 60 ? ' ' + (m % 60) + 'm' : ''}` : `${m}m`;
@@ -211,21 +211,41 @@ function renderCats() {
   $('svcList').innerHTML = (cat?.services || []).map(s => `
     <button class="opt" onclick='pickService(${JSON.stringify(s.slug)})'>
       <div class="t"><div class="n">${esc(s.name)}</div>${s.description ? `<div class="d">${esc(s.description)}</div>` : ''}</div>
-      <div class="p"><b>${money(s.price_from_cents)}</b><small>${dur(s.duration_min)}</small></div>
+      <div class="p"><b>${money(s.price_from_cents)}</b><small>${s.variations.length > 1 ? 'from ' : ''}${dur(s.duration_min)}</small></div>
     </button>`).join('');
 }
 function pickService(slug) {
   SEL.service = CATS.flatMap(c => c.services).find(s => s.slug === slug);
-  SEL.stylist = 'any'; SEL.date = null; SEL.startAt = null;
+  SEL.variation = null; SEL.stylist = 'any'; SEL.date = null; SEL.startAt = null;
+  // One option → straight through. Several (size, length, new vs. existing
+  // client…) → the customer picks, since each has its own duration.
+  if (SEL.service.variations.length === 1) return pickVariation(SEL.service.variations[0].id);
+  renderVariations();
+}
+function renderVariations() {
+  const s = SEL.service;
+  $('cats').innerHTML = `<button class="pill" onclick="renderCats()">← ${esc(SEL.cat)}</button>`;
+  $('svcList').innerHTML = `<div class="hint" style="margin-top:8px;">${esc(s.name)} — choose an option:</div>` +
+    s.variations.map(v => `
+    <button class="opt" onclick='pickVariation(${v.id})'>
+      <div class="t"><div class="n" style="font-size:19px;">${esc(v.name)}</div></div>
+      <div class="p"><small>${dur(v.duration_min)}</small></div>
+    </button>`).join('');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function pickVariation(id) {
+  SEL.variation = SEL.service.variations.find(v => v.id === id);
   loadStylists();
 }
+const svcQuery = () => `service=${encodeURIComponent(SEL.service.slug)}&variation=${SEL.variation.id}`;
+const svcLabel = () => SEL.service.variations.length > 1 ? `${SEL.service.name} · ${SEL.variation.name}` : SEL.service.name;
 
 /* ── 2 · stylist ── */
 async function loadStylists() {
   go(2);
   $('stylistList').innerHTML = '<div class="spin">Checking who offers this…</div>';
   // Stylists come back with availability; ask for today's to learn who's on the roster.
-  const r = await fetch(`/api/book/availability?service=${encodeURIComponent(SEL.service.slug)}&date=${ymdToday()}`);
+  const r = await fetch(`/api/book/availability?${svcQuery()}&date=${ymdToday()}`);
   const j = await r.json();
   const list = r.ok ? j.stylists : [];
   const opts = [{ slug: 'any', name: 'First available', title: 'Any stylist who offers this' }, ...list];
@@ -241,7 +261,7 @@ function pickStylist(slug) { SEL.stylist = slug; SEL.date = null; SEL.startAt = 
 function renderDates() {
   const today = ymdToday();
   const days = Array.from({ length: Math.min(MAX_DAYS, 60) }, (_, i) => addDays(today, i));
-  $('s3hint').textContent = `${SEL.service.name} · ${dur(SEL.service.duration_min)}${SEL.stylist !== 'any' ? ' · ' + (SEL.avail?.stylists.find(s => s.slug === SEL.stylist)?.name || '') : ''}`;
+  $('s3hint').textContent = `${svcLabel()} · ${dur(SEL.variation.duration_min)}${SEL.stylist !== 'any' ? ' · ' + (SEL.avail?.stylists.find(s => s.slug === SEL.stylist)?.name || '') : ''}`;
   $('dates').innerHTML = days.map(d => { const p = ymdParts(d); return `<button class="day ${d === SEL.date ? 'on' : ''}" onclick='pickDate(${JSON.stringify(d)})'><small>${p.dow}</small><b>${p.day}</b><small>${p.mon}</small></button>`; }).join('');
   if (!SEL.date) pickDate(days[0]);
 }
@@ -250,7 +270,7 @@ async function pickDate(d) {
   [...$('dates').children].forEach(el => el.classList.toggle('on', el.textContent.replace(/\s/g, '') === (ymdParts(d).dow + ymdParts(d).day + ymdParts(d).mon).replace(/\s/g, '')));
   $('timesWrap').innerHTML = '<div class="spin">Finding openings…</div>'; $('e3').textContent = '';
   try {
-    const q = `service=${encodeURIComponent(SEL.service.slug)}&date=${d}` + (SEL.stylist !== 'any' ? `&stylist=${encodeURIComponent(SEL.stylist)}` : '');
+    const q = `${svcQuery()}&date=${d}` + (SEL.stylist !== 'any' ? `&stylist=${encodeURIComponent(SEL.stylist)}` : '');
     const r = await fetch('/api/book/availability?' + q);
     const j = await r.json();
     if (!r.ok) throw new Error(j.error || 'Could not load times');
@@ -270,7 +290,7 @@ function pickTime(iso) {
   SEL.startAt = iso;
   const s = SEL.service;
   const who = SEL.stylist === 'any' ? 'First available stylist' : (SEL.avail.stylists.find(x => x.slug === SEL.stylist)?.name || '');
-  $('summary').innerHTML = `<b>${esc(s.name)}</b> · ${money(s.price_from_cents)} · ${dur(s.duration_min)}<br>${esc(who)}<br>${fmtDate(iso)} at <b>${fmtTime(iso)}</b>`;
+  $('summary').innerHTML = `<b>${esc(svcLabel())}</b> · ${money(s.price_from_cents)} · ${dur(SEL.variation.duration_min)}<br>${esc(who)}<br>${fmtDate(iso)} at <b>${fmtTime(iso)}</b>`;
   $('consultNote').classList.toggle('hidden', !s.requires_consult);
   $('e4').textContent = '';
   go(4);
@@ -283,7 +303,7 @@ async function book() {
     const r = await fetch('/api/book/create', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        service: SEL.service.slug, stylist: SEL.stylist, startAt: SEL.startAt,
+        service: SEL.service.slug, variation: SEL.variation.id, stylist: SEL.stylist, startAt: SEL.startAt,
         client: { name: $('fName').value, phone: $('fPhone').value, email: $('fEmail').value },
         notes: $('fNotes').value
       })
@@ -296,7 +316,7 @@ async function book() {
     }
     DONE = j;
     $('doneCode').textContent = j.code;
-    $('doneSum').innerHTML = `<b>${esc(j.service.name)}</b> with ${esc(j.stylist.name)}<br>${fmtDate(j.startsAt)}<br><b>${fmtTime(j.startsAt)}</b> – ${fmtTime(j.endsAt)}`;
+    $('doneSum').innerHTML = `<b>${esc(j.service.name)}</b>${j.variation?.name && SEL.service.variations.length > 1 ? ` · ${esc(j.variation.name)}` : ''} with ${esc(j.stylist.name)}<br>${fmtDate(j.startsAt)}<br><b>${fmtTime(j.startsAt)}</b> – ${fmtTime(j.endsAt)}`;
     go(5);
   } catch (e) { $('e4').textContent = e.message; }
   finally { btn.disabled = false; btn.textContent = 'Book appointment'; }
@@ -307,7 +327,7 @@ function downloadIcs() {
   const z = d => new Date(d).toISOString().replace(/[-:]|\.\d{3}/g, '');
   const ics = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Crown Heirs//Booking//EN', 'BEGIN:VEVENT',
     `UID:${DONE.code}@crownheirs`, `DTSTAMP:${z(new Date())}`, `DTSTART:${z(DONE.startsAt)}`, `DTEND:${z(DONE.endsAt)}`,
-    `SUMMARY:Crown Heirs — ${DONE.service.name}`, `DESCRIPTION:With ${DONE.stylist.name}. Confirmation ${DONE.code}.`,
+    `SUMMARY:Crown Heirs — ${DONE.service.name}${DONE.variation?.name ? ' (' + DONE.variation.name + ')' : ''}`, `DESCRIPTION:With ${DONE.stylist.name}. Confirmation ${DONE.code}.`,
     'END:VEVENT', 'END:VCALENDAR'].join('\r\n');
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([ics], { type: 'text/calendar' })); a.download = `crown-heirs-${DONE.code}.ics`; a.click();
@@ -327,7 +347,7 @@ async function lookup() {
   if (!r.ok) { $('mResult').innerHTML = ''; $('em').textContent = j.error || 'Not found'; return; }
   const future = new Date(j.startsAt) > new Date();
   $('mResult').innerHTML = `
-    <div class="sum"><b>${esc(j.service.name)}</b> with ${esc(j.stylist.name)}<br>${fmtDate(j.startsAt)} at <b>${fmtTime(j.startsAt)}</b><br>
+    <div class="sum"><b>${esc(j.service.name)}</b>${j.variation?.name ? ` · ${esc(j.variation.name)}` : ''} with ${esc(j.stylist.name)}<br>${fmtDate(j.startsAt)} at <b>${fmtTime(j.startsAt)}</b><br>
       Status: <b>${esc(j.status)}</b> · ${esc(j.client.name)} (…${esc(j.client.phoneLast4)})</div>
     ${j.status === 'confirmed' && future ? `<div class="row"><button class="btn btn-ghost" style="border-color:rgba(160,50,40,.4);color:var(--err);" onclick='cancelAppt(${JSON.stringify(j.code)})'>Cancel this appointment</button></div>` : ''}`;
 }

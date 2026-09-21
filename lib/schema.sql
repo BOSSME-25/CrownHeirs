@@ -15,6 +15,20 @@ CREATE TABLE IF NOT EXISTS services (
   sort             integer NOT NULL DEFAULT 0
 );
 
+-- A service's sizes/lengths/client types ("Small 24in", "New Client"), each
+-- with its own duration. The customer books a variation; the service is the
+-- grouping they browse. `bookable=false` mirrors Square's "not bookable
+-- online": kept for the record, never offered in the flow.
+CREATE TABLE IF NOT EXISTS service_variations (
+  id           serial PRIMARY KEY,
+  service_id   integer NOT NULL REFERENCES services(id) ON DELETE CASCADE,
+  name         text NOT NULL,
+  duration_min integer NOT NULL CHECK (duration_min > 0),
+  bookable     boolean NOT NULL DEFAULT true,
+  sort         integer NOT NULL DEFAULT 0,
+  UNIQUE (service_id, name)
+);
+
 CREATE TABLE IF NOT EXISTS stylists (
   id     serial PRIMARY KEY,
   slug   text UNIQUE NOT NULL,
@@ -83,6 +97,10 @@ CREATE TABLE IF NOT EXISTS appointments (
     (stylist_id WITH =, tstzrange(starts_at, busy_until) WITH &&)
     WHERE (status = 'confirmed')
 );
+-- Which variation was booked, plus its name as a snapshot so history reads
+-- correctly even if the catalog is renamed later.
+ALTER TABLE appointments ADD COLUMN IF NOT EXISTS variation_id integer REFERENCES service_variations(id);
+ALTER TABLE appointments ADD COLUMN IF NOT EXISTS variation_name text NOT NULL DEFAULT '';
 CREATE INDEX IF NOT EXISTS appointments_stylist_time_idx ON appointments (stylist_id, starts_at);
 CREATE INDEX IF NOT EXISTS appointments_client_idx ON appointments (client_id);
 
