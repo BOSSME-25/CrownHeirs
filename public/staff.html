@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Front Desk — Crown Heirs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Cinzel:wght@400;500&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #ece8e2; --surface: #ffffff; --surface-dim: #f5f2ee;
+  --terra: #a0624a; --terra-hi: #b8714f; --gold: #c8952a;
+  --ink: #1a1816; --ink-mid: #4a4540; --ink-dim: #8a837a;
+  --border: rgba(26,24,22,0.12); --ok: #3d7a45; --err: #a03228; --warn: #9a6b12;
+  --font-ui: 'Jost', sans-serif; --font-serif: 'Cormorant Garamond', serif; --font-display: 'Cinzel', serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-ui); font-weight: 300; font-size: 16px; }
+button { font-family: var(--font-ui); cursor: pointer; }
+input, textarea, select { font-family: var(--font-ui); font-size: 16px; font-weight: 300; color: var(--ink); width: 100%; padding: 11px 13px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); }
+input:focus, textarea:focus, select:focus { outline: 2px solid var(--terra); outline-offset: -1px; }
+label { display: block; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-dim); margin: 12px 0 5px; }
+.wrap { max-width: 760px; margin: 0 auto; padding: 18px 16px 90px; }
+header.top { display: flex; align-items: center; gap: 12px; padding: 8px 0 14px; }
+header.top img { height: 44px; }
+header.top h1 { font-family: var(--font-display); font-weight: 400; font-size: 17px; letter-spacing: 0.2em; text-transform: uppercase; }
+.tabs { display: flex; gap: 6px; margin-bottom: 14px; }
+.tab { flex: 1; border: 1px solid var(--border); background: var(--surface); border-radius: 100px; padding: 10px; font-size: 14px; color: var(--ink-mid); }
+.tab.on { background: var(--ink); color: #fff; border-color: var(--ink); }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 18px; margin-top: 14px; }
+h2 { font-family: var(--font-serif); font-weight: 600; font-size: 25px; margin-bottom: 4px; }
+.hint { color: var(--ink-dim); font-size: 14px; margin-bottom: 10px; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: none; border-radius: 100px; padding: 12px 22px; font-size: 14px; font-weight: 400; letter-spacing: 0.03em; }
+.btn-terra { background: var(--terra); color: #fff; }
+.btn-terra:disabled { background: #c8a898; }
+.btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--ink-mid); }
+.btn-sm { padding: 8px 14px; font-size: 13px; }
+.btn-danger { background: transparent; border: 1px solid rgba(160,50,40,.4); color: var(--err); }
+.row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.err { color: var(--err); font-size: 14px; margin-top: 8px; min-height: 18px; }
+.hidden { display: none !important; }
+.dates { display: flex; gap: 6px; overflow-x: auto; padding: 2px 2px 8px; scrollbar-width: none; }
+.dates::-webkit-scrollbar { display: none; }
+.day { flex: none; width: 58px; border: 1px solid var(--border); background: var(--surface); border-radius: 10px; padding: 8px 0; text-align: center; color: var(--ink-mid); }
+.day small { display: block; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; }
+.day b { display: block; font-size: 18px; font-weight: 400; color: var(--ink); }
+.day.on { background: var(--ink); border-color: var(--ink); color: #fff; } .day.on b { color: #fff; }
+.day.today { border-color: var(--gold); }
+.pills { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 6px; scrollbar-width: none; }
+.pill { flex: none; border: 1px solid var(--border); background: var(--surface); border-radius: 100px; padding: 7px 13px; font-size: 13px; color: var(--ink-mid); white-space: nowrap; }
+.pill.on { background: var(--terra); color: #fff; border-color: var(--terra); }
+.appt { border: 1px solid var(--border); border-left: 4px solid var(--terra); border-radius: 12px; padding: 12px 14px; margin-top: 10px; background: var(--surface-dim); }
+.appt.cancelled { border-left-color: var(--ink-faint, #b8b0a8); opacity: .65; }
+.appt.completed { border-left-color: var(--ok); }
+.appt.no_show { border-left-color: var(--err); }
+.appt .t { font-family: var(--font-serif); font-size: 20px; font-weight: 600; }
+.appt .m { font-size: 14px; color: var(--ink-mid); margin-top: 2px; line-height: 1.45; }
+.appt .m a { color: var(--terra); text-decoration: none; }
+.badge { display: inline-block; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; border-radius: 100px; padding: 3px 9px; background: rgba(26,24,22,.07); color: var(--ink-mid); margin-left: 6px; vertical-align: middle; }
+.badge.ok { background: rgba(61,122,69,.12); color: var(--ok); } .badge.err { background: rgba(160,50,40,.1); color: var(--err); } .badge.staff { background: rgba(200,149,42,.15); color: var(--warn); }
+.acts { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+.off { border: 1px dashed var(--border); border-radius: 12px; padding: 10px 14px; margin-top: 10px; font-size: 14px; color: var(--ink-mid); display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.empty { color: var(--ink-dim); padding: 22px 0; text-align: center; }
+.modal-bg { position: fixed; inset: 0; background: rgba(26,24,22,.45); display: flex; align-items: flex-end; justify-content: center; z-index: 50; }
+.modal { background: var(--surface); border-radius: 18px 18px 0 0; width: 100%; max-width: 640px; max-height: 92vh; overflow-y: auto; padding: 20px 18px 28px; }
+@media (min-width: 700px) { .modal-bg { align-items: center; } .modal { border-radius: 18px; } }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.hours { width: 100%; border-collapse: collapse; margin-top: 6px; }
+.hours td { padding: 5px 4px; font-size: 14px; } .hours input[type=time] { padding: 7px 8px; } .hours input[type=checkbox] { width: auto; accent-color: var(--terra); }
+.svcgrid label { display: flex; align-items: center; gap: 8px; font-size: 14px; text-transform: none; letter-spacing: 0; color: var(--ink); margin: 6px 0; }
+.svcgrid input { width: auto; accent-color: var(--terra); }
+.cat { font-family: var(--font-display); font-size: 12px; letter-spacing: .15em; text-transform: uppercase; color: var(--gold); margin-top: 12px; display: flex; justify-content: space-between; align-items: center; }
+.cat button { font-size: 12px; background: none; border: none; color: var(--terra); }
+.stylist { display: flex; justify-content: space-between; align-items: center; gap: 10px; border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; margin-top: 10px; background: var(--surface-dim); }
+.stylist .n { font-family: var(--font-serif); font-size: 20px; font-weight: 600; }
+.stylist .d { font-size: 13px; color: var(--ink-dim); }
+.toast { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); background: var(--ink); color: #fff; padding: 10px 18px; border-radius: 100px; font-size: 14px; z-index: 60; }
+#login { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+#login .card { width: 100%; max-width: 380px; text-align: center; padding: 34px 26px; }
+#login img { height: 80px; margin-bottom: 14px; }
+</style>
+</head>
+<body>
+
+<div id="login">
+  <div class="card">
+    <img src="/images/logo-1.png" alt="Crown Heirs">
+    <h2 style="font-family:var(--font-display);font-weight:400;letter-spacing:0.18em;font-size:18px;">Front Desk</h2>
+    <p style="color:var(--ink-dim);margin:8px 0 18px;">Same password as the TV admin.</p>
+    <input id="pw" type="password" placeholder="Password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+    <div class="err" id="loginErr"></div>
+    <button class="btn btn-terra" style="width:100%;margin-top:8px;" onclick="doLogin()">Sign in</button>
+  </div>
+</div>
+
+<div id="app" class="wrap hidden">
+  <header class="top"><img src="/images/logo-1.png" alt=""><h1>Front Desk</h1></header>
+  <div class="tabs">
+    <button class="tab on" id="tabBook" onclick="showTab('book')">Book</button>
+    <button class="tab" id="tabTeam" onclick="showTab('team')">Team</button>
+  </div>
+
+  <!-- ═══ BOOK ═══ -->
+  <section id="viewBook">
+    <div class="dates" id="dates"></div>
+    <div class="pills" id="stylistPills"></div>
+    <div class="row" style="margin:8px 0 4px;">
+      <button class="btn btn-terra btn-sm" onclick="openNew()">＋ New appointment</button>
+      <button class="btn btn-ghost btn-sm" onclick="openBlock()">Block time</button>
+      <span style="flex:1"></span>
+      <span id="dayTitle" style="font-family:var(--font-serif);font-size:19px;"></span>
+    </div>
+    <div id="dayList"><div class="empty">Loading…</div></div>
+    <div class="err" id="dayErr"></div>
+  </section>
+
+  <!-- ═══ TEAM ═══ -->
+  <section id="viewTeam" class="hidden">
+    <div class="card">
+      <h2>Team</h2>
+      <div class="hint">Who works here, when, and what they offer. Only active stylists with hours appear in online booking.</div>
+      <div id="stylistList"></div>
+      <button class="btn btn-ghost btn-sm" style="margin-top:12px;" onclick="openStylist(null)">＋ Add stylist</button>
+    </div>
+    <div class="card">
+      <h2>Reminders</h2>
+      <div class="hint">Runs automatically every morning (9 AM Phoenix) for the next day's appointments, once <code>CRON_SECRET</code> is set in Vercel. Press to run now.</div>
+      <button class="btn btn-ghost btn-sm" onclick="runReminders()">Send due reminders now</button>
+      <div id="remOut" class="hint" style="margin-top:8px;"></div>
+    </div>
+  </section>
+</div>
+
+<!-- ═══ MODALS ═══ -->
+<div id="mNew" class="modal-bg hidden" onclick="if(event.target===this)close('mNew')">
+  <div class="modal">
+    <h2>New appointment</h2>
+    <div class="hint">Phone or walk-in booking. Same rules as online, minus the lead time.</div>
+    <div class="grid2">
+      <div><label>Stylist</label><select id="nStylist" onchange="nTimes()"></select></div>
+      <div><label>Date</label><input id="nDate" type="date" onchange="nTimes()"></div>
+    </div>
+    <label>Service</label><select id="nService" onchange="nVariations()"></select>
+    <label>Option</label><select id="nVariation" onchange="nTimes()"></select>
+    <label>Time</label><select id="nTime"><option value="">Pick stylist, service and date first</option></select>
+    <div class="grid2">
+      <div><label>Client name</label><input id="nName" autocomplete="off"></div>
+      <div><label>Mobile</label><input id="nPhone" type="tel" inputmode="tel"></div>
+    </div>
+    <label>Email (optional)</label><input id="nEmail" type="email">
+    <label>Notes</label><textarea id="nNotes" rows="2"></textarea>
+    <div class="err" id="nErr"></div>
+    <div class="row" style="justify-content:space-between;margin-top:12px;">
+      <button class="btn btn-ghost" onclick="close('mNew')">Cancel</button>
+      <button class="btn btn-terra" id="nGo" onclick="nBook()">Book it</button>
+    </div>
+  </div>
+</div>
+
+<div id="mBlock" class="modal-bg hidden" onclick="if(event.target===this)close('mBlock')">
+  <div class="modal">
+    <h2>Block time</h2>
+    <div class="hint">Lunch, a day off, a class. Existing bookings in the window aren't moved — you'll get a list to call.</div>
+    <label>Stylist</label><select id="bStylist"></select>
+    <div class="grid2">
+      <div><label>From</label><input id="bStart" type="datetime-local"></div>
+      <div><label>To</label><input id="bEnd" type="datetime-local"></div>
+    </div>
+    <label>Reason (optional)</label><input id="bReason" placeholder="Lunch, vacation…">
+    <div class="err" id="bErr"></div>
+    <div class="row" style="justify-content:space-between;margin-top:12px;">
+      <button class="btn btn-ghost" onclick="close('mBlock')">Cancel</button>
+      <button class="btn btn-terra" onclick="bSave()">Block</button>
+    </div>
+  </div>
+</div>
+
+<div id="mStylist" class="modal-bg hidden" onclick="if(event.target===this)close('mStylist')">
+  <div class="modal">
+    <h2 id="sTitle">Stylist</h2>
+    <div class="grid2">
+      <div><label>Name</label><input id="sName"></div>
+      <div><label>Title</label><input id="sTitleIn" placeholder="Stylist, Loctician, Barber…"></div>
+    </div>
+    <label style="display:flex;align-items:center;gap:8px;text-transform:none;letter-spacing:0;font-size:14px;color:var(--ink);"><input id="sActive" type="checkbox" style="width:auto;accent-color:var(--terra);" checked> Active (bookable)</label>
+    <label>Weekly hours</label>
+    <table class="hours" id="sHours"></table>
+    <label>Services offered</label>
+    <div class="svcgrid" id="sServices"></div>
+    <div class="err" id="sErr"></div>
+    <div class="row" style="justify-content:space-between;margin-top:12px;">
+      <button class="btn btn-ghost" onclick="close('mStylist')">Cancel</button>
+      <button class="btn btn-terra" onclick="sSave()">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ════════════════════════════════════════════
+   Crown Heirs — front desk. Talks to /api/book/staff.
+════════════════════════════════════════════ */
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let KEY = sessionStorage.getItem('chKey') || '';
+let TZ = 'America/Phoenix', DATE = null, STYLIST = 'all', CATS = [], STYLISTS = [], DAY = null, EDITING = null;
+
+const api = async (method, params, body) => {
+  const url = '/api/book/staff' + (params ? '?' + new URLSearchParams(params) : '');
+  const r = await fetch(url, { method, headers: { 'x-admin-key': KEY, 'Content-Type': 'application/json' }, body: body ? JSON.stringify(body) : undefined });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(j.error || `Error ${r.status}`);
+  return j;
+};
+const toast = m => { const t = document.createElement('div'); t.className = 'toast'; t.textContent = m; document.body.appendChild(t); setTimeout(() => t.remove(), 2600); };
+const fmtT = iso => new Date(iso).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZone: TZ });
+const fmtD = ymd => { const [y, m, d] = ymd.split('-').map(Number); return new Date(Date.UTC(y, m - 1, d)).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', timeZone: 'UTC' }); };
+const today = () => new Intl.DateTimeFormat('en-CA', { timeZone: TZ, year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+const addDays = (ymd, n) => { const [y, m, d] = ymd.split('-').map(Number); return new Date(Date.UTC(y, m - 1, d + n)).toISOString().slice(0, 10); };
+const dur = m => m >= 60 ? `${Math.floor(m / 60)}h${m % 60 ? ' ' + (m % 60) + 'm' : ''}` : `${m}m`;
+const close = id => $(id).classList.add('hidden');
+const open = id => $(id).classList.remove('hidden');
+// Local datetime-local value → ISO in the salon zone (not the browser's).
+function localToIso(v) { const [d, t] = v.split('T'); const [h, m] = t.split(':').map(Number); const probe = new Date(`${d}T${t}:00Z`); const off = (new Date(probe.toLocaleString('en-US', { timeZone: TZ })) - new Date(probe.toLocaleString('en-US', { timeZone: 'UTC' }))) / 60000; return new Date(probe.getTime() - off * 60000).toISOString(); }
+
+/* ── auth ── */
+async function doLogin() {
+  const pw = $('pw').value; $('loginErr').textContent = '';
+  const r = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: pw }) });
+  if (r.ok) { KEY = pw; sessionStorage.setItem('chKey', pw); enter(); }
+  else $('loginErr').textContent = (await r.json().catch(() => ({}))).error || 'Wrong password';
+}
+async function enter() {
+  $('login').classList.add('hidden'); $('app').classList.remove('hidden');
+  try {
+    const cat = await fetch('/api/book/services').then(r => r.json());
+    CATS = cat.categories || []; TZ = cat.timeZone || TZ;
+    STYLISTS = (await api('GET', { action: 'stylists' })).stylists;
+  } catch (e) { $('dayErr').textContent = e.message; }
+  DATE = today(); renderDates(); loadDay();
+}
+function showTab(t) {
+  $('viewBook').classList.toggle('hidden', t !== 'book'); $('viewTeam').classList.toggle('hidden', t !== 'team');
+  $('tabBook').classList.toggle('on', t === 'book'); $('tabTeam').classList.toggle('on', t === 'team');
+  if (t === 'team') renderTeam();
+}
+
+/* ── day view ── */
+function renderDates() {
+  const t = today();
+  const days = Array.from({ length: 28 }, (_, i) => addDays(t, i - 2));
+  $('dates').innerHTML = days.map(d => { const [y, m, dd] = d.split('-').map(Number); const dt = new Date(Date.UTC(y, m - 1, dd));
+    return `<button class="day ${d === DATE ? 'on' : ''} ${d === t ? 'today' : ''}" onclick="DATE=${JSON.stringify(d)};renderDates();loadDay()"><small>${dt.toLocaleDateString('en-US', { weekday: 'short', timeZone: 'UTC' })}</small><b>${dd}</b></button>`; }).join('');
+  const active = STYLISTS.filter(s => s.active);
+  $('stylistPills').innerHTML = [`<button class="pill ${STYLIST === 'all' ? 'on' : ''}" onclick="STYLIST='all';renderDates();renderDay()">Everyone</button>`,
+    ...active.map(s => `<button class="pill ${STYLIST === s.slug ? 'on' : ''}" onclick="STYLIST=${JSON.stringify(s.slug)};renderDates();renderDay()">${esc(s.name)}</button>`)].join('');
+}
+async function loadDay() {
+  $('dayErr').textContent = ''; $('dayTitle').textContent = fmtD(DATE);
+  try { DAY = await api('GET', { action: 'day', date: DATE }); renderDay(); }
+  catch (e) { $('dayList').innerHTML = ''; $('dayErr').textContent = e.message; }
+}
+function renderDay() {
+  if (!DAY) return;
+  const appts = DAY.appointments.filter(a => STYLIST === 'all' || a.stylist.slug === STYLIST);
+  const off = DAY.timeOff.filter(t => STYLIST === 'all' || t.stylist.slug === STYLIST);
+  const items = [...appts.map(a => ({ at: a.startsAt, html: apptHtml(a) })), ...off.map(t => ({ at: t.startsAt, html: offHtml(t) }))].sort((x, y) => new Date(x.at) - new Date(y.at));
+  $('dayList').innerHTML = items.length ? items.map(i => i.html).join('') : '<div class="empty">Nothing on the book.</div>';
+}
+function apptHtml(a) {
+  const st = { confirmed: '', completed: '<span class="badge ok">Done</span>', cancelled: '<span class="badge">Cancelled</span>', no_show: '<span class="badge err">No-show</span>' }[a.status] || '';
+  const opt = a.variation?.name && a.variation.name !== 'Regular' ? ` · ${esc(a.variation.name)}` : '';
+  const tel = a.client.phone.replace(/^1(\d{3})(\d{3})(\d{4})$/, '($1) $2-$3');
+  return `<div class="appt ${a.status}">
+    <div class="t">${fmtT(a.startsAt)} – ${fmtT(a.endsAt)}${st}${a.source === 'staff' ? '<span class="badge staff">Phone</span>' : ''}</div>
+    <div class="m"><b>${esc(a.client.name)}</b> · <a href="tel:+${esc(a.client.phone)}">${esc(tel)}</a>${a.client.email ? ` · ${esc(a.client.email)}` : ''}<br>
+      ${esc(a.service.name)}${opt} · ${esc(a.stylist.name)} · <span style="color:var(--ink-dim)">${esc(a.code)}</span>${a.notes ? `<br><i>${esc(a.notes)}</i>` : ''}</div>
+    ${a.status === 'confirmed' ? `<div class="acts">
+      <button class="btn btn-ghost btn-sm" onclick="setStatus('${a.code}','completed')">✓ Done</button>
+      <button class="btn btn-ghost btn-sm" onclick="setStatus('${a.code}','no_show')">No-show</button>
+      <button class="btn btn-danger btn-sm" onclick="if(confirm('Cancel this appointment? The client will be notified.'))setStatus('${a.code}','cancelled')">Cancel</button></div>`
+    : `<div class="acts"><button class="btn btn-ghost btn-sm" onclick="setStatus('${a.code}','confirmed')">Restore</button></div>`}
+  </div>`;
+}
+function offHtml(t) {
+  return `<div class="off"><span>⏸ ${esc(t.stylist.name)} off ${fmtT(t.startsAt)} – ${fmtT(t.endsAt)}${t.reason ? ` · ${esc(t.reason)}` : ''}</span>
+    <button class="btn btn-ghost btn-sm" onclick="removeOff(${t.id})">Remove</button></div>`;
+}
+async function setStatus(code, status) {
+  try { await api('POST', null, { action: 'status', code, status }); toast('Updated'); loadDay(); }
+  catch (e) { alert(e.message); }
+}
+async function removeOff(id) {
+  try { await api('POST', null, { action: 'timeoff.remove', id }); loadDay(); } catch (e) { alert(e.message); }
+}
+
+/* ── new appointment ── */
+function stylistOptions(sel, withAny) {
+  const act = STYLISTS.filter(s => s.active);
+  sel.innerHTML = (withAny ? '<option value="any">First available</option>' : '') + act.map(s => `<option value="${esc(s.slug)}">${esc(s.name)}</option>`).join('');
+}
+function openNew() {
+  stylistOptions($('nStylist'), true);
+  if (STYLIST !== 'all') $('nStylist').value = STYLIST;
+  $('nDate').value = DATE;
+  $('nService').innerHTML = CATS.map(c => `<optgroup label="${esc(c.category)}">${c.services.map(s => `<option value="${esc(s.slug)}">${esc(s.name)}</option>`).join('')}</optgroup>`).join('');
+  ['nName', 'nPhone', 'nEmail', 'nNotes'].forEach(id => $(id).value = ''); $('nErr').textContent = '';
+  nVariations(); open('mNew');
+}
+function nVariations() {
+  const s = CATS.flatMap(c => c.services).find(x => x.slug === $('nService').value);
+  $('nVariation').innerHTML = (s?.variations || []).map(v => `<option value="${v.id}">${esc(v.name)} · ${dur(v.duration_min)}</option>`).join('');
+  nTimes();
+}
+async function nTimes() {
+  const sel = $('nTime'); sel.innerHTML = '<option value="">Finding openings…</option>';
+  try {
+    const q = { action: 'availability', service: $('nService').value, variation: $('nVariation').value, date: $('nDate').value };
+    if ($('nStylist').value !== 'any') q.stylist = $('nStylist').value;
+    const j = await api('GET', q);
+    const slots = $('nStylist').value === 'any' ? j.any : (j.stylists[0]?.slots || []);
+    sel.innerHTML = slots.length ? slots.map(iso => `<option value="${iso}">${fmtT(iso)}</option>`).join('') : '<option value="">No openings — try another day or stylist</option>';
+  } catch (e) { sel.innerHTML = `<option value="">${esc(e.message)}</option>`; }
+}
+async function nBook() {
+  $('nErr').textContent = ''; $('nGo').disabled = true;
+  try {
+    if (!$('nTime').value) throw new Error('Pick a time');
+    const j = await api('POST', null, { action: 'book', service: $('nService').value, variation: Number($('nVariation').value), stylist: $('nStylist').value,
+      startAt: $('nTime').value, client: { name: $('nName').value, phone: $('nPhone').value, email: $('nEmail').value }, notes: $('nNotes').value });
+    close('mNew'); toast(`Booked · ${j.code}`); DATE = $('nDate').value; renderDates(); loadDay();
+  } catch (e) { $('nErr').textContent = e.message; }
+  finally { $('nGo').disabled = false; }
+}
+
+/* ── block time ── */
+function openBlock() {
+  stylistOptions($('bStylist'), false); if (STYLIST !== 'all') $('bStylist').value = STYLIST;
+  $('bStart').value = `${DATE}T12:00`; $('bEnd').value = `${DATE}T13:00`; $('bReason').value = ''; $('bErr').textContent = '';
+  open('mBlock');
+}
+async function bSave() {
+  $('bErr').textContent = '';
+  try {
+    const j = await api('POST', null, { action: 'timeoff.add', stylist: $('bStylist').value, startsAt: localToIso($('bStart').value), endsAt: localToIso($('bEnd').value), reason: $('bReason').value });
+    close('mBlock'); loadDay();
+    if (j.conflicts.length) alert(`Blocked. ${j.conflicts.length} existing booking(s) fall inside this window — they were NOT moved:\n\n` + j.conflicts.map(a => `${fmtT(a.startsAt)} ${a.client.name} (${a.client.phone}) — ${a.service.name}`).join('\n'));
+    else toast('Time blocked');
+  } catch (e) { $('bErr').textContent = e.message; }
+}
+
+/* ── team ── */
+const WD = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const hhmm = m => `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
+const mins = s => { const [h, m] = s.split(':').map(Number); return h * 60 + m; };
+async function renderTeam() {
+  try { STYLISTS = (await api('GET', { action: 'stylists' })).stylists; } catch (e) { alert(e.message); return; }
+  $('stylistList').innerHTML = STYLISTS.map(s => {
+    const days = [...new Set(s.hours.map(h => h.weekday))].sort().map(d => WD[d]).join(' ');
+    return `<div class="stylist"><div><div class="n">${esc(s.name)}${s.active ? '' : '<span class="badge">Inactive</span>'}</div>
+      <div class="d">${esc(s.title || '')}${s.title ? ' · ' : ''}${days || 'No hours set'} · ${s.services.length} services</div></div>
+      <button class="btn btn-ghost btn-sm" onclick='openStylist(${JSON.stringify(s.slug)})'>Edit</button></div>`;
+  }).join('') || '<div class="empty">No stylists yet.</div>';
+}
+function openStylist(slug) {
+  EDITING = slug ? STYLISTS.find(s => s.slug === slug) : { name: '', title: '', active: true, hours: [], services: CATS.flatMap(c => c.services.map(s => s.slug)) };
+  $('sTitle').textContent = slug ? 'Edit stylist' : 'Add stylist';
+  $('sName').value = EDITING.name; $('sTitleIn').value = EDITING.title || ''; $('sActive').checked = EDITING.active !== false; $('sErr').textContent = '';
+  $('sHours').innerHTML = WD.map((d, i) => { const h = EDITING.hours.find(x => x.weekday === i);
+    return `<tr><td><input type="checkbox" id="h${i}" ${h ? 'checked' : ''}> ${d}</td><td><input type="time" id="h${i}s" value="${h ? hhmm(h.startMin) : '09:00'}"></td><td>–</td><td><input type="time" id="h${i}e" value="${h ? hhmm(h.endMin) : '18:00'}"></td></tr>`; }).join('');
+  const has = new Set(EDITING.services);
+  $('sServices').innerHTML = CATS.map(c => `<div class="cat"><span>${esc(c.category)}</span><button onclick="toggleCat(this)">all / none</button></div>` +
+    c.services.map(s => `<label><input type="checkbox" data-svc="${esc(s.slug)}" ${has.has(s.slug) ? 'checked' : ''}> ${esc(s.name)}</label>`).join('')).join('');
+  open('mStylist');
+}
+function toggleCat(btn) {
+  let el = btn.parentElement.nextElementSibling; const boxes = [];
+  while (el && !el.classList.contains('cat')) { const b = el.querySelector('input'); if (b) boxes.push(b); el = el.nextElementSibling; }
+  const on = !boxes.every(b => b.checked); boxes.forEach(b => b.checked = on);
+}
+async function sSave() {
+  $('sErr').textContent = '';
+  try {
+    const hours = WD.map((_, i) => $(`h${i}`).checked ? { weekday: i, startMin: mins($(`h${i}s`).value), endMin: mins($(`h${i}e`).value) } : null).filter(Boolean);
+    const services = [...document.querySelectorAll('#sServices input[data-svc]:checked')].map(b => b.dataset.svc);
+    await api('POST', null, { action: 'stylist.save', slug: EDITING.slug || null, name: $('sName').value, title: $('sTitleIn').value, active: $('sActive').checked, hours, services });
+    close('mStylist'); toast('Saved'); renderTeam(); renderDates();
+  } catch (e) { $('sErr').textContent = e.message; }
+}
+async function runReminders() {
+  $('remOut').textContent = 'Running…';
+  const r = await fetch('/api/book/reminders', { headers: { 'x-admin-key': KEY } }); const j = await r.json().catch(() => ({}));
+  $('remOut').textContent = r.ok ? `Sent ${j.count} reminder(s).` : (j.error || 'Failed');
+}
+
+/* ── boot ── */
+if (KEY) fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: KEY }) }).then(r => { if (r.ok) enter(); else sessionStorage.removeItem('chKey'); });
+</script>
+</body>
+</html>
