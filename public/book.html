@@ -201,6 +201,7 @@ async function loadServices() {
     CATS = j.categories; TZ = j.timeZone || TZ; MAX_DAYS = j.maxDaysAhead || MAX_DAYS;
     SEL.cat = CATS[0]?.category || null;
     renderCats();
+    preselectFromQuery();
   } catch (e) {
     $('svcList').innerHTML = ''; $('e1').textContent = e.message;
   }
@@ -221,6 +222,18 @@ function pickService(slug) {
   // client…) → the customer picks, since each has its own duration.
   if (SEL.service.variations.length === 1) return pickVariation(SEL.service.variations[0].id);
   renderVariations();
+}
+// Arriving from the finder: /book?service=<slug>[&variation=<name>] lands
+// straight on that service — and on the option, if the finder knew it.
+function preselectFromQuery() {
+  const q = new URLSearchParams(location.search);
+  const slug = q.get('service'); if (!slug) return;
+  const s = CATS.flatMap(c => c.services).find(x => x.slug === slug); if (!s) return;
+  SEL.cat = s.category;
+  const want = (q.get('variation') || '').trim().toLowerCase();
+  const v = want && s.variations.find(x => x.name.toLowerCase() === want);
+  if (v && s.variations.length > 1) { SEL.service = s; SEL.variation = null; SEL.stylist = 'any'; SEL.date = null; SEL.startAt = null; pickVariation(v.id); }
+  else pickService(slug);
 }
 function renderVariations() {
   const s = SEL.service;
