@@ -112,7 +112,32 @@ npm test                                   # engine tests only
 TEST_DATABASE_URL=postgres://… npm test    # + integration and API tests against a real Postgres
 ```
 
+## Front desk (`/staff`)
+
+Same password as `/admin`. **Book** tab: the day's appointments per stylist
+(complete / no-show / cancel / restore), phone or walk-in bookings with no
+lead time, and time blocking (lunch, days off — existing bookings inside the
+window are listed, not moved). **Team** tab: stylists, weekly hours, and
+which services each offers — this is where the placeholder "Bethany" gets
+replaced with the real team. Only active stylists with hours are bookable.
+
+## Notifications
+
+Sent on booking and cancellation (client + salon) and as a next-day
+reminder (client only). Each channel is silent until its keys exist, so the
+booking flow works with none of them set.
+
+| Variable | Purpose |
+|---|---|
+| `RESEND_API_KEY`, `NOTIFY_FROM_EMAIL` | Email via Resend. The from-address needs a verified domain in Resend (e.g. `Crown Heirs <book@crownheirs.com>`). |
+| `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM_NUMBER` | SMS via Twilio. US business texting needs A2P 10DLC registration in Twilio before messages deliver reliably. |
+| `NOTIFY_EMAIL`, `NOTIFY_SMS_TO` | Where the salon's copies go. |
+| `CRON_SECRET` | Any long random string. Enables the daily reminder run (`vercel.json` cron, 16:00 UTC = 9 AM Phoenix). |
+| `SITE_URL` | Used in message links; defaults to the vercel.app URL. |
+
+Reminders can also be triggered by hand from `/staff` → Team → Reminders.
+
 ### Not built yet (natural next steps)
 
-Staff calendar/admin for appointments and hours · SMS/email confirmations
-and reminders · deposits · per-stylist pricing · reschedule-by-code.
+Deposits · per-stylist pricing · reschedule-by-code · the homepage finder
+handing off to `/book` with the service pre-selected.

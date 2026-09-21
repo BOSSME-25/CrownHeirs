@@ -101,6 +101,9 @@ CREATE TABLE IF NOT EXISTS appointments (
 -- correctly even if the catalog is renamed later.
 ALTER TABLE appointments ADD COLUMN IF NOT EXISTS variation_id integer REFERENCES service_variations(id);
 ALTER TABLE appointments ADD COLUMN IF NOT EXISTS variation_name text NOT NULL DEFAULT '';
+-- 'online' (customer at /book) or 'staff' (entered at /staff, e.g. a phone booking).
+ALTER TABLE appointments ADD COLUMN IF NOT EXISTS source text NOT NULL DEFAULT 'online';
+ALTER TABLE appointments ADD COLUMN IF NOT EXISTS reminder_sent_at timestamptz;
 CREATE INDEX IF NOT EXISTS appointments_stylist_time_idx ON appointments (stylist_id, starts_at);
 CREATE INDEX IF NOT EXISTS appointments_client_idx ON appointments (client_id);
 
