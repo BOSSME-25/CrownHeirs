@@ -12,7 +12,11 @@ The internal employee Team Hub lives in its own **private** repository,
 |---|---|
 | `/` | The "Find Your Service" experience |
 | `/tv` | **Salon TV display** — full-screen auto-rotating slideshow (photos & videos of work, Instagram-framed posts, a "Follow us" slide, memberships, products, announcements). AirPlay or open this URL on the TV and leave it. |
-| `/admin` | **Bethany's editor** — password-protected. Add/swap photos and short videos (≤100 MB, direct-to-storage upload), mark any as an Instagram-style post, edit memberships, products, announcements, the IG handle, and slide timing. Works great from a phone. |
+| `/book` | **Online booking** for customers. |
+| `/admin` | **The admin site** — one sign-in (`ADMIN_PASSWORD`) for everything below. Home shows today at a glance. |
+| `/admin/desk` | Front desk: today's book, phone bookings, time off. `?tab=team` for the roster. |
+| `/admin/tv` | What plays on the salon TV: photos and short videos (≤100 MB), Instagram-style posts, memberships, products, announcements, timing. |
+| `/admin/settings` | Booking database setup, notification variables, run reminders now. |
 
 The TV re-checks for new content every 3 minutes, so saves in `/admin` show up
 on screen without touching the TV.
@@ -72,9 +76,10 @@ same slot in the same instant, the database accepts one and rejects the other.
 1. **Postgres** — in the Vercel dashboard: **Storage → Create Database →
    Postgres (Neon)**, connect it to `crown-heirs` for all environments, then
    **redeploy**. This adds `DATABASE_URL` (or `POSTGRES_URL`) automatically.
-2. Open **`/admin`** → **Booking database → Set up / refresh**. That creates
-   the tables and loads the catalog. It's safe to press again any time; it
-   never overwrites edited rows.
+2. Open **`/admin/settings`** → **Set up / refresh booking database**. That
+   creates the tables and loads the catalog. It's safe to press again any
+   time (and needed after any update that changes the schema); it never
+   overwrites edited prices or deletes appointments.
 
 Until step 1 is done, `/book` shows a plain "not connected yet" message
 instead of the flow.
@@ -112,9 +117,9 @@ npm test                                   # engine tests only
 TEST_DATABASE_URL=postgres://… npm test    # + integration and API tests against a real Postgres
 ```
 
-## Front desk (`/staff`)
+## Front desk (`/admin/desk`)
 
-Same password as `/admin`. **Book** tab: the day's appointments per stylist
+**Book** tab: the day's appointments per stylist
 (complete / no-show / cancel / restore), phone or walk-in bookings with no
 lead time, and time blocking (lunch, days off — existing bookings inside the
 window are listed, not moved). **Team** tab: stylists, weekly hours, and
@@ -135,7 +140,7 @@ booking flow works with none of them set.
 | `CRON_SECRET` | Any long random string. Enables the daily reminder run (`vercel.json` cron, 16:00 UTC = 9 AM Phoenix). |
 | `SITE_URL` | Used in message links; defaults to the vercel.app URL. |
 
-Reminders can also be triggered by hand from `/staff` → Team → Reminders.
+Reminders can also be triggered by hand from `/admin/settings`.
 
 ### Not built yet (natural next steps)
 

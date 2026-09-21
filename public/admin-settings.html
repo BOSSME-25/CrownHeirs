@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Settings — Crown Heirs Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Cinzel:wght@400;500&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root { --bg:#ece8e2; --surface:#fff; --surface-dim:#f5f2ee; --terra:#a0624a; --gold:#c8952a; --ink:#1a1816; --ink-mid:#4a4540; --ink-dim:#8a837a; --border:rgba(26,24,22,.12); --ok:#3d7a45; --err:#a03228; --font-ui:'Jost',sans-serif; --font-serif:'Cormorant Garamond',serif; --font-display:'Cinzel',serif; }
+*, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+body { background:var(--bg); color:var(--ink); font-family:var(--font-ui); font-weight:300; font-size:16px; }
+button { font-family:var(--font-ui); cursor:pointer; }
+.wrap { max-width:680px; margin:0 auto; padding:14px 18px 60px; }
+.card { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:20px; margin-top:16px; }
+h2 { font-family:var(--font-serif); font-weight:600; font-size:26px; margin-bottom:4px; }
+.hint { color:var(--ink-dim); font-size:14px; margin-bottom:12px; line-height:1.5; }
+.btn { display:inline-flex; align-items:center; gap:8px; border:none; border-radius:100px; padding:12px 22px; font-size:14px; }
+.btn-terra { background:var(--terra); color:#fff; } .btn-ghost { background:transparent; border:1px solid var(--border); color:var(--ink-mid); }
+.status { font-size:14px; color:var(--ink-mid); margin:6px 0 12px; } .status.ok { color:var(--ok); } .status.err { color:var(--err); }
+code { background:var(--surface-dim); padding:1px 6px; border-radius:6px; font-size:13px; }
+table { width:100%; border-collapse:collapse; font-size:14px; margin-top:6px; } td { padding:7px 6px; border-top:1px solid var(--border); vertical-align:top; } td:first-child { white-space:nowrap; }
+.hidden { display:none !important; }
+</style>
+</head>
+<body>
+<div class="wrap hidden" id="app">
+  <div id="nav"></div>
+
+  <div class="card">
+    <h2>Booking database</h2>
+    <div class="hint">Online booking and the front desk run on Postgres. Press once after connecting a database in Vercel, and again after any update that changes the schema. Safe to press any time — it never overwrites edited prices or deletes appointments.</div>
+    <div class="status" id="bkStatus">Checking…</div>
+    <button class="btn btn-terra" onclick="bookingSetup()">Set up / refresh booking database</button>
+  </div>
+
+  <div class="card">
+    <h2>Notifications</h2>
+    <div class="hint">Configured in Vercel → crown-heirs → Settings → Environment Variables (then redeploy). Each channel stays silent until its keys exist.</div>
+    <table>
+      <tr><td><code>RESEND_API_KEY</code><br><code>NOTIFY_FROM_EMAIL</code></td><td>Email confirmations, cancellations and reminders via Resend. The from-address needs a verified domain in Resend.</td></tr>
+      <tr><td><code>TWILIO_ACCOUNT_SID</code><br><code>TWILIO_AUTH_TOKEN</code><br><code>TWILIO_FROM_NUMBER</code></td><td>Text messages via Twilio. US business texting needs Twilio's A2P 10DLC registration first.</td></tr>
+      <tr><td><code>NOTIFY_EMAIL</code><br><code>NOTIFY_SMS_TO</code></td><td>Where the salon's copy of each booking and cancellation goes.</td></tr>
+      <tr><td><code>CRON_SECRET</code></td><td>Any long random string. Turns on the 9 AM daily reminder run for the next day's appointments.</td></tr>
+    </table>
+    <div class="status" id="remStatus" style="margin-top:12px;"></div>
+    <button class="btn btn-ghost" onclick="runReminders()">Send due reminders now</button>
+  </div>
+
+  <div class="card">
+    <h2>Public pages</h2>
+    <div class="hint"><a href="/" target="_blank">Find your service</a> · <a href="/book" target="_blank">Book online</a> · <a href="/tv" target="_blank">Salon TV</a></div>
+  </div>
+</div>
+
+<script src="/admin-shell.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+let KEY = '';
+const summary = j => `Ready — ${j.services} services, ${j.variations} options, ${j.stylists} stylist(s), ${j.appointments} upcoming appointment(s).`;
+async function bookingStatus() {
+  const r = await fetch('/api/book/setup', { headers: { 'x-admin-key': KEY } });
+  const j = await r.json().catch(() => ({}));
+  $('bkStatus').textContent = r.ok ? summary(j) : (j.error || 'Not set up yet.');
+  $('bkStatus').className = 'status ' + (r.ok ? 'ok' : 'err');
+}
+async function bookingSetup() {
+  $('bkStatus').className = 'status'; $('bkStatus').textContent = 'Setting up…';
+  const r = await fetch('/api/book/setup', { method: 'POST', headers: { 'x-admin-key': KEY } });
+  const j = await r.json().catch(() => ({}));
+  $('bkStatus').className = 'status ' + (r.ok ? 'ok' : 'err');
+  $('bkStatus').textContent = r.ok
+    ? summary(j) + (j.stylistCreated ? ' Created a starter stylist (Bethany, Tue–Sat 9–6) — replace under Team.' : '')
+    : 'Error: ' + (j.error || r.status);
+}
+async function runReminders() {
+  $('remStatus').textContent = 'Running…';
+  const r = await fetch('/api/book/reminders', { headers: { 'x-admin-key': KEY } });
+  const j = await r.json().catch(() => ({}));
+  $('remStatus').textContent = r.ok ? `Sent ${j.count} reminder(s).` : (j.error || 'Failed');
+}
+AdminShell.requireAuth().then(k => { KEY = k; $('app').classList.remove('hidden'); bookingStatus(); });
+</script>
+</body>
+</html>
