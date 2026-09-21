@@ -136,6 +136,40 @@ window are listed, not moved). **Team** tab: stylists, weekly hours, and
 which services each offers — this is where the placeholder "Bethany" gets
 replaced with the real team. Only active stylists with hours are bookable.
 
+## Till — tickets (POS Phase 1)
+
+This site is becoming the system of record for revenue, per the Square
+contract (`SQUARE-CONTRACT.md`). A **ticket** is opened from an appointment
+(Book tab → Checkout) or as a walk-in, and holds one line per service or
+retail item. **Every line names the employee who delivered it**, stored,
+never inferred; the till operator is kept separately. Gross, discount (with
+reason) and tax are separate amounts per line; commission is paid on gross,
+KPIs use net. A line with no price stays unpriced and **blocks payment**
+rather than becoming $0. Paying a ticket marks its appointment completed;
+refunds are linked to their ticket; voids close it. In this phase the card
+is taken on the Square terminal and the ticket records the tender and
+reference — capturing the card from here is Phase 2.
+
+Retail items and the retail tax rate live in `/admin/settings`.
+
+### Read API for integrations — `/api/v1/`
+
+Per-integration tokens with named scopes, created and revoked in
+`/admin/settings` (shown once; only a hash is stored). `Authorization:
+Bearer ch_…`.
+
+| Resource | Scope | Notes |
+|---|---|---|
+| `whoami` | — | The token's name and scopes |
+| `appointments?from&to[&status]` | `appointments:read` | One segment per booking today, with the ticket id when one exists |
+| `tickets?from&to[&status]` | `tickets:read` | Lines with `employee_id`, `gross_cents`, `discount_cents`, `tax_cents`, `net_cents`; refunds |
+| `catalog` | `catalog:read` | Services (`product_type: service`) with variations and durations; retail items |
+| `schedule?from&to` | `schedule:read` | Local shifts and time off per employee |
+| `employees` | `employees:read` | Stable ids that survive departure |
+
+Ranges are salon-local days, up to 366 days per call, any distance back.
+Money is integer cents with a `_cents` suffix.
+
 ## Team Hub
 
 Team Hub (the private `CrownTeam` app) reconciles payroll against Square and

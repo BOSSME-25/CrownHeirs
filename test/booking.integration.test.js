@@ -26,8 +26,15 @@ if (!url) {
   test.before(async () => {
     await migrate();
     await seed();
-    await db.query(`DELETE FROM appointments WHERE client_id IN (SELECT id FROM clients WHERE phone LIKE '1602555%')`);
-    await db.query(`DELETE FROM clients WHERE phone LIKE '1602555%'`);
+    // Tickets reference appointments (and refunds reference tickets), so they go first.
+    // Only this suite's own numbers (0142 and the race test's 0100–0105) —
+    // suites run in parallel, so a broad LIKE would delete another suite's rows mid-run.
+    const phones = `SELECT id FROM clients WHERE phone = '16025550142' OR phone LIKE '160255501__'`;
+    const mine = `SELECT id FROM appointments WHERE client_id IN (${phones})`;
+    await db.query(`DELETE FROM ticket_refunds WHERE ticket_id IN (SELECT id FROM tickets WHERE appointment_id IN (${mine}))`);
+    await db.query(`DELETE FROM tickets WHERE appointment_id IN (${mine})`);
+    await db.query(`DELETE FROM appointments WHERE id IN (${mine})`);
+    await db.query(`DELETE FROM clients WHERE id IN (${phones})`);
     const all = (await B.listServices()).flatMap(c => c.services);
     RETWIST = all.find(s => s.slug === 'loc-retwist');
     PONY = all.find(s => s.slug === 'sleek-ponytail');
@@ -59,23 +66,23 @@ if (!url) {
 
   test('availability, booking, double-booking rejection, lookup, cancel', async () => {
     const date = nextTuesday();
-    const before = await B.availability({ serviceSlug: 'loc-retwist', variationId: RETWIST_V.id, date });
+    const before = await B.availability({ serviceSlug: 'loc-retwist', variationId: RETWIST_V.id, date, stylistSlug: 'bethany' });
     assert.ok(before.any.length > 10, 'open day has slots');
     const startAt = before.any[4];
 
-    const appt = await B.createAppointment({ serviceSlug: 'loc-retwist', variationId: RETWIST_V.id, stylistSlug: 'any', startAt, client, notes: 'first visit' });
+    const appt = await B.createAppointment({ serviceSlug: 'loc-retwist', variationId: RETWIST_V.id, stylistSlug: 'bethany', startAt, client, notes: 'first visit' });
     assert.match(appt.code, /^CH-[A-Z2-9]{5}$/);
     assert.equal(new Date(appt.startsAt).toISOString(), startAt);
     assert.equal(appt.variation.name, RETWIST_V.name);
     assert.equal((new Date(appt.endsAt) - new Date(appt.startsAt)) / 60000, RETWIST_V.duration_min, 'length comes from the variation');
 
-    const after = await B.availability({ serviceSlug: 'loc-retwist', variationId: RETWIST_V.id, date });
+    const after = await B.availability({ serviceSlug: 'loc-retwist', variationId: RETWIST_V.id, date, stylistSlug: 'bethany' });
     assert.ok(!after.any.includes(startAt), 'booked slot disappears');
     assert.ok(after.any.length < before.any.length);
 
     // Same slot again — the engine catches it first (409)…
     await assert.rejects(
-      () => B.createAppointment({ serviceSlug: 'loc-retwist', variationId: RETWIST_V.id, stylistSlug: 'any', startAt, client }),
+      () => B.createAppointment({ serviceSlug: 'loc-retwist', variationId: RETWIST_V.id, stylistSlug: 'bethany', startAt, client }),
       (e) => e.status === 409
     );
     // …and even if the engine were bypassed, the DB constraint refuses the overlap.
@@ -95,18 +102,18 @@ if (!url) {
     assert.equal(found.status, 'confirmed');
 
     await B.cancel(appt.code);
-    const again = await B.availability({ serviceSlug: 'loc-retwist', variationId: RETWIST_V.id, date });
+    const again = await B.availability({ serviceSlug: 'loc-retwist', variationId: RETWIST_V.id, date, stylistSlug: 'bethany' });
     assert.ok(again.any.includes(startAt), 'cancelled slot comes back');
     await assert.rejects(() => B.cancel(appt.code), (e) => e.status === 409);
   });
 
   test('a race for one slot produces exactly one booking', async () => {
     const date = nextTuesday();
-    const { any } = await B.availability({ serviceSlug: PONY.slug, variationId: PONY_V.id, date });
+    const { any } = await B.availability({ serviceSlug: PONY.slug, variationId: PONY_V.id, date, stylistSlug: 'bethany' });
     const startAt = any[any.length - 1];
     const results = await Promise.allSettled(
       Array.from({ length: 6 }, (_, i) => B.createAppointment({
-        serviceSlug: PONY.slug, variationId: PONY_V.id, stylistSlug: 'any', startAt,
+        serviceSlug: PONY.slug, variationId: PONY_V.id, stylistSlug: 'bethany', startAt,
         client: { name: 'Racer ' + i, phone: '602555010' + i }
       }))
     );
