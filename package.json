@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "test": "node --test test/availability.test.js test/booking.integration.test.js test/api.smoke.test.js",
+    "test": "node --test test/availability.test.js test/catalog.test.js test/booking.integration.test.js test/api.smoke.test.js",
     "setup": "node scripts/setup.js"
   },
   "dependencies": {
