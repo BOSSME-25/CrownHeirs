@@ -38,6 +38,12 @@ CREATE TABLE IF NOT EXISTS stylists (
   sort   integer NOT NULL DEFAULT 0
 );
 
+-- Work email is the join key to Team Hub; hours_source 'hub' takes this
+-- stylist's shifts and time off from the hub instead of `schedules`.
+ALTER TABLE stylists ADD COLUMN IF NOT EXISTS email text;
+ALTER TABLE stylists ADD COLUMN IF NOT EXISTS hours_source text NOT NULL DEFAULT 'local'
+  CHECK (hours_source IN ('local', 'hub'));
+
 -- Which stylists perform which services.
 CREATE TABLE IF NOT EXISTS stylist_services (
   stylist_id integer NOT NULL REFERENCES stylists(id) ON DELETE CASCADE,
@@ -104,6 +110,9 @@ ALTER TABLE appointments ADD COLUMN IF NOT EXISTS variation_name text NOT NULL D
 -- 'online' (customer at /book) or 'staff' (entered at /staff, e.g. a phone booking).
 ALTER TABLE appointments ADD COLUMN IF NOT EXISTS source text NOT NULL DEFAULT 'online';
 ALTER TABLE appointments ADD COLUMN IF NOT EXISTS reminder_sent_at timestamptz;
+-- Whether Team Hub has this appointment (see lib/teamhub.js).
+ALTER TABLE appointments ADD COLUMN IF NOT EXISTS hub_synced_at timestamptz;
+ALTER TABLE appointments ADD COLUMN IF NOT EXISTS hub_error text;
 CREATE INDEX IF NOT EXISTS appointments_stylist_time_idx ON appointments (stylist_id, starts_at);
 CREATE INDEX IF NOT EXISTS appointments_client_idx ON appointments (client_id);
 

@@ -93,6 +93,7 @@ h2 { font-family: var(--font-serif); font-weight: 600; font-size: 25px; margin-b
     <div class="row" style="margin:8px 0 4px;">
       <button class="btn btn-terra btn-sm" onclick="openNew()">＋ New appointment</button>
       <button class="btn btn-ghost btn-sm" onclick="openBlock()">Block time</button>
+      <button class="btn btn-ghost btn-sm" onclick="syncDay()" title="Re-send this day's appointments to Team Hub">Sync to Team Hub</button>
       <span style="flex:1"></span>
       <span id="dayTitle" style="font-family:var(--font-serif);font-size:19px;"></span>
     </div>
@@ -168,6 +169,9 @@ h2 { font-family: var(--font-serif); font-weight: 600; font-size: 25px; margin-b
       <div><label>Name</label><input id="sName"></div>
       <div><label>Title</label><input id="sTitleIn" placeholder="Stylist, Loctician, Barber…"></div>
     </div>
+    <label>Work email <span style="text-transform:none;letter-spacing:0;">(the link to Team Hub)</span></label>
+    <input id="sEmail" type="email" placeholder="name@crownheirs.com">
+    <label style="display:flex;align-items:center;gap:8px;text-transform:none;letter-spacing:0;font-size:14px;color:var(--ink);"><input id="sHub" type="checkbox" style="width:auto;accent-color:var(--terra);"> Hours &amp; time off come from Team Hub (matched by this email) — the weekly hours below are then ignored</label>
     <label style="display:flex;align-items:center;gap:8px;text-transform:none;letter-spacing:0;font-size:14px;color:var(--ink);"><input id="sActive" type="checkbox" style="width:auto;accent-color:var(--terra);" checked> Active (bookable)</label>
     <label>Weekly hours</label>
     <table class="hours" id="sHours"></table>
@@ -253,7 +257,7 @@ function apptHtml(a) {
   const opt = a.variation?.name && a.variation.name !== 'Regular' ? ` · ${esc(a.variation.name)}` : '';
   const tel = a.client.phone.replace(/^1(\d{3})(\d{3})(\d{4})$/, '($1) $2-$3');
   return `<div class="appt ${a.status}">
-    <div class="t">${fmtT(a.startsAt)} – ${fmtT(a.endsAt)}${st}${a.source === 'staff' ? '<span class="badge staff">Phone</span>' : ''}</div>
+    <div class="t">${fmtT(a.startsAt)} – ${fmtT(a.endsAt)}${st}${a.source === 'staff' ? '<span class="badge staff">Phone</span>' : ''}${hubBadge(a)}</div>
     <div class="m"><b>${esc(a.client.name)}</b> · <a href="tel:+${esc(a.client.phone)}">${esc(tel)}</a>${a.client.email ? ` · ${esc(a.client.email)}` : ''}<br>
       ${esc(a.service.name)}${opt} · ${esc(a.stylist.name)} · <span style="color:var(--ink-dim)">${esc(a.code)}</span>${a.notes ? `<br><i>${esc(a.notes)}</i>` : ''}</div>
     ${a.status === 'confirmed' ? `<div class="acts">
@@ -262,6 +266,17 @@ function apptHtml(a) {
       <button class="btn btn-danger btn-sm" onclick="if(confirm('Cancel this appointment? The client will be notified.'))setStatus('${a.code}','cancelled')">Cancel</button></div>`
     : `<div class="acts"><button class="btn btn-ghost btn-sm" onclick="setStatus('${a.code}','confirmed')">Restore</button></div>`}
   </div>`;
+}
+// Whether Team Hub has this appointment (blank when the hub isn't configured).
+const hubBadge = a => !a.hub ? '' :
+  a.hub.error ? `<span class="badge err" title="${esc(a.hub.error)}">Hub ✗</span>` :
+  a.hub.syncedAt ? '<span class="badge ok" title="Team Hub has this appointment">Hub ✓</span>' : '';
+async function syncDay() {
+  try {
+    const j = await api('POST', null, { action: 'hub.resync', from: DATE, to: DATE });
+    toast(`Team Hub: ${j.sent} sent${j.unmatched ? `, ${j.unmatched} with no stylist mapping` : ''}${j.failed ? `, ${j.failed} failed` : ''}`);
+    loadDay();
+  } catch (e) { alert(e.message); }
 }
 function offHtml(t) {
   return `<div class="off"><span>⏸ ${esc(t.stylist.name)} off ${fmtT(t.startsAt)} – ${fmtT(t.endsAt)}${t.reason ? ` · ${esc(t.reason)}` : ''}</span>
@@ -339,14 +354,15 @@ async function renderTeam() {
   $('stylistList').innerHTML = STYLISTS.map(s => {
     const days = [...new Set(s.hours.map(h => h.weekday))].sort().map(d => WD[d]).join(' ');
     return `<div class="stylist"><div><div class="n">${esc(s.name)}${s.active ? '' : '<span class="badge">Inactive</span>'}</div>
-      <div class="d">${esc(s.title || '')}${s.title ? ' · ' : ''}${days || 'No hours set'} · ${s.services.length} services</div></div>
+      <div class="d">${esc(s.title || '')}${s.title ? ' · ' : ''}${s.hoursSource === 'hub' ? 'Hours from Team Hub' : (days || 'No hours set')} · ${s.services.length} services · id <code>${esc(s.slug)}</code></div></div>
       <button class="btn btn-ghost btn-sm" onclick='openStylist(${JSON.stringify(s.slug)})'>Edit</button></div>`;
   }).join('') || '<div class="empty">No stylists yet.</div>';
 }
 function openStylist(slug) {
-  EDITING = slug ? STYLISTS.find(s => s.slug === slug) : { name: '', title: '', active: true, hours: [], services: CATS.flatMap(c => c.services.map(s => s.slug)) };
-  $('sTitle').textContent = slug ? 'Edit stylist' : 'Add stylist';
+  EDITING = slug ? STYLISTS.find(s => s.slug === slug) : { name: '', title: '', active: true, email: '', hoursSource: 'local', hours: [], services: CATS.flatMap(c => c.services.map(s => s.slug)) };
+  $('sTitle').textContent = slug ? `Edit stylist${slug ? ' · id ' + slug : ''}` : 'Add stylist';
   $('sName').value = EDITING.name; $('sTitleIn').value = EDITING.title || ''; $('sActive').checked = EDITING.active !== false; $('sErr').textContent = '';
+  $('sEmail').value = EDITING.email || ''; $('sHub').checked = EDITING.hoursSource === 'hub';
   $('sHours').innerHTML = WD.map((d, i) => { const h = EDITING.hours.find(x => x.weekday === i);
     return `<tr><td><input type="checkbox" id="h${i}" ${h ? 'checked' : ''}> ${d}</td><td><input type="time" id="h${i}s" value="${h ? hhmm(h.startMin) : '09:00'}"></td><td>–</td><td><input type="time" id="h${i}e" value="${h ? hhmm(h.endMin) : '18:00'}"></td></tr>`; }).join('');
   const has = new Set(EDITING.services);
@@ -364,7 +380,8 @@ async function sSave() {
   try {
     const hours = WD.map((_, i) => $(`h${i}`).checked ? { weekday: i, startMin: mins($(`h${i}s`).value), endMin: mins($(`h${i}e`).value) } : null).filter(Boolean);
     const services = [...document.querySelectorAll('#sServices input[data-svc]:checked')].map(b => b.dataset.svc);
-    await api('POST', null, { action: 'stylist.save', slug: EDITING.slug || null, name: $('sName').value, title: $('sTitleIn').value, active: $('sActive').checked, hours, services });
+    await api('POST', null, { action: 'stylist.save', slug: EDITING.slug || null, name: $('sName').value, title: $('sTitleIn').value, active: $('sActive').checked, hours, services,
+      email: $('sEmail').value, hoursSource: $('sHub').checked ? 'hub' : 'local' });
     close('mStylist'); toast('Saved'); renderTeam(); renderDates();
   } catch (e) { $('sErr').textContent = e.message; }
 }

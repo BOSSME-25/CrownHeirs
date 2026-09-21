@@ -7,7 +7,9 @@
 //   POST { action: 'status', code, status }
 //   POST { action: 'timeoff.add', stylist, startsAt, endsAt, reason }
 //   POST { action: 'timeoff.remove', id }
-//   POST { action: 'stylist.save', slug?, name, title, active, hours, services }
+//   POST { action: 'stylist.save', slug?, name, title, active, hours, services, email, hoursSource }
+//   GET  ?action=hub.status                       Team Hub connection check
+//   POST { action: 'hub.resync', from, to }       re-push a date range to Team Hub
 const staff = require('../../lib/staff');
 const { availability, createAppointment } = require('../../lib/booking');
 const { fail, noStore, isAdmin } = require('./_shared');
@@ -21,6 +23,7 @@ module.exports = async (req, res) => {
       switch (q.action) {
         case 'day':          return res.status(200).json(await staff.day(q.date));
         case 'stylists':     return res.status(200).json({ stylists: await staff.listStylists() });
+        case 'hub.status':   return res.status(200).json(await staff.hubStatus());
         case 'availability': return res.status(200).json(await availability({
           serviceSlug: q.service, variationId: q.variation || null, date: q.date, stylistSlug: q.stylist || null, staff: true
         }));
@@ -38,6 +41,7 @@ module.exports = async (req, res) => {
         case 'timeoff.add':    return res.status(201).json(await staff.addTimeOff(b));
         case 'timeoff.remove': return res.status(200).json(await staff.removeTimeOff(b.id));
         case 'stylist.save':   return res.status(200).json(await staff.saveStylist(b));
+        case 'hub.resync':     return res.status(200).json(await staff.hubResync(b));
         default: return res.status(400).json({ error: 'Unknown action' });
       }
     }
