@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Front Desk — Crown Heirs</title>
+<title>Front Desk — Crown Heirs Admin</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Cinzel:wght@400;500&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
@@ -75,26 +75,12 @@ h2 { font-family: var(--font-serif); font-weight: 600; font-size: 25px; margin-b
 .stylist .n { font-family: var(--font-serif); font-size: 20px; font-weight: 600; }
 .stylist .d { font-size: 13px; color: var(--ink-dim); }
 .toast { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); background: var(--ink); color: #fff; padding: 10px 18px; border-radius: 100px; font-size: 14px; z-index: 60; }
-#login { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
-#login .card { width: 100%; max-width: 380px; text-align: center; padding: 34px 26px; }
-#login img { height: 80px; margin-bottom: 14px; }
 </style>
 </head>
 <body>
 
-<div id="login">
-  <div class="card">
-    <img src="/images/logo-1.png" alt="Crown Heirs">
-    <h2 style="font-family:var(--font-display);font-weight:400;letter-spacing:0.18em;font-size:18px;">Front Desk</h2>
-    <p style="color:var(--ink-dim);margin:8px 0 18px;">Same password as the TV admin.</p>
-    <input id="pw" type="password" placeholder="Password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
-    <div class="err" id="loginErr"></div>
-    <button class="btn btn-terra" style="width:100%;margin-top:8px;" onclick="doLogin()">Sign in</button>
-  </div>
-</div>
-
 <div id="app" class="wrap hidden">
-  <header class="top"><img src="/images/logo-1.png" alt=""><h1>Front Desk</h1></header>
+  <div id="nav"></div>
   <div class="tabs">
     <button class="tab on" id="tabBook" onclick="showTab('book')">Book</button>
     <button class="tab" id="tabTeam" onclick="showTab('team')">Team</button>
@@ -195,6 +181,7 @@ h2 { font-family: var(--font-serif); font-weight: 600; font-size: 25px; margin-b
   </div>
 </div>
 
+<script src="/admin-shell.js"></script>
 <script>
 /* ════════════════════════════════════════════
    Crown Heirs — front desk. Talks to /api/book/staff.
@@ -223,20 +210,15 @@ const open = id => $(id).classList.remove('hidden');
 function localToIso(v) { const [d, t] = v.split('T'); const [h, m] = t.split(':').map(Number); const probe = new Date(`${d}T${t}:00Z`); const off = (new Date(probe.toLocaleString('en-US', { timeZone: TZ })) - new Date(probe.toLocaleString('en-US', { timeZone: 'UTC' }))) / 60000; return new Date(probe.getTime() - off * 60000).toISOString(); }
 
 /* ── auth ── */
-async function doLogin() {
-  const pw = $('pw').value; $('loginErr').textContent = '';
-  const r = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: pw }) });
-  if (r.ok) { KEY = pw; sessionStorage.setItem('chKey', pw); enter(); }
-  else $('loginErr').textContent = (await r.json().catch(() => ({}))).error || 'Wrong password';
-}
 async function enter() {
-  $('login').classList.add('hidden'); $('app').classList.remove('hidden');
+  $('app').classList.remove('hidden');
   try {
     const cat = await fetch('/api/book/services').then(r => r.json());
     CATS = cat.categories || []; TZ = cat.timeZone || TZ;
     STYLISTS = (await api('GET', { action: 'stylists' })).stylists;
   } catch (e) { $('dayErr').textContent = e.message; }
   DATE = today(); renderDates(); loadDay();
+  if (new URLSearchParams(location.search).get('tab') === 'team') showTab('team');
 }
 function showTab(t) {
   $('viewBook').classList.toggle('hidden', t !== 'book'); $('viewTeam').classList.toggle('hidden', t !== 'team');
@@ -393,7 +375,7 @@ async function runReminders() {
 }
 
 /* ── boot ── */
-if (KEY) fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: KEY }) }).then(r => { if (r.ok) enter(); else sessionStorage.removeItem('chKey'); });
+AdminShell.requireAuth().then(enter);
 </script>
 </body>
 </html>

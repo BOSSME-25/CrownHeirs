@@ -8,6 +8,9 @@
   "rewrites": [
     { "source": "/tv", "destination": "/tv.html" },
     { "source": "/admin", "destination": "/admin.html" },
+    { "source": "/admin/tv", "destination": "/admin-tv.html" },
+    { "source": "/admin/desk", "destination": "/staff.html" },
+    { "source": "/admin/settings", "destination": "/admin-settings.html" },
     { "source": "/book", "destination": "/book.html" },
     { "source": "/staff", "destination": "/staff.html" },
     { "source": "/((?!api/).*)", "destination": "/index.html" }
