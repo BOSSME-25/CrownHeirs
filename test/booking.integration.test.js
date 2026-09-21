@@ -8,6 +8,7 @@ if (!url) {
   test('booking integration (skipped: no TEST_DATABASE_URL)', { skip: true }, () => {});
 } else {
   process.env.DATABASE_URL = url;
+  process.env.BOOKING_MODE = 'site';
   const db = require('../lib/db');
   const { migrate, seed } = require('../lib/setup');
   const B = require('../lib/booking');

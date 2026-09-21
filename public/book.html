@@ -192,8 +192,19 @@ function go(n) {
 /* ── 1 · services ── */
 async function loadServices() {
   try {
-    const r = await fetch('/api/book/services');
+    const want = new URLSearchParams(location.search).get('service');
+    const r = await fetch('/api/book/services' + (want ? '?service=' + encodeURIComponent(want) : ''));
     const j = await r.json();
+    // Until switch-over the salon books on Square: hand the customer straight
+    // over — to the specific service when arriving from the finder.
+    if (r.ok && j.bookingOpen === false) {
+      if (want) { location.replace(j.squareUrl); return; }
+      $('steps').classList.add('hidden');
+      $('s1').innerHTML = `<h2>Book with us</h2>
+        <div class="hint">Right now we take bookings through Square — it only takes a minute.</div>
+        <div class="row" style="justify-content:center;margin-top:16px;"><a class="btn btn-terra" href="${esc(j.squareUrl)}">Book on Square →</a></div>`;
+      return;
+    }
     // 503 = database not connected yet. That's a setup detail for the owner,
     // not something a customer should read.
     if (r.status === 503) throw new Error('Online booking is almost ready — for now, please call or text the salon to book.');

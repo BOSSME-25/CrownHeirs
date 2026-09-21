@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "test": "node --test test/availability.test.js test/catalog.test.js test/db-errors.test.js test/finder-map.test.js test/notify.test.js test/teamhub.test.js test/booking.integration.test.js test/api.smoke.test.js test/staff.integration.test.js",
+    "test": "node --test test/availability.test.js test/catalog.test.js test/db-errors.test.js test/finder-map.test.js test/booking-mode.test.js test/notify.test.js test/teamhub.test.js test/booking.integration.test.js test/api.smoke.test.js test/staff.integration.test.js",
     "setup": "node scripts/setup.js"
   },
   "dependencies": {

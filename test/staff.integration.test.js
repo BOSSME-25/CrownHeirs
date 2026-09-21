@@ -12,6 +12,7 @@ if (!url) {
   process.env.NOTIFY_EMAIL = 'desk@example.com';
   process.env.ADMIN_PASSWORD = 'test-admin-key';
   process.env.CRON_SECRET = 'cron-secret';
+  process.env.BOOKING_MODE = 'site';
   const db = require('../lib/db');
   const { migrate, seed } = require('../lib/setup');
   const B = require('../lib/booking');
