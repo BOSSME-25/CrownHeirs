@@ -35,6 +35,15 @@ table { width:100%; border-collapse:collapse; font-size:14px; margin-top:6px; } 
   </div>
 
   <div class="card">
+    <h2>Team Hub</h2>
+    <div class="hint">Every booking, cancellation, completion and no-show made here is pushed to Team Hub — it takes the seat HighLevel had, so payroll reconciliation, today's outlook and service hours keep working. A stylist can also take their hours and time off from the hub (Team → edit → “Hours come from Team Hub”).<br><br>
+      Set <code>TEAMHUB_URL</code> (e.g. <code>https://team.crownheirs.com</code>) and <code>TEAMHUB_SECRET</code> — the secret shown on the hub's Admin → HighLevel page — in Vercel, then redeploy. Then in the hub's Admin → HighLevel table, give each stylist their id from this site's Team tab as the <em>calendar ID</em> and their work email as the <em>user ID</em>; that's how the hub credits appointments to them.</div>
+    <div class="status" id="hubStatus">Checking…</div>
+    <button class="btn btn-ghost" onclick="hubResync()">Resync the next 60 days to Team Hub</button>
+    <div class="status" id="hubOut" style="margin-top:8px;"></div>
+  </div>
+
+  <div class="card">
     <h2>Notifications</h2>
     <div class="hint">Configured in Vercel → crown-heirs → Settings → Environment Variables (then redeploy). Each channel stays silent until its keys exist.</div>
     <table>
@@ -73,13 +82,28 @@ async function bookingSetup() {
     ? summary(j) + (j.stylistCreated ? ' Created a starter stylist (Bethany, Tue–Sat 9–6) — replace under Team.' : '')
     : 'Error: ' + (j.error || r.status);
 }
+const ymd = (offsetDays) => { const d = new Date(Date.now() + offsetDays * 86400000); return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Phoenix', year: 'numeric', month: '2-digit', day: '2-digit' }).format(d); };
+async function hubStatus() {
+  const r = await fetch('/api/book/staff?action=hub.status', { headers: { 'x-admin-key': KEY } });
+  const j = await r.json().catch(() => ({}));
+  $('hubStatus').textContent = j.detail || (j.error || 'Unknown');
+  $('hubStatus').className = 'status ' + (j.ok ? 'ok' : (j.configured ? 'err' : ''));
+}
+async function hubResync() {
+  $('hubOut').textContent = 'Resyncing…';
+  const r = await fetch('/api/book/staff', { method: 'POST', headers: { 'x-admin-key': KEY, 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'hub.resync', from: ymd(0), to: ymd(60) }) });
+  const j = await r.json().catch(() => ({}));
+  $('hubOut').textContent = r.ok
+    ? `${j.sent} of ${j.total} sent${j.unmatched ? ` · ${j.unmatched} with no stylist mapping in the hub` : ''}${j.failed ? ` · ${j.failed} failed: ${(j.errors || []).join('; ')}` : ''}`
+    : (j.error || 'Failed');
+}
 async function runReminders() {
   $('remStatus').textContent = 'Running…';
   const r = await fetch('/api/book/reminders', { headers: { 'x-admin-key': KEY } });
   const j = await r.json().catch(() => ({}));
   $('remStatus').textContent = r.ok ? `Sent ${j.count} reminder(s).` : (j.error || 'Failed');
 }
-AdminShell.requireAuth().then(k => { KEY = k; $('app').classList.remove('hidden'); bookingStatus(); });
+AdminShell.requireAuth().then(k => { KEY = k; $('app').classList.remove('hidden'); bookingStatus(); hubStatus(); });
 </script>
 </body>
 </html>

@@ -121,4 +121,53 @@ if (!url) {
     assert.ok(!r2.body.results.some(x => x.code === appt.code), 'never reminded twice');
     await S.setStatus(appt.code, 'cancelled');
   });
+
+  test('Team Hub: hub shifts drive availability; bookings and status changes are pushed and recorded; outage falls back', async () => {
+    const hub = require('../lib/teamhub');
+    process.env.TEAMHUB_URL = 'https://team.example.com'; process.env.TEAMHUB_SECRET = 'hub-secret';
+    const pushes = [];
+    const ok = (body) => ({ ok: true, status: 200, json: async () => body });
+    hub._setFetch(async (url, opts) => {
+      if (/\/api\/webhooks\/highlevel$/.test(url)) { pushes.push(JSON.parse(opts.body)); return ok({ ok: true, stylistMatched: true }); }
+      if (/\/api\/integrations\/schedule/.test(url)) return ok({ timezone: 'America/Phoenix', entries: [
+        { email: 'test@crownheirs.com', name: 'Test Stylist', date: TOMORROW, start: '10:00', end: '14:00', type: 'shift' } ] });
+      throw new Error('unexpected ' + url);
+    });
+    const allDay = Array.from({ length: 7 }, (_, weekday) => ({ weekday, startMin: 0, endMin: 1440 }));
+    const local = iso => new Date(iso).toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', timeZone: 'America/Phoenix' });
+    try {
+      await S.saveStylist({ slug: 'test-stylist', name: 'Test Stylist', title: 'Loctician', active: true, email: 'Test@CrownHeirs.com', hoursSource: 'hub', hours: allDay, services: ['sleek-ponytail', 'loc-retwist'] });
+      await assert.rejects(() => S.saveStylist({ slug: 'test-stylist', name: 'Test Stylist', hoursSource: 'hub', email: '' }), (e) => e.status === 400, 'hub hours need an email');
+      assert.equal((await S.listStylists()).find(s => s.slug === 'test-stylist').email, 'test@crownheirs.com');
+
+      hub._clearCache();
+      const av = await B.availability({ serviceSlug: 'sleek-ponytail', variationId: PONY_V.id, date: TOMORROW, stylistSlug: 'test-stylist', staff: true });
+      const times = av.stylists[0].slots.map(local);
+      assert.equal(times[0], '10:00', 'first slot is the hub shift start');
+      assert.ok(times.every(t => t >= '10:00' && t < '14:00'), 'nothing outside the hub shift: ' + times.join(','));
+
+      const appt = await B.createAppointment({ serviceSlug: 'sleek-ponytail', variationId: PONY_V.id, stylistSlug: 'test-stylist', startAt: av.stylists[0].slots[0], client: { name: 'Desk Client', phone: PHONE }, staff: true });
+      assert.equal(appt.hub.sent, true);
+      const p = pushes.find(x => x.id === appt.code);
+      assert.ok(p, 'booking pushed'); assert.equal(p.calendarId, 'test-stylist'); assert.equal(p.userId, 'test@crownheirs.com'); assert.equal(p.status, 'booked');
+      const { rows: [row] } = await db.query('SELECT hub_synced_at, hub_error FROM appointments WHERE code = $1', [appt.code]);
+      assert.ok(row.hub_synced_at, 'sync recorded'); assert.equal(row.hub_error, null);
+
+      await S.setStatus(appt.code, 'no_show');
+      assert.equal(pushes.filter(x => x.id === appt.code).pop().status, 'no_show');
+      assert.ok((await S.day(TOMORROW)).appointments.find(a => a.code === appt.code).hub.syncedAt);
+      const r = await S.hubResync({ from: TOMORROW, to: TOMORROW });
+      assert.ok(r.total >= 1 && r.sent === r.total && r.failed === 0, JSON.stringify(r));
+      await S.setStatus(appt.code, 'cancelled');
+
+      // Hub down → local hours stand in, and nothing throws.
+      hub._setFetch(async () => { throw new Error('down'); }); hub._clearCache();
+      const fb = await B.availability({ serviceSlug: 'sleek-ponytail', variationId: PONY_V.id, date: TOMORROW, stylistSlug: 'test-stylist', staff: true });
+      assert.ok(fb.stylists[0].slots.length > times.length, 'local 24h hours used while the hub is unreachable');
+    } finally {
+      hub._setFetch((...a) => fetch(...a)); hub._clearCache();
+      delete process.env.TEAMHUB_URL; delete process.env.TEAMHUB_SECRET;
+      await S.saveStylist({ slug: 'test-stylist', name: 'Test Stylist', hoursSource: 'local', email: '', hours: allDay, services: ['sleek-ponytail', 'loc-retwist'] });
+    }
+  });
 }

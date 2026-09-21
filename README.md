@@ -126,6 +126,32 @@ window are listed, not moved). **Team** tab: stylists, weekly hours, and
 which services each offers — this is where the placeholder "Bethany" gets
 replaced with the real team. Only active stylists with hours are bookable.
 
+## Team Hub
+
+Team Hub (the private `CrownTeam` app) reconciles payroll against Square and
+runs the salon; it used to take appointments from HighLevel. This site now
+takes that seat, using the two surfaces the hub already exposes for a client
+site — nothing changes on the hub side.
+
+- **Appointments up.** Every booking, cancellation, completion and no-show is
+  POSTed to the hub's appointment webhook (`/api/webhooks/highlevel`) with
+  our stylist **id** as the "calendar id" and their **work email** as the
+  "user id". In the hub's Admin → HighLevel table, paste those two values
+  against each employee once, and appointments are credited to them. Each
+  appointment here records whether the hub accepted it (`Hub ✓ / ✗` on the
+  front desk); a day or the next 60 days can be resynced from the front desk
+  or Settings.
+- **Hours down.** A stylist with "Hours come from Team Hub" ticked takes their
+  published shifts and approved time off from the hub's schedule feed
+  (`/api/integrations/schedule`), matched by work email; local weekly hours
+  are ignored for them. If the hub can't be reached, local hours stand in
+  rather than closing the book, and Settings shows the hub status.
+
+| Variable | Purpose |
+|---|---|
+| `TEAMHUB_URL` | e.g. `https://team.crownheirs.com` |
+| `TEAMHUB_SECRET` | The shared secret shown on the hub's Admin → HighLevel page |
+
 ## Notifications
 
 Sent on booking and cancellation (client + salon) and as a next-day
