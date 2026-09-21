@@ -75,6 +75,16 @@ h2 { font-family: var(--font-serif); font-weight: 600; font-size: 25px; margin-b
 .stylist .n { font-family: var(--font-serif); font-size: 20px; font-weight: 600; }
 .stylist .d { font-size: 13px; color: var(--ink-dim); }
 .toast { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); background: var(--ink); color: #fff; padding: 10px 18px; border-radius: 100px; font-size: 14px; z-index: 60; }
+.sum { background: var(--surface-dim); border-radius: 12px; padding: 12px 14px; line-height: 1.7; font-size: 15px; }
+.sum b { font-weight: 500; }
+.tline { border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px; margin-top: 8px; background: var(--surface-dim); }
+.tline .n { font-family: var(--font-serif); font-size: 18px; font-weight: 600; }
+.tline .g { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px; margin-top: 6px; }
+.tline label { margin: 0 0 3px; font-size: 11px; }
+.tline input, .tline select { padding: 8px 10px; font-size: 14px; }
+.tk { border: 1px solid var(--border); border-left: 4px solid var(--gold); border-radius: 12px; padding: 12px 14px; margin-top: 10px; background: var(--surface-dim); }
+.tk.paid { border-left-color: var(--ok); } .tk.voided { opacity: .6; } .tk.refunded, .tk.partially_refunded { border-left-color: var(--err); }
+.money { font-variant-numeric: tabular-nums; }
 </style>
 </head>
 <body>
@@ -83,6 +93,7 @@ h2 { font-family: var(--font-serif); font-weight: 600; font-size: 25px; margin-b
   <div id="nav"></div>
   <div class="tabs">
     <button class="tab on" id="tabBook" onclick="showTab('book')">Book</button>
+    <button class="tab" id="tabTix" onclick="showTab('tix')">Tickets</button>
     <button class="tab" id="tabTeam" onclick="showTab('team')">Team</button>
   </div>
 
@@ -94,11 +105,23 @@ h2 { font-family: var(--font-serif); font-weight: 600; font-size: 25px; margin-b
       <button class="btn btn-terra btn-sm" onclick="openNew()">＋ New appointment</button>
       <button class="btn btn-ghost btn-sm" onclick="openBlock()">Block time</button>
       <button class="btn btn-ghost btn-sm" onclick="syncDay()" title="Re-send this day's appointments to Team Hub">Sync to Team Hub</button>
+      <button class="btn btn-ghost btn-sm" onclick="openWalkIn()">＋ Walk-in ticket</button>
       <span style="flex:1"></span>
       <span id="dayTitle" style="font-family:var(--font-serif);font-size:19px;"></span>
     </div>
     <div id="dayList"><div class="empty">Loading…</div></div>
     <div class="err" id="dayErr"></div>
+  </section>
+
+  <!-- ═══ TICKETS ═══ -->
+  <section id="viewTix" class="hidden">
+    <div class="row" style="margin:4px 0 8px;">
+      <button class="btn btn-terra btn-sm" onclick="openWalkIn()">＋ Walk-in ticket</button>
+      <span style="flex:1"></span>
+      <span id="tixTitle" style="font-family:var(--font-serif);font-size:19px;"></span>
+    </div>
+    <div class="hint">Tickets opened on the day shown in the Book tab. Every line names who delivered it — that is what Team Hub pays on.</div>
+    <div id="tixList"><div class="empty">Loading…</div></div>
   </section>
 
   <!-- ═══ TEAM ═══ -->
@@ -158,6 +181,37 @@ h2 { font-family: var(--font-serif); font-weight: 600; font-size: 25px; margin-b
     <div class="row" style="justify-content:space-between;margin-top:12px;">
       <button class="btn btn-ghost" onclick="close('mBlock')">Cancel</button>
       <button class="btn btn-terra" onclick="bSave()">Block</button>
+    </div>
+  </div>
+</div>
+
+<div id="mTicket" class="modal-bg hidden" onclick="if(event.target===this){close('mTicket');loadDay();}">
+  <div class="modal">
+    <h2 id="tTitle">Ticket</h2>
+    <div class="hint" id="tSub"></div>
+    <div id="tLines"></div>
+    <div id="tAdd" style="border:1px dashed var(--border);border-radius:12px;padding:10px 12px;margin-top:10px;">
+      <div class="grid2">
+        <div><label>Add</label><select id="tKind" onchange="tKindChange()"><option value="service">Service</option><option value="retail">Retail</option></select></div>
+        <div><label>Delivered by</label><select id="tProv"></select></div>
+      </div>
+      <div id="tSvcRow" class="grid2"><div><label>Service</label><select id="tSvc" onchange="tSvcChange()"></select></div><div><label>Option</label><select id="tVar"></select></div></div>
+      <div id="tRetRow" class="grid2 hidden"><div><label>Item</label><select id="tRet"></select></div><div><label>Or custom name</label><input id="tName" placeholder="Custom item"></div></div>
+      <div class="grid2"><div><label>Amount $ (blank = catalogue price)</label><input id="tAmt" inputmode="decimal" placeholder="e.g. 85"></div><div><label>Qty</label><input id="tQty" value="1" inputmode="numeric"></div></div>
+      <div class="row" style="margin-top:8px;"><button class="btn btn-ghost btn-sm" onclick="tAddLine()">＋ Add line</button></div>
+    </div>
+    <div id="tTotals" class="sum" style="margin-top:12px;"></div>
+    <div id="tPay">
+      <div class="grid2">
+        <div><label>Tender</label><select id="tTender"><option value="card">Card — taken on the Square terminal</option><option value="cash">Cash</option><option value="other">Other</option></select></div>
+        <div><label>Tip $</label><input id="tTip" inputmode="decimal" value="0"></div>
+      </div>
+      <label>Reference (Square payment id — optional)</label><input id="tRef" placeholder="e.g. the Square receipt number">
+    </div>
+    <div class="err" id="tErr"></div>
+    <div class="row" style="justify-content:space-between;margin-top:12px;">
+      <button class="btn btn-ghost" onclick="close('mTicket');loadDay()">Close</button>
+      <span class="row" id="tActions"></span>
     </div>
   </div>
 </div>
@@ -225,9 +279,10 @@ async function enter() {
   if (new URLSearchParams(location.search).get('tab') === 'team') showTab('team');
 }
 function showTab(t) {
-  $('viewBook').classList.toggle('hidden', t !== 'book'); $('viewTeam').classList.toggle('hidden', t !== 'team');
-  $('tabBook').classList.toggle('on', t === 'book'); $('tabTeam').classList.toggle('on', t === 'team');
+  $('viewBook').classList.toggle('hidden', t !== 'book'); $('viewTeam').classList.toggle('hidden', t !== 'team'); $('viewTix').classList.toggle('hidden', t !== 'tix');
+  $('tabBook').classList.toggle('on', t === 'book'); $('tabTeam').classList.toggle('on', t === 'team'); $('tabTix').classList.toggle('on', t === 'tix');
   if (t === 'team') renderTeam();
+  if (t === 'tix') loadTickets();
 }
 
 /* ── day view ── */
@@ -260,12 +315,106 @@ function apptHtml(a) {
     <div class="t">${fmtT(a.startsAt)} – ${fmtT(a.endsAt)}${st}${a.source === 'staff' ? '<span class="badge staff">Phone</span>' : ''}${hubBadge(a)}</div>
     <div class="m"><b>${esc(a.client.name)}</b> · <a href="tel:+${esc(a.client.phone)}">${esc(tel)}</a>${a.client.email ? ` · ${esc(a.client.email)}` : ''}<br>
       ${esc(a.service.name)}${opt} · ${esc(a.stylist.name)} · <span style="color:var(--ink-dim)">${esc(a.code)}</span>${a.notes ? `<br><i>${esc(a.notes)}</i>` : ''}</div>
+    ${a.ticket ? `<div class="m">Ticket <b>${esc(a.ticket.code)}</b> · ${money(a.ticket.total_cents + a.ticket.tip_cents)} · ${esc(a.ticket.status.replace('_', ' '))}</div>` : ''}
     ${a.status === 'confirmed' ? `<div class="acts">
+      ${a.ticket ? `<button class="btn btn-terra btn-sm" onclick="openTicket('${a.ticket.code}')">Open ticket</button>` : `<button class="btn btn-terra btn-sm" onclick="checkout('${a.code}')">Checkout</button>`}
       <button class="btn btn-ghost btn-sm" onclick="setStatus('${a.code}','completed')">✓ Done</button>
       <button class="btn btn-ghost btn-sm" onclick="setStatus('${a.code}','no_show')">No-show</button>
       <button class="btn btn-danger btn-sm" onclick="if(confirm('Cancel this appointment? The client will be notified.'))setStatus('${a.code}','cancelled')">Cancel</button></div>`
-    : `<div class="acts"><button class="btn btn-ghost btn-sm" onclick="setStatus('${a.code}','confirmed')">Restore</button></div>`}
+    : `<div class="acts">${a.ticket ? `<button class="btn btn-ghost btn-sm" onclick="openTicket('${a.ticket.code}')">Open ticket</button>` : (a.status === 'completed' ? `<button class="btn btn-terra btn-sm" onclick="checkout('${a.code}')">Checkout</button>` : '')}<button class="btn btn-ghost btn-sm" onclick="setStatus('${a.code}','confirmed')">Restore</button></div>`}
   </div>`;
+}
+
+/* ── tickets ── */
+const money = c => (c == null ? '—' : '$' + (c / 100).toFixed(2));
+let TICKET = null, RETAIL = [];
+async function loadTickets() {
+  $('tixTitle').textContent = fmtD(DATE);
+  try {
+    const j = await api('GET', { action: 'tickets.day', date: DATE });
+    $('tixList').innerHTML = j.tickets.length ? j.tickets.map(t => `
+      <div class="tk ${t.status}">
+        <div class="row" style="justify-content:space-between;">
+          <b>${esc(t.code)}</b><span class="badge ${t.status === 'paid' ? 'ok' : (/refund/.test(t.status) ? 'err' : '')}">${esc(t.status.replace('_', ' '))}</span>
+          <span style="flex:1"></span><span class="money"><b>${money(t.total_cents + t.tip_cents)}</b>${t.tip_cents ? ` <small>(tip ${money(t.tip_cents)})</small>` : ''}${t.refunded_cents ? ` <small style="color:var(--err)">−${money(t.refunded_cents)}</small>` : ''}</span>
+        </div>
+        <div class="m" style="font-size:14px;color:var(--ink-mid);margin-top:4px;">${t.client ? esc(t.client.name) : 'No client'}${t.appointment ? ` · appt ${esc(t.appointment.code)}` : ' · walk-in'}${t.tender ? ` · ${esc(t.tender)}` : ''}${t.rungBy ? ` · rung by ${esc(t.rungBy.name)}` : ''}<br>
+          ${t.lines.map(l => `${esc(l.name)} <span style="color:var(--ink-dim)">(${esc(l.provider.name)})</span>`).join(' · ') || '<i>no lines yet</i>'}</div>
+        <div class="acts"><button class="btn btn-ghost btn-sm" onclick="openTicket('${t.code}')">Open</button></div>
+      </div>`).join('') : '<div class="empty">No tickets this day.</div>';
+  } catch (e) { $('tixList').innerHTML = `<div class="err">${esc(e.message)}</div>`; }
+}
+async function ensureRetail() { if (!RETAIL.length) RETAIL = (await api('GET', { action: 'retail.list' })).items.filter(i => i.active); }
+async function checkout(apptCode) {
+  try { const t = await api('POST', null, { action: 'ticket.open', appointmentCode: apptCode }); openTicket(t.code); }
+  catch (e) { alert(e.message); }
+}
+async function openWalkIn() {
+  const name = prompt('Client name (optional):') ?? ''; if (name === null) return;
+  const phone = name ? (prompt('Mobile number (optional — links the ticket to a client record):') || '') : '';
+  try { const t = await api('POST', null, { action: 'ticket.open', client: name ? { name, phone } : null }); openTicket(t.code); }
+  catch (e) { alert(e.message); }
+}
+async function openTicket(code) {
+  try { await ensureRetail(); TICKET = await api('GET', { action: 'ticket.get', code }); renderTicket(); open('mTicket'); }
+  catch (e) { alert(e.message); }
+}
+function provOptions(sel) { return STYLISTS.filter(s => s.active || s.slug === sel).map(s => `<option value="${esc(s.slug)}" ${s.slug === sel ? 'selected' : ''}>${esc(s.name)}</option>`).join(''); }
+function renderTicket() {
+  const t = TICKET, openT = t.status === 'open';
+  $('tTitle').textContent = `${t.code} · ${t.status.replace('_', ' ')}`;
+  $('tSub').textContent = `${t.client ? t.client.name : 'No client'}${t.appointment ? ` · appointment ${t.appointment.code}` : ' · walk-in'}${t.rungBy ? ` · rung by ${t.rungBy.name}` : ''}${t.tender ? ` · ${t.tender}${t.tenderRef ? ' ' + t.tenderRef : ''}` : ''}`;
+  $('tLines').innerHTML = t.lines.map(l => `
+    <div class="tline">
+      <div class="row" style="justify-content:space-between;"><span class="n">${esc(l.name)}</span>${openT ? `<button class="btn btn-danger btn-sm" onclick="tRemove(${l.id})">✕</button>` : ''}</div>
+      <div class="g">
+        <div><label>Delivered by</label>${openT ? `<select onchange="tPatch(${l.id},{provider:this.value})">${provOptions(l.provider.slug)}</select>` : `<div>${esc(l.provider.name)}</div>`}</div>
+        <div><label>Qty</label>${openT ? `<input value="${l.quantity}" inputmode="numeric" onchange="tPatch(${l.id},{quantity:this.value})">` : `<div>${l.quantity}</div>`}</div>
+        <div><label>Amount $${l.gross_cents == null ? ' — <span style="color:var(--err)">needed</span>' : ''}</label>${openT ? `<input value="${l.gross_cents == null ? '' : (l.gross_cents / 100).toFixed(2)}" inputmode="decimal" placeholder="enter price" onchange="tPatch(${l.id},{gross_cents:this.value})">` : `<div>${money(l.gross_cents)}</div>`}</div>
+        <div><label>Discount $</label>${openT ? `<input value="${(l.discount_cents / 100).toFixed(2)}" inputmode="decimal" onchange="tPatch(${l.id},{discount_cents:this.value})">` : `<div>${money(l.discount_cents)}</div>`}</div>
+        <div><label>Discount reason</label>${openT ? `<input value="${esc(l.discount_reason)}" onchange="tPatch(${l.id},{discount_reason:this.value})">` : `<div>${esc(l.discount_reason || '—')}</div>`}</div>
+        <div><label>Tax $</label>${openT ? `<input value="${(l.tax_cents / 100).toFixed(2)}" inputmode="decimal" onchange="tPatch(${l.id},{tax_cents:this.value})">` : `<div>${money(l.tax_cents)}</div>`}</div>
+      </div>
+    </div>`).join('') || '<div class="empty">No lines yet — add the services and products below.</div>';
+  $('tAdd').classList.toggle('hidden', !openT); $('tPay').classList.toggle('hidden', !openT);
+  if (openT) {
+    $('tProv').innerHTML = provOptions(t.lines[0]?.provider.slug || STYLISTS.find(s => s.active)?.slug);
+    $('tSvc').innerHTML = CATS.map(c => `<optgroup label="${esc(c.category)}">${c.services.map(s => `<option value="${esc(s.slug)}">${esc(s.name)}</option>`).join('')}</optgroup>`).join('');
+    $('tRet').innerHTML = '<option value="">— custom —</option>' + RETAIL.map(r => `<option value="${r.id}">${esc(r.name)}${r.price_cents != null ? ' · ' + money(r.price_cents) : ''}</option>`).join('');
+    tSvcChange(); tKindChange();
+  }
+  const unpriced = t.lines.filter(l => l.gross_cents == null).length;
+  $('tTotals').innerHTML = `Subtotal <b class="money">${money(t.subtotal_cents)}</b> · Discount <b class="money">−${money(t.discount_cents)}</b> · Tax <b class="money">${money(t.tax_cents)}</b><br>
+    Total <b class="money">${money(t.total_cents)}</b>${t.tip_cents ? ` · Tip <b class="money">${money(t.tip_cents)}</b>` : ''}${t.refunded_cents ? ` · Refunded <b class="money" style="color:var(--err)">${money(t.refunded_cents)}</b>` : ''}${unpriced ? `<br><span style="color:var(--err)">${unpriced} line${unpriced === 1 ? '' : 's'} without a price — enter it before paying.</span>` : ''}`;
+  $('tErr').textContent = '';
+  const acts = [];
+  if (openT) { acts.push(`<button class="btn btn-danger btn-sm" onclick="tVoid()">Void</button>`); acts.push(`<button class="btn btn-terra" onclick="tPay()">Take payment</button>`); }
+  else if (t.status === 'paid' || t.status === 'partially_refunded') { acts.push(`<button class="btn btn-danger btn-sm" onclick="tRefund()">Refund…</button>`); if (t.status === 'paid') acts.push(`<button class="btn btn-ghost btn-sm" onclick="tVoid()">Void</button>`); }
+  $('tActions').innerHTML = acts.join('');
+}
+function tKindChange() { const r = $('tKind').value === 'retail'; $('tSvcRow').classList.toggle('hidden', r); $('tRetRow').classList.toggle('hidden', !r); }
+function tSvcChange() { const s = CATS.flatMap(c => c.services).find(x => x.slug === $('tSvc').value); $('tVar').innerHTML = (s?.variations || []).map(v => `<option value="${v.id}">${esc(v.name)}</option>`).join(''); }
+async function tCall(body) { try { TICKET = await api('POST', null, { code: TICKET.code, ...body }); renderTicket(); } catch (e) { $('tErr').textContent = e.message; } }
+async function tAddLine() {
+  const kind = $('tKind').value;
+  const line = { kind, provider: $('tProv').value, quantity: $('tQty').value };
+  if ($('tAmt').value.trim()) line.gross_cents = $('tAmt').value;
+  if (kind === 'service') { line.serviceSlug = $('tSvc').value; line.variationId = $('tVar').value || undefined; }
+  else if ($('tRet').value) line.retailItemId = $('tRet').value; else line.name = $('tName').value;
+  await tCall({ action: 'ticket.line.add', line }); $('tAmt').value = ''; $('tName').value = ''; $('tQty').value = '1';
+}
+const tPatch = (lineId, patch) => tCall({ action: 'ticket.line.update', lineId, patch });
+const tRemove = (lineId) => tCall({ action: 'ticket.line.remove', lineId });
+async function tPay() {
+  if (!confirm(`Take ${$('tTender').value} payment for ${TICKET.code}?`)) return;
+  await tCall({ action: 'ticket.pay', tender: $('tTender').value, tipCents: $('tTip').value, tenderRef: $('tRef').value });
+  if (TICKET.status === 'paid') toast('Paid · ' + TICKET.code);
+}
+async function tVoid() { const r = prompt('Void this ticket? Reason (optional):'); if (r === null) return; await tCall({ action: 'ticket.void', reason: r }); }
+async function tRefund() {
+  const amt = prompt(`Refund amount in dollars (up to ${money(TICKET.total_cents + TICKET.tip_cents - TICKET.refunded_cents)}):`); if (!amt) return;
+  const reason = prompt('Reason:') || '';
+  await tCall({ action: 'ticket.refund', amountCents: amt, reason });
 }
 // Whether Team Hub has this appointment (blank when the hub isn't configured).
 const hubBadge = a => !a.hub ? '' :

@@ -41,6 +41,32 @@ table { width:100%; border-collapse:collapse; font-size:14px; margin-top:6px; } 
   </div>
 
   <div class="card">
+    <h2>Till</h2>
+    <div class="hint">Tickets are rung at the front desk (Book tab → Checkout, or a walk-in ticket). Every line records who delivered it; that is what Team Hub pays on. In this phase the card itself is taken on the Square terminal and the ticket records it; capturing the card from here is the next phase.</div>
+    <label>Retail sales tax rate (%) — services are untaxed</label>
+    <div style="display:flex;gap:8px;align-items:center;"><input id="taxRate" inputmode="decimal" style="max-width:120px;" placeholder="8.6"><button class="btn btn-ghost" onclick="saveTax()">Save</button><span class="status" id="taxOut" style="margin:0;"></span></div>
+    <h2 style="font-size:20px;margin-top:18px;">Retail items</h2>
+    <div class="hint">Products sold at the desk. Leave the price blank for "price on the day" (the ticket will ask for it).</div>
+    <div id="retailList" class="status">Loading…</div>
+    <div style="display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:8px;align-items:end;margin-top:8px;">
+      <div><label>Name</label><input id="rName" placeholder="Crown Oil 4oz"></div>
+      <div><label>Price $</label><input id="rPrice" inputmode="decimal" placeholder="20"></div>
+      <div><label>SKU</label><input id="rSku" placeholder="optional"></div>
+      <button class="btn btn-ghost" onclick="addRetail()">Add</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Integration tokens</h2>
+    <div class="hint">Read-only credentials for other software (Team Hub) with named scopes. The token is shown once when created; revoke it here any time. Base URL: <code>/api/v1/</code> — <code>whoami</code>, <code>appointments</code>, <code>tickets</code>, <code>catalog</code>, <code>schedule</code>, <code>employees</code>; date ranges up to a year, any distance back.</div>
+    <div id="tokList" class="status">Loading…</div>
+    <div style="margin-top:8px;"><label>New token name</label><input id="tokName" placeholder="Team Hub" style="max-width:280px;"></div>
+    <div id="tokScopes" style="display:flex;flex-wrap:wrap;gap:10px;margin:8px 0;"></div>
+    <button class="btn btn-ghost" onclick="createToken()">Create token</button>
+    <div id="tokNew" class="status" style="margin-top:10px;word-break:break-all;"></div>
+  </div>
+
+  <div class="card">
     <h2>Team Hub</h2>
     <div class="hint">Every booking, cancellation, completion and no-show made here is pushed to Team Hub — it takes the seat HighLevel had, so payroll reconciliation, today's outlook and service hours keep working. A stylist can also take their hours and time off from the hub (Team → edit → “Hours come from Team Hub”).<br><br>
       Set <code>TEAMHUB_URL</code> (e.g. <code>https://team.crownheirs.com</code>) and <code>TEAMHUB_SECRET</code> — the secret shown on the hub's Admin → HighLevel page — in Vercel, then redeploy. Then in the hub's Admin → HighLevel table, give each stylist their id from this site's Team tab as the <em>calendar ID</em> and their work email as the <em>user ID</em>; that's how the hub credits appointments to them.</div>
@@ -97,6 +123,41 @@ async function modeStatus() {
     ? 'SITE — bookings are taken here.'
     : `SQUARE — customers are sent to Square to book (${j.squareUrl || 'link not set'}). Flip BOOKING_MODE to "site" on switch-over day.`;
 }
+const post = (body) => fetch('/api/book/staff', { method: 'POST', headers: { 'x-admin-key': KEY, 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then(async r => { const j = await r.json().catch(() => ({})); if (!r.ok) throw new Error(j.error || r.status); return j; });
+const get = (q) => fetch('/api/book/staff?' + new URLSearchParams(q), { headers: { 'x-admin-key': KEY } }).then(async r => { const j = await r.json().catch(() => ({})); if (!r.ok) throw new Error(j.error || r.status); return j; });
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const money = c => c == null ? '—' : '$' + (c / 100).toFixed(2);
+async function loadTill() {
+  try {
+    const j = await get({ action: 'retail.list' });
+    const items = j.items;
+    if (!$('taxRate').value) $('taxRate').value = (j.tax_rate_bps / 100).toString();
+    $('retailList').innerHTML = items.length ? items.map(i => `<div style="display:flex;gap:10px;align-items:center;padding:4px 0;border-top:1px solid var(--border);">
+        <span style="flex:1;${i.active ? '' : 'opacity:.5;text-decoration:line-through;'}">${esc(i.name)}${i.sku ? ` <code>${esc(i.sku)}</code>` : ''}</span><span>${money(i.price_cents)}</span>
+        <button class="btn btn-ghost" style="padding:6px 12px;font-size:13px;" onclick="toggleRetail(${i.id}, ${!i.active})">${i.active ? 'Retire' : 'Restore'}</button></div>`).join('') : 'No retail items yet.';
+  } catch (e) { $('retailList').textContent = e.message; }
+}
+async function saveTax() { try { const j = await post({ action: 'settings.save', tax_rate_percent: $('taxRate').value }); $('taxOut').textContent = `Saved: ${(j.tax_rate_bps / 100).toFixed(2)}%`; } catch (e) { $('taxOut').textContent = e.message; } }
+async function addRetail() { try { await post({ action: 'retail.save', name: $('rName').value, price_cents: $('rPrice').value, sku: $('rSku').value }); $('rName').value = $('rPrice').value = $('rSku').value = ''; loadTill(); } catch (e) { alert(e.message); } }
+async function toggleRetail(id, active) {
+  const items = (await get({ action: 'retail.list' })).items; const i = items.find(x => x.id === id);
+  try { await post({ action: 'retail.save', id, name: i.name, price_cents: i.price_cents == null ? '' : i.price_cents / 100, sku: i.sku || '', taxable: i.taxable, active }); loadTill(); } catch (e) { alert(e.message); }
+}
+async function loadTokens() {
+  try {
+    const j = await get({ action: 'tokens.list' });
+    $('tokScopes').innerHTML = j.scopes.map(s => `<label style="display:flex;gap:6px;align-items:center;font-size:14px;text-transform:none;letter-spacing:0;margin:0;"><input type="checkbox" value="${s}" checked style="width:auto;"> ${s}</label>`).join('');
+    $('tokList').innerHTML = j.tokens.length ? j.tokens.map(t => `<div style="display:flex;gap:10px;align-items:center;padding:4px 0;border-top:1px solid var(--border);${t.revokedAt ? 'opacity:.5;' : ''}">
+        <span style="flex:1;"><b>${esc(t.name)}</b> <code>${esc(t.prefix)}…</code> · ${t.scopes.join(', ')}${t.lastUsedAt ? ` · last used ${new Date(t.lastUsedAt).toLocaleDateString()}` : ' · never used'}${t.revokedAt ? ' · revoked' : ''}</span>
+        ${t.revokedAt ? '' : `<button class="btn btn-ghost" style="padding:6px 12px;font-size:13px;" onclick="revokeToken(${t.id})">Revoke</button>`}</div>`).join('') : 'No tokens yet.';
+  } catch (e) { $('tokList').textContent = e.message; }
+}
+async function createToken() {
+  const scopes = [...document.querySelectorAll('#tokScopes input:checked')].map(i => i.value);
+  try { const j = await post({ action: 'token.create', name: $('tokName').value, scopes }); $('tokNew').innerHTML = `Copy this now — it won't be shown again:<br><b>${esc(j.token)}</b>`; $('tokName').value = ''; loadTokens(); }
+  catch (e) { $('tokNew').textContent = e.message; }
+}
+async function revokeToken(id) { if (!confirm('Revoke this token? Anything using it stops working immediately.')) return; try { await post({ action: 'token.revoke', id }); loadTokens(); } catch (e) { alert(e.message); } }
 async function hubStatus() {
   const r = await fetch('/api/book/staff?action=hub.status', { headers: { 'x-admin-key': KEY } });
   const j = await r.json().catch(() => ({}));
@@ -117,7 +178,7 @@ async function runReminders() {
   const j = await r.json().catch(() => ({}));
   $('remStatus').textContent = r.ok ? `Sent ${j.count} reminder(s).` : (j.error || 'Failed');
 }
-AdminShell.requireAuth().then(k => { KEY = k; $('app').classList.remove('hidden'); modeStatus(); bookingStatus(); hubStatus(); });
+AdminShell.requireAuth().then(k => { KEY = k; $('app').classList.remove('hidden'); modeStatus(); bookingStatus(); hubStatus(); loadTill(); loadTokens(); });
 </script>
 </body>
 </html>

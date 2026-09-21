@@ -36,10 +36,16 @@ if (!url) {
     await migrate(); await seed();
     // Appointments never cascade from a stylist (history must survive a
     // roster change), so a leftover test stylist's bookings go first.
-    await db.query(`DELETE FROM appointments WHERE stylist_id IN (SELECT id FROM stylists WHERE slug LIKE 'test-%')
-                        OR client_id IN (SELECT id FROM clients WHERE phone = '16025550777')`);
+    // Refunds → tickets → appointments → stylist: each references the next.
+    // Only this suite's stylist ('test-stylist'); the tickets suite owns 'test-till'.
+    const mine = `SELECT id FROM appointments WHERE stylist_id IN (SELECT id FROM stylists WHERE slug = 'test-stylist')
+                      OR client_id IN (SELECT id FROM clients WHERE phone = '16025550777')`;
+    const tix = `SELECT id FROM tickets WHERE appointment_id IN (${mine}) OR rung_by IN (SELECT id FROM stylists WHERE slug = 'test-stylist')`;
+    await db.query(`DELETE FROM ticket_refunds WHERE ticket_id IN (${tix})`);
+    await db.query(`DELETE FROM tickets WHERE id IN (${tix})`);
+    await db.query(`DELETE FROM appointments WHERE id IN (${mine})`);
     await db.query(`DELETE FROM clients WHERE phone = '16025550777'`);
-    await db.query(`DELETE FROM stylists WHERE slug LIKE 'test-%'`);
+    await db.query(`DELETE FROM stylists WHERE slug = 'test-stylist'`);
     const all = (await B.listServices()).flatMap(c => c.services);
     PONY = all.find(s => s.slug === 'sleek-ponytail'); PONY_V = PONY.variations[0];
   });
