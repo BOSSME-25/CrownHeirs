@@ -70,6 +70,26 @@ test('schedule: hub entries become working blocks; time off and missing days clo
   await assert.rejects(() => hub.fetchSchedule('2026-09-22', '2026-09-22'), /401/);
 });
 
+test('weeklyHours: the newest shift per weekday wins, split shifts merge, time off is skipped', () => {
+  const data = hub.normalizeSchedule({ entries: [
+    // Tue 09-15: old rota 9–5; Tue 09-22: new rota, split shift 10–14:30 + 15–18
+    { email: 'bethany@crownheirs.com', date: '2026-09-15', start: '09:00', end: '17:00', type: 'shift' },
+    { email: 'bethany@crownheirs.com', date: '2026-09-22', start: '10:00', end: '14:30', type: 'shift' },
+    { email: 'bethany@crownheirs.com', date: '2026-09-22', start: '15:00', end: '18:00', type: 'shift' },
+    // Wed 09-23 is approved time off — must not erase the Wed pattern from 09-16
+    { email: 'bethany@crownheirs.com', date: '2026-09-16', start: '11:00', end: '19:00', type: 'shift' },
+    { email: 'bethany@crownheirs.com', date: '2026-09-23', type: 'time_off' },
+    { email: 'sam@crownheirs.com', date: '2026-09-21', start: '08:00', end: '12:00', type: 'shift' }
+  ] });
+  const w = hub.weeklyHours(data, 'Bethany@CrownHeirs.com');
+  assert.deepEqual(w.hours, [
+    { weekday: 2, startMin: 600, endMin: 1080 },
+    { weekday: 3, startMin: 660, endMin: 1140 }
+  ]);
+  assert.deepEqual(w.sampled, { 2: '2026-09-22', 3: '2026-09-16' });
+  assert.deepEqual(hub.weeklyHours(data, 'nobody@crownheirs.com'), { hours: [], sampled: {} });
+});
+
 test('status: reports configured / rejected secret / connected', async () => {
   delete process.env.TEAMHUB_URL;
   assert.equal((await hub.status()).configured, false);

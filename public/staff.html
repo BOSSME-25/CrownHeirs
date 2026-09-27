@@ -225,9 +225,17 @@ h2 { font-family: var(--font-serif); font-weight: 600; font-size: 25px; margin-b
     </div>
     <label>Work email <span style="text-transform:none;letter-spacing:0;">(the link to Team Hub)</span></label>
     <input id="sEmail" type="email" placeholder="name@crownheirs.com">
-    <label style="display:flex;align-items:center;gap:8px;text-transform:none;letter-spacing:0;font-size:14px;color:var(--ink);"><input id="sHub" type="checkbox" style="width:auto;accent-color:var(--terra);"> Hours &amp; time off come from Team Hub (matched by this email) — the weekly hours below are then ignored</label>
     <label style="display:flex;align-items:center;gap:8px;text-transform:none;letter-spacing:0;font-size:14px;color:var(--ink);"><input id="sActive" type="checkbox" style="width:auto;accent-color:var(--terra);" checked> Active (bookable)</label>
-    <label>Weekly hours</label>
+    <label>Schedule</label>
+    <div style="display:grid;gap:6px;margin-bottom:8px;">
+      <label style="display:flex;align-items:flex-start;gap:8px;text-transform:none;letter-spacing:0;font-size:14px;color:var(--ink);"><input type="radio" name="sSrc" value="local" style="width:auto;accent-color:var(--terra);margin-top:3px;" onchange="sSrcChange()"> <span><b>Set here</b> — the weekly hours below. Import them from Team Hub once, then edit freely.</span></label>
+      <label style="display:flex;align-items:flex-start;gap:8px;text-transform:none;letter-spacing:0;font-size:14px;color:var(--ink);"><input type="radio" name="sSrc" value="hub" style="width:auto;accent-color:var(--terra);margin-top:3px;" onchange="sSrcChange()"> <span><b>Live from Team Hub</b> — published shifts and approved time off, matched by the work email. The hours below are ignored.</span></label>
+    </div>
+    <div class="row" style="justify-content:space-between;align-items:center;">
+      <label style="margin:0;">Weekly hours</label>
+      <button class="btn btn-ghost btn-sm" id="sImport" onclick="sImportHub()">⇩ Import from Team Hub</button>
+    </div>
+    <div class="hint" id="sImportOut"></div>
     <table class="hours" id="sHours"></table>
     <label>Services offered</label>
     <div class="svcgrid" id="sServices"></div>
@@ -511,13 +519,38 @@ function openStylist(slug) {
   EDITING = slug ? STYLISTS.find(s => s.slug === slug) : { name: '', title: '', active: true, email: '', hoursSource: 'local', hours: [], services: CATS.flatMap(c => c.services.map(s => s.slug)) };
   $('sTitle').textContent = slug ? `Edit stylist${slug ? ' · id ' + slug : ''}` : 'Add stylist';
   $('sName').value = EDITING.name; $('sTitleIn').value = EDITING.title || ''; $('sActive').checked = EDITING.active !== false; $('sErr').textContent = '';
-  $('sEmail').value = EDITING.email || ''; $('sHub').checked = EDITING.hoursSource === 'hub';
-  $('sHours').innerHTML = WD.map((d, i) => { const h = EDITING.hours.find(x => x.weekday === i);
-    return `<tr><td><input type="checkbox" id="h${i}" ${h ? 'checked' : ''}> ${d}</td><td><input type="time" id="h${i}s" value="${h ? hhmm(h.startMin) : '09:00'}"></td><td>–</td><td><input type="time" id="h${i}e" value="${h ? hhmm(h.endMin) : '18:00'}"></td></tr>`; }).join('');
+  $('sEmail').value = EDITING.email || '';
+  document.querySelector(`input[name="sSrc"][value="${EDITING.hoursSource === 'hub' ? 'hub' : 'local'}"]`).checked = true;
+  $('sImportOut').textContent = '';
+  fillHours(EDITING.hours);
+  sSrcChange();
   const has = new Set(EDITING.services);
   $('sServices').innerHTML = CATS.map(c => `<div class="cat"><span>${esc(c.category)}</span><button onclick="toggleCat(this)">all / none</button></div>` +
     c.services.map(s => `<label><input type="checkbox" data-svc="${esc(s.slug)}" ${has.has(s.slug) ? 'checked' : ''}> ${esc(s.name)}</label>`).join('')).join('');
   openModal('mStylist');
+}
+function fillHours(hours) {
+  $('sHours').innerHTML = WD.map((d, i) => { const h = hours.find(x => x.weekday === i);
+    return `<tr><td><input type="checkbox" id="h${i}" ${h ? 'checked' : ''}> ${d}</td><td><input type="time" id="h${i}s" value="${h ? hhmm(h.startMin) : '09:00'}"></td><td>–</td><td><input type="time" id="h${i}e" value="${h ? hhmm(h.endMin) : '18:00'}"></td></tr>`; }).join('');
+}
+const sSrc = () => document.querySelector('input[name="sSrc"]:checked')?.value || 'local';
+function sSrcChange() {
+  // In live mode the table is only a reference, so it reads as such.
+  $('sHours').style.opacity = sSrc() === 'hub' ? '.45' : '1';
+}
+// Pull the stylist's current rota from Team Hub into the weekly table.
+// Nothing is saved until Save — so a wrong email just shows an empty result.
+async function sImportHub() {
+  const out = $('sImportOut'); out.textContent = 'Reading Team Hub…'; $('sImport').disabled = true;
+  try {
+    const r = await api('GET', { action: 'hub.hours', email: $('sEmail').value.trim() });
+    if (!r.known) { out.textContent = `Team Hub has nobody with the email ${r.email}. Check the work email matches the hub.`; return; }
+    if (!r.hours.length) { out.textContent = `Team Hub knows ${r.email} but has no published shifts between ${r.from} and ${r.to}.`; return; }
+    fillHours(r.hours);
+    document.querySelector('input[name="sSrc"][value="local"]').checked = true; sSrcChange();
+    out.textContent = `Imported ${r.hours.length} day${r.hours.length === 1 ? '' : 's'} from the hub's published shifts (${r.from} → ${r.to}). Adjust if needed, then Save.`;
+  } catch (e) { out.textContent = e.message; }
+  finally { $('sImport').disabled = false; }
 }
 function toggleCat(btn) {
   let el = btn.parentElement.nextElementSibling; const boxes = [];
@@ -530,7 +563,7 @@ async function sSave() {
     const hours = WD.map((_, i) => $(`h${i}`).checked ? { weekday: i, startMin: mins($(`h${i}s`).value), endMin: mins($(`h${i}e`).value) } : null).filter(Boolean);
     const services = [...document.querySelectorAll('#sServices input[data-svc]:checked')].map(b => b.dataset.svc);
     await api('POST', null, { action: 'stylist.save', slug: EDITING.slug || null, name: $('sName').value, title: $('sTitleIn').value, active: $('sActive').checked, hours, services,
-      email: $('sEmail').value, hoursSource: $('sHub').checked ? 'hub' : 'local' });
+      email: $('sEmail').value, hoursSource: sSrc() });
     closeModal('mStylist'); toast('Saved'); renderTeam(); renderDates();
   } catch (e) { $('sErr').textContent = e.message; }
 }
