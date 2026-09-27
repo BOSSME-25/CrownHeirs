@@ -185,11 +185,15 @@ site — nothing changes on the hub side.
   appointment here records whether the hub accepted it (`Hub ✓ / ✗` on the
   front desk); a day or the next 60 days can be resynced from the front desk
   or Settings.
-- **Hours down.** A stylist with "Hours come from Team Hub" ticked takes their
-  published shifts and approved time off from the hub's schedule feed
-  (`/api/integrations/schedule`), matched by work email; local weekly hours
-  are ignored for them. If the hub can't be reached, local hours stand in
-  rather than closing the book, and Settings shows the hub status.
+- **Hours down.** Each stylist's schedule is either *Set here* or *Live from
+  Team Hub*. Live takes their published shifts and approved time off from the
+  hub's schedule feed (`/api/integrations/schedule`), matched by work email;
+  local weekly hours are ignored for them. If the hub can't be reached, local
+  hours stand in rather than closing the book, and Settings shows the hub
+  status. *Set here* can still be seeded from the hub: **Import from Team
+  Hub** in the stylist editor reads the next four weeks of published shifts,
+  takes the newest shift for each weekday (split shifts merge into one
+  block), fills the weekly table, and leaves it editable.
 
 | Variable | Purpose |
 |---|---|

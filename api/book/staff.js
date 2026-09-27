@@ -9,6 +9,7 @@
 //   POST { action: 'timeoff.remove', id }
 //   POST { action: 'stylist.save', slug?, name, title, active, hours, services, email, hoursSource }
 //   GET  ?action=hub.status                       Team Hub connection check
+//   GET  ?action=hub.hours&email=                 a stylist's weekly hours as Team Hub publishes them
 //   POST { action: 'hub.resync', from, to }       re-push a date range to Team Hub
 const staff = require('../../lib/staff');
 const tickets = require('../../lib/tickets');
@@ -27,6 +28,7 @@ module.exports = async (req, res) => {
         case 'day':          return res.status(200).json(await staff.day(q.date));
         case 'stylists':     return res.status(200).json({ stylists: await staff.listStylists() });
         case 'hub.status':   return res.status(200).json(await staff.hubStatus());
+        case 'hub.hours':    return res.status(200).json(await staff.hubHours({ email: q.email }));
         case 'tickets.day':  return res.status(200).json({ tickets: await tickets.listDay(q.date) });
         case 'ticket.get':   return res.status(200).json(await tickets.get(q.code));
         case 'retail.list':  return res.status(200).json({ items: await tickets.listRetail(), tax_rate_bps: Number((await getSettings()).tax_rate_bps) || 0 });
