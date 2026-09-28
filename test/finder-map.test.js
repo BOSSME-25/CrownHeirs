@@ -49,6 +49,21 @@ test('finder: service photos exist, belong to catalog services, and cover the ca
   assert.ok((html.match(/svcVis\('/g) || []).length >= 5, 'every tile renderer uses the photo helper');
 });
 
+test('tv: the services list names real, active services that have a photo', () => {
+  const dir = path.join(__dirname, '..', 'public', 'images', 'services');
+  const list = JSON.parse(fs.readFileSync(path.join(dir, 'index.json'), 'utf8'));
+  assert.ok(list.length >= 40, 'most of the menu is on the TV');
+  assert.equal(new Set(list.map(s => s.slug)).size, list.length, 'no service twice');
+  for (const s of list) {
+    const c = bySlug[s.slug];
+    assert.ok(c && c.active, `${s.slug} is an active service`);
+    assert.equal(s.name, c.name, `${s.slug}: Square's name`);
+    assert.ok(fs.existsSync(path.join(dir, s.slug + '.jpg')), `${s.slug}.jpg exists`);
+  }
+  const first6 = new Set(list.slice(0, 6).map(s => s.category));
+  assert.ok(first6.size >= 4, 'each screenful mixes categories');
+});
+
 test('finder: no Square booking links remain; cards book on this site', () => {
   assert.doesNotMatch(html, /squareup\.com/);
   assert.doesNotMatch(html, /SQUARE_BASE|BOOKING_URLS/);

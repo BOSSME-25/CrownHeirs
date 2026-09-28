@@ -147,6 +147,7 @@ header.top p { color: var(--ink-dim); margin-top: 6px; }
       <option value="America/Anchorage">Alaska — Anchorage</option>
       <option value="Pacific/Honolulu">Hawaii — Honolulu</option>
     </select>
+    <label style="display:flex;align-items:center;gap:8px;text-transform:none;letter-spacing:0;font-size:14px;margin-top:14px;"><input id="showSvcs" type="checkbox" style="width:auto;"> Show the “Our Services” slide — six services at a time with their Square photos, a new six each time it comes round</label>
   </div>
 </div>
 
@@ -178,6 +179,7 @@ async function enter() {
   $('secs').value = C.settings.secondsPerSlide || 9;
   $('igHandle').value = C.settings.instagramHandle ?? 'crownheirs';
   $('tz').value = C.settings.timeZone || 'America/Phoenix';
+  $('showSvcs').checked = C.settings.showServices !== false;
   renderAll();
 }
 
@@ -381,6 +383,7 @@ async function saveAll() {
   C.settings.secondsPerSlide = Math.max(4, Number($('secs').value) || 9);
   C.settings.instagramHandle = $('igHandle').value.replace(/^@/, '').trim();
   C.settings.timeZone = $('tz').value;
+  C.settings.showServices = $('showSvcs').checked;
   // Drop empty rows so the TV never shows blanks
   C.memberships = C.memberships.filter(m => m.name || m.price || (m.perks || []).length);
   C.products    = C.products.filter(p => p.name || p.blurb);
