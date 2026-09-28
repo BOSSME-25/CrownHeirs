@@ -246,14 +246,30 @@ function preselectFromQuery() {
   SEL.cat = s.category;
   const want = (q.get('variation') || '').trim().toLowerCase();
   const v = want && s.variations.find(x => x.name.toLowerCase() === want);
-  if (v && s.variations.length > 1) { SEL.service = s; SEL.variation = null; SEL.stylist = 'any'; SEL.date = null; SEL.startAt = null; pickVariation(v.id); }
-  else pickService(slug);
+  if (v && s.variations.length > 1) { SEL.service = s; SEL.variation = null; SEL.stylist = 'any'; SEL.date = null; SEL.startAt = null; pickVariation(v.id); return; }
+  // The finder passes the client's length (len=short|medium|long|twa); the
+  // options that fit it come first. Same table the finder uses.
+  const len = q.get('len');
+  if (len && s.variations.length > 1) {
+    fetch('/data/finder-catalog.json').then(r => r.ok ? r.json() : null).then(c => {
+      const names = c && c.services[slug] && c.services[slug].len && c.services[slug].len[len];
+      if (names && names.length) SEL.lenHint = { slug, key: len, label: c.lengthScale[len], names: new Set(names) };
+    }).catch(() => {}).finally(() => pickService(slug));
+    return;
+  }
+  pickService(slug);
 }
-function renderVariations() {
+function renderVariations(showAll) {
   const s = SEL.service;
   $('cats').innerHTML = `<button class="pill" onclick="renderCats()">← ${esc(SEL.cat)}</button>`;
-  $('svcList').innerHTML = `<div class="hint" style="margin-top:8px;">${esc(s.name)} — choose an option:</div>` +
-    s.variations.map(v => `
+  const hint = SEL.lenHint && SEL.lenHint.slug === s.slug ? SEL.lenHint : null;
+  const list = hint && !showAll ? s.variations.filter(v => hint.names.has(v.name)) : s.variations;
+  const note = hint ? (showAll
+      ? `<div class="hint" style="margin-top:8px;">All ${s.variations.length} options.</div>`
+      : `<div class="hint" style="margin-top:8px;">Options for ${esc(hint.label.label.toLowerCase())} hair (${esc(hint.label.desc.toLowerCase())}). <a href="#" onclick="renderVariations(true);return false;">Show all options</a></div>`)
+    : '';
+  $('svcList').innerHTML = `<div class="hint" style="margin-top:8px;">${esc(s.name)}: choose an option.</div>` + note +
+    list.map(v => `
     <button class="opt" onclick='pickVariation(${v.id})'>
       <div class="t"><div class="n" style="font-size:19px;">${esc(v.name)}</div></div>
       <div class="p"><small>${dur(v.duration_min)}</small></div>

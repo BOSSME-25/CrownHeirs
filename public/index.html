@@ -1726,7 +1726,7 @@ function goHome(){
    finder is more specific than Square, the option — pre-selected. The labels
    customers see are Square's; BOOK_MAP is generated from lib/seed-data.json
    (test/finder-map.test.js checks every entry still exists in the catalog). */
-const BOOK_MAP={"Pixie & Tapered Cut":{"slug":"hair-cut","name":"Hair Cut","variation":"Short Length (Pixie/Above Earlobe) Cut"},"Shape Up & Trim":{"slug":"trim","name":"Trim","variation":null},"Silk Press":{"slug":"silk-press-flat-iron-straightening","name":"Silk Press (Flat Iron Straightening)","variation":null},"Knotless Braids":{"slug":"braids-knotless","name":"Braids (Knotless)","variation":null},"Senegalese / Box Twists":{"slug":"individuals-singles","name":"Individuals (Singles)","variation":"Senegalese Twists"},"Natural Hair Styling":{"slug":"loose-natural-styles","name":"Loose Natural Styles","variation":null},"Updo & Special Occasion":{"slug":"loose-natural-styles","name":"Loose Natural Styles","variation":null},"Starter Locs":{"slug":"loc-starters","name":"Loc Starters","variation":null},"Loc Retwist":{"slug":"loc-retwist","name":"Loc Retwist","variation":null},"Interlocking":{"slug":"loc-interlocking","name":"Loc Interlocking","variation":null},"Loc Moisturizing Treatment":{"slug":"loc-detoxes","name":"Loc Detoxes","variation":"Signature Detox (Add-on Service)"},"Loc Styling":{"slug":"loc-styles","name":"Loc Styles","variation":null},"Loc Repair & Combine":{"slug":"loc-repairs","name":"Loc Repairs","variation":null},"Loc Extensions":{"slug":"loc-extensions","name":"Loc Extensions","variation":null},"Freeform Locs":{"slug":"loc-retwist","name":"Loc Retwist","variation":null},"Loc Color":{"slug":"loc-color","name":"Loc Color","variation":null},"Scalp Detox & Steam":{"slug":"hair-and-scalp-treatments-add-ons","name":"Hair & Scalp Treatments (Add-ons)","variation":"Steam Hydration Treatment"},"Hot Towel Treatment":{"slug":"barber-s-corner","name":"Barber's Corner","variation":null},"Barber Cut & Fade":{"slug":"barber-s-corner","name":"Barber's Corner","variation":"Traditionial Cut"},"Line-up & Beard Sculpt":{"slug":"barber-s-corner","name":"Barber's Corner","variation":"Edge Up"},"Tiny Heirs Wash & Style":{"slug":"shampoo-and-blow-dry","name":"Shampoo and Blow Dry","variation":null},"Tiny Heirs Braids & Twists":{"slug":"natural-hair-braiding","name":"Natural Hair Braiding","variation":null},"Tiny Heirs First Cut":{"slug":"barber-s-corner","name":"Barber's Corner","variation":"Traditional Cut - Child"},"Tiny Heirs Shape-Up & Line-up":{"slug":"barber-s-corner","name":"Barber's Corner","variation":"Edge Up"},"Tiny Heirs Trim & Shape":{"slug":"trim","name":"Trim","variation":null},"Tiny Heirs Natural Care":{"slug":"loose-natural-styles","name":"Loose Natural Styles","variation":null},"Tiny Heirs Loc Maintenance":{"slug":"loc-retwist","name":"Loc Retwist","variation":null},"Loc Maintenance":{"slug":"loc-retwist","name":"Loc Retwist","variation":null},"Updo & Special Styling":{"slug":"loose-natural-styles","name":"Loose Natural Styles","variation":null},"Sew-In Weave Installation":{"slug":"weave-installation","name":"Weave Installation","variation":null},"Partial Sew-In":{"slug":"weave-installation","name":"Weave Installation","variation":"Partial Sew-In"},"Quick Weave":{"slug":"quick-weave","name":"Quick Weave","variation":null},"Crochet Styles":{"slug":"crochet-styles","name":"Crochet Styles","variation":null},"Hair Extensions":{"slug":"hair-extensions","name":"Hair Extensions","variation":null},"Feed-In Style Braids":{"slug":"feed-in-style-braids","name":"Feed-In Style Braids","variation":null},"Faux Locs — Butterfly":{"slug":"faux-locs-butterfly-and-soft-locs","name":"Faux Locs (Butterfly & Soft Locs)","variation":null},"Faux Locs — Soft":{"slug":"faux-locs-butterfly-and-soft-locs","name":"Faux Locs (Butterfly & Soft Locs)","variation":null},"Individuals Over Locs":{"slug":"individuals-over-locs","name":"Individuals Over Locs","variation":null},"Mini Twists w/ Added Hair":{"slug":"mini-twists-two-strands-with-added-hair","name":"Mini Twists (Two Strands) with Added Hair","variation":null},"Mini Twists (Two Strands)":{"slug":"mini-twists-two-strands","name":"Mini Twists (Two Strands)","variation":null},"Natural Hair Braiding":{"slug":"natural-hair-braiding","name":"Natural Hair Braiding","variation":null},"Curl Definition + Restoration":{"slug":"curl-definition-restoration","name":"Curl Definition + Restoration","variation":null},"Sleek Ponytail":{"slug":"sleek-ponytail","name":"Sleek Ponytail","variation":null},"Shampoo & Style":{"slug":"shampoo-and-style","name":"Shampoo & Style","variation":null},"Chemical Relaxer":{"slug":"chemical-relaxer","name":"Chemical Relaxer","variation":null},"Chemical Perm":{"slug":"chemical-perm","name":"Chemical Perm","variation":null},"Color (Loose Hair)":{"slug":"color","name":"Color","variation":null},"Instant Locs":{"slug":"instant-locs","name":"Instant Locs","variation":null},"Loc Sparkles":{"slug":"loc-sparkles","name":"Loc Sparkles","variation":null},"Braiding Add-Ons":{"slug":"braiding-add-ons","name":"Braiding Add-Ons","variation":null},"Takedown":{"slug":"takedown","name":"Takedown","variation":null},"Sew-In Maintenance":{"slug":"sew-in-maintenance-add-on-service","name":"Sew-In Maintenance (Add-on Service)","variation":null},"Perimeter Touch Up":{"slug":"chemical-relaxer","name":"Chemical Relaxer","variation":"Relaxer Edge Up (Perimeter)"},"Lash Extensions — Full Set":{"slug":"lash-extensions-full-sets","name":"Lash Extensions Full Sets","variation":null},"Lash 2/3 Week Fill":{"slug":"lash-2-3-week-fill","name":"Lash 2/3 Week Fill","variation":null},"Lash Mini Fill":{"slug":"lash-2-3-week-fill","name":"Lash 2/3 Week Fill","variation":null},"Makeup — Full Face":{"slug":"make-up-full-face","name":"Make Up: Full Face","variation":null},"Makeup — Half Face":{"slug":"make-up-half-face","name":"Make Up: Half Face","variation":null},"Waxing — Face":{"slug":"waxing-face","name":"Waxing (Face)","variation":null},"Waxing — Body":{"slug":"waxing-body","name":"Waxing (Body)","variation":null},"Men's Cornrows & Braids":{"slug":"feed-in-style-braids","name":"Feed-In Style Braids","variation":null},"Men's Natural Styling":{"slug":"loose-natural-styles","name":"Loose Natural Styles","variation":null},"Men's Silk Press":{"slug":"silk-press-flat-iron-straightening","name":"Silk Press (Flat Iron Straightening)","variation":null},"Natural Styling":{"slug":"loose-natural-styles","name":"Loose Natural Styles","variation":null},"Men's Loc Retwist":{"slug":"loc-retwist","name":"Loc Retwist","variation":null},"Tiny Heirs Cut":{"slug":"barber-s-corner","name":"Barber's Corner","variation":"Traditional Cut - Child"}};
+const BOOK_MAP={"Pixie & Tapered Cut":{"slug":"hair-cut","name":"Hair Cut","variation":"Short Length (Pixie/Above Earlobe) Cut"},"Shape Up & Trim":{"slug":"trim","name":"Trim","variation":null},"Silk Press":{"slug":"silk-press-flat-iron-straightening","name":"Silk Press (Flat Iron Straightening)","variation":null},"Knotless Braids":{"slug":"braids-knotless","name":"Braids (Knotless)","variation":null},"Senegalese / Box Twists":{"slug":"individuals-singles","name":"Individuals (Singles)","variation":"Senegalese Twists"},"Natural Hair Styling":{"slug":"loose-natural-styles","name":"Loose Natural Styles","variation":null},"Updo & Special Occasion":{"slug":"loose-natural-styles","name":"Loose Natural Styles","variation":null},"Starter Locs":{"slug":"loc-starters","name":"Loc Starters","variation":null},"Loc Retwist":{"slug":"loc-retwist","name":"Loc Retwist","variation":null},"Interlocking":{"slug":"loc-interlocking","name":"Loc Interlocking","variation":null},"Loc Moisturizing Treatment":{"slug":"loc-detoxes","name":"Loc Detoxes","variation":"Signature Detox (Add-on Service)"},"Loc Styling":{"slug":"loc-styles","name":"Loc Styles","variation":null},"Loc Repair & Combine":{"slug":"loc-repairs","name":"Loc Repairs","variation":null},"Loc Extensions":{"slug":"loc-extensions","name":"Loc Extensions","variation":null},"Freeform Locs":{"slug":"consultations","name":"Consultations","variation":"Loc Consult"},"Loc Color":{"slug":"loc-color","name":"Loc Color","variation":null},"Scalp Detox & Steam":{"slug":"hair-and-scalp-treatments-add-ons","name":"Hair & Scalp Treatments (Add-ons)","variation":"Steam Hydration Treatment"},"Hot Towel Treatment":{"slug":"barber-s-corner","name":"Barber's Corner","variation":null},"Barber Cut & Fade":{"slug":"barber-s-corner","name":"Barber's Corner","variation":"Traditionial Cut"},"Line-up & Beard Sculpt":{"slug":"barber-s-corner","name":"Barber's Corner","variation":"Edge Up"},"Tiny Heirs Wash & Style":{"slug":"shampoo-and-blow-dry","name":"Shampoo and Blow Dry","variation":null},"Tiny Heirs Braids & Twists":{"slug":"natural-hair-braiding","name":"Natural Hair Braiding","variation":null},"Tiny Heirs First Cut":{"slug":"barber-s-corner","name":"Barber's Corner","variation":"Traditional Cut - Child"},"Tiny Heirs Shape-Up & Line-up":{"slug":"barber-s-corner","name":"Barber's Corner","variation":"Edge Up"},"Tiny Heirs Trim & Shape":{"slug":"trim","name":"Trim","variation":null},"Tiny Heirs Natural Care":{"slug":"loose-natural-styles","name":"Loose Natural Styles","variation":null},"Tiny Heirs Loc Maintenance":{"slug":"loc-retwist","name":"Loc Retwist","variation":null},"Loc Maintenance":{"slug":"loc-retwist","name":"Loc Retwist","variation":null},"Updo & Special Styling":{"slug":"loose-natural-styles","name":"Loose Natural Styles","variation":null},"Sew-In Weave Installation":{"slug":"weave-installation","name":"Weave Installation","variation":null},"Partial Sew-In":{"slug":"weave-installation","name":"Weave Installation","variation":"Partial Sew-In"},"Quick Weave":{"slug":"quick-weave","name":"Quick Weave","variation":null},"Crochet Styles":{"slug":"crochet-styles","name":"Crochet Styles","variation":null},"Hair Extensions":{"slug":"hair-extensions","name":"Hair Extensions","variation":null},"Feed-In Style Braids":{"slug":"feed-in-style-braids","name":"Feed-In Style Braids","variation":null},"Faux Locs — Butterfly":{"slug":"faux-locs-butterfly-and-soft-locs","name":"Faux Locs (Butterfly & Soft Locs)","variation":null},"Faux Locs — Soft":{"slug":"faux-locs-butterfly-and-soft-locs","name":"Faux Locs (Butterfly & Soft Locs)","variation":null},"Individuals Over Locs":{"slug":"individuals-over-locs","name":"Individuals Over Locs","variation":null},"Mini Twists w/ Added Hair":{"slug":"mini-twists-two-strands-with-added-hair","name":"Mini Twists (Two Strands) with Added Hair","variation":null},"Mini Twists (Two Strands)":{"slug":"mini-twists-two-strands","name":"Mini Twists (Two Strands)","variation":null},"Natural Hair Braiding":{"slug":"natural-hair-braiding","name":"Natural Hair Braiding","variation":null},"Curl Definition + Restoration":{"slug":"curl-definition-restoration","name":"Curl Definition + Restoration","variation":null},"Sleek Ponytail":{"slug":"sleek-ponytail","name":"Sleek Ponytail","variation":null},"Shampoo & Style":{"slug":"shampoo-and-style","name":"Shampoo & Style","variation":null},"Chemical Relaxer":{"slug":"chemical-relaxer","name":"Chemical Relaxer","variation":null},"Chemical Perm":{"slug":"chemical-perm","name":"Chemical Perm","variation":null},"Color (Loose Hair)":{"slug":"color","name":"Color","variation":null},"Instant Locs":{"slug":"instant-locs","name":"Instant Locs","variation":null},"Loc Sparkles":{"slug":"loc-sparkles","name":"Loc Sparkles","variation":null},"Braiding Add-Ons":{"slug":"braiding-add-ons","name":"Braiding Add-Ons","variation":null},"Takedown":{"slug":"takedown","name":"Takedown","variation":null},"Sew-In Maintenance":{"slug":"sew-in-maintenance-add-on-service","name":"Sew-In Maintenance (Add-on Service)","variation":null},"Lash Extensions — Full Set":{"slug":"lash-extensions-full-sets","name":"Lash Extensions Full Sets","variation":null},"Lash 2/3 Week Fill":{"slug":"lash-2-3-week-fill","name":"Lash 2/3 Week Fill","variation":null},"Lash Mini Fill":{"slug":"lash-2-3-week-fill","name":"Lash 2/3 Week Fill","variation":null},"Makeup — Full Face":{"slug":"make-up-full-face","name":"Make Up: Full Face","variation":null},"Makeup — Half Face":{"slug":"make-up-half-face","name":"Make Up: Half Face","variation":null},"Waxing — Face":{"slug":"waxing-face","name":"Waxing (Face)","variation":null},"Waxing — Body":{"slug":"waxing-body","name":"Waxing (Body)","variation":null},"Men's Cornrows & Braids":{"slug":"feed-in-style-braids","name":"Feed-In Style Braids","variation":null},"Men's Natural Styling":{"slug":"loose-natural-styles","name":"Loose Natural Styles","variation":null},"Men's Silk Press":{"slug":"silk-press-flat-iron-straightening","name":"Silk Press (Flat Iron Straightening)","variation":null},"Natural Styling":{"slug":"loose-natural-styles","name":"Loose Natural Styles","variation":null},"Men's Loc Retwist":{"slug":"loc-retwist","name":"Loc Retwist","variation":null},"Tiny Heirs Cut":{"slug":"barber-s-corner","name":"Barber's Corner","variation":"Traditional Cut - Child"},"Relaxer Edge-Up":{"slug":"chemical-relaxer","name":"Chemical Relaxer","variation":"Relaxer Edge Up (Perimeter)"}};
 const SQ_COUNT={};for(const m of Object.values(BOOK_MAP)){const k=m.slug+'|'+(m.variation||'');SQ_COUNT[k]=(SQ_COUNT[k]||0)+1;}
 function sqLabel(name){
   const m=BOOK_MAP[name]; if(!m) return name;
@@ -1746,9 +1746,48 @@ function svcVis(cls,name,ph,emoji,badge){
   return u?`<div class="${cls} vis-photo" style="background-image:url('${u}')" role="img" aria-label="${sqLabel(name).replace(/"/g,'&quot;')}">${b}</div>`
           :`<div class="${cls} ${ph||'ph2'}">${b}${emoji}</div>`;
 }
+/* ── Price and time come from Square's catalog (public/data/finder-catalog.json,
+   generated from lib/seed-data.json), not hand-typed copies. A card falls back
+   to its own text only when the catalog has no price for that service. ── */
+let CATALOG=null;
+fetch('/data/finder-catalog.json').then(r=>r.ok?r.json():null).then(j=>{CATALOG=j;}).catch(()=>{});
+// Services Square won't book online: the card says to contact the studio.
+const CONTACT_ONLY={'Perimeter Touch Up':'perimeter-touch-up'};
+// The client's length answer, only while they are in Guide Me.
+function curLen(){ const d2=document.getElementById('door2'); return d2&&d2.classList.contains('active')&&typeof hLen!=='undefined'?hLen:null; }
+function fmtMin(m){ const h=Math.floor(m/60),r=m%60; return h?(h+'h'+(r?' '+r+'m':'')):(r+' min'); }
+function catalogFor(name){
+  const slug=(BOOK_MAP[name]&&BOOK_MAP[name].slug)||CONTACT_ONLY[name];
+  return CATALOG&&slug?CATALOG.services[slug]:null;
+}
+// The options a card stands for: its mapped option, else the ones for the
+// client's length (when the finder knows it), else every bookable option.
+function optionsFor(name){
+  const c=catalogFor(name); if(!c) return [];
+  const v=BOOK_MAP[name]&&BOOK_MAP[name].variation;
+  if(v){ const one=c.variations.filter(x=>x[0]===v); if(one.length) return one; }
+  const L=curLen(), len=L&&c.len&&c.len[L];
+  if(len&&len.length){ const f=c.variations.filter(x=>len.includes(x[0])); if(f.length) return f; }
+  return c.variations;
+}
+function cardMeta(s){
+  const c=catalogFor(s.n); if(!c) return {dur:s.dur,price:s.price};
+  const mins=optionsFor(s.n).map(x=>x[1]);
+  const lo=Math.min(...mins),hi=Math.max(...mins);
+  const dur=mins.length?(lo===hi?fmtMin(lo):fmtMin(lo)+' to '+fmtMin(hi)):s.dur;
+  const price=c.from!=null?'From $'+Math.round(c.from/100):(s.price||'Price at consult');
+  return {dur,price};
+}
+function bookButton(s,label){
+  if(CONTACT_ONLY[s.n]) return `<a class="book-now-btn" href="mailto:info@crownheirs.com?subject=${encodeURIComponent(s.n)}">Contact the studio to book</a>`;
+  const consult=/consult/i.test(s.price||'')||(BOOK_MAP[s.n]&&BOOK_MAP[s.n].slug==='consultations');
+  return `<a class="book-now-btn" href="${getBookingUrl(s.n)}">${label||(consult?'Book a consultation':'Book now')}</a>`;
+}
 function getBookingUrl(name){
   const m=BOOK_MAP[name]; if(!m) return '/book';
-  return '/book?service='+encodeURIComponent(m.slug)+(m.variation?'&variation='+encodeURIComponent(m.variation):'');
+  const c=CATALOG&&CATALOG.services[m.slug];
+  const L=curLen(), len=!m.variation&&L&&c&&c.len&&c.len[L]&&c.len[L].length?'&len='+L:'';
+  return '/book?service='+encodeURIComponent(m.slug)+(m.variation?'&variation='+encodeURIComponent(m.variation):'')+len;
 }
 
 function openDoor(n){
@@ -2047,16 +2086,17 @@ function buildD2Results(){
   let html=scored.length?scored.map(s=>`
     <div class="scard">
       ${svcVis('scard-vis',s.n,s.p,`<span style="font-size:2.2rem">${s.e}</span>`,s.badge)}
-      <div class="scard-body"><h3>${sqLabel(s.n)}</h3><p>${s.d}</p>${s.disclaimer?CHEM_DISCLAIMER_HTML:''}<div class="scard-meta"><span class="dur">⏱ ${s.dur}</span><span class="price">${s.price}</span></div></div>
-      <a class="book-now-btn" href="${getBookingUrl(s.n)}">${/consult/i.test(s.price)?'Book Consultation':'Book now'}</a>
+      <div class="scard-body"><h3>${sqLabel(s.n)}</h3><p>${s.d}</p>${s.disclaimer?CHEM_DISCLAIMER_HTML:''}<div class="scard-meta"><span class="dur">⏱ ${cardMeta(s).dur}</span><span class="price">${cardMeta(s).price}</span></div></div>
+      ${bookButton(s)}
     </div>`).join('')
     :`<div style="grid-column:1/-1;text-align:center;padding:40px;font-family:var(--font-serif);font-size:1.1rem;color:var(--ink-dim);">We'd love to build a custom plan. <a href="mailto:info@crownheirs.com" style="color:var(--terra)">Email us</a> or book a free consultation.</div>`;
   // If any loc-goal service present, append Loc Sparkles as an add-on card
   if(scored.some(s=>s.loc)){
+    const sp={n:'Loc Sparkles',d:'Adorn your locs with silver or gold beads. Book alongside your retwist or on its own.',dur:'20 min+',price:'From $12'};
     html+=`<div class="scard" style="border:1px dashed var(--border)">
-      <div class="scard-vis ph4"><div class="sbadge">Add-on</div><span style="font-size:2.2rem">✨</span></div>
-      <div class="scard-body"><h3>Loc Sparkles</h3><p>Adorn your locs with silver or gold beads — book alongside your retwist or on its own.</p><div class="scard-meta"><span class="dur">⏱ 20 min+</span><span class="price">From $12</span></div></div>
-      <a class="book-now-btn" href="${getBookingUrl('Loc Sparkles')}">Add Sparkles</a>
+      ${svcVis('scard-vis',sp.n,'ph4','<span style="font-size:2.2rem">✨</span>','Add-on')}
+      <div class="scard-body"><h3>${sqLabel(sp.n)}</h3><p>${sp.d}</p><div class="scard-meta"><span class="dur">⏱ ${cardMeta(sp).dur}</span><span class="price">${cardMeta(sp).price}</span></div></div>
+      ${bookButton(sp,'Add Sparkles')}
     </div>`;
   }
   grid.innerHTML=html;
@@ -2078,8 +2118,8 @@ function buildTinyResults(){
   grid.innerHTML=tinySvcs.length?tinySvcs.map(s=>`
     <div class="scard">
       ${svcVis('scard-vis',s.n,s.p,`<span style="font-size:2.2rem">${s.e}</span>`,s.badge)}
-      <div class="scard-body"><h3>${sqLabel(s.n)}</h3><p>${s.d}</p><div class="scard-meta"><span class="dur">⏱ ${s.dur}</span><span class="price">${s.price}</span></div></div>
-      <a class="book-now-btn" href="${getBookingUrl(s.n)}">${/consult/i.test(s.price)?'Book Consultation':'Book now'}</a>
+      <div class="scard-body"><h3>${sqLabel(s.n)}</h3><p>${s.d}</p><div class="scard-meta"><span class="dur">⏱ ${cardMeta(s).dur}</span><span class="price">${cardMeta(s).price}</span></div></div>
+      ${bookButton(s)}
     </div>`).join('')
     :`<div style="grid-column:1/-1;text-align:center;padding:40px;font-family:var(--font-serif);font-size:1.1rem;color:var(--ink-dim);">We'd love to build a custom plan. <a href="mailto:info@crownheirs.com" style="color:var(--terra)">Email us</a> or book a free consultation.</div>`;
   showD2Screen('qtiny',5);
@@ -2170,8 +2210,8 @@ function buildMatchResults(){
       ${svcVis('mresult-vis',r.n,r.p,r.e)}
       <div class="mresult-body">
         <h3>${sqLabel(r.n)}</h3><p>${r.d}</p>
-        <div class="mresult-meta"><span>Starting price</span><strong>${r.price}</strong></div>
-        <a class="book-now-btn" href="${getBookingUrl(r.n)}" style="width:100%;margin:0;display:block">${/consult/i.test(r.price||'')?'Book Consultation':'Book now'}</a>
+        <div class="mresult-meta"><span>Starting price</span><strong>${cardMeta(r).price}</strong></div>
+        ${bookButton(r).replace('class="book-now-btn"','class="book-now-btn" style="width:100%;margin:0;display:block"')}
       </div>
     </div>`;
   }).join('');
@@ -2186,7 +2226,8 @@ const ALL_SVCS={
   'Takedown':            {n:'Takedown',d:"In between styles? Let us take your current style down, wash, and prep for what's next.",dur:'30 min+',price:'From $30',badge:'Removal',e:'🧺',p:'ph2'},
   'Sew-In Maintenance':  {n:'Sew-In Maintenance',d:'Tighten, wash, and restyle your existing sew-in.',dur:'1.25 hrs',price:'$35',badge:'Maintenance',e:'➰',p:'ph2'},
   'Shampoo & Style':     {n:'Shampoo & Style',d:'Signature shampoo, conditioner, and mold to your desired style. Perfect refresh between services.',dur:'1 hr',price:'From $90',badge:'Refresh',e:'💧',p:'ph3'},
-  'Perimeter Touch Up':  {n:'Perimeter Touch Up',d:'First two/three rows of braids, faux locs, or singles — stretches any install.',dur:'2 hrs',price:'From $120',badge:'Touch-up',e:'✨',p:'ph2'},
+  'Perimeter Touch Up':  {n:'Perimeter Touch Up',d:'Redo the first two or three rows of braids, faux locs or singles to stretch your install. Book by contacting the studio.',dur:'2 hrs',price:'From $120',badge:'Touch-up',e:'✨',p:'ph2'},
+  'Relaxer Edge-Up':     {n:'Relaxer Edge-Up',d:'Relaxer on the edges and hairline only, to keep a relaxed style neat between root touch-ups.',dur:'25 min',price:'From $45',badge:'Edge-up',e:'🧪',p:'ph1',disclaimer:true},
   'Loc Sparkles':        {n:'Loc Sparkles',d:'Adorn your locs with silver or gold beads sewn into each loc.',dur:'20 min+',price:'From $12',badge:'Add-on',e:'✨',p:'ph4'},
 };
 
@@ -2198,7 +2239,8 @@ const HAVE_MAP={
     label:'Braids',
     prompt:'Braids of any kind — box, knotless, cornrows, twists, faux locs.',
     needs:[
-      {id:'maintenance',label:'Maintenance / Touch-up',desc:'Edges, new growth, add-ons',service:'Braiding Add-Ons'},
+      {id:'maintenance',label:'Touch-up',desc:'Redo the front two or three rows',service:'Perimeter Touch Up'},
+      {id:'addons',label:'Add-ons',desc:'Beads, boho curls, stitch style',service:'Braiding Add-Ons'},
       {id:'removal',label:'Removal',desc:'Take them down, wash, and reset',service:'Takedown'},
       {id:'refresh',label:'Refresh',desc:'Wash, style, make them feel new',service:'Shampoo & Style'}
     ]
@@ -2226,7 +2268,7 @@ const HAVE_MAP={
     label:'Color or Chemical',
     prompt:'Existing color, relaxer, or perm.',
     needs:[
-      {id:'touchup',label:'Perimeter Touch Up',desc:'Fix edges / hairline on existing install',service:'Perimeter Touch Up'},
+      {id:'touchup',label:'Relaxer edge-up',desc:'Relax the edges and hairline',service:'Relaxer Edge-Up'},
       {id:'newcolor',label:'New color / service',desc:'Route me into the chemical flow',routeTo:'chemical'}
     ]
   },
@@ -2294,8 +2336,8 @@ function buildD4Results(){
   if(svc){
     grid.innerHTML=`<div class="scard">
       ${svcVis('scard-vis',svc.n,svc.p,`<span style="font-size:2.2rem">${svc.e||'•'}</span>`,svc.badge||'Service')}
-      <div class="scard-body"><h3>${sqLabel(svc.n)}</h3><p>${svc.d||''}</p><div class="scard-meta"><span class="dur">⏱ ${svc.dur||''}</span><span class="price">${svc.price||''}</span></div></div>
-      <a class="book-now-btn" href="${getBookingUrl(svc.n)}">${/consult/i.test(svc.price||'')?'Book Consultation':'Book now'}</a>
+      <div class="scard-body"><h3>${sqLabel(svc.n)}</h3><p>${svc.d||''}</p><div class="scard-meta"><span class="dur">⏱ ${cardMeta(svc).dur}</span><span class="price">${cardMeta(svc).price}</span></div></div>
+      ${bookButton(svc)}
     </div>`;
   } else {
     grid.innerHTML=`<div style="grid-column:1/-1;text-align:center;padding:40px;font-family:var(--font-serif);font-size:1.1rem;color:var(--ink-dim);">We couldn't match that automatically. <a href="mailto:info@crownheirs.com" style="color:var(--terra)">Email us</a> and we'll take care of you.</div>`;
@@ -2333,8 +2375,8 @@ function initBeauty(){
     }
     html+=`<div class="scard">
       ${svcVis('scard-vis',s.n,s.p,`<span style="font-size:2.2rem">${s.e}</span>`,s.badge)}
-      <div class="scard-body"><h3>${sqLabel(s.n)}</h3><p>${s.d}</p><div class="scard-meta"><span class="dur">⏱ ${s.dur}</span><span class="price">${s.price}</span></div></div>
-      <a class="book-now-btn" href="${getBookingUrl(s.n)}">Book now</a>
+      <div class="scard-body"><h3>${sqLabel(s.n)}</h3><p>${s.d}</p><div class="scard-meta"><span class="dur">⏱ ${cardMeta(s).dur}</span><span class="price">${cardMeta(s).price}</span></div></div>
+      ${bookButton(s)}
     </div>`;
   });
   grid.innerHTML=html;
