@@ -87,5 +87,5 @@ test('finder: no Square booking links remain; cards book on this site', () => {
   assert.doesNotMatch(html, /SQUARE_BASE|BOOKING_URLS/);
   assert.match(html, /getBookingUrl\(name\)[\s\S]*?'\/book\?service='/);
   assert.ok((html.match(/href="\/book"/g) || []).length >= 10, 'browse/book buttons go to /book');
-  assert.ok((html.match(/sqLabel\(/g) || []).length >= 6, 'card labels go through sqLabel');
+  assert.ok((html.match(/cardHead\(/g) || []).length >= 5, 'card titles show the friendly name with Square\'s name underneath');
 });
