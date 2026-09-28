@@ -1,0 +1,1972 @@
+{
+ "generatedFrom": "lib/seed-data.json",
+ "lengthScale": {
+  "twa": {
+   "label": "Very Short",
+   "desc": "Close to the scalp"
+  },
+  "short": {
+   "label": "Short",
+   "desc": "To the top of the nape"
+  },
+  "medium": {
+   "label": "Medium",
+   "desc": "Neck length"
+  },
+  "long": {
+   "label": "Long",
+   "desc": "Shoulder length or past"
+  }
+ },
+ "services": {
+  "back-ii-school-service-menu-limited-time": {
+   "name": "Back II School Service Menu - Limited Time",
+   "category": "Specials",
+   "active": false,
+   "from": null,
+   "variations": [
+    [
+     "Boy's Haircuts",
+     30
+    ],
+    [
+     "Children's Press (Silk Press for Children)",
+     120
+    ],
+    [
+     "Feed - In Style Braids (2 Braids)",
+     90
+    ],
+    [
+     "Feed - In Style Braids (3-6)",
+     120
+    ],
+    [
+     "Natural Braids + Line Up (Straightbacks/Cornrows up to 6 braids)",
+     150
+    ],
+    [
+     "Retwist + Basic Style",
+     120
+    ],
+    [
+     "Traditional or Knotless Braids - Large 18'",
+     150
+    ],
+    [
+     "Traditional or Knotless Braids - Large 24'",
+     150
+    ]
+   ]
+  },
+  "barber-s-corner": {
+   "name": "Barber's Corner",
+   "category": "Barber",
+   "active": true,
+   "from": 2500,
+   "variations": [
+    [
+     "Beard Shave",
+     30
+    ],
+    [
+     "Edge Up",
+     30
+    ],
+    [
+     "Traditional Cut - Child",
+     30
+    ],
+    [
+     "Traditionial Cut",
+     30
+    ],
+    [
+     "Ultimate Cut - Adult",
+     60
+    ],
+    [
+     "Ultimate Cut - Child",
+     45
+    ],
+    [
+     "Undercut",
+     30
+    ],
+    [
+     "Undercut w/ design",
+     30
+    ]
+   ]
+  },
+  "box-braids-traditional": {
+   "name": "Box Braids (Traditional)",
+   "category": "Braids & Twists",
+   "active": true,
+   "from": null,
+   "variations": [
+    [
+     "Large/Jumbo '18",
+     150
+    ],
+    [
+     "Large/Jumbo 24'",
+     180
+    ],
+    [
+     "Large/Jumbo 36'",
+     210
+    ],
+    [
+     "Medium '18",
+     210
+    ],
+    [
+     "Medium 24'",
+     240
+    ],
+    [
+     "Medium 36'",
+     270
+    ],
+    [
+     "Small 24'",
+     360
+    ],
+    [
+     "Small 36'",
+     390
+    ],
+    [
+     "Smedium '18",
+     270
+    ],
+    [
+     "Smedium 24'",
+     300
+    ],
+    [
+     "Smedium 36'",
+     330
+    ],
+    [
+     "XSmall 24’",
+     480
+    ]
+   ]
+  },
+  "braiding-add-ons": {
+   "name": "Braiding Add-Ons",
+   "category": "Add-Ons",
+   "active": true,
+   "from": 2000,
+   "variations": [
+    [
+     "Beading Add-On",
+     30
+    ],
+    [
+     "Boho Styling - A little more than Sprinkles, but a dash",
+     60
+    ],
+    [
+     "Boho Styling - Full Bohemian",
+     120
+    ],
+    [
+     "Boho Styling - Splash (loose hair througout)",
+     90
+    ],
+    [
+     "Boho Styling - Sprinkles of Loose Hair",
+     30
+    ],
+    [
+     "Bora Bora Style - Hair not Included",
+     150
+    ],
+    [
+     "Curls for the Bottom (For Knotless/Box braids)",
+     30
+    ],
+    [
+     "Stitch Style Braiding Add-On",
+     40
+    ],
+    [
+     "Triangle Parts",
+     30
+    ]
+   ]
+  },
+  "braids-knotless": {
+   "name": "Braids (Knotless)",
+   "category": "Braids & Twists",
+   "active": true,
+   "from": 17500,
+   "variations": [
+    [
+     "Large/Jumbo 18'",
+     150
+    ],
+    [
+     "Large/Jumbo 24'",
+     180
+    ],
+    [
+     "Large/Jumbo 36'",
+     210
+    ],
+    [
+     "Medium 18'",
+     210
+    ],
+    [
+     "Medium 24'",
+     240
+    ],
+    [
+     "Medium 36'",
+     270
+    ],
+    [
+     "Small 18'",
+     330
+    ],
+    [
+     "Small 24'",
+     360
+    ],
+    [
+     "Small 36'",
+     390
+    ],
+    [
+     "Smedium 18'",
+     270
+    ],
+    [
+     "Smedium 24'",
+     300
+    ],
+    [
+     "Smedium 36'",
+     330
+    ]
+   ]
+  },
+  "chemical-perm": {
+   "name": "Chemical Perm",
+   "category": "Chemical & Color",
+   "active": true,
+   "from": 8000,
+   "variations": [
+    [
+     "Basic Perm (Wave Pattern) - Long",
+     150
+    ],
+    [
+     "Basic Perm (Wave Pattern) - Medium",
+     90
+    ],
+    [
+     "Basic Perm (Wave) - Short Hair",
+     90
+    ],
+    [
+     "Luxury Texture Transformation",
+     210
+    ],
+    [
+     "Spiral Perm (Tight Curl) - Long",
+     150
+    ],
+    [
+     "Spiral Perm (Tight Curl) - Medium",
+     150
+    ],
+    [
+     "Spiral Perm (Tight Curl) - Short Hair",
+     90
+    ]
+   ]
+  },
+  "chemical-relaxer": {
+   "name": "Chemical Relaxer",
+   "category": "Chemical & Color",
+   "active": true,
+   "from": 4500,
+   "variations": [
+    [
+     "Long Hair (Virgin) Relaxer + Style",
+     105
+    ],
+    [
+     "Relaxer Edge Up (Perimeter)",
+     25
+    ],
+    [
+     "Root Touch Up",
+     45
+    ],
+    [
+     "Root Touch Up + Style",
+     75
+    ],
+    [
+     "Short Hair (Virgin) Relaxer + Style",
+     90
+    ],
+    [
+     "Virgin Relaxer (Long)",
+     70
+    ],
+    [
+     "Virgin Relaxer (Short)",
+     60
+    ]
+   ],
+   "len": {
+    "short": [
+     "Relaxer Edge Up (Perimeter)",
+     "Root Touch Up",
+     "Root Touch Up + Style",
+     "Short Hair (Virgin) Relaxer + Style",
+     "Virgin Relaxer (Short)"
+    ],
+    "medium": [
+     "Long Hair (Virgin) Relaxer + Style",
+     "Relaxer Edge Up (Perimeter)",
+     "Root Touch Up",
+     "Root Touch Up + Style",
+     "Short Hair (Virgin) Relaxer + Style",
+     "Virgin Relaxer (Long)",
+     "Virgin Relaxer (Short)"
+    ],
+    "long": [
+     "Long Hair (Virgin) Relaxer + Style",
+     "Relaxer Edge Up (Perimeter)",
+     "Root Touch Up",
+     "Root Touch Up + Style",
+     "Virgin Relaxer (Long)"
+    ]
+   }
+  },
+  "classes": {
+   "name": "Classes",
+   "category": "Classes",
+   "active": false,
+   "from": null,
+   "variations": [
+    [
+     "Lash Basics",
+     30
+    ],
+    [
+     "Loc Basics",
+     30
+    ],
+    [
+     "Loc Styling - 1 on 1",
+     180
+    ]
+   ]
+  },
+  "color": {
+   "name": "Color",
+   "category": "Chemical & Color",
+   "active": true,
+   "from": 7500,
+   "variations": [
+    [
+     "All Over Color (Deposit Only)",
+     105
+    ],
+    [
+     "All over Color (Double Processing)",
+     150
+    ],
+    [
+     "All Over Color w/ Highlights",
+     135
+    ],
+    [
+     "Cellophane/Rinse",
+     60
+    ],
+    [
+     "Full Highlights",
+     90
+    ],
+    [
+     "Partial Highlight",
+     70
+    ],
+    [
+     "Root Touch Ups",
+     50
+    ],
+    [
+     "Toner",
+     35
+    ]
+   ]
+  },
+  "consultations": {
+   "name": "Consultations",
+   "category": "Consultations",
+   "active": true,
+   "from": null,
+   "variations": [
+    [
+     "Braiding Consultation",
+     15
+    ],
+    [
+     "Curly Hair Consultation",
+     20
+    ],
+    [
+     "General Color",
+     20
+    ],
+    [
+     "General Consultation",
+     20
+    ],
+    [
+     "Loc Color",
+     20
+    ],
+    [
+     "Loc Consult",
+     15
+    ],
+    [
+     "Zoom Consultation",
+     30
+    ]
+   ]
+  },
+  "crochet-styles": {
+   "name": "Crochet Styles",
+   "category": "Braids & Twists",
+   "active": true,
+   "from": 18000,
+   "variations": [
+    [
+     "Individuals Crochet",
+     210
+    ],
+    [
+     "Traditional Crochet",
+     150
+    ]
+   ]
+  },
+  "curl-definition-restoration": {
+   "name": "Curl Definition + Restoration",
+   "category": "Cuts & Styling",
+   "active": true,
+   "from": 6500,
+   "variations": [
+    [
+     "Curl Shape + Define (Includes Light Trim)",
+     75
+    ],
+    [
+     "Curly Quick Reset (Shampoo + Glow)",
+     45
+    ],
+    [
+     "Deluxe Curl Definition (Steam Hydration + Deep Conditioning)",
+     210
+    ],
+    [
+     "Exclusive Curl Restoration (Refresh, Curl Set + Trim)",
+     180
+    ],
+    [
+     "Signature Curl Definition (Refresh + Curl Set)",
+     150
+    ]
+   ]
+  },
+  "facials": {
+   "name": "Facials",
+   "category": "Beauty",
+   "active": true,
+   "from": null,
+   "variations": [
+    [
+     "Acne Facials",
+     75
+    ],
+    [
+     "Back Facial",
+     60
+    ],
+    [
+     "Signature Facial",
+     70
+    ],
+    [
+     "Vajacial",
+     45
+    ],
+    [
+     "Vajacial + Brazilian",
+     80
+    ],
+    [
+     "Vitamin C hydration/Ageless facial",
+     70
+    ]
+   ]
+  },
+  "faux-locs-butterfly-and-soft-locs": {
+   "name": "Faux Locs (Butterfly & Soft Locs)",
+   "category": "Locs",
+   "active": true,
+   "from": 26500,
+   "variations": [
+    [
+     "Large/Jumbo 24'",
+     300
+    ],
+    [
+     "Largo/Jumbo 36'",
+     300
+    ],
+    [
+     "Medium 24'",
+     360
+    ],
+    [
+     "Medium 36'",
+     360
+    ],
+    [
+     "Small 24'",
+     420
+    ],
+    [
+     "Small 36'",
+     420
+    ]
+   ]
+  },
+  "feed-in-style-braids": {
+   "name": "Feed-In Style Braids",
+   "category": "Braids & Twists",
+   "active": true,
+   "from": 9500,
+   "variations": [
+    [
+     "10 - 15 Feed - Ins (Straight back)",
+     180
+    ],
+    [
+     "16 - 25 Feed - Ins",
+     225
+    ],
+    [
+     "26 - 35 Feed - Ins",
+     270
+    ],
+    [
+     "3 - 6 Braids",
+     120
+    ],
+    [
+     "6 - 9 Braids",
+     150
+    ],
+    [
+     "Bun",
+     165
+    ],
+    [
+     "Long Ponytail",
+     210
+    ],
+    [
+     "Tribal Style (Half to Scalp and Singles in Back)",
+     270
+    ],
+    [
+     "Two Feed-In Braids",
+     90
+    ]
+   ]
+  },
+  "foreign-fill": {
+   "name": "Foreign Fill",
+   "category": "Beauty",
+   "active": true,
+   "from": null,
+   "variations": [
+    [
+     "Regular",
+     30
+    ]
+   ]
+  },
+  "fulani-tribal-braids-half-braided-to-scalp-individuals-in-back": {
+   "name": "Fulani/Tribal Braids (Half Braided to Scalp, Individuals in Back)",
+   "category": "Braids & Twists",
+   "active": true,
+   "from": null,
+   "variations": [
+    [
+     "Large/Jumbo 18\"",
+     180
+    ],
+    [
+     "Large/Jumbo 24'",
+     210
+    ],
+    [
+     "Large/Jumbo 36\"",
+     240
+    ],
+    [
+     "Medium 18\"",
+     240
+    ],
+    [
+     "Medium 24\"",
+     270
+    ],
+    [
+     "Medium 36\"",
+     300
+    ],
+    [
+     "Small 18\"",
+     360
+    ],
+    [
+     "Small 24\"",
+     390
+    ],
+    [
+     "Small 36\"",
+     420
+    ],
+    [
+     "Smedium 18\"",
+     300
+    ],
+    [
+     "Smedium 24\"",
+     330
+    ],
+    [
+     "Smedium 36\"",
+     360
+    ],
+    [
+     "Xsmall 24\"",
+     480
+    ]
+   ]
+  },
+  "hair-and-scalp-treatments-add-ons": {
+   "name": "Hair & Scalp Treatments (Add-ons)",
+   "category": "Add-Ons",
+   "active": true,
+   "from": null,
+   "variations": [
+    [
+     "Deep Conditioning Treatment",
+     30
+    ],
+    [
+     "Deluxe Therapeutic Shampoo",
+     10
+    ],
+    [
+     "Detangle",
+     45
+    ],
+    [
+     "Hot Oil Treatment",
+     30
+    ],
+    [
+     "Olaplex Treatment",
+     30
+    ],
+    [
+     "Steam Hydration Treatment",
+     20
+    ]
+   ]
+  },
+  "hair-cut": {
+   "name": "Hair Cut",
+   "category": "Cuts & Styling",
+   "active": true,
+   "from": 4000,
+   "variations": [
+    [
+     "Barber Cut",
+     40
+    ],
+    [
+     "Extra Long/Thick Cut",
+     75
+    ],
+    [
+     "Medium to Long (Shoulder) Cut",
+     60
+    ],
+    [
+     "Short Length (Pixie/Above Earlobe) Cut",
+     45
+    ]
+   ],
+   "len": {
+    "twa": [
+     "Barber Cut",
+     "Short Length (Pixie/Above Earlobe) Cut"
+    ],
+    "short": [
+     "Short Length (Pixie/Above Earlobe) Cut"
+    ],
+    "medium": [
+     "Medium to Long (Shoulder) Cut"
+    ],
+    "long": [
+     "Extra Long/Thick Cut",
+     "Medium to Long (Shoulder) Cut"
+    ]
+   }
+  },
+  "hair-extensions": {
+   "name": "Hair Extensions",
+   "category": "Weaves & Extensions",
+   "active": true,
+   "from": 20000,
+   "variations": [
+    [
+     "Micro- links Installation",
+     300
+    ],
+    [
+     "Micro-Link Retightening",
+     150
+    ],
+    [
+     "Tape - Ins Installation",
+     120
+    ]
+   ]
+  },
+  "individuals-over-locs": {
+   "name": "Individuals Over Locs",
+   "category": "Locs",
+   "active": true,
+   "from": 27500,
+   "variations": [
+    [
+     "Braids Over Locs",
+     300
+    ],
+    [
+     "Faux Locs Over Locs",
+     300
+    ],
+    [
+     "Marley Twist Over Locs",
+     300
+    ]
+   ]
+  },
+  "individuals-singles": {
+   "name": "Individuals (Singles)",
+   "category": "Cuts & Styling",
+   "active": true,
+   "from": 18500,
+   "variations": [
+    [
+     "Braids over Locs",
+     360
+    ],
+    [
+     "Faux Locs over Locs",
+     360
+    ],
+    [
+     "Invisible Locs (Two strands with Added Hair)",
+     210
+    ],
+    [
+     "Marley Twists",
+     240
+    ],
+    [
+     "Marley Twists (Over Locs)",
+     240
+    ],
+    [
+     "Passion Twists",
+     300
+    ],
+    [
+     "Senegalese Twists",
+     300
+    ]
+   ]
+  },
+  "instant-locs": {
+   "name": "Instant Locs",
+   "category": "Locs",
+   "active": true,
+   "from": 50000,
+   "variations": [
+    [
+     "Regular",
+     240
+    ]
+   ]
+  },
+  "keratin-treatment-crown-smooth-experience": {
+   "name": "Keratin Treatment - Crown Smooth Experience",
+   "category": "Chemical & Color",
+   "active": true,
+   "from": null,
+   "variations": [
+    [
+     "Extra Long or High Density",
+     300
+    ],
+    [
+     "Long",
+     240
+    ],
+    [
+     "Short to Medium",
+     195
+    ]
+   ],
+   "len": {
+    "short": [
+     "Short to Medium"
+    ],
+    "medium": [
+     "Short to Medium"
+    ],
+    "long": [
+     "Extra Long or High Density",
+     "Long"
+    ]
+   }
+  },
+  "lash-2-3-week-fill": {
+   "name": "Lash 2/3 Week Fill",
+   "category": "Beauty",
+   "active": true,
+   "from": null,
+   "variations": [
+    [
+     "Classic",
+     60
+    ],
+    [
+     "Classic PLUS",
+     60
+    ],
+    [
+     "Hybrid",
+     60
+    ],
+    [
+     "Volume",
+     60
+    ]
+   ]
+  },
+  "lash-add-on": {
+   "name": "Lash Add-on",
+   "category": "Add-Ons",
+   "active": false,
+   "from": null,
+   "variations": [
+    [
+     "Regular",
+     30
+    ]
+   ]
+  },
+  "lash-extension-removal": {
+   "name": "Lash Extension Removal",
+   "category": "Beauty",
+   "active": true,
+   "from": null,
+   "variations": [
+    [
+     "Regular",
+     30
+    ]
+   ]
+  },
+  "lash-extensions-full-sets": {
+   "name": "Lash Extensions Full Sets",
+   "category": "Beauty",
+   "active": true,
+   "from": null,
+   "variations": [
+    [
+     "Classic",
+     150
+    ],
+    [
+     "Classic PLUS",
+     150
+    ],
+    [
+     "Hybrid",
+     150
+    ],
+    [
+     "Mega Volume",
+     180
+    ],
+    [
+     "Volume",
+     150
+    ]
+   ]
+  },
+  "lash-lift-and-tint": {
+   "name": "Lash Lift and Tint",
+   "category": "Beauty",
+   "active": false,
+   "from": null,
+   "variations": [
+    [
+     "Regular",
+     60
+    ]
+   ]
+  },
+  "lash-mini-fill": {
+   "name": "Lash Mini Fill",
+   "category": "Beauty",
+   "active": false,
+   "from": null,
+   "variations": [
+    [
+     "Classic",
+     30
+    ],
+    [
+     "Classic PLUS",
+     30
+    ],
+    [
+     "Hybrid",
+     30
+    ],
+    [
+     "Volume",
+     30
+    ]
+   ]
+  },
+  "loc-color": {
+   "name": "Loc Color",
+   "category": "Locs",
+   "active": true,
+   "from": null,
+   "variations": [
+    [
+     "Deposit Only (No Bleach Needed)",
+     75
+    ],
+    [
+     "Double Processing (Bleach Needed)",
+     100
+    ],
+    [
+     "Just the Tips / Root Touch Up",
+     75
+    ]
+   ]
+  },
+  "loc-comb-out-services": {
+   "name": "Loc Comb Out Services",
+   "category": "Locs",
+   "active": true,
+   "from": null,
+   "variations": [
+    [
+     "Established Locs: Chin to Shoulder",
+     480
+    ],
+    [
+     "Established Locs: Mid-Back + Beyond",
+     480
+    ],
+    [
+     "Established Locs: Shoulder to Mid-back",
+     480
+    ],
+    [
+     "Immature Locs : Chin to Shoulder",
+     480
+    ],
+    [
+     "Immature Locs: Mid-back + Beyond",
+     480
+    ],
+    [
+     "Immature Locs: Shoulder to Mid-Back",
+     480
+    ],
+    [
+     "Mature Locs: Chin to Shoulder",
+     480
+    ],
+    [
+     "Mature Locs: Mid-Back + Beyond",
+     480
+    ],
+    [
+     "Mature Locs: Shoulder to Mid-Back",
+     480
+    ]
+   ]
+  },
+  "loc-crochet-retighten": {
+   "name": "Loc Crochet Retighten",
+   "category": "Locs",
+   "active": true,
+   "from": null,
+   "variations": [
+    [
+     "Regular",
+     180
+    ]
+   ]
+  },
+  "loc-detoxes": {
+   "name": "Loc Detoxes",
+   "category": "Locs",
+   "active": true,
+   "from": null,
+   "variations": [
+    [
+     "Crown Lux Detox (Includes Massage Chair/Add-On)",
+     45
+    ],
+    [
+     "General Detox",
+     45
+    ],
+    [
+     "General Detox (Add-On Service)",
+     30
+    ],
+    [
+     "Signature Detox (Add-on Service)",
+     30
+    ]
+   ]
+  },
+  "loc-extensions": {
+   "name": "Loc Extensions",
+   "category": "Locs",
+   "active": true,
+   "from": null,
+   "variations": [
+    [
+     "Regular",
+     360
+    ]
+   ]
+  },
+  "loc-interlocking": {
+   "name": "Loc Interlocking",
+   "category": "Locs",
+   "active": true,
+   "from": 8500,
+   "variations": [
+    [
+     "Interlocking (Microlocs / over 150)",
+     300
+    ],
+    [
+     "Interlocking (Small / Under 150 over 90 locs)",
+     240
+    ],
+    [
+     "Interlocking (Traditional Size / under 90 locs)",
+     180
+    ]
+   ]
+  },
+  "loc-repairs": {
+   "name": "Loc Repairs",
+   "category": "Locs",
+   "active": true,
+   "from": null,
+   "variations": [
+    [
+     "Multiple Repairs",
+     30
+    ],
+    [
+     "Regular",
+     15
+    ]
+   ]
+  },
+  "loc-retwist": {
+   "name": "Loc Retwist",
+   "category": "Locs",
+   "active": true,
+   "from": 6500,
+   "variations": [
+    [
+     "Brother/Sisterlocks (Palm roll)",
+     210
+    ],
+    [
+     "Existing Client (Over 45 days)",
+     90
+    ],
+    [
+     "Existing Client (within 45 days)",
+     90
+    ],
+    [
+     "Microlocs (New Client/Over 45 days)",
+     150
+    ],
+    [
+     "Microlocs (Over 135 locs)",
+     150
+    ],
+    [
+     "New Client",
+     90
+    ]
+   ]
+  },
+  "loc-sparkles": {
+   "name": "Loc Sparkles",
+   "category": "Locs",
+   "active": true,
+   "from": 1200,
+   "variations": [
+    [
+     "10 Locs",
+     90
+    ],
+    [
+     "15 Locs",
+     120
+    ],
+    [
+     "5 Locs",
+     40
+    ],
+    [
+     "Fully Sparked",
+     240
+    ],
+    [
+     "Per Loc",
+     20
+    ]
+   ]
+  },
+  "loc-starters": {
+   "name": "Loc Starters",
+   "category": "Locs",
+   "active": true,
+   "from": null,
+   "variations": [
+    [
+     "Micro Starters (Extra Long)",
+     360
+    ],
+    [
+     "Micro Starters (Long)",
+     270
+    ],
+    [
+     "Micro Starters (Short)",
+     210
+    ],
+    [
+     "Regular",
+     150
+    ],
+    [
+     "Starters - Just the top",
+     90
+    ],
+    [
+     "Starters - Long Hair",
+     180
+    ]
+   ],
+   "len": {
+    "twa": [
+     "Micro Starters (Short)",
+     "Regular",
+     "Starters - Just the top"
+    ],
+    "short": [
+     "Micro Starters (Short)",
+     "Regular"
+    ],
+    "medium": [
+     "Micro Starters (Long)",
+     "Micro Starters (Short)",
+     "Regular"
+    ],
+    "long": [
+     "Micro Starters (Extra Long)",
+     "Micro Starters (Long)",
+     "Starters - Long Hair"
+    ]
+   }
+  },
+  "loc-styles": {
+   "name": "Loc Styles",
+   "category": "Locs",
+   "active": true,
+   "from": 9000,
+   "variations": [
+    [
+     "Exclusive Style (Two strand twists, ropes, halos etc)",
+     30
+    ],
+    [
+     "Loc Curls - Flexirods (Requires extended dryer time)",
+     45
+    ],
+    [
+     "Loc Curls - Pipecleaners",
+     60
+    ],
+    [
+     "Loc Two Strands/Ropes - Long + Small",
+     50
+    ],
+    [
+     "Loc Two Strands/Ropes - Long or Small",
+     40
+    ],
+    [
+     "Regular",
+     20
+    ]
+   ]
+  },
+  "loose-natural-styles": {
+   "name": "Loose Natural Styles",
+   "category": "Cuts & Styling",
+   "active": true,
+   "from": 5500,
+   "variations": [
+    [
+     "Extra Long",
+     180
+    ],
+    [
+     "Extra Long Exclusive Style (Combos, Invisible Locs, Flexi Rod, Bantu Knots, etc)",
+     210
+    ],
+    [
+     "Long Exclusive Style (Combos, Invisible Locs, Flexi Rod, Bantu Knots, etc)",
+     150
+    ],
+    [
+     "Long Hair",
+     120
+    ],
+    [
+     "Medium Exclusive Style (Combos, Invisible Locs, Flexi Rod, Bantu Knots, etc)",
+     120
+    ],
+    [
+     "Medium Length",
+     90
+    ],
+    [
+     "Short Hair",
+     75
+    ]
+   ],
+   "len": {
+    "twa": [
+     "Short Hair"
+    ],
+    "short": [
+     "Short Hair"
+    ],
+    "medium": [
+     "Medium Exclusive Style (Combos, Invisible Locs, Flexi Rod, Bantu Knots, etc)",
+     "Medium Length"
+    ],
+    "long": [
+     "Extra Long",
+     "Extra Long Exclusive Style (Combos, Invisible Locs, Flexi Rod, Bantu Knots, etc)",
+     "Long Exclusive Style (Combos, Invisible Locs, Flexi Rod, Bantu Knots, etc)",
+     "Long Hair"
+    ]
+   }
+  },
+  "luxury-experience-add-ons": {
+   "name": "Luxury Experience Add-Ons",
+   "category": "Add-Ons",
+   "active": true,
+   "from": null,
+   "variations": [
+    [
+     "High Frequency Treatment",
+     20
+    ],
+    [
+     "Shampoo Massage Chair",
+     5
+    ],
+    [
+     "Steamer and Botanical Mixer",
+     20
+    ]
+   ]
+  },
+  "make-up-add-ons": {
+   "name": "Make Up: Add-ons",
+   "category": "Add-Ons",
+   "active": false,
+   "from": null,
+   "variations": [
+    [
+     "Eyebrows",
+     10
+    ],
+    [
+     "Glitter",
+     5
+    ],
+    [
+     "Lashes",
+     5
+    ],
+    [
+     "Rhinestones",
+     10
+    ]
+   ]
+  },
+  "make-up-full-face": {
+   "name": "Make Up: Full Face",
+   "category": "Beauty",
+   "active": true,
+   "from": null,
+   "variations": [
+    [
+     "Full Glam",
+     60
+    ],
+    [
+     "Natural Glam",
+     60
+    ],
+    [
+     "Soft Glam",
+     60
+    ],
+    [
+     "Ultimate Glamour",
+     90
+    ]
+   ]
+  },
+  "make-up-half-face": {
+   "name": "Make Up: Half Face",
+   "category": "Beauty",
+   "active": true,
+   "from": null,
+   "variations": [
+    [
+     "Dramatic Eye",
+     30
+    ],
+    [
+     "Natural Eye",
+     30
+    ],
+    [
+     "Soft Eye",
+     30
+    ]
+   ]
+  },
+  "mini-twists-two-strands": {
+   "name": "Mini Twists (Two Strands)",
+   "category": "Braids & Twists",
+   "active": true,
+   "from": 12500,
+   "variations": [
+    [
+     "Extra Small Parts (Long Hair / Shoulder Length)",
+     195
+    ],
+    [
+     "Extra Small Parts (Medium / Neck Length)",
+     165
+    ],
+    [
+     "Extra Small Parts (Short Hair / Top of Nape Length)",
+     135
+    ],
+    [
+     "Micro Parts (Long Hair / Shoulder Length)",
+     240
+    ],
+    [
+     "Micro Parts (Medium / Neck Length)",
+     210
+    ],
+    [
+     "Micro Parts (Short Hair / Top of Nape Length)",
+     165
+    ],
+    [
+     "Small Parts (Long Hair / Shoulder Length)",
+     150
+    ],
+    [
+     "Small Parts (Medium / Neck Length)",
+     120
+    ],
+    [
+     "Small Parts (Short Hair / Top of Nape Length)",
+     90
+    ]
+   ],
+   "len": {
+    "twa": [
+     "Extra Small Parts (Short Hair / Top of Nape Length)",
+     "Micro Parts (Short Hair / Top of Nape Length)",
+     "Small Parts (Short Hair / Top of Nape Length)"
+    ],
+    "short": [
+     "Extra Small Parts (Short Hair / Top of Nape Length)",
+     "Micro Parts (Short Hair / Top of Nape Length)",
+     "Small Parts (Short Hair / Top of Nape Length)"
+    ],
+    "medium": [
+     "Extra Small Parts (Medium / Neck Length)",
+     "Micro Parts (Medium / Neck Length)",
+     "Small Parts (Medium / Neck Length)"
+    ],
+    "long": [
+     "Extra Small Parts (Long Hair / Shoulder Length)",
+     "Micro Parts (Long Hair / Shoulder Length)",
+     "Small Parts (Long Hair / Shoulder Length)"
+    ]
+   }
+  },
+  "mini-twists-two-strands-with-added-hair": {
+   "name": "Mini Twists (Two Strands) with Added Hair",
+   "category": "Braids & Twists",
+   "active": true,
+   "from": 22500,
+   "variations": [
+    [
+     "Extra Small Parts (Long Hair / Shoulder Length)",
+     270
+    ],
+    [
+     "Extra Small Parts (Medium / Neck Length)",
+     225
+    ],
+    [
+     "Extra Small Parts (Short / Top of Nape Length)",
+     195
+    ],
+    [
+     "Micro Parts (Long Hair / Shoulder Length)",
+     390
+    ],
+    [
+     "Micro Parts (Medium / Neck Length)",
+     270
+    ],
+    [
+     "Micro Parts (Short / Top of Nape Length)",
+     285
+    ],
+    [
+     "Small Parts (Long Hair / Shoulder Length)",
+     210
+    ],
+    [
+     "Small Parts (Medium / Neck Length)",
+     180
+    ],
+    [
+     "Small Parts (Short / Top of Nape Length)",
+     150
+    ]
+   ],
+   "len": {
+    "twa": [
+     "Extra Small Parts (Short / Top of Nape Length)",
+     "Micro Parts (Short / Top of Nape Length)",
+     "Small Parts (Short / Top of Nape Length)"
+    ],
+    "short": [
+     "Extra Small Parts (Short / Top of Nape Length)",
+     "Micro Parts (Short / Top of Nape Length)",
+     "Small Parts (Short / Top of Nape Length)"
+    ],
+    "medium": [
+     "Extra Small Parts (Medium / Neck Length)",
+     "Micro Parts (Medium / Neck Length)",
+     "Small Parts (Medium / Neck Length)"
+    ],
+    "long": [
+     "Extra Small Parts (Long Hair / Shoulder Length)",
+     "Micro Parts (Long Hair / Shoulder Length)",
+     "Small Parts (Long Hair / Shoulder Length)"
+    ]
+   }
+  },
+  "miracle-knots-braids-natural-braids": {
+   "name": "Miracle Knots Braids (Natural Braids)",
+   "category": "Braids & Twists",
+   "active": true,
+   "from": null,
+   "variations": [
+    [
+     "Jumbo Miracle Knots",
+     150
+    ],
+    [
+     "Large Miracle Knots",
+     210
+    ],
+    [
+     "Medium Miracle Knots",
+     270
+    ],
+    [
+     "Small Miracle Knots",
+     450
+    ],
+    [
+     "Smedium Miracle Knots",
+     360
+    ]
+   ]
+  },
+  "natural-hair-braiding": {
+   "name": "Natural Hair Braiding",
+   "category": "Braids & Twists",
+   "active": true,
+   "from": null,
+   "variations": [
+    [
+     "Long - Extra Long Natural Hair Braiding",
+     195
+    ],
+    [
+     "Medium - Long Natural Hair Braiding",
+     150
+    ],
+    [
+     "Short - Medium Natural Hair Braiding",
+     90
+    ]
+   ],
+   "len": {
+    "short": [
+     "Short - Medium Natural Hair Braiding"
+    ],
+    "medium": [
+     "Medium - Long Natural Hair Braiding",
+     "Short - Medium Natural Hair Braiding"
+    ],
+    "long": [
+     "Long - Extra Long Natural Hair Braiding",
+     "Medium - Long Natural Hair Braiding"
+    ]
+   }
+  },
+  "partial-sew-in": {
+   "name": "Partial Sew In",
+   "category": "Weaves & Extensions",
+   "active": false,
+   "from": null,
+   "variations": [
+    [
+     "Regular",
+     120
+    ]
+   ]
+  },
+  "perimeter-touch-up": {
+   "name": "Perimeter Touch Up",
+   "category": "Cuts & Styling",
+   "active": false,
+   "from": 12000,
+   "variations": [
+    [
+     "Regular",
+     120
+    ]
+   ]
+  },
+  "quick-weave": {
+   "name": "Quick Weave",
+   "category": "Weaves & Extensions",
+   "active": true,
+   "from": 20000,
+   "variations": [
+    [
+     "Regular",
+     180
+    ]
+   ]
+  },
+  "sew-in-maintenance-add-on-service": {
+   "name": "Sew-In Maintenance (Add-on Service)",
+   "category": "Add-Ons",
+   "active": true,
+   "from": 3500,
+   "variations": [
+    [
+     "Regular",
+     45
+    ]
+   ]
+  },
+  "shampoo-and-blow-dry": {
+   "name": "Shampoo and Blow Dry",
+   "category": "Cuts & Styling",
+   "active": true,
+   "from": null,
+   "variations": [
+    [
+     "Shampoo & Blow Dry with Trim",
+     75
+    ],
+    [
+     "Shampoo & Braid Down w/ Trim - Regular",
+     120
+    ],
+    [
+     "Shampoo & Braid Down w/ Trim -Long Hair (Past Shoulder)",
+     135
+    ],
+    [
+     "Shampoo & Braid Down-Long Hair (Past Shoulder)",
+     105
+    ],
+    [
+     "Shampoo & Braid Down-Regular",
+     90
+    ],
+    [
+     "Shampoo and Blow Dry Only",
+     50
+    ],
+    [
+     "Shampoo ONLY (Walkout Wet)",
+     30
+    ]
+   ]
+  },
+  "shampoo-and-style": {
+   "name": "Shampoo & Style",
+   "category": "Cuts & Styling",
+   "active": true,
+   "from": 9000,
+   "variations": [
+    [
+     "Regular",
+     60
+    ]
+   ]
+  },
+  "silk-press-flat-iron-straightening": {
+   "name": "Silk Press (Flat Iron Straightening)",
+   "category": "Cuts & Styling",
+   "active": true,
+   "from": 8500,
+   "variations": [
+    [
+     "Silk Press and Trim",
+     120
+    ],
+    [
+     "Silk Press Deluxe (Trim & Hydration Treatment)",
+     150
+    ],
+    [
+     "Silk Press Exclusive (Trim, Hydro Treatment + Massage Chair)",
+     165
+    ],
+    [
+     "Silk Press Gold (Hot Oil Treatment + Trim)",
+     150
+    ],
+    [
+     "Silk Press Only",
+     105
+    ],
+    [
+     "Silk Press w/ Steam Hydration Treatment",
+     120
+    ]
+   ]
+  },
+  "sleek-ponytail": {
+   "name": "Sleek Ponytail",
+   "category": "Cuts & Styling",
+   "active": true,
+   "from": 11500,
+   "variations": [
+    [
+     "Loose Hair: Curled/Straight",
+     75
+    ],
+    [
+     "Synthetic Braid",
+     90
+    ],
+    [
+     "W/ Feed In Designs",
+     95
+    ]
+   ]
+  },
+  "style-upgrade": {
+   "name": "Style Upgrade",
+   "category": "Cuts & Styling",
+   "active": false,
+   "from": null,
+   "variations": [
+    [
+     "Regular",
+     30
+    ]
+   ]
+  },
+  "takedown": {
+   "name": "Takedown",
+   "category": "Cuts & Styling",
+   "active": true,
+   "from": 3000,
+   "variations": [
+    [
+     "Faux Locs",
+     90
+    ],
+    [
+     "Individuals (Individual Braids, Crochets etc)  Takedown",
+     90
+    ],
+    [
+     "Loc Style Takedown",
+     30
+    ],
+    [
+     "Natural Hair Braids Takedown",
+     35
+    ],
+    [
+     "Perimeter Takedown",
+     40
+    ],
+    [
+     "Weave Takedown",
+     40
+    ]
+   ]
+  },
+  "threading": {
+   "name": "Threading",
+   "category": "Beauty",
+   "active": false,
+   "from": null,
+   "variations": [
+    [
+     "Chin Only",
+     10
+    ],
+    [
+     "Eyebrow & Upper Lip",
+     30
+    ],
+    [
+     "Eyebrows Only",
+     15
+    ],
+    [
+     "Forehead Only",
+     10
+    ],
+    [
+     "Full Face",
+     45
+    ],
+    [
+     "Neck Only",
+     15
+    ],
+    [
+     "Side Burns Only",
+     15
+    ],
+    [
+     "Upper Lip Only",
+     10
+    ]
+   ]
+  },
+  "tinting-and-lamination-services": {
+   "name": "Tinting and Lamination Services",
+   "category": "Beauty",
+   "active": true,
+   "from": null,
+   "variations": [
+    [
+     "Brow Lamination",
+     30
+    ],
+    [
+     "Brow Tint",
+     30
+    ]
+   ]
+  },
+  "trim": {
+   "name": "Trim",
+   "category": "Cuts & Styling",
+   "active": true,
+   "from": 3500,
+   "variations": [
+    [
+     "Bang Trim",
+     30
+    ],
+    [
+     "Edge Up",
+     30
+    ],
+    [
+     "Full Trim",
+     30
+    ],
+    [
+     "Shampoo + Trim",
+     60
+    ]
+   ]
+  },
+  "waxing-body": {
+   "name": "Waxing (Body)",
+   "category": "Beauty",
+   "active": true,
+   "from": null,
+   "variations": [
+    [
+     "Brazilian",
+     30
+    ],
+    [
+     "Full Leg",
+     45
+    ],
+    [
+     "Full Lower Half (Brazilian + Legs)",
+     60
+    ],
+    [
+     "Lower Legs",
+     30
+    ],
+    [
+     "Underarms",
+     30
+    ]
+   ]
+  },
+  "waxing-face": {
+   "name": "Waxing (Face)",
+   "category": "Beauty",
+   "active": true,
+   "from": null,
+   "variations": [
+    [
+     "Chin",
+     10
+    ],
+    [
+     "Eyebrow",
+     15
+    ],
+    [
+     "Full Face",
+     35
+    ],
+    [
+     "Lip and Brows",
+     20
+    ],
+    [
+     "Side burns",
+     15
+    ],
+    [
+     "Upper Lip",
+     10
+    ]
+   ]
+  },
+  "weave-installation": {
+   "name": "Weave Installation",
+   "category": "Weaves & Extensions",
+   "active": true,
+   "from": 37500,
+   "variations": [
+    [
+     "Closure/Frontal Sew in",
+     240
+    ],
+    [
+     "No leave out/Flip over method",
+     330
+    ],
+    [
+     "Partial Sew-In",
+     150
+    ],
+    [
+     "Quick Weave",
+     180
+    ],
+    [
+     "Traditional Sew in",
+     270
+    ],
+    [
+     "Versatile/Vixen Sew In",
+     270
+    ]
+   ]
+  }
+ }
+}
