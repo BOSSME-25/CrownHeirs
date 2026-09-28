@@ -53,6 +53,8 @@ h2 { font-family: var(--font-serif); font-weight: 600; font-size: 27px; margin-b
 .opt { display: flex; align-items: center; gap: 14px; width: 100%; text-align: left; background: var(--surface-dim); border: 1px solid var(--border); border-radius: 12px; padding: 14px; margin-top: 10px; color: var(--ink); }
 .opt:active, .opt.on { border-color: var(--terra); outline: 1px solid var(--terra); }
 .opt .t { flex: 1; min-width: 0; }
+/* Square's photo for the service; removed on error, so services without one keep the plain row. */
+.opt .ph { width: 72px; height: 72px; flex: none; align-self: flex-start; border-radius: 10px; object-fit: cover; object-position: center 30%; background: var(--border); }
 .opt .n { font-family: var(--font-serif); font-size: 21px; font-weight: 600; }
 .opt .d { font-size: 13.5px; color: var(--ink-dim); margin-top: 2px; line-height: 1.4; }
 .opt .p { text-align: right; flex: none; }
@@ -222,6 +224,7 @@ function renderCats() {
   const cat = CATS.find(c => c.category === SEL.cat);
   $('svcList').innerHTML = (cat?.services || []).map(s => `
     <button class="opt" onclick='pickService(${JSON.stringify(s.slug)})'>
+      <img class="ph" src="/images/services/${encodeURIComponent(s.slug)}.jpg" alt="" loading="lazy" onerror="this.remove()">
       <div class="t"><div class="n">${esc(s.name)}</div>${s.description ? `<div class="d">${esc(s.description)}</div>` : ''}</div>
       <div class="p"><b>${money(s.price_from_cents)}</b><small>${s.variations.length > 1 ? 'from ' : ''}${dur(s.duration_min)}</small></div>
     </button>`).join('');
