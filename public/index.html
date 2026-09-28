@@ -1919,15 +1919,15 @@ const GOALS=[
   {id:'cut',     e:'✂️', img:'hair-cut', p:'ph7', l:'Fresh Cut or Shape', d:'A trim, cut, or whole new shape',                      intents:['cut'],              lens:['twa','short','medium','long'], gender:['women']},
   {id:'locs',    e:'🔱', img:'loc-retwist', p:'ph4', l:'Start or Keep Locs', d:'Begin or maintain my loc journey',                     intents:['keep','add'],       lens:['twa','short','medium','long'], gender:['women','men']},
   {id:'scalp',   e:'💧', img:'hair-and-scalp-treatments-add-ons', p:'ph5', l:'Scalp Reset',        d:'Dryness, flakes, buildup — my scalp needs relief',     intents:['add','keep','cut'], lens:['twa','short','medium','long'], gender:['women','men']},
-  {id:'natural', e:'🌀', img:'curl-definition-restoration', p:'ph3', l:'Embrace My Curls',   d:'Show off my natural texture',                          intents:['keep'],             lens:['short','medium','long'],       gender:['women','men']},
+  {id:'natural', e:'🌀', img:'curl-definition-restoration', imgMen:'loose-natural-styles', p:'ph3', l:'Embrace My Curls',   d:'Show off my natural texture',                          intents:['keep'],             lens:['short','medium','long'],       gender:['women','men']},
   {id:'occasion',e:'👑', img:'sleek-ponytail', p:'ph6', l:'Special Occasion',   d:'Wedding, prom, event — I want to feel elevated',       intents:['add','keep'],       lens:['short','medium','long'],       gender:['women']},
   {id:'weave',  e:'➰', img:'weave-installation', p:'ph2', l:'Weave & Extensions', d:'Sew-in, quick weave, crochet, tape-in, microlinks',    intents:['add'],              lens:['twa','short','medium','long'], gender:['women']},
   {id:'chemical',e:'🧪',img:'color', p:'ph1', l:'Chemical Service',   d:'Relaxer, perm, or color on loose hair',                intents:['keep'],             lens:['short','medium','long'],       gender:['women']},
   {id:'shampoo', e:'💧',img:'shampoo-and-blow-dry', p:'ph3', l:'Shampoo & Style',    d:'Wash, condition, style — between appointments',        intents:['keep'],             lens:['short','medium','long'],       gender:['women','men']},
   // Men's goals
-  {id:'barber',  e:'💈', p:'ph7', l:'Cut & Fade',         d:'Fresh cut, taper, fade, or shape-up',                  intents:['cut'],              lens:['twa','short','medium','long'], gender:['men']},
+  {id:'barber',  e:'💈', img:'barber-s-corner', p:'ph7', l:'Cut & Fade',         d:'Fresh cut, taper, fade, or shape-up',                  intents:['cut'],              lens:['twa','short','medium','long'], gender:['men']},
   {id:'beard',   e:'🧔🏾',p:'ph7', l:'Beard & Line-up',   d:'Crisp hairline and beard sculpt',                      intents:['cut','keep'],       lens:['twa','short','medium','long'], gender:['men']},
-  {id:'braids_m',e:'🌿', p:'ph2', l:'Braids & Cornrows',  d:'Custom cornrows or braids built for you',              intents:['add','keep'],       lens:['short','medium','long'],       gender:['men']},
+  {id:'braids_m',e:'🌿', img:'natural-hair-braiding', p:'ph2', l:'Braids & Cornrows',  d:'Custom cornrows or braids built for you',              intents:['add','keep'],       lens:['short','medium','long'],       gender:['men']},
 ];
 function buildGoals(){
   const grid=document.getElementById('goalGrid');
@@ -1939,7 +1939,7 @@ function buildGoals(){
   GOALS.filter(g=>g.gender.includes(d2Gender)).forEach(g=>{
     const ok=(hIntent==='any'||g.intents.includes(hIntent))&&g.lens.includes(hLen);
     grid.innerHTML+=`<div class="card${ok?'':' locked'}" style="overflow:hidden;cursor:pointer" onclick="toggleGoal(this,'${g.id}')">
-      ${g.img?`<div class="card-vis vis-photo" style="aspect-ratio:4/3;background-image:url('/images/services/${g.img}.jpg')" role="img" aria-label="${g.l}"></div>`:`<div class="card-vis ${g.p}" style="aspect-ratio:4/3;font-size:1.9rem">${g.e}</div>`}
+      ${(d2Gender==='men'&&g.imgMen||g.img)?`<div class="card-vis vis-photo" style="aspect-ratio:4/3;background-image:url('/images/services/${d2Gender==='men'&&g.imgMen||g.img}.jpg')" role="img" aria-label="${g.l}"></div>`:`<div class="card-vis ${g.p}" style="aspect-ratio:4/3;font-size:1.9rem">${g.e}</div>`}
       <div class="card-body"><h3>${g.l}</h3><p>${g.d}</p></div>
     </div>`;
   });
