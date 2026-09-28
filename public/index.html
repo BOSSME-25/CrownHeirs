@@ -758,9 +758,9 @@ footer a:hover { color: var(--ink); }
 .length-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; max-width: 660px; margin: 0 auto; padding: 0 var(--space-m); }
 @media(max-width:520px) { .length-grid { grid-template-columns: repeat(2,1fr); } }
 .lcard { text-align: center; padding-bottom: 14px; }
-.lcard-vis { padding: 18px 0 10px; display: flex; flex-direction: column; align-items: center; }
-.l-head { width: 26px; height: 26px; background: var(--ink); border-radius: 50%; opacity: 0.5; }
-.l-strand { width: 8px; margin-top: 2px; background: linear-gradient(180deg, var(--ink) 0%, transparent 100%); border-radius: 0 0 4px 4px; opacity: 0.35; }
+.lcard { overflow: hidden; }
+.lcard-vis { aspect-ratio: 1/1; margin-bottom: 12px; background: var(--border, #e6dfd6); }
+.lcard-vis img { width: 100%; height: 100%; object-fit: cover; object-position: center 25%; display: block; }
 .lcard .card-body { padding: 0 10px 0; }
 
 /* ═══════════════════════════════════════════
@@ -1006,19 +1006,19 @@ footer a:hover { color: var(--ink); }
     <div class="sec-head"><h2>How long is your hair?</h2><p>Pick the closest match</p></div>
     <div class="length-grid">
       <div class="card lcard" onclick="pickLen('twa',this)">
-        <div class="lcard-vis"><div class="l-head"></div><div class="l-strand" style="height:5px"></div></div>
+        <div class="lcard-vis"><img src="/images/length/very-short.jpg" alt="Very short, close-cropped natural hair" loading="lazy"></div>
         <div class="card-body"><h3>Very Short</h3><p>Close to scalp</p></div>
       </div>
       <div class="card lcard" onclick="pickLen('short',this)">
-        <div class="lcard-vis"><div class="l-head"></div><div class="l-strand" style="height:16px"></div></div>
+        <div class="lcard-vis"><img src="/images/length/short.jpg" alt="Short hair, ear length" loading="lazy"></div>
         <div class="card-body"><h3>Short</h3><p>Ear to chin</p></div>
       </div>
       <div class="card lcard" onclick="pickLen('medium',this)">
-        <div class="lcard-vis"><div class="l-head"></div><div class="l-strand" style="height:32px"></div></div>
+        <div class="lcard-vis"><img src="/images/length/medium.jpg" alt="Chin-length bob" loading="lazy"></div>
         <div class="card-body"><h3>Medium</h3><p>Shoulder area</p></div>
       </div>
       <div class="card lcard" onclick="pickLen('long',this)">
-        <div class="lcard-vis"><div class="l-head"></div><div class="l-strand" style="height:50px"></div></div>
+        <div class="lcard-vis"><img src="/images/length/long.jpg" alt="Shoulder-length hair" loading="lazy"></div>
         <div class="card-body"><h3>Long</h3><p>Past the shoulder</p></div>
       </div>
     </div>
