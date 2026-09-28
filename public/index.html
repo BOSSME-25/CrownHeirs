@@ -1940,9 +1940,15 @@ const GOALS=[
   {id:'shampoo', e:'💧',img:'shampoo-and-blow-dry', p:'ph3', l:'Shampoo & Style',    d:'Wash, condition, style — between appointments',        intents:['keep'],             lens:['short','medium','long'],       gender:['women','men']},
   // Men's goals
   {id:'barber',  e:'💈', img:'barber-s-corner', p:'ph7', l:'Cut & Fade',         d:'Fresh cut, taper, fade, or shape-up',                  intents:['cut'],              lens:['twa','short','medium','long'], gender:['men']},
-  {id:'beard',   e:'🧔🏾',p:'ph7', l:'Beard & Line-up',   d:'Crisp hairline and beard sculpt',                      intents:['cut','keep'],       lens:['twa','short','medium','long'], gender:['men']},
+  {id:'beard',   e:'🧔🏾',imgPath:'/images/length/men-very-short.jpg', p:'ph7', l:'Beard & Line-up',   d:'Crisp hairline and beard sculpt',                      intents:['cut','keep'],       lens:['twa','short','medium','long'], gender:['men']},
   {id:'braids_m',e:'🌿', img:'natural-hair-braiding', p:'ph2', l:'Braids & Cornrows',  d:'Custom cornrows or braids built for you',              intents:['add','keep'],       lens:['short','medium','long'],       gender:['men']},
 ];
+// A goal's photo: a direct path, else the Square service photo (men may get their own).
+function goalPhoto(g){
+  if(g.imgPath) return g.imgPath;
+  const slug=d2Gender==='men'&&g.imgMen||g.img;
+  return slug?'/images/services/'+slug+'.jpg':null;
+}
 function buildGoals(){
   const grid=document.getElementById('goalGrid');
   grid.innerHTML='';d2Goals.clear();d2LocBranch=null;
@@ -1953,7 +1959,7 @@ function buildGoals(){
   GOALS.filter(g=>g.gender.includes(d2Gender)).forEach(g=>{
     const ok=(hIntent==='any'||g.intents.includes(hIntent))&&g.lens.includes(hLen);
     grid.innerHTML+=`<div class="card${ok?'':' locked'}" style="overflow:hidden;cursor:pointer" onclick="toggleGoal(this,'${g.id}')">
-      ${(d2Gender==='men'&&g.imgMen||g.img)?`<div class="card-vis vis-photo" style="aspect-ratio:4/3;background-image:url('/images/services/${d2Gender==='men'&&g.imgMen||g.img}.jpg')" role="img" aria-label="${g.l}"></div>`:`<div class="card-vis ${g.p}" style="aspect-ratio:4/3;font-size:1.9rem">${g.e}</div>`}
+      ${goalPhoto(g)?`<div class="card-vis vis-photo" style="aspect-ratio:4/3;background-image:url('${goalPhoto(g)}')" role="img" aria-label="${g.l}"></div>`:`<div class="card-vis ${g.p}" style="aspect-ratio:4/3;font-size:1.9rem">${g.e}</div>`}
       <div class="card-body"><h3>${g.l}</h3><p>${g.d}</p></div>
     </div>`;
   });
