@@ -1185,17 +1185,17 @@ footer a:hover { color: var(--ink); }
     <div class="sec-head"><h2>How old is your child?</h2><p>Pick the closest range</p></div>
     <div class="container" style="margin-bottom:0">
       <div class="grid-3up">
-        <div class="card" style="padding:20px 16px;text-align:center" onclick="pickTinyAge('toddler',this)">
-          <span style="font-size:1.8rem;display:block;margin-bottom:10px">🌱</span>
-          <div class="card-body" style="padding:0"><h3>Toddler</h3><p>1–5 years</p></div>
+        <div class="card" style="overflow:hidden;cursor:pointer;text-align:center" onclick="pickTinyAge('toddler',this)">
+          <div class="card-vis vis-photo" style="aspect-ratio:4/3;background-position:center 35%;background-image:url('/images/tiny/toddler.jpg')" role="img" aria-label="Toddler with short curls"></div>
+          <div class="card-body"><h3>Toddler</h3><p>1–5 years</p></div>
         </div>
-        <div class="card" style="padding:20px 16px;text-align:center" onclick="pickTinyAge('child',this)">
-          <span style="font-size:1.8rem;display:block;margin-bottom:10px">👧🏾</span>
-          <div class="card-body" style="padding:0"><h3>Child</h3><p>6–12 years</p></div>
+        <div class="card" style="overflow:hidden;cursor:pointer;text-align:center" onclick="pickTinyAge('child',this)">
+          <div class="card-vis vis-photo" style="aspect-ratio:4/3;background-position:center 35%;background-image:url('/images/tiny/child.jpg')" role="img" aria-label="Girl with shoulder-length curls"></div>
+          <div class="card-body"><h3>Child</h3><p>6–12 years</p></div>
         </div>
-        <div class="card" style="padding:20px 16px;text-align:center" onclick="pickTinyAge('teen',this)">
-          <span style="font-size:1.8rem;display:block;margin-bottom:10px">🧒🏾</span>
-          <div class="card-body" style="padding:0"><h3>Teen</h3><p>13+ years</p></div>
+        <div class="card" style="overflow:hidden;cursor:pointer;text-align:center" onclick="pickTinyAge('teen',this)">
+          <div class="card-vis vis-photo" style="aspect-ratio:4/3;background-position:center 35%;background-image:url('/images/tiny/teen.jpg')" role="img" aria-label="Boy with a waves cut"></div>
+          <div class="card-body"><h3>Teen</h3><p>13+ years</p></div>
         </div>
       </div>
     </div>
@@ -1214,13 +1214,13 @@ footer a:hover { color: var(--ink); }
     <div class="sec-head"><h2>Girl or boy?</h2></div>
     <div class="container" style="margin-bottom:0">
       <div class="grid-2up">
-        <div class="card" style="padding:20px 16px;text-align:center" onclick="pickTinyGender('girl',this)">
-          <span style="font-size:1.8rem;display:block;margin-bottom:10px">👧🏾</span>
-          <div class="card-body" style="padding:0"><h3>Girl</h3></div>
+        <div class="card" style="overflow:hidden;cursor:pointer;text-align:center" onclick="pickTinyGender('girl',this)">
+          <div class="card-vis vis-photo" style="aspect-ratio:4/3;background-position:center 35%;background-image:url('/images/tiny/girl.jpg')" role="img" aria-label="Girl with long curls"></div>
+          <div class="card-body"><h3>Girl</h3></div>
         </div>
-        <div class="card" style="padding:20px 16px;text-align:center" onclick="pickTinyGender('boy',this)">
-          <span style="font-size:1.8rem;display:block;margin-bottom:10px">👦🏾</span>
-          <div class="card-body" style="padding:0"><h3>Boy</h3></div>
+        <div class="card" style="overflow:hidden;cursor:pointer;text-align:center" onclick="pickTinyGender('boy',this)">
+          <div class="card-vis vis-photo" style="aspect-ratio:4/3;background-position:center 35%;background-image:url('/images/tiny/teen.jpg')" role="img" aria-label="Boy with a waves cut"></div>
+          <div class="card-body"><h3>Boy</h3></div>
         </div>
       </div>
     </div>
