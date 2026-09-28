@@ -53,7 +53,7 @@ test('finder: every photo the tiles reference exists (static paths and goal img 
   const dir = path.join(__dirname, '..', 'public', 'images');
   const refs = [
     ...[...html.matchAll(/\/images\/(services|length)\/([a-z0-9-]+)\.jpg/g)].map(m => `${m[1]}/${m[2]}.jpg`),
-    ...[...html.matchAll(/\bimg:'([a-z0-9-]+)'/g)].map(m => `services/${m[1]}.jpg`)
+    ...[...html.matchAll(/\b(?:img|imgMen):'([a-z0-9-]+)'/g)].map(m => `services/${m[1]}.jpg`)
   ];
   assert.ok(refs.length >= 30, 'tiles reference photos');
   const missing = [...new Set(refs)].filter(r => !fs.existsSync(path.join(dir, r)));
