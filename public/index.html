@@ -405,6 +405,7 @@ body {
   display: flex; align-items: center; justify-content: center;
   position: relative; font-size: 2.4rem;
 }
+.vis-photo { background-size: cover; background-position: center 30%; background-color: var(--cream-2, #efe6da); }
 .sbadge {
   position: absolute; top: 10px; left: 10px;
   background: var(--terra); color: #fff;
@@ -1757,6 +1758,17 @@ function sqLabel(name){
   if(SQ_COUNT[m.slug+'|'+(m.variation||'')]>1 && name!==m.name) l+=' ('+name+')';
   return l;
 }
+/* Square's own service photos (from the Service Book), one per service,
+   at /images/services/<slug>.jpg. A card shows the photo of the Square
+   service it books; services without one keep the colour + emoji tile. */
+const SVC_PHOTOS=new Set(["back-ii-school-service-menu-limited-time", "barber-s-corner", "box-braids-traditional", "braiding-add-ons", "braids-knotless", "chemical-perm", "chemical-relaxer", "classes", "color", "consultations", "crochet-styles", "curl-definition-restoration", "facials", "faux-locs-butterfly-and-soft-locs", "feed-in-style-braids", "hair-and-scalp-treatments-add-ons", "hair-cut", "hair-extensions", "individuals-over-locs", "individuals-singles", "instant-locs", "keratin-treatment-crown-smooth-experience", "lash-2-3-week-fill", "lash-extensions-full-sets", "loc-color", "loc-comb-out-services", "loc-crochet-retighten", "loc-detoxes", "loc-extensions", "loc-interlocking", "loc-repairs", "loc-retwist", "loc-sparkles", "loc-starters", "loc-styles", "loose-natural-styles", "luxury-experience-add-ons", "make-up-full-face", "make-up-half-face", "mini-twists-two-strands", "mini-twists-two-strands-with-added-hair", "miracle-knots-braids-natural-braids", "natural-hair-braiding", "sew-in-maintenance-add-on-service", "shampoo-and-blow-dry", "shampoo-and-style", "silk-press-flat-iron-straightening", "sleek-ponytail", "takedown", "tinting-and-lamination-services", "trim", "waxing-body", "waxing-face", "weave-installation"]);
+function svcPhoto(name){const m=BOOK_MAP[name];return m&&SVC_PHOTOS.has(m.slug)?'/images/services/'+m.slug+'.jpg':null;}
+function svcVis(cls,name,ph,emoji,badge){
+  const u=svcPhoto(name);
+  const b=badge?`<div class="sbadge">${badge}</div>`:'';
+  return u?`<div class="${cls} vis-photo" style="background-image:url('${u}')" role="img" aria-label="${sqLabel(name).replace(/"/g,'&quot;')}">${b}</div>`
+          :`<div class="${cls} ${ph||'ph2'}">${b}${emoji}</div>`;
+}
 function getBookingUrl(name){
   const m=BOOK_MAP[name]; if(!m) return '/book';
   return '/book?service='+encodeURIComponent(m.slug)+(m.variation?'&variation='+encodeURIComponent(m.variation):'');
@@ -2031,7 +2043,7 @@ function buildD2Results(){
   const grid=document.getElementById('d2grid');
   let html=scored.length?scored.map(s=>`
     <div class="scard">
-      <div class="scard-vis ${s.p}"><div class="sbadge">${s.badge}</div><span style="font-size:2.2rem">${s.e}</span></div>
+      ${svcVis('scard-vis',s.n,s.p,`<span style="font-size:2.2rem">${s.e}</span>`,s.badge)}
       <div class="scard-body"><h3>${sqLabel(s.n)}</h3><p>${s.d}</p>${s.disclaimer?CHEM_DISCLAIMER_HTML:''}<div class="scard-meta"><span class="dur">⏱ ${s.dur}</span><span class="price">${s.price}</span></div></div>
       <a class="book-now-btn" href="${getBookingUrl(s.n)}">${/consult/i.test(s.price)?'Book Consultation':'Book now'}</a>
     </div>`).join('')
@@ -2062,7 +2074,7 @@ function buildTinyResults(){
   const grid=document.getElementById('dtinygrid');
   grid.innerHTML=tinySvcs.length?tinySvcs.map(s=>`
     <div class="scard">
-      <div class="scard-vis ${s.p}"><div class="sbadge">${s.badge}</div><span style="font-size:2.2rem">${s.e}</span></div>
+      ${svcVis('scard-vis',s.n,s.p,`<span style="font-size:2.2rem">${s.e}</span>`,s.badge)}
       <div class="scard-body"><h3>${sqLabel(s.n)}</h3><p>${s.d}</p><div class="scard-meta"><span class="dur">⏱ ${s.dur}</span><span class="price">${s.price}</span></div></div>
       <a class="book-now-btn" href="${getBookingUrl(s.n)}">${/consult/i.test(s.price)?'Book Consultation':'Book now'}</a>
     </div>`).join('')
@@ -2147,7 +2159,7 @@ function buildMatchResults(){
   grid.innerHTML=sel.map(s=>{
     const r=INSPO_MAP[s];
     return `<div class="mresult">
-      <div class="mresult-vis ${r.p}">${r.e}</div>
+      ${svcVis('mresult-vis',r.n,r.p,r.e)}
       <div class="mresult-body">
         <h3>${sqLabel(r.n)}</h3><p>${r.d}</p>
         <div class="mresult-meta"><span>Starting price</span><strong>${r.price}</strong></div>
@@ -2270,7 +2282,7 @@ function buildD4Results(){
   const grid=document.getElementById('d4grid');
   if(svc){
     grid.innerHTML=`<div class="scard">
-      <div class="scard-vis ${svc.p||'ph2'}"><div class="sbadge">${svc.badge||'Service'}</div><span style="font-size:2.2rem">${svc.e||'•'}</span></div>
+      ${svcVis('scard-vis',svc.n,svc.p,`<span style="font-size:2.2rem">${svc.e||'•'}</span>`,svc.badge||'Service')}
       <div class="scard-body"><h3>${sqLabel(svc.n)}</h3><p>${svc.d||''}</p><div class="scard-meta"><span class="dur">⏱ ${svc.dur||''}</span><span class="price">${svc.price||''}</span></div></div>
       <a class="book-now-btn" href="${getBookingUrl(svc.n)}">${/consult/i.test(svc.price||'')?'Book Consultation':'Book now'}</a>
     </div>`;
@@ -2309,7 +2321,7 @@ function initBeauty(){
       lastSection=s.section;
     }
     html+=`<div class="scard">
-      <div class="scard-vis ${s.p}"><div class="sbadge">${s.badge}</div><span style="font-size:2.2rem">${s.e}</span></div>
+      ${svcVis('scard-vis',s.n,s.p,`<span style="font-size:2.2rem">${s.e}</span>`,s.badge)}
       <div class="scard-body"><h3>${sqLabel(s.n)}</h3><p>${s.d}</p><div class="scard-meta"><span class="dur">⏱ ${s.dur}</span><span class="price">${s.price}</span></div></div>
       <a class="book-now-btn" href="${getBookingUrl(s.n)}">Book now</a>
     </div>`;
