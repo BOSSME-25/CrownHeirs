@@ -1815,7 +1815,21 @@ const D2_LABELS={
   men:  ['Who','Length','','Goal','Texture','Results'],
   tiny: ['Who','Age','Gender','Need','','Matches']
 };
+/* Length tiles show portraits of the person choosing: women's set by default,
+   men's set on the For Him path. */
+const LEN_PHOTOS={
+  women:{twa:['very-short','Very short, close-cropped natural hair'],short:['short','Short hair, ear length'],medium:['medium','Chin-length bob'],long:['long','Shoulder-length hair']},
+  men:{twa:['men-very-short','Close cut with waves and a full beard'],short:['men-short','High-top with a fade'],medium:['men-medium','Medium-length curls'],long:['men-long','Full, long curls']}
+};
+function setLengthPhotos(gender){
+  const set=LEN_PHOTOS[gender==='men'?'men':'women'];
+  document.querySelectorAll('#q1 .lcard').forEach(c=>{
+    const key=(c.getAttribute('onclick').match(/pickLen\('([a-z]+)'/)||[])[1];const img=c.querySelector('img');
+    if(set[key]&&img){img.src='/images/length/'+set[key][0]+'.jpg';img.alt=set[key][1];}
+  });
+}
 function updateProgressLabels(gender){
+  setLengthPhotos(gender);
   const l=D2_LABELS[gender]||D2_LABELS.women;
   for(let i=0;i<6;i++){
     const el=document.getElementById('d2s'+i);

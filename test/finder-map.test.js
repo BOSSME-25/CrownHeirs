@@ -55,6 +55,12 @@ test('finder: every photo the tiles reference exists (static paths and goal img 
     ...[...html.matchAll(/\/images\/(services|length)\/([a-z0-9-]+)\.jpg/g)].map(m => `${m[1]}/${m[2]}.jpg`),
     ...[...html.matchAll(/\b(?:img|imgMen):'([a-z0-9-]+)'/g)].map(m => `services/${m[1]}.jpg`)
   ];
+  // Length portraits, one set per audience
+  const len = html.match(/const LEN_PHOTOS=\{([\s\S]*?)\n\};/);
+  assert.ok(len, 'LEN_PHOTOS present');
+  const lenRefs = [...len[1].matchAll(/\['([a-z-]+)','/g)].map(m => `length/${m[1]}.jpg`);
+  assert.equal(lenRefs.length, 8, 'four lengths for women and four for men');
+  refs.push(...lenRefs);
   assert.ok(refs.length >= 30, 'tiles reference photos');
   const missing = [...new Set(refs)].filter(r => !fs.existsSync(path.join(dir, r)));
   assert.deepEqual(missing, [], 'no tile points at a missing photo');
