@@ -1037,17 +1037,17 @@ footer a:hover { color: var(--ink); }
     <div class="sec-head"><h2>What are you open to?</h2><p>This shapes all the options that follow</p></div>
     <div class="container" style="margin-bottom:0">
       <div class="grid-3up">
-        <div class="card" style="padding:20px 16px;text-align:center" onclick="pickIntent('add',this)">
-          <span style="font-size:1.8rem;display:block;margin-bottom:10px">➕</span>
-          <div class="card-body" style="padding:0"><h3>Add Hair</h3><p>Open to extensions to build my look</p></div>
+        <div class="card" style="overflow:hidden;cursor:pointer;text-align:center" onclick="pickIntent('add',this)">
+          <div class="card-vis vis-photo" style="aspect-ratio:4/3;background-image:url('/images/services/hair-extensions.jpg')" role="img" aria-label="Add Hair"></div>
+          <div class="card-body"><h3>Add Hair</h3><p>Open to extensions to build my look</p></div>
         </div>
-        <div class="card" style="padding:20px 16px;text-align:center" onclick="pickIntent('cut',this)">
-          <span style="font-size:1.8rem;display:block;margin-bottom:10px">✂️</span>
-          <div class="card-body" style="padding:0"><h3>Cut or Shape</h3><p>A trim, cut, or whole new shape</p></div>
+        <div class="card" style="overflow:hidden;cursor:pointer;text-align:center" onclick="pickIntent('cut',this)">
+          <div class="card-vis vis-photo" style="aspect-ratio:4/3;background-image:url('/images/services/hair-cut.jpg')" role="img" aria-label="Cut or Shape"></div>
+          <div class="card-body"><h3>Cut or Shape</h3><p>A trim, cut, or whole new shape</p></div>
         </div>
-        <div class="card" style="padding:20px 16px;text-align:center" onclick="pickIntent('keep',this)">
-          <span style="font-size:1.8rem;display:block;margin-bottom:10px">🌿</span>
-          <div class="card-body" style="padding:0"><h3>Keep What I Have</h3><p>Work with my natural length</p></div>
+        <div class="card" style="overflow:hidden;cursor:pointer;text-align:center" onclick="pickIntent('keep',this)">
+          <div class="card-vis vis-photo" style="aspect-ratio:4/3;background-image:url('/images/services/silk-press-flat-iron-straightening.jpg')" role="img" aria-label="Keep What I Have"></div>
+          <div class="card-body"><h3>Keep What I Have</h3><p>Work with my natural length</p></div>
         </div>
       </div>
     </div>
@@ -1083,31 +1083,31 @@ footer a:hover { color: var(--ink); }
     <div class="container" style="margin-bottom:0">
       <div class="grid-goals">
         <div class="card" style="overflow:hidden;cursor:pointer" onclick="pickLocBranch('starting',this)">
-          <div class="card-vis ph4" style="aspect-ratio:4/3;font-size:1.9rem">🌱</div>
+          <div class="card-vis vis-photo" style="aspect-ratio:4/3;background-image:url('/images/services/loc-starters.jpg')" role="img" aria-label="Starting Locs"></div>
           <div class="card-body"><h3>Starting Locs</h3><p>I'm ready to begin my loc journey</p></div>
         </div>
         <div class="card" style="overflow:hidden;cursor:pointer" onclick="pickLocBranch('maintenance',this)">
-          <div class="card-vis ph4" style="aspect-ratio:4/3;font-size:1.9rem">🔱</div>
+          <div class="card-vis vis-photo" style="aspect-ratio:4/3;background-image:url('/images/services/loc-retwist.jpg')" role="img" aria-label="Maintenance"></div>
           <div class="card-body"><h3>Maintenance</h3><p>Retwist and keep them healthy</p></div>
         </div>
         <div class="card" style="overflow:hidden;cursor:pointer" onclick="pickLocBranch('styling',this)">
-          <div class="card-vis ph4" style="aspect-ratio:4/3;font-size:1.9rem">✨</div>
+          <div class="card-vis vis-photo" style="aspect-ratio:4/3;background-image:url('/images/services/loc-styles.jpg')" role="img" aria-label="Styling"></div>
           <div class="card-body"><h3>Styling</h3><p>Elevated — updo, pinned, designed</p></div>
         </div>
         <div class="card" style="overflow:hidden;cursor:pointer" onclick="pickLocBranch('repair',this)">
-          <div class="card-vis ph4" style="aspect-ratio:4/3;font-size:1.9rem">🛠️</div>
+          <div class="card-vis vis-photo" style="aspect-ratio:4/3;background-image:url('/images/services/loc-repairs.jpg')" role="img" aria-label="Repair & Combine"></div>
           <div class="card-body"><h3>Repair & Combine</h3><p>Rebuild thinning or damaged locs</p></div>
         </div>
         <div class="card" style="overflow:hidden;cursor:pointer" onclick="pickLocBranch('extensions',this)">
-          <div class="card-vis ph4" style="aspect-ratio:4/3;font-size:1.9rem">➕</div>
+          <div class="card-vis vis-photo" style="aspect-ratio:4/3;background-image:url('/images/services/loc-extensions.jpg')" role="img" aria-label="Extensions"></div>
           <div class="card-body"><h3>Extensions</h3><p>Add length or fullness to my locs</p></div>
         </div>
         <div class="card" style="overflow:hidden;cursor:pointer" onclick="pickLocBranch('freeform',this)">
-          <div class="card-vis ph4" style="aspect-ratio:4/3;font-size:1.9rem">🌿</div>
+          <div class="card-vis vis-photo" style="aspect-ratio:4/3;background-image:url('/images/services/loc-sparkles.jpg')" role="img" aria-label="Freeform"></div>
           <div class="card-body"><h3>Freeform</h3><p>Going organic — less frequent maintenance</p></div>
         </div>
         <div class="card" style="overflow:hidden;cursor:pointer" onclick="pickLocBranch('color',this)">
-          <div class="card-vis ph4" style="aspect-ratio:4/3;font-size:1.9rem">🎨</div>
+          <div class="card-vis vis-photo" style="aspect-ratio:4/3;background-image:url('/images/services/loc-color.jpg')" role="img" aria-label="Color"></div>
           <div class="card-body"><h3>Color</h3><p>Highlights, full color, or toning on locs</p></div>
         </div>
       </div>
@@ -1128,15 +1128,15 @@ footer a:hover { color: var(--ink); }
     <div class="container" style="margin-bottom:0">
       <div class="grid-goals">
         <div class="card" style="overflow:hidden;cursor:pointer" onclick="pickProtectBranch('individual',this)">
-          <div class="card-vis ph2" style="aspect-ratio:4/3;font-size:1.9rem">🌿</div>
+          <div class="card-vis vis-photo" style="aspect-ratio:4/3;background-image:url('/images/services/box-braids-traditional.jpg')" role="img" aria-label="Individual Braids"></div>
           <div class="card-body"><h3>Individual Braids</h3><p>Knotless, box, Senegalese, faux locs, feed-in</p></div>
         </div>
         <div class="card" style="overflow:hidden;cursor:pointer" onclick="pickProtectBranch('natural-braids',this)">
-          <div class="card-vis ph5" style="aspect-ratio:4/3;font-size:1.9rem">🌀</div>
+          <div class="card-vis vis-photo" style="aspect-ratio:4/3;background-image:url('/images/services/natural-hair-braiding.jpg')" role="img" aria-label="Natural Braids"></div>
           <div class="card-body"><h3>Natural Braids</h3><p>Braided with your own hair — no extensions</p></div>
         </div>
         <div class="card" style="overflow:hidden;cursor:pointer" onclick="pickProtectBranch('natural-styles',this)">
-          <div class="card-vis ph3" style="aspect-ratio:4/3;font-size:1.9rem">✨</div>
+          <div class="card-vis vis-photo" style="aspect-ratio:4/3;background-image:url('/images/services/loose-natural-styles.jpg')" role="img" aria-label="Natural Styles"></div>
           <div class="card-body"><h3>Natural Styles</h3><p>Twist-outs, braid-outs, defined curls, wash-n-go</p></div>
         </div>
       </div>
@@ -1157,15 +1157,15 @@ footer a:hover { color: var(--ink); }
     <div class="container" style="margin-bottom:0">
       <div class="grid-goals">
         <div class="card" style="overflow:hidden;cursor:pointer" onclick="pickChem('relaxer',this)">
-          <div class="card-vis ph1" style="aspect-ratio:4/3;font-size:1.9rem">🧪</div>
+          <div class="card-vis vis-photo" style="aspect-ratio:4/3;background-image:url('/images/services/chemical-relaxer.jpg')" role="img" aria-label="Relaxer"></div>
           <div class="card-body"><h3>Relaxer</h3><p>Straighten curly / coiled hair chemically</p></div>
         </div>
         <div class="card" style="overflow:hidden;cursor:pointer" onclick="pickChem('perm',this)">
-          <div class="card-vis ph1" style="aspect-ratio:4/3;font-size:1.9rem">🌀</div>
+          <div class="card-vis vis-photo" style="aspect-ratio:4/3;background-image:url('/images/services/chemical-perm.jpg')" role="img" aria-label="Perm"></div>
           <div class="card-body"><h3>Perm</h3><p>Defined curls or waves via rod set</p></div>
         </div>
         <div class="card" style="overflow:hidden;cursor:pointer" onclick="pickChem('color',this)">
-          <div class="card-vis ph1" style="aspect-ratio:4/3;font-size:1.9rem">🎨</div>
+          <div class="card-vis vis-photo" style="aspect-ratio:4/3;background-image:url('/images/services/color.jpg')" role="img" aria-label="Color"></div>
           <div class="card-body"><h3>Color</h3><p>Dye for loose hair</p></div>
         </div>
       </div>
@@ -1914,16 +1914,16 @@ function backFromTexture(){
 }
 const GOALS=[
   // Women's goals
-  {id:'protect', e:'🌿', p:'ph2', l:'Protect & Grow',     d:'Give my hair a break and help it grow',                intents:['add','keep'],       lens:['twa','short','medium','long'], gender:['women']},
-  {id:'sleek',   e:'✨', p:'ph1', l:'Sleek & Polished',   d:'Smooth, straight, professional look',                  intents:['keep','add'],       lens:['short','medium','long'],       gender:['women']},
-  {id:'cut',     e:'✂️', p:'ph7', l:'Fresh Cut or Shape', d:'A trim, cut, or whole new shape',                      intents:['cut'],              lens:['twa','short','medium','long'], gender:['women']},
-  {id:'locs',    e:'🔱', p:'ph4', l:'Start or Keep Locs', d:'Begin or maintain my loc journey',                     intents:['keep','add'],       lens:['twa','short','medium','long'], gender:['women','men']},
-  {id:'scalp',   e:'💧', p:'ph5', l:'Scalp Reset',        d:'Dryness, flakes, buildup — my scalp needs relief',     intents:['add','keep','cut'], lens:['twa','short','medium','long'], gender:['women','men']},
-  {id:'natural', e:'🌀', p:'ph3', l:'Embrace My Curls',   d:'Show off my natural texture',                          intents:['keep'],             lens:['short','medium','long'],       gender:['women','men']},
-  {id:'occasion',e:'👑', p:'ph6', l:'Special Occasion',   d:'Wedding, prom, event — I want to feel elevated',       intents:['add','keep'],       lens:['short','medium','long'],       gender:['women']},
-  {id:'weave',  e:'➰', p:'ph2', l:'Weave & Extensions', d:'Sew-in, quick weave, crochet, tape-in, microlinks',    intents:['add'],              lens:['twa','short','medium','long'], gender:['women']},
-  {id:'chemical',e:'🧪',p:'ph1', l:'Chemical Service',   d:'Relaxer, perm, or color on loose hair',                intents:['keep'],             lens:['short','medium','long'],       gender:['women']},
-  {id:'shampoo', e:'💧',p:'ph3', l:'Shampoo & Style',    d:'Wash, condition, style — between appointments',        intents:['keep'],             lens:['short','medium','long'],       gender:['women','men']},
+  {id:'protect', e:'🌿', img:'braids-knotless', p:'ph2', l:'Protect & Grow',     d:'Give my hair a break and help it grow',                intents:['add','keep'],       lens:['twa','short','medium','long'], gender:['women']},
+  {id:'sleek',   e:'✨', img:'keratin-treatment-crown-smooth-experience', p:'ph1', l:'Sleek & Polished',   d:'Smooth, straight, professional look',                  intents:['keep','add'],       lens:['short','medium','long'],       gender:['women']},
+  {id:'cut',     e:'✂️', img:'hair-cut', p:'ph7', l:'Fresh Cut or Shape', d:'A trim, cut, or whole new shape',                      intents:['cut'],              lens:['twa','short','medium','long'], gender:['women']},
+  {id:'locs',    e:'🔱', img:'loc-retwist', p:'ph4', l:'Start or Keep Locs', d:'Begin or maintain my loc journey',                     intents:['keep','add'],       lens:['twa','short','medium','long'], gender:['women','men']},
+  {id:'scalp',   e:'💧', img:'hair-and-scalp-treatments-add-ons', p:'ph5', l:'Scalp Reset',        d:'Dryness, flakes, buildup — my scalp needs relief',     intents:['add','keep','cut'], lens:['twa','short','medium','long'], gender:['women','men']},
+  {id:'natural', e:'🌀', img:'curl-definition-restoration', p:'ph3', l:'Embrace My Curls',   d:'Show off my natural texture',                          intents:['keep'],             lens:['short','medium','long'],       gender:['women','men']},
+  {id:'occasion',e:'👑', img:'sleek-ponytail', p:'ph6', l:'Special Occasion',   d:'Wedding, prom, event — I want to feel elevated',       intents:['add','keep'],       lens:['short','medium','long'],       gender:['women']},
+  {id:'weave',  e:'➰', img:'weave-installation', p:'ph2', l:'Weave & Extensions', d:'Sew-in, quick weave, crochet, tape-in, microlinks',    intents:['add'],              lens:['twa','short','medium','long'], gender:['women']},
+  {id:'chemical',e:'🧪',img:'color', p:'ph1', l:'Chemical Service',   d:'Relaxer, perm, or color on loose hair',                intents:['keep'],             lens:['short','medium','long'],       gender:['women']},
+  {id:'shampoo', e:'💧',img:'shampoo-and-blow-dry', p:'ph3', l:'Shampoo & Style',    d:'Wash, condition, style — between appointments',        intents:['keep'],             lens:['short','medium','long'],       gender:['women','men']},
   // Men's goals
   {id:'barber',  e:'💈', p:'ph7', l:'Cut & Fade',         d:'Fresh cut, taper, fade, or shape-up',                  intents:['cut'],              lens:['twa','short','medium','long'], gender:['men']},
   {id:'beard',   e:'🧔🏾',p:'ph7', l:'Beard & Line-up',   d:'Crisp hairline and beard sculpt',                      intents:['cut','keep'],       lens:['twa','short','medium','long'], gender:['men']},
@@ -1939,7 +1939,7 @@ function buildGoals(){
   GOALS.filter(g=>g.gender.includes(d2Gender)).forEach(g=>{
     const ok=(hIntent==='any'||g.intents.includes(hIntent))&&g.lens.includes(hLen);
     grid.innerHTML+=`<div class="card${ok?'':' locked'}" style="overflow:hidden;cursor:pointer" onclick="toggleGoal(this,'${g.id}')">
-      <div class="card-vis ${g.p}" style="aspect-ratio:4/3;font-size:1.9rem">${g.e}</div>
+      ${g.img?`<div class="card-vis vis-photo" style="aspect-ratio:4/3;background-image:url('/images/services/${g.img}.jpg')" role="img" aria-label="${g.l}"></div>`:`<div class="card-vis ${g.p}" style="aspect-ratio:4/3;font-size:1.9rem">${g.e}</div>`}
       <div class="card-body"><h3>${g.l}</h3><p>${g.d}</p></div>
     </div>`;
   });

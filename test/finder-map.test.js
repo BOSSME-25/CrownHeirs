@@ -49,6 +49,17 @@ test('finder: service photos exist, belong to catalog services, and cover the ca
   assert.ok((html.match(/svcVis\('/g) || []).length >= 5, 'every tile renderer uses the photo helper');
 });
 
+test('finder: every photo the tiles reference exists (static paths and goal img slugs)', () => {
+  const dir = path.join(__dirname, '..', 'public', 'images');
+  const refs = [
+    ...[...html.matchAll(/\/images\/(services|length)\/([a-z0-9-]+)\.jpg/g)].map(m => `${m[1]}/${m[2]}.jpg`),
+    ...[...html.matchAll(/\bimg:'([a-z0-9-]+)'/g)].map(m => `services/${m[1]}.jpg`)
+  ];
+  assert.ok(refs.length >= 30, 'tiles reference photos');
+  const missing = [...new Set(refs)].filter(r => !fs.existsSync(path.join(dir, r)));
+  assert.deepEqual(missing, [], 'no tile points at a missing photo');
+});
+
 test('tv: the services list names real, active services that have a photo', () => {
   const dir = path.join(__dirname, '..', 'public', 'images', 'services');
   const list = JSON.parse(fs.readFileSync(path.join(dir, 'index.json'), 'utf8'));
