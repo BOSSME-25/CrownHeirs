@@ -52,7 +52,7 @@ test('finder: service photos exist, belong to catalog services, and cover the ca
 test('finder: every photo the tiles reference exists (static paths and goal img slugs)', () => {
   const dir = path.join(__dirname, '..', 'public', 'images');
   const refs = [
-    ...[...html.matchAll(/\/images\/(services|length)\/([a-z0-9-]+)\.jpg/g)].map(m => `${m[1]}/${m[2]}.jpg`),
+    ...[...html.matchAll(/\/images\/(services|length|tiny)\/([a-z0-9-]+)\.jpg/g)].map(m => `${m[1]}/${m[2]}.jpg`),
     ...[...html.matchAll(/\b(?:img|imgMen):'([a-z0-9-]+)'/g)].map(m => `services/${m[1]}.jpg`),
     ...[...html.matchAll(/\bimgPath:'\/images\/([a-z0-9\/-]+\.jpg)'/g)].map(m => m[1])
   ];
