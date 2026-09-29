@@ -1,0 +1,19 @@
+{
+ "name": "Crown Heirs Hair Den",
+ "short_name": "Crown Heirs",
+ "icons": [
+  {
+   "src": "/icon-192.png",
+   "sizes": "192x192",
+   "type": "image/png"
+  },
+  {
+   "src": "/icon-512.png",
+   "sizes": "512x512",
+   "type": "image/png"
+  }
+ ],
+ "theme_color": "#a0624a",
+ "background_color": "#ece8e2",
+ "display": "browser"
+}
