@@ -4,11 +4,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Crown Heirs Hair Den | Natural Hair Salon in Phoenix</title>
-<meta name="description" content="Crown Heirs Hair Den is a natural hair salon in Phoenix, Arizona: braids, locs, silk presses, cuts, color, lashes and Tiny Heirs kids' services. Find your service and book online.">
+<meta name="description" content="Crown Heirs Hair Den is a natural hair salon in Phoenix, Arizona, on W. Lower Buckeye Rd.: braids, locs, silk presses, cuts, color, lashes and Tiny Heirs kids' services. Find your service and book online.">
 <meta property="og:title" content="Crown Heirs Hair Den | Natural Hair Salon in Phoenix">
 <meta property="og:description" content="Braids, locs, silk presses, cuts, color and Tiny Heirs kids' services in Phoenix, Arizona. Find your service and book online.">
 <meta property="og:image" content="/images/logo-1.png">
 <meta property="og:type" content="website">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"HairSalon","name":"Crown Heirs Hair Den","telephone":"+1-480-457-0165","email":"info@crownheirs.com",
+ "address":{"@type":"PostalAddress","streetAddress":"7625 W. Lower Buckeye Rd., Suite 140","addressLocality":"Phoenix","addressRegion":"AZ","postalCode":"85043","addressCountry":"US"},
+ "foundingDate":"2021-07","image":"/images/logo-1.png","sameAs":["https://instagram.com/crownheirs"]}
+</script>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Cinzel:wght@400;500&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
@@ -138,7 +144,8 @@ body {
 @media(max-width:680px) {
   .site-header { padding: 0 16px; }
   .site-nav { gap: 14px; }
-  .site-nav .nav-link { display: none; }
+  .site-nav .nav-link:not(.nav-keep) { display: none; }
+  .site-nav .nav-cta { padding: 8px 16px; }
 }
 
 /* ═══════════════════════════════════════════
@@ -884,6 +891,20 @@ footer a:hover { color: var(--ink); }
 .tier ul { list-style: none; padding: 0; margin: 0; }
 .tier li { font-size: 0.85rem; color: var(--ink-mid); padding: 5px 0; border-top: 1px solid var(--border); }
 .prod p { font-size: 0.82rem; color: var(--ink-dim); line-height: 1.55; }
+
+/* ═══ ABOUT + VISIT ═══ */
+.story { max-width: 720px; margin: 0 auto; }
+.story p, .bio p, .visit p { font-size: 0.9rem; color: var(--ink-mid); line-height: 1.7; margin-bottom: 12px; }
+.story h3 { font-family: var(--font-serif); font-weight: 400; font-size: 1.3rem; margin: 18px 0 8px; color: var(--ink); }
+.bios { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; margin-top: 24px; }
+.bio { background: #fff; border: 1px solid var(--border); border-radius: 14px; padding: 22px; }
+.bio-head { display: flex; gap: 12px; align-items: center; margin-bottom: 12px; }
+.bio h3 { font-family: var(--font-serif); font-weight: 400; font-size: 1.3rem; color: var(--ink); }
+.bio-role { font-size: 0.72rem !important; letter-spacing: 0.12em; text-transform: uppercase; color: var(--terra) !important; margin: 2px 0 0 !important; }
+.visit { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+.visit > div { background: #fff; border: 1px solid var(--border); border-radius: 14px; padding: 18px; }
+.visit h3 { font-size: 0.72rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-dim); font-weight: 500; margin-bottom: 8px; }
+.visit a, footer a[href^="tel"] { color: var(--terra); }
 </style>
 </head>
 <body>
@@ -902,6 +923,8 @@ footer a:hover { color: var(--ink); }
     </svg></a>
     <nav class="site-nav">
       <a href="/" class="nav-link" onclick="goHome();return false;">Home</a>
+      <a href="#about" class="nav-link nav-about nav-keep" onclick="goSection('about');return false;">About</a>
+      <a href="#visit" class="nav-link nav-keep" onclick="goSection('visit');return false;">Visit</a>
       <a href="/book" class="nav-cta">Book</a>
     </nav>
   </header>
@@ -977,7 +1000,40 @@ footer a:hover { color: var(--ink); }
     <p class="home-note">Available at the front desk.</p>
   </section>
 
-  <footer><p>Crown Heirs Hair Den · Phoenix, Arizona · <a href="mailto:info@crownheirs.com">info@crownheirs.com</a><span id="igLink"></span></p></footer>
+  <section class="home-sec" id="about">
+    <div class="sec-head"><h2>Our Story</h2><p>Love, service and excellence</p></div>
+    <div class="story">
+      <p>Established in July 2021, we officially welcomed the public into what is often called "The Den" on September 1st of the same year. Our vision for the community: a professional yet comfortable full service salon where love, service and excellence are the pillars of the hair haven, and a hub for community resources and economic development.</p>
+      <p>Our salon serves as a community anchor that delivers support, education and services. We provide a space for self care for diverse cultures, with clients ranging from toddlers to seniors. We also provide unique employment opportunities and training, and we intentionally connect with correctional rehabilitation clients.</p>
+      <h3>Our Vision</h3>
+      <p>We are a community anchor for partnerships that propel our community forward. We do so by advancing individuals to their highest levels of health, wealth and wellness through resources, training, financial literacy education and scholarship.</p>
+    </div>
+    <div class="bios">
+      <article class="bio">
+        <div class="bio-head"><div class="agent-ring">E</div><div><h3>Emily Belt</h3><p class="bio-role">Co-Owner and Chief Executive Officer</p></div></div>
+        <p>Ms. Belt is known to most as a pillar of gratitude, humility, consistency and, most importantly, unwavering faith. For the past 12 years she has been a proud resident of Laveen, Arizona, where she lives with her all-academic, all-pro, entrepreneur daughter, Elisabeth. As a proud member of Zeta Phi Beta Sorority, Inc., her focus is being an asset to her local communities. Her experience includes community and program development, advocacy and specialist work in foster care, counseling with a focus on behavior modification, and serving as a liaison for diversity development in higher education.</p>
+        <p>Emily is an experienced leader, coach and team developer with a special interest in operational development, strategic planning and growth. Although her education and early career are rooted in social services, she has shown that her skills transfer to any industry and stage. Alongside leading The Den, she serves as Associate Vice President of Enrollment Operations at Grand Canyon University, where she has proudly worked for 15 years.</p>
+        <p>She has been privileged to serve some of the most dynamic and diverse groups of people, and she leaves each role confident they will continue to soar. She is eager to work alongside phenomenal people already doing great work, and to partner with others to break new boundaries, overcome new challenges and exceed expectations.</p>
+      </article>
+      <article class="bio">
+        <div class="bio-head"><div class="agent-ring bethany">B</div><div><h3>Bethany Grissum</h3><p class="bio-role">Chief Operating Officer</p></div></div>
+        <p>Bethany has been an independent salon stylist since 2019, specializing in loc maintenance and care with an emphasis on natural hair restoration. An Arizona native, she earned her Bachelor's in Biology with an emphasis in Pre-Medicine from Grand Canyon University, then continued into Master's study in Public Administration with an emphasis in Health Care Administration. Her education and passion for health and wellness, fueled by her faith, led her to create House of Figs LLC, a functional nutrition company. It brings together her creative work as a portrait photographer (Third Wheel Photography, LLC), private chef (Ms. Baes LLC), loctician (CandetLocs, LLC) and published model.</p>
+        <p>While she has a drive for entrepreneurship, she has a passion for change and is an advocate for self development that stems from purpose. She feels privileged to be part of the positive side of others' journeys. She has a deep community service background and has spent her life in ministry, at home and abroad, with a special focus on youth development and care for widows across Arizona.</p>
+        <p>In addition to her time in the salon as Chief Operating Officer, she manages an admissions team for Grand Canyon University, where she has managed various departments for the last decade. Bethany is a woman of faith who aims to be an exemplary resource for innovation, stability and renaissance.</p>
+      </article>
+    </div>
+  </section>
+  <section class="home-sec" id="visit">
+    <div class="sec-head"><h2>Visit The Den</h2><p>We can't wait to see you</p></div>
+    <div class="visit">
+      <div><h3>Address</h3><p>7625 W. Lower Buckeye Rd., Suite 140, Phoenix, AZ 85043</p><p><a href="https://www.google.com/maps/search/?api=1&query=7625+W+Lower+Buckeye+Rd+Suite+140+Phoenix+AZ+85043" target="_blank" rel="noopener">Open in Maps</a></p></div>
+      <div><h3>Call or text</h3><p><a href="tel:+14804570165">(480) 457-0165</a></p><p>Texting is welcome: <a href="sms:+14804570165">send us a text</a>.</p></div>
+      <div><h3>Parking</h3><p>Free and plentiful.</p></div>
+      <div><h3>Consultations</h3><p>Consultations are a paid appointment. Book one from any consultation card, or ask when you book your service.</p></div>
+    </div>
+  </section>
+
+  <footer><p>Crown Heirs Hair Den · 7625 W. Lower Buckeye Rd., Suite 140, Phoenix, AZ 85043 · <a href="tel:+14804570165">(480) 457-0165</a> (call or text) · <a href="mailto:info@crownheirs.com">info@crownheirs.com</a><span id="igLink"></span></p></footer>
 </div>
 
 <!-- ═══════════════════════════════════════
@@ -992,6 +1048,8 @@ footer a:hover { color: var(--ink); }
     </svg></a>
     <nav class="site-nav">
       <a href="/" class="nav-link" onclick="goHome();return false;">Home</a>
+      <a href="#about" class="nav-link nav-about nav-keep" onclick="goSection('about');return false;">About</a>
+      <a href="#visit" class="nav-link nav-keep" onclick="goSection('visit');return false;">Visit</a>
       <a href="/book" class="nav-cta">Book</a>
     </nav>
   </header>
@@ -1377,7 +1435,7 @@ footer a:hover { color: var(--ink); }
     </div>
   </div>
 
-  <footer><p>Crown Heirs Hair Den · <a href="https://crownheirs.com">crownheirs.com</a> · <a href="mailto:info@crownheirs.com">info@crownheirs.com</a></p></footer>
+  <footer><p>Crown Heirs Hair Den · <a href="tel:+14804570165">(480) 457-0165</a> (call or text) · <a href="mailto:info@crownheirs.com">info@crownheirs.com</a></p></footer>
 </div>
 
 <!-- ═══════════════════════════════════════
@@ -1392,6 +1450,8 @@ footer a:hover { color: var(--ink); }
     </svg></a>
     <nav class="site-nav">
       <a href="/" class="nav-link" onclick="goHome();return false;">Home</a>
+      <a href="#about" class="nav-link nav-about nav-keep" onclick="goSection('about');return false;">About</a>
+      <a href="#visit" class="nav-link nav-keep" onclick="goSection('visit');return false;">Visit</a>
       <a href="/book" class="nav-cta">Book</a>
     </nav>
   </header>
@@ -1590,7 +1650,7 @@ footer a:hover { color: var(--ink); }
     </div>
   </div>
 
-  <footer><p>Crown Heirs Hair Den · <a href="https://crownheirs.com">crownheirs.com</a> · <a href="mailto:info@crownheirs.com">info@crownheirs.com</a></p></footer>
+  <footer><p>Crown Heirs Hair Den · <a href="tel:+14804570165">(480) 457-0165</a> (call or text) · <a href="mailto:info@crownheirs.com">info@crownheirs.com</a></p></footer>
 </div>
 
 <!-- ═══════════════════════════════════════
@@ -1605,6 +1665,8 @@ footer a:hover { color: var(--ink); }
     </svg></a>
     <nav class="site-nav">
       <a href="/" class="nav-link" onclick="goHome();return false;">Home</a>
+      <a href="#about" class="nav-link nav-about nav-keep" onclick="goSection('about');return false;">About</a>
+      <a href="#visit" class="nav-link nav-keep" onclick="goSection('visit');return false;">Visit</a>
       <a href="/book" class="nav-cta">Book</a>
     </nav>
   </header>
@@ -1692,7 +1754,7 @@ footer a:hover { color: var(--ink); }
     </div>
   </div>
 
-  <footer><p>Crown Heirs Hair Den · <a href="https://crownheirs.com">crownheirs.com</a> · <a href="mailto:info@crownheirs.com">info@crownheirs.com</a></p></footer>
+  <footer><p>Crown Heirs Hair Den · <a href="tel:+14804570165">(480) 457-0165</a> (call or text) · <a href="mailto:info@crownheirs.com">info@crownheirs.com</a></p></footer>
 </div>
 
 <!-- ═══════════════════════════════════════
@@ -1707,6 +1769,8 @@ footer a:hover { color: var(--ink); }
     </svg></a>
     <nav class="site-nav">
       <a href="/" class="nav-link" onclick="goHome();return false;">Home</a>
+      <a href="#about" class="nav-link nav-about nav-keep" onclick="goSection('about');return false;">About</a>
+      <a href="#visit" class="nav-link nav-keep" onclick="goSection('visit');return false;">Visit</a>
       <a href="/book" class="nav-cta">Book</a>
     </nav>
   </header>
@@ -1726,7 +1790,7 @@ footer a:hover { color: var(--ink); }
     </div>
   </div>
 
-  <footer><p>Crown Heirs Hair Den · <a href="https://crownheirs.com">crownheirs.com</a> · <a href="mailto:info@crownheirs.com">info@crownheirs.com</a></p></footer>
+  <footer><p>Crown Heirs Hair Den · <a href="tel:+14804570165">(480) 457-0165</a> (call or text) · <a href="mailto:info@crownheirs.com">info@crownheirs.com</a></p></footer>
 </div>
 
 <script src="/finder-engine.js"></script>
@@ -1797,6 +1861,7 @@ function showScreen(id){
   document.getElementById(id).classList.add('active');
   window.scrollTo(0,0);
 }
+function goSection(id){ goHome(); setTimeout(()=>{ const el=document.getElementById(id); if(el) el.scrollIntoView({behavior:'smooth'}); },60); }
 function goHome(){
   const splash=document.getElementById('splash'); if(splash) splash.style.display='none';
   showScreen('welcome'); document.getElementById('portal').style.display='block';
@@ -2156,7 +2221,7 @@ function buildTinyResults(){
       <div class="scard-body">${cardHead(s.n)}<p>${s.d}</p><div class="scard-meta"><span class="dur">⏱ ${cardMeta(s).dur}</span><span class="price">${cardMeta(s).price}</span></div></div>
       ${bookButton(s)}
     </div>`).join('')
-    :`<div style="grid-column:1/-1;text-align:center;padding:40px;font-family:var(--font-serif);font-size:1.1rem;color:var(--ink-dim);">We'd love to build a custom plan. <a href="mailto:info@crownheirs.com" style="color:var(--terra)">Email us</a> or book a free consultation.</div>`;
+    :consultCard({goals:[],texture:null});
   showD2Screen('qtiny',5);
 }
 function resetD2(){
@@ -2465,10 +2530,10 @@ const esc=t=>String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
     const links=[['ourwork','Our Work',photos.length],['memberships','Memberships',(c.memberships||[]).length],['products','Products',(c.products||[]).length]].filter(x=>x[2]);
     document.querySelectorAll('.site-nav').forEach(nav=>{
       nav.querySelectorAll('.nav-sec').forEach(a=>a.remove());
-      const book=nav.querySelector('.nav-cta');
+      const before=nav.querySelector('.nav-about');
       links.forEach(([id,label])=>{ const a=document.createElement('a'); a.href='#'+id; a.className='nav-link nav-sec'; a.textContent=label;
-        a.onclick=e=>{ e.preventDefault(); goHome(); setTimeout(()=>document.getElementById(id).scrollIntoView({behavior:'smooth'}),50); };
-        nav.insertBefore(a,book); });
+        a.onclick=e=>{ e.preventDefault(); goSection(id); };
+        nav.insertBefore(a,before); });
     });
   }).catch(()=>{});
 })();
@@ -2480,7 +2545,9 @@ const CHAT_INTENTS=[
   {k:['how much','price','cost','$','charge','deposit'],r:'Each card above shows the starting price. Your stylist confirms the exact quote for your length and density at your appointment.'},
   {k:['how long','last','time','hours'],r:'The time on each card is chair time. Braids and twists usually last 6 to 8 weeks. A silk press lasts until your next wash. Locs are long term.'},
   {k:['book','appointment','available','opening','schedule'],r:'Tap Book now on the card that fits. You will pick your option, stylist and time on the next page.'},
-  {k:['consult'],r:'Consultations are on the menu. Tap Book now on a consultation card, or ask for one when you book your service.'},
+  {k:['where','address','location','parking','park','directions'],r:'We are at 7625 W. Lower Buckeye Rd., Suite 140, Phoenix, AZ 85043. Parking is free and plentiful.'},
+  {k:['phone','call','text','number'],r:'Call or text us at (480) 457-0165. Texting is welcome.'},
+  {k:['consult'],r:'Consultations are a paid appointment. Tap Book on a consultation card, or ask for one when you book your service.'},
   {k:['kid','child','tiny','son','daughter'],r:'Tiny Heirs services are gentle and paced for kids, for every length and texture. Choose Tiny Heirs on the first question to see them.'},
   {k:['loc'],r:'You can start locs at almost any length, and we pick the method for your texture. Retwists every 4 to 6 weeks keep them healthy.'},
   {k:['braid','knotless','twist'],r:'Knotless braids use added hair and work at any natural length. They last 6 to 8 weeks with care.'},
