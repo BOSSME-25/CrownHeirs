@@ -9,7 +9,8 @@ module.exports = async (req, res) => {
     noStore(res);
     if (req.method === 'GET') {
       const code = req.query.code;
-      return res.status(200).json(family.isVisitCode(code) ? { kind: 'visit', ...(await family.lookup(code)) } : await booking.lookup(code));
+      if (family.isVisitCode(code)) { const v = await family.lookup(code); return res.status(200).json({ ...v, kind: 'visit', visitKind: v.kind }); }
+      return res.status(200).json(await booking.lookup(code));
     }
     if (req.method === 'POST' && (req.body || {}).action === 'cancel') {
       const code = req.body.code;

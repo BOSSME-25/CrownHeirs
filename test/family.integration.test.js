@@ -61,9 +61,11 @@ if (!url) {
   test.after(async () => { await db.getPool().end(); });
 
   const people = () => [
-    { self: true, name: HOLDER.name, service: 'sleek-ponytail', variation: PONY_V.id, stylist: 'bethany' },
-    { name: 'Kai', relationship: 'son', service: 'loc-retwist', variation: RETWIST_V.id, stylist: 'test-fam' }
+    { self: true, name: HOLDER.name, services: [{ service: 'sleek-ponytail', variation: PONY_V.id, stylist: 'bethany' }] },
+    { name: 'Kai', relationship: 'son', services: [{ service: 'loc-retwist', variation: RETWIST_V.id, stylist: 'test-fam' }] }
   ];
+  // availability's option → the people payload create() takes (stylist + startAt on every leg)
+  const fromOption = (o) => people().map((p, i) => ({ ...p, services: p.services.map((sv, k) => ({ ...sv, stylist: o.people[i].legs[k].stylist.slug, startAt: o.people[i].legs[k].startAt })) }));
   let VISIT;
 
   test('availability: every option seats everyone within the window, one chair at a time', async () => {
@@ -73,20 +75,20 @@ if (!url) {
     assert.ok(a.options.length > 5, 'open day has family options');
     for (const o of a.options) {
       assert.equal(o.people.length, 2);
-      const starts = o.people.map(p => new Date(p.startAt).getTime());
+      const starts = o.people.map(p => new Date(p.legs[0].startAt).getTime());
       assert.ok(Math.max(...starts) - Math.min(...starts) <= 60 * 60000, 'starts within the window');
       assert.equal(o.startAt, new Date(Math.min(...starts)).toISOString());
-      // 90-minute services within 60 minutes of each other can't share a stylist.
-      assert.notEqual(o.people[0].stylist.slug, o.people[1].stylist.slug, 'different stylists');
+      assert.notEqual(o.people[0].legs[0].stylist.slug, o.people[1].legs[0].stylist.slug, 'pinned to different stylists');
     }
-    await assert.rejects(() => F.availability({ people: [people()[0]], date }), (e) => e.status === 400);
+    await assert.rejects(() => F.availability({ people: [people()[0]], date }), (e) => e.status === 400, 'one person, one service is not a visit');
+    await assert.rejects(() => F.availability({ people: people(), date, mode: 'nope' }), (e) => e.status === 400);
   });
 
   test('create: one visit, two legs, dependent in the household without a phone; one message to the holder', async () => {
     const date = nextTuesday();
     const { options } = await F.availability({ people: people(), date });
     const o = options[2];
-    const ppl = people().map((p, i) => ({ ...p, stylist: o.people[i].stylist.slug, startAt: o.people[i].startAt }));
+    const ppl = fromOption(o);
     notify.outbox.length = 0;
     VISIT = await F.create({ holder: HOLDER, people: ppl, notes: 'first family visit' });
     assert.match(VISIT.code, /^CF-[A-Z2-9]{5}$/);
@@ -131,7 +133,7 @@ if (!url) {
     const date = addDays(nextTuesday(), 1);   // Wednesday: both stylists work
     const { options } = await F.availability({ people: people(), date });
     const o = options[0];
-    const ppl = people().map((p, i) => ({ ...p, stylist: o.people[i].stylist.slug, startAt: o.people[i].startAt }));
+    const ppl = fromOption(o);
     const v2 = await F.create({ holder: HOLDER, people: ppl });
     const { rows } = await db.query(`SELECT count(*) n FROM clients WHERE name = 'Kai' AND household_id = (SELECT household_id FROM clients WHERE phone = $1)`, [PHONE]);
     assert.equal(Number(rows[0].n), 1);
@@ -146,26 +148,72 @@ if (!url) {
     const { options } = await F.availability({ people: people(), date });
     const o = options[1];
     // Take Kai's slot with a single booking first.
-    await B.createAppointment({ serviceSlug: 'loc-retwist', variationId: RETWIST_V.id, stylistSlug: o.people[1].stylist.slug, startAt: o.people[1].startAt, client: { name: 'Blocker', phone: '602-555-0891' } });
+    await B.createAppointment({ serviceSlug: 'loc-retwist', variationId: RETWIST_V.id, stylistSlug: o.people[1].legs[0].stylist.slug, startAt: o.people[1].legs[0].startAt, client: { name: 'Blocker', phone: '602-555-0891' } });
     const before = (await db.query('SELECT count(*) n FROM visits')).rows[0].n;
-    const ppl = people().map((p, i) => ({ ...p, stylist: o.people[i].stylist.slug, startAt: o.people[i].startAt }));
+    const ppl = fromOption(o);
     await assert.rejects(() => F.create({ holder: HOLDER, people: ppl }), (e) => e.status === 409 && /Kai/.test(e.message));
     assert.equal((await db.query('SELECT count(*) n FROM visits')).rows[0].n, before, 'nothing half-booked');
   });
 
   test('handlers: GET/POST /api/book/family and visit codes through /api/book/lookup', async () => {
     const date = addDays(nextTuesday(), 3);
-    const g = await call(familyApi, req('GET', { query: { date, people: JSON.stringify(people()) } }));
-    assert.equal(g.statusCode, 200, JSON.stringify(g.body)); assert.ok(g.body.options.length);
+    const g = await call(familyApi, req('GET', { query: { date, people: JSON.stringify(people()), mode: 'together' } }));
+    assert.equal(g.statusCode, 200, JSON.stringify(g.body)); assert.ok(g.body.options.length); assert.equal(g.body.mode, 'together');
+    const so = await call(familyApi, req('GET', { query: { soonest: '1', people: JSON.stringify(people()), mode: 'sameday' } }));
+    assert.equal(so.statusCode, 200); assert.ok(so.body.date, 'a soonest day');
     const o = g.body.options[0];
-    const ppl = people().map((p, i) => ({ ...p, stylist: o.people[i].stylist.slug, startAt: o.people[i].startAt }));
-    const c = await call(familyApi, req('POST', { body: { holder: HOLDER, people: ppl } }));
+    const ppl = fromOption(o);
+    const c = await call(familyApi, req('POST', { body: { holder: HOLDER, people: ppl, mode: 'together' } }));
     assert.equal(c.statusCode, 201, JSON.stringify(c.body)); assert.match(c.body.code, /^CF-/);
     const l = await call(lookupApi, req('GET', { query: { code: c.body.code } }));
     assert.equal(l.body.kind, 'visit'); assert.equal(l.body.people.length, 2);
     const x = await call(lookupApi, req('POST', { body: { code: c.body.code, action: 'cancel' } }));
     assert.equal(x.statusCode, 200); assert.equal(x.body.status, 'cancelled');
     assert.equal((await call(familyApi, req('GET', { query: { date, people: 'nope' } }))).statusCode, 400);
+  });
+
+  test('stack: one person, loc color then retwist, back to back, only on qualified stylists', async () => {
+    const date = addDays(nextTuesday(), 7);
+    const color = (await B.listServices()).flatMap(c => c.services).find(s => s.slug === 'loc-color');
+    const colorV = color.variations[0];
+    // bethany offers everything; test-fam does not offer loc-color.
+    const stack = [{ self: true, name: HOLDER.name, services: [{ service: 'loc-color', variation: colorV.id, stylist: 'bethany' }, { service: 'loc-retwist', variation: RETWIST_V.id }] }];
+    const a = await F.availability({ people: stack, date });
+    assert.ok(a.options.length, 'a stacked visit has times');
+    for (const o of a.options) {
+      const [c, r] = o.people[0].legs;
+      assert.equal(c.service.slug, 'loc-color'); assert.equal(r.service.slug, 'loc-retwist');
+      assert.equal(r.startAt, c.endsAt, 'the retwist starts when the color ends');
+      assert.equal(c.stylist.slug, 'bethany', 'color only lands on a stylist who offers it');
+    }
+    // A stylist who is not qualified can't be asked for.
+    await assert.rejects(() => F.availability({ people: [{ self: true, services: [{ service: 'loc-color', variation: colorV.id, stylist: 'test-fam' }, { service: 'loc-retwist', variation: RETWIST_V.id }] }], date }), (e) => e.status === 404);
+    const o = a.options[Math.min(1, a.options.length - 1)];
+    const ppl = [{ ...stack[0], services: stack[0].services.map((sv, k) => ({ ...sv, stylist: o.people[0].legs[k].stylist.slug, startAt: o.people[0].legs[k].startAt })) }];
+    const v = await F.create({ holder: HOLDER, people: ppl });
+    assert.equal(v.kind, 'combo'); assert.equal(v.people.length, 2);
+    assert.equal(new Date(v.people[1].startsAt).toISOString(), new Date(v.people[0].endsAt).toISOString());
+    // Out-of-order or gapped legs are refused.
+    const gapped = [{ ...ppl[0], services: [ppl[0].services[0], { ...ppl[0].services[1], startAt: new Date(new Date(ppl[0].services[1].startAt).getTime() + 15 * 60000).toISOString() }] }];
+    await assert.rejects(() => F.create({ holder: HOLDER, people: gapped }), (e) => e.status === 400 && /must start when/.test(e.message));
+    await F.cancel(v.code);
+  });
+
+  test('same day: when together is impossible, sameday finds a plan; soonest walks forward', async () => {
+    const date = addDays(nextTuesday(), 8);   // a Wednesday
+    // Make "together" impossible on that day: block bethany except the morning, and test-fam except the afternoon.
+    const two = people().map(p => ({ ...p, services: p.services.map(sv => ({ ...sv, stylist: 'bethany' })) }));   // both want bethany → sequential only
+    const together = await F.availability({ people: two, date, mode: 'together' });
+    const sameday = await F.availability({ people: two, date, mode: 'sameday' });
+    assert.ok(sameday.options.length >= together.options.length);
+    assert.ok(sameday.options.length, 'bethany can see both, one after the other');
+    const o = sameday.options[0];
+    const t0 = new Date(o.people[0].legs[0].startAt).getTime(), t1 = new Date(o.people[1].legs[0].startAt).getTime();
+    assert.ok(Math.abs(t1 - t0) >= 90 * 60000, 'one stylist, so the second person waits for the first to finish');
+    const s = await F.soonest({ people: two, mode: 'sameday', from: date });
+    assert.equal(s.date, date); assert.ok(s.option);
+    const none = await F.soonest({ people: [{ self: true, services: [{ service: 'loc-color', variation: (await B.listServices()).flatMap(c => c.services).find(x => x.slug === 'loc-color').variations[0].id, stylist: 'bethany' }, { service: 'loc-retwist', variation: RETWIST_V.id, stylist: 'test-fam' }] }], mode: 'together', from: date });
+    assert.ok(none.date === null || none.option, 'soonest never throws');
   });
 
   test('reminders: one message per family visit, not one per leg', async () => {
