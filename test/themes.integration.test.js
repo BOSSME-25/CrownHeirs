@@ -73,7 +73,7 @@ if (!url) {
     // Lead time: the test stylist works all day, and FRIDAY is at least 2 days out.
     await assert.rejects(() => B.createAppointment(base), (e) => e.status === 409 && e.extra && e.extra.needsAck && e.extra.theme.name === 'Test Family Friday');
     notify.outbox.length = 0;
-    const a = await B.createAppointment({ ...base, themeAck: true });
+    const a = await B.createAppointment({ policyAck: true, ...base, themeAck: true });
     assert.equal(a.theme.name, 'Test Family Friday'); assert.equal(a.theme.fit, false);
     const sms = notify.outbox.find(m => m.channel === 'sms' && m.to === '+16025550893');
     assert.match(sms.body, /may be moved/);
@@ -85,15 +85,15 @@ if (!url) {
     const mine = day.appointments.find(x => x.code === a.code);
     assert.equal(mine.theme.fit, false); assert.equal(mine.theme.ack, true);
     // A children's service fits without acknowledgement (through the handler, which carries the flag).
-    const h = await call(createApi, req('POST', { body: { service: 'sleek-ponytail', variation: PONY_V.id, stylist: 'test-theme', startAt: slots[20], client } }));
+    const h = await call(createApi, req('POST', { body: { policyAck: true, service: 'sleek-ponytail', variation: PONY_V.id, stylist: 'test-theme', startAt: slots[20], client } }));
     assert.equal(h.statusCode, 409); assert.equal(h.body.needsAck, true); assert.equal(h.body.theme.audience, 'family');
-    const ok = await call(createApi, req('POST', { body: { service: 'sleek-ponytail', variation: PONY_V.id, stylist: 'test-theme', startAt: slots[20], client, themeAck: true } }));
+    const ok = await call(createApi, req('POST', { body: { policyAck: true, service: 'sleek-ponytail', variation: PONY_V.id, stylist: 'test-theme', startAt: slots[20], client, themeAck: true } }));
     assert.equal(ok.statusCode, 201); assert.equal(ok.body.theme.fit, false);
     // Staff bookings are never gated.
-    const staffBooked = await B.createAppointment({ ...base, startAt: slots[40], staff: true });
+    const staffBooked = await B.createAppointment({ policyAck: true, ...base, startAt: slots[40], staff: true });
     assert.equal(staffBooked.theme.fit, false);
     // A plain Tuesday has no theme.
-    const t = await B.createAppointment({ ...base, startAt: (await slotOn(TUESDAY))[4], staff: true });
+    const t = await B.createAppointment({ policyAck: true, ...base, startAt: (await slotOn(TUESDAY))[4], staff: true });
     assert.equal(t.theme, null);
   });
 

@@ -74,7 +74,7 @@ if (!url) {
     assert.equal(av.statusCode, 200, JSON.stringify(av.body));
     const startAt = av.body.stylists[0].slots[0];
 
-    const b = await call(handler, req('POST', { headers: ADMIN, body: { action: 'book', service: 'sleek-ponytail', variation: PONY_V.id, stylist: 'test-stylist', startAt, client: { name: 'Desk Client', phone: PHONE }, notes: 'called in' } }));
+    const b = await call(handler, req('POST', { headers: ADMIN, body: { action: 'book', policyAck: true, service: 'sleek-ponytail', variation: PONY_V.id, stylist: 'test-stylist', startAt, client: { name: 'Desk Client', phone: PHONE }, notes: 'called in' } }));
     assert.equal(b.statusCode, 201, JSON.stringify(b.body));
     assert.equal(b.body.source, 'staff');
     assert.ok(notify.outbox.some(m => m.channel === 'sms' && m.to === '+16025550777' && /you're booked/.test(m.body)), 'client SMS');
@@ -99,7 +99,7 @@ if (!url) {
     const date = TOMORROW;
     const before = (await B.availability({ serviceSlug: 'sleek-ponytail', variationId: PONY_V.id, date, stylistSlug: 'test-stylist', staff: true })).stylists[0].slots;
     const startAt = before[Math.floor(before.length / 2)];
-    const appt = await B.createAppointment({ serviceSlug: 'sleek-ponytail', variationId: PONY_V.id, stylistSlug: 'test-stylist', startAt, client: { name: 'Desk Client', phone: PHONE }, staff: true });
+    const appt = await B.createAppointment({ policyAck: true, serviceSlug: 'sleek-ponytail', variationId: PONY_V.id, stylistSlug: 'test-stylist', startAt, client: { name: 'Desk Client', phone: PHONE }, staff: true });
     const block = await S.addTimeOff({ stylist: 'test-stylist', startsAt: startAt, endsAt: new Date(new Date(startAt).getTime() + 3 * 3600000).toISOString(), reason: 'lunch' });
     assert.equal(block.conflicts.length, 1); assert.equal(block.conflicts[0].code, appt.code);
     const after = (await B.availability({ serviceSlug: 'sleek-ponytail', variationId: PONY_V.id, date, stylistSlug: 'test-stylist', staff: true })).stylists[0].slots;
@@ -115,7 +115,7 @@ if (!url) {
     const date = TOMORROW;
     const slots = (await B.availability({ serviceSlug: 'sleek-ponytail', variationId: PONY_V.id, date, stylistSlug: 'test-stylist', staff: true })).stylists[0].slots;
     // First slot of tomorrow is always inside the 36-hour reminder window.
-    const appt = await B.createAppointment({ serviceSlug: 'sleek-ponytail', variationId: PONY_V.id, stylistSlug: 'test-stylist', startAt: slots[0], client: { name: 'Desk Client', phone: PHONE, email: 'c@example.com' }, staff: true });
+    const appt = await B.createAppointment({ policyAck: true, serviceSlug: 'sleek-ponytail', variationId: PONY_V.id, stylistSlug: 'test-stylist', startAt: slots[0], client: { name: 'Desk Client', phone: PHONE, email: 'c@example.com' }, staff: true });
 
     assert.equal((await call(reminders, req('GET'))).statusCode, 401);
     notify.outbox.length = 0;
@@ -153,7 +153,7 @@ if (!url) {
       assert.equal(times[0], '10:00', 'first slot is the hub shift start');
       assert.ok(times.every(t => t >= '10:00' && t < '14:00'), 'nothing outside the hub shift: ' + times.join(','));
 
-      const appt = await B.createAppointment({ serviceSlug: 'sleek-ponytail', variationId: PONY_V.id, stylistSlug: 'test-stylist', startAt: av.stylists[0].slots[0], client: { name: 'Desk Client', phone: PHONE }, staff: true });
+      const appt = await B.createAppointment({ policyAck: true, serviceSlug: 'sleek-ponytail', variationId: PONY_V.id, stylistSlug: 'test-stylist', startAt: av.stylists[0].slots[0], client: { name: 'Desk Client', phone: PHONE }, staff: true });
       assert.equal(appt.hub.sent, true);
       const p = pushes.find(x => x.id === appt.code);
       assert.ok(p, 'booking pushed'); assert.equal(p.calendarId, 'test-stylist'); assert.equal(p.userId, 'test@crownheirs.com'); assert.equal(p.status, 'booked');

@@ -28,7 +28,7 @@ module.exports = async (req, res) => {
     }
     if (req.method === 'POST') {
       const b = req.body || {};
-      return res.status(201).json(await family.create({ holder: b.holder, people: b.people, notes: b.notes, mode: b.mode || 'together', themeAck: Boolean(b.themeAck) }));
+      return res.status(201).json(await family.create({ holder: b.holder, people: b.people, notes: b.notes, mode: b.mode || 'together', themeAck: Boolean(b.themeAck), policyAck: Boolean(b.policyAck) }));
     }
     res.status(405).json({ error: 'Method not allowed' });
   } catch (e) { fail(res, e); }

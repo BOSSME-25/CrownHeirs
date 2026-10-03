@@ -92,14 +92,25 @@ CREATE TABLE IF NOT EXISTS households (
 );
 ALTER TABLE clients ALTER COLUMN phone DROP NOT NULL;
 ALTER TABLE clients ADD COLUMN IF NOT EXISTS household_id integer;
-ALTER TABLE clients DROP CONSTRAINT IF EXISTS clients_household_id_fkey;
-ALTER TABLE clients ADD CONSTRAINT clients_household_id_fkey FOREIGN KEY (household_id) REFERENCES households(id) ON DELETE CASCADE;
-ALTER TABLE households DROP CONSTRAINT IF EXISTS households_holder_id_fkey;
-ALTER TABLE households ADD CONSTRAINT households_holder_id_fkey FOREIGN KEY (holder_id) REFERENCES clients(id) ON DELETE CASCADE;
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'clients_household_id_fkey' AND confdeltype = 'c') THEN
+    ALTER TABLE clients DROP CONSTRAINT IF EXISTS clients_household_id_fkey;
+    ALTER TABLE clients ADD CONSTRAINT clients_household_id_fkey FOREIGN KEY (household_id) REFERENCES households(id) ON DELETE CASCADE;
+  END IF;
+END $$;
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'households_holder_id_fkey' AND confdeltype = 'c') THEN
+    ALTER TABLE households DROP CONSTRAINT IF EXISTS households_holder_id_fkey;
+    ALTER TABLE households ADD CONSTRAINT households_holder_id_fkey FOREIGN KEY (holder_id) REFERENCES clients(id) ON DELETE CASCADE;
+  END IF;
+END $$;
 ALTER TABLE clients ADD COLUMN IF NOT EXISTS relationship text NOT NULL DEFAULT '';   -- "daughter", "son", "partner"…
 ALTER TABLE clients ADD COLUMN IF NOT EXISTS birth_year integer;
-ALTER TABLE clients DROP CONSTRAINT IF EXISTS clients_phone_or_household;
-ALTER TABLE clients ADD CONSTRAINT clients_phone_or_household CHECK (phone IS NOT NULL OR household_id IS NOT NULL);
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'clients_phone_or_household') THEN
+    ALTER TABLE clients ADD CONSTRAINT clients_phone_or_household CHECK (phone IS NOT NULL OR household_id IS NOT NULL);
+  END IF;
+END $$;
 CREATE INDEX IF NOT EXISTS clients_household_idx ON clients (household_id);
 
 -- ── Visits: one confirmation code for several appointments booked together
@@ -148,11 +159,25 @@ ALTER TABLE appointments ADD COLUMN IF NOT EXISTS reminder_sent_at timestamptz;
 -- Whether Team Hub has this appointment (see lib/teamhub.js).
 ALTER TABLE appointments ADD COLUMN IF NOT EXISTS hub_synced_at timestamptz;
 ALTER TABLE appointments ADD COLUMN IF NOT EXISTS hub_error text;
-ALTER TABLE visits DROP CONSTRAINT IF EXISTS visits_holder_id_fkey;
-ALTER TABLE visits ADD CONSTRAINT visits_holder_id_fkey FOREIGN KEY (holder_id) REFERENCES clients(id) ON DELETE CASCADE;
-ALTER TABLE visits DROP CONSTRAINT IF EXISTS visits_household_id_fkey;
-ALTER TABLE visits ADD CONSTRAINT visits_household_id_fkey FOREIGN KEY (household_id) REFERENCES households(id) ON DELETE SET NULL;
-ALTER TABLE appointments ADD COLUMN IF NOT EXISTS visit_id integer REFERENCES visits(id);
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'visits_holder_id_fkey' AND confdeltype = 'c') THEN
+    ALTER TABLE visits DROP CONSTRAINT IF EXISTS visits_holder_id_fkey;
+    ALTER TABLE visits ADD CONSTRAINT visits_holder_id_fkey FOREIGN KEY (holder_id) REFERENCES clients(id) ON DELETE CASCADE;
+  END IF;
+END $$;
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'visits_household_id_fkey' AND confdeltype = 'n') THEN
+    ALTER TABLE visits DROP CONSTRAINT IF EXISTS visits_household_id_fkey;
+    ALTER TABLE visits ADD CONSTRAINT visits_household_id_fkey FOREIGN KEY (household_id) REFERENCES households(id) ON DELETE SET NULL;
+  END IF;
+END $$;
+ALTER TABLE appointments ADD COLUMN IF NOT EXISTS visit_id integer;
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'appointments_visit_id_fkey' AND confdeltype = 'c') THEN
+    ALTER TABLE appointments DROP CONSTRAINT IF EXISTS appointments_visit_id_fkey;
+    ALTER TABLE appointments ADD CONSTRAINT appointments_visit_id_fkey FOREIGN KEY (visit_id) REFERENCES visits(id) ON DELETE CASCADE;
+  END IF;
+END $$;
 CREATE INDEX IF NOT EXISTS appointments_visit_idx ON appointments (visit_id);
 CREATE INDEX IF NOT EXISTS appointments_stylist_time_idx ON appointments (stylist_id, starts_at);
 CREATE INDEX IF NOT EXISTS appointments_client_idx ON appointments (client_id);
@@ -268,6 +293,24 @@ ALTER TABLE appointments ADD COLUMN IF NOT EXISTS theme_fit boolean;      -- was
 ALTER TABLE appointments ADD COLUMN IF NOT EXISTS theme_ack boolean NOT NULL DEFAULT false;
 ALTER TABLE appointments ADD COLUMN IF NOT EXISTS moved_from timestamptz;  -- last reschedule's original start
 
+-- ── Deposits and policies ─────────────────────────────────────────────────
+-- A booking carries the deposit it owes (from the policy at booking time),
+-- whether it has been paid, and that the client accepted the policy.
+ALTER TABLE services ADD COLUMN IF NOT EXISTS deposit_cents integer CHECK (deposit_cents IS NULL OR deposit_cents >= 0);  -- per-service override
+ALTER TABLE appointments ADD COLUMN IF NOT EXISTS deposit_cents integer NOT NULL DEFAULT 0 CHECK (deposit_cents >= 0);
+ALTER TABLE appointments ADD COLUMN IF NOT EXISTS deposit_status text NOT NULL DEFAULT 'none'
+  CHECK (deposit_status IN ('none', 'due', 'paid', 'waived', 'forfeited', 'refunded'));
+ALTER TABLE appointments ADD COLUMN IF NOT EXISTS deposit_ref text;            -- Square order / payment id, or a desk note
+ALTER TABLE appointments ADD COLUMN IF NOT EXISTS deposit_paid_at timestamptz;
+ALTER TABLE appointments ADD COLUMN IF NOT EXISTS policy_ack boolean NOT NULL DEFAULT false;
+ALTER TABLE appointments ADD COLUMN IF NOT EXISTS cancelled_at timestamptz;
+ALTER TABLE appointments ADD COLUMN IF NOT EXISTS late_cancel boolean NOT NULL DEFAULT false;   -- cancelled inside the window
+ALTER TABLE clients ADD COLUMN IF NOT EXISTS fee_waived boolean NOT NULL DEFAULT false;        -- e.g. Loyalty members
+ALTER TABLE visits ADD COLUMN IF NOT EXISTS pay_url text;                                       -- Square payment link for the visit's deposit
+ALTER TABLE visits ADD COLUMN IF NOT EXISTS pay_ref text;
+ALTER TABLE appointments ADD COLUMN IF NOT EXISTS pay_url text;
+ALTER TABLE tickets ADD COLUMN IF NOT EXISTS deposit_cents integer NOT NULL DEFAULT 0 CHECK (deposit_cents >= 0);  -- credit applied
+
 CREATE TABLE IF NOT EXISTS settings (
   key   text PRIMARY KEY,
   value text NOT NULL
@@ -278,5 +321,10 @@ INSERT INTO settings (key, value) VALUES
   ('max_days_ahead', '60'),
   ('step_min',       '15'),
   ('tax_rate_bps',   '0'),    -- retail sales tax, basis points (860 = 8.6%); services untaxed
-  ('family_window_min', '60') -- a family's appointments all start within this many minutes
+  ('family_window_min', '60'), -- a family's appointments all start within this many minutes
+  ('deposit_percent',    '25'),  -- deposit = this % of the starting price…
+  ('deposit_min_cents',  '2500'), -- …but never less than this (when the service has a price)
+  ('cancel_window_hours','24'),  -- cancelling inside this window forfeits the deposit
+  ('late_grace_min',     '15'),  -- after this many minutes late, the desk may mark a no-show
+  ('policy_text',        '')     -- optional wording shown above the booking checkbox
 ON CONFLICT (key) DO NOTHING;

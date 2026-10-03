@@ -105,6 +105,24 @@ The holder gets one confirmation, one reminder and one lookup/cancel code.
 Dependents live in the holder's household without a phone; one who later
 books alone just gets a phone of their own.
 
+**Deposits and policies.** Set under *Deposits and policies* in
+`/admin/settings`: the deposit as a percentage of the starting price with
+a floor (a service can carry its own `deposit_cents`; consultations and
+unpriced services hold nothing), the cancellation notice in hours, the
+late grace in minutes, and optional wording. Every online booking shows
+the policy and needs the box ticked (`policyAck`); the desk never does.
+The deposit is recorded on each appointment (`deposit_cents`,
+`deposit_status`: due → paid / waived / forfeited / refunded) and the
+confirmation says what is due. With `SQUARE_ACCESS_TOKEN` and
+`SQUARE_LOCATION_ID` set, each booking gets a Square payment link (the
+Checkout API's quick pay); when the client looks the booking up after
+paying, the order is checked and the deposit marked paid. Without Square
+the desk takes the deposit by hand and marks it *Deposit received*.
+Cancelling inside the notice forfeits a paid deposit; a no-show forfeits;
+a client marked *Member* (fees waived) never forfeits. The till applies a
+paid deposit as credit on the ticket ("Due today"). The day view flags a
+confirmed booking past its grace as *Late*.
+
 **Theme days.** Family Fridays, Zin Saturdays, Mother's Day Saturday. Set
 them up under *Theme days* in `/admin/settings`: a weekly rule or a single
 date, an audience (families and children, adults, everyone), a headline
@@ -255,5 +273,6 @@ Reminders can also be triggered by hand from `/admin/settings`.
 
 ### Not built yet (natural next steps)
 
-Deposits · per-stylist pricing · reschedule-by-code · family and stacked
-visits from the front desk (the API supports it: `/api/book/family`).
+Per-stylist pricing · reschedule-by-code · family and stacked visits
+from the front desk (the API supports it: `/api/book/family`) · card
+payments at the till through Square Terminal.

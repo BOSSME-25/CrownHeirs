@@ -90,7 +90,7 @@ if (!url) {
     const o = options[2];
     const ppl = fromOption(o);
     notify.outbox.length = 0;
-    VISIT = await F.create({ holder: HOLDER, people: ppl, notes: 'first family visit' });
+    VISIT = await F.create({ policyAck: true, holder: HOLDER, people: ppl, notes: 'first family visit' });
     assert.match(VISIT.code, /^CF-[A-Z2-9]{5}$/);
     assert.equal(VISIT.people.length, 2);
     assert.ok(VISIT.people.every(l => /^CH-/.test(l.code)));
@@ -134,7 +134,7 @@ if (!url) {
     const { options } = await F.availability({ people: people(), date });
     const o = options[0];
     const ppl = fromOption(o);
-    const v2 = await F.create({ holder: HOLDER, people: ppl });
+    const v2 = await F.create({ policyAck: true, holder: HOLDER, people: ppl });
     const { rows } = await db.query(`SELECT count(*) n FROM clients WHERE name = 'Kai' AND household_id = (SELECT household_id FROM clients WHERE phone = $1)`, [PHONE]);
     assert.equal(Number(rows[0].n), 1);
     const c = await F.cancel(v2.code);
@@ -148,10 +148,10 @@ if (!url) {
     const { options } = await F.availability({ people: people(), date });
     const o = options[1];
     // Take Kai's slot with a single booking first.
-    await B.createAppointment({ serviceSlug: 'loc-retwist', variationId: RETWIST_V.id, stylistSlug: o.people[1].legs[0].stylist.slug, startAt: o.people[1].legs[0].startAt, client: { name: 'Blocker', phone: '602-555-0891' } });
+    await B.createAppointment({ policyAck: true, serviceSlug: 'loc-retwist', variationId: RETWIST_V.id, stylistSlug: o.people[1].legs[0].stylist.slug, startAt: o.people[1].legs[0].startAt, client: { name: 'Blocker', phone: '602-555-0891' } });
     const before = (await db.query('SELECT count(*) n FROM visits')).rows[0].n;
     const ppl = fromOption(o);
-    await assert.rejects(() => F.create({ holder: HOLDER, people: ppl }), (e) => e.status === 409 && /Kai/.test(e.message));
+    await assert.rejects(() => F.create({ policyAck: true, holder: HOLDER, people: ppl }), (e) => e.status === 409 && /Kai/.test(e.message));
     assert.equal((await db.query('SELECT count(*) n FROM visits')).rows[0].n, before, 'nothing half-booked');
   });
 
@@ -163,7 +163,7 @@ if (!url) {
     assert.equal(so.statusCode, 200); assert.ok(so.body.date, 'a soonest day');
     const o = g.body.options[0];
     const ppl = fromOption(o);
-    const c = await call(familyApi, req('POST', { body: { holder: HOLDER, people: ppl, mode: 'together' } }));
+    const c = await call(familyApi, req('POST', { body: { policyAck: true, holder: HOLDER, people: ppl, mode: 'together' } }));
     assert.equal(c.statusCode, 201, JSON.stringify(c.body)); assert.match(c.body.code, /^CF-/);
     const l = await call(lookupApi, req('GET', { query: { code: c.body.code } }));
     assert.equal(l.body.kind, 'visit'); assert.equal(l.body.people.length, 2);
@@ -190,12 +190,12 @@ if (!url) {
     await assert.rejects(() => F.availability({ people: [{ self: true, services: [{ service: 'loc-color', variation: colorV.id, stylist: 'test-fam' }, { service: 'loc-retwist', variation: RETWIST_V.id }] }], date }), (e) => e.status === 404);
     const o = a.options[Math.min(1, a.options.length - 1)];
     const ppl = [{ ...stack[0], services: stack[0].services.map((sv, k) => ({ ...sv, stylist: o.people[0].legs[k].stylist.slug, startAt: o.people[0].legs[k].startAt })) }];
-    const v = await F.create({ holder: HOLDER, people: ppl });
+    const v = await F.create({ policyAck: true, holder: HOLDER, people: ppl });
     assert.equal(v.kind, 'combo'); assert.equal(v.people.length, 2);
     assert.equal(new Date(v.people[1].startsAt).toISOString(), new Date(v.people[0].endsAt).toISOString());
     // Out-of-order or gapped legs are refused.
     const gapped = [{ ...ppl[0], services: [ppl[0].services[0], { ...ppl[0].services[1], startAt: new Date(new Date(ppl[0].services[1].startAt).getTime() + 15 * 60000).toISOString() }] }];
-    await assert.rejects(() => F.create({ holder: HOLDER, people: gapped }), (e) => e.status === 400 && /must start when/.test(e.message));
+    await assert.rejects(() => F.create({ policyAck: true, holder: HOLDER, people: gapped }), (e) => e.status === 400 && /must start when/.test(e.message));
     await F.cancel(v.code);
   });
 

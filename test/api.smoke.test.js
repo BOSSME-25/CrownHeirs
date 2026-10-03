@@ -86,10 +86,10 @@ if (!url) {
     const startAt = a.body.any[2];
 
     assert.equal((await call(H.create, req('POST', { body: {} }))).statusCode, 404, 'no service → 404');
-    const bad = await call(H.create, req('POST', { body: { service: PONY.slug, variation: v, startAt, client: { name: 'A', phone: '1' } } }));
+    const bad = await call(H.create, req('POST', { body: { policyAck: true, service: PONY.slug, variation: v, startAt, client: { name: 'A', phone: '1' } } }));
     assert.equal(bad.statusCode, 400);
 
-    const c = await call(H.create, req('POST', { body: {
+    const c = await call(H.create, req('POST', { body: { policyAck: true,
       service: PONY.slug, variation: v, stylist: 'bethany', startAt,
       client: { name: 'Smoke Test', phone: '602-555-9999', email: 'smoke@example.com' }, notes: 'via handler'
     } }));
@@ -97,7 +97,7 @@ if (!url) {
     assert.match(c.body.code, /^CH-/);
     assert.equal(c.body.variation.id, v);
 
-    const dup = await call(H.create, req('POST', { body: { service: PONY.slug, variation: v, stylist: 'bethany', startAt, client: { name: 'Smoke Test', phone: '602-555-9999' } } }));
+    const dup = await call(H.create, req('POST', { body: { policyAck: true, service: PONY.slug, variation: v, stylist: 'bethany', startAt, client: { name: 'Smoke Test', phone: '602-555-9999' } } }));
     assert.equal(dup.statusCode, 409);
 
     const l = await call(H.lookup, req('GET', { query: { code: c.body.code.toLowerCase() } }));
