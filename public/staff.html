@@ -329,9 +329,15 @@ function apptHtml(a) {
   const fam = a.visit ? (a.visit.kind === 'combo' ? `<span class="badge staff" title="Part of visit ${esc(a.visit.code)}: several services back to back">Stacked</span>` : `<span class="badge staff" title="Family visit ${esc(a.visit.code)}, booked by ${esc(a.visit.holder.name)}">Family</span>`) : '';
   const th = a.theme && a.theme.fit === false ? `<span class="badge err" title="Outside the ${esc(a.theme.name)} audience${a.theme.ack ? '; the client accepted it may be moved' : ''}">Move?</span>` : '';
   const moved = a.movedFrom ? `<span class="badge" title="Moved from ${fmtT(a.movedFrom)}">Moved</span>` : '';
+  const dep = !a.deposit || !a.deposit.cents ? '' : a.deposit.status === 'paid' ? `<span class="badge ok" title="Deposit ${money(a.deposit.cents)} paid${a.deposit.ref ? ' · ' + esc(a.deposit.ref) : ''}">Deposit paid</span>`
+    : a.deposit.status === 'due' ? `<span class="badge err" title="Deposit ${money(a.deposit.cents)} not yet received">Deposit due ${money(a.deposit.cents)}</span>`
+    : a.deposit.status === 'forfeited' ? `<span class="badge" title="Deposit kept: late cancellation or no-show">Deposit forfeited</span>`
+    : a.deposit.status === 'waived' ? '<span class="badge">Deposit waived</span>' : '';
+  const late = a.late ? '<span class="badge err" title="Past the grace period and still confirmed">Late</span>' : '';
+  const member = a.feeWaived ? '<span class="badge ok" title="Fees waived for this client (member)">Member</span>' : '';
   const who = a.visit && a.visit.holder.name !== a.client.name ? `<b>${esc(a.client.name)}</b>${a.client.relationship ? ` (${esc(a.client.relationship)})` : ''} · booked by ${esc(a.visit.holder.name)}` : `<b>${esc(a.client.name)}</b>`;
   return `<div class="appt ${a.status}">
-    <div class="t">${fmtT(a.startsAt)} – ${fmtT(a.endsAt)}${st}${a.source === 'staff' ? '<span class="badge staff">Phone</span>' : ''}${fam}${th}${moved}${hubBadge(a)}</div>
+    <div class="t">${fmtT(a.startsAt)} – ${fmtT(a.endsAt)}${st}${a.source === 'staff' ? '<span class="badge staff">Phone</span>' : ''}${fam}${th}${moved}${dep}${late}${member}${hubBadge(a)}</div>
     <div class="m">${who}${phone ? ` · <a href="tel:+${esc(phone)}">${esc(tel)}</a>` : ''}${a.client.email ? ` · ${esc(a.client.email)}` : ''}<br>
       ${esc(a.service.name)}${opt} · ${esc(a.stylist.name)} · <span style="color:var(--ink-dim)">${esc(a.code)}</span>${a.notes ? `<br><i>${esc(a.notes)}</i>` : ''}</div>
     ${a.ticket ? `<div class="m">Ticket <b>${esc(a.ticket.code)}</b> · ${money(a.ticket.total_cents + a.ticket.tip_cents)} · ${esc(a.ticket.status.replace('_', ' '))}</div>` : ''}
@@ -340,6 +346,8 @@ function apptHtml(a) {
       <button class="btn btn-ghost btn-sm" onclick="setStatus('${a.code}','completed')">✓ Done</button>
       <button class="btn btn-ghost btn-sm" onclick="setStatus('${a.code}','no_show')">No-show</button>
       <button class="btn btn-ghost btn-sm" onclick="moveAppt('${a.code}')">Move</button>
+      ${a.deposit && a.deposit.cents && a.deposit.status === 'due' ? `<button class="btn btn-ghost btn-sm" onclick="markDeposit('${a.code}','paid')">Deposit received</button><button class="btn btn-ghost btn-sm" onclick="markDeposit('${a.code}','waived')">Waive deposit</button>` : ''}
+      ${a.client.phone ? `<button class="btn btn-ghost btn-sm" onclick="toggleMember('${esc(a.client.phone)}',${a.feeWaived ? 'false' : 'true'})">${a.feeWaived ? 'Remove member' : 'Member: waive fees'}</button>` : ''}
       <button class="btn btn-danger btn-sm" onclick="if(confirm(${a.visit ? "'Cancel just this appointment? The rest of the visit stays. The booking holder will be notified.'" : "'Cancel this appointment? The client will be notified.'"}))setStatus('${a.code}','cancelled')">Cancel</button></div>`
     : `<div class="acts">${a.ticket ? `<button class="btn btn-ghost btn-sm" onclick="openTicket('${a.ticket.code}')">Open ticket</button>` : (a.status === 'completed' ? `<button class="btn btn-terra btn-sm" onclick="checkout('${a.code}')">Checkout</button>` : '')}<button class="btn btn-ghost btn-sm" onclick="setStatus('${a.code}','confirmed')">Restore</button></div>`}
   </div>`;
@@ -409,7 +417,7 @@ function renderTicket() {
   }
   const unpriced = t.lines.filter(l => l.gross_cents == null).length;
   $('tTotals').innerHTML = `Subtotal <b class="money">${money(t.subtotal_cents)}</b> · Discount <b class="money">−${money(t.discount_cents)}</b> · Tax <b class="money">${money(t.tax_cents)}</b><br>
-    Total <b class="money">${money(t.total_cents)}</b>${t.tip_cents ? ` · Tip <b class="money">${money(t.tip_cents)}</b>` : ''}${t.refunded_cents ? ` · Refunded <b class="money" style="color:var(--err)">${money(t.refunded_cents)}</b>` : ''}${unpriced ? `<br><span style="color:var(--err)">${unpriced} line${unpriced === 1 ? '' : 's'} without a price — enter it before paying.</span>` : ''}`;
+    Total <b class="money">${money(t.total_cents)}</b>${t.deposit_cents ? ` · Deposit already paid <b class="money" style="color:var(--ok)">−${money(t.deposit_cents)}</b> · <b>Due today ${money(Math.max(0, t.total_cents - t.deposit_cents))}</b>` : ''}${t.tip_cents ? ` · Tip <b class="money">${money(t.tip_cents)}</b>` : ''}${t.refunded_cents ? ` · Refunded <b class="money" style="color:var(--err)">${money(t.refunded_cents)}</b>` : ''}${unpriced ? `<br><span style="color:var(--err)">${unpriced} line${unpriced === 1 ? '' : 's'} without a price — enter it before paying.</span>` : ''}`;
   $('tErr').textContent = '';
   const acts = [];
   if (openT) { acts.push(`<button class="btn btn-danger btn-sm" onclick="tVoid()">Void</button>`); acts.push(`<button class="btn btn-terra" onclick="tPay()">Take payment</button>`); }
@@ -464,6 +472,16 @@ async function moveAppt(code) {
   const startAt = new Date(`${m[1]}T${m[2].padStart(2, '0')}:${m[3]}:00`).toISOString();   // the desk runs on salon time
   const reason = prompt('Reason to tell the client (optional):', a.theme && a.theme.fit === false ? `to make room on ${a.theme.name}` : '') ?? '';
   try { await api('POST', null, { action: 'move', code, startAt, reason }); toast('Moved and client notified'); loadDay(); }
+  catch (e) { alert(e.message); }
+}
+async function markDeposit(code, status) {
+  const ref = status === 'paid' ? (prompt('How was it paid? (e.g. Square terminal, cash, or the Square payment id)') ?? '') : '';
+  if (status === 'paid' && ref === null) return;
+  try { await api('POST', null, { action: 'deposit.mark', code, status, ref }); toast(status === 'paid' ? 'Deposit marked paid' : 'Deposit waived'); loadDay(); }
+  catch (e) { alert(e.message); }
+}
+async function toggleMember(phone, waived) {
+  try { await api('POST', null, { action: 'client.waive', phone, waived }); toast(waived ? 'Fees waived for this client' : 'Fees apply again'); loadDay(); }
   catch (e) { alert(e.message); }
 }
 async function setStatus(code, status) {

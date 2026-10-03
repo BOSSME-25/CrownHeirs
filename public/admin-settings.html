@@ -94,6 +94,22 @@ table { width:100%; border-collapse:collapse; font-size:14px; margin-top:6px; } 
   </div>
 
   <div class="card">
+    <h2>Deposits and policies</h2>
+    <div class="hint">Shown to every client before they book, and applied automatically: the deposit a booking holds, how far ahead a cancellation must be to keep it, and how late is a no-show. Loyalty members can have fees waived on their client record (front desk → Member).</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div><label>Deposit, % of the starting price</label><input id="polPct" type="number" min="0" max="100" style="max-width:140px;"></div>
+      <div><label>…but at least $ (when the service has a price)</label><input id="polMin" type="number" min="0" max="1000" style="max-width:140px;"></div>
+      <div><label>Cancellation notice (hours)</label><input id="polWin" type="number" min="0" max="240" style="max-width:140px;"></div>
+      <div><label>Late grace before a no-show (minutes)</label><input id="polGrace" type="number" min="0" max="120" style="max-width:140px;"></div>
+    </div>
+    <label>Extra policy wording (optional)</label><textarea id="polText" rows="2" placeholder="e.g. Deposits are non-refundable. Please arrive with clean, product-free hair."></textarea>
+    <div class="status" id="polPreview"></div>
+    <div class="status" id="polSquare"></div>
+    <button class="btn btn-terra" onclick="savePolicy()">Save policies</button>
+    <span class="status" id="polOut"></span>
+  </div>
+
+  <div class="card">
     <h2>Theme days</h2>
     <div class="hint">Family Fridays, Zin Saturdays, Mother's Day Saturday. A theme shows on the booking calendar and the TV. Clients outside its audience see what to expect and must accept that their appointment may be moved. A dated theme can open its date for booking early.</div>
     <div id="themeList"></div>
@@ -203,6 +219,27 @@ async function hubResync() {
     : (j.error || 'Failed');
 }
 
+
+/* ── deposits and policies ── */
+async function loadPolicy() {
+  try {
+    const p = await get({ action: 'policy' });
+    $('polPct').value = p.deposit_percent; $('polMin').value = (p.deposit_min_cents / 100).toFixed(0); $('polWin').value = p.cancel_window_hours; $('polGrace').value = p.late_grace_min; $('polText').value = p.policy_text;
+    $('polSquare').innerHTML = p.square ? '<span style="color:var(--ok)">Square payment links are on: clients get a link to pay the deposit online.</span>'
+      : 'Square payment links are <b>off</b>: deposits are taken at the desk (terminal, cash, or a link you send from Square) and marked paid on the appointment. To turn them on, add <code>SQUARE_ACCESS_TOKEN</code> and <code>SQUARE_LOCATION_ID</code> in Vercel.';
+    previewPolicy();
+  } catch (e) { $('polOut').textContent = e.message; }
+}
+function previewPolicy() {
+  const pct = Number($('polPct').value) || 0, min = Number($('polMin').value) || 0, win = Number($('polWin').value) || 0, grace = Number($('polGrace').value) || 0;
+  const ex = Math.max(Math.round(85 * pct / 100), min);
+  $('polPreview').textContent = `Example: an $85 service holds a ${pct ? '$' + ex : 'no'} deposit. ${win ? `Cancel inside ${win} hours and it is forfeited.` : ''} ${grace ? `${grace} minutes late may be marked a no-show.` : ''}`;
+}
+['polPct','polMin','polWin','polGrace'].forEach(id => document.addEventListener('input', e => { if (e.target.id === id) previewPolicy(); }));
+async function savePolicy() {
+  try { await post({ action: 'settings.save', deposit_percent: $('polPct').value, deposit_min_dollars: $('polMin').value, cancel_window_hours: $('polWin').value, late_grace_min: $('polGrace').value, policy_text: $('polText').value }); $('polOut').textContent = 'Saved.'; previewPolicy(); }
+  catch (e) { $('polOut').textContent = e.message; }
+}
 /* ── theme days ── */
 const WD = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 const AUD = { family: 'families and children', adults: 'adults, child-free', everyone: 'everyone' };
@@ -242,7 +279,7 @@ async function runReminders() {
   const j = await r.json().catch(() => ({}));
   $('remStatus').textContent = r.ok ? `Sent ${j.count} reminder(s).` : (j.error || 'Failed');
 }
-AdminShell.requireAuth().then(k => { KEY = k; $("app").classList.remove("hidden"); modeStatus(); bookingStatus(); hubStatus(); loadTill(); loadTokens(); loadThemes(); });
+AdminShell.requireAuth().then(k => { KEY = k; $("app").classList.remove("hidden"); modeStatus(); bookingStatus(); hubStatus(); loadTill(); loadTokens(); loadThemes(); loadPolicy(); });
 </script>
 </body>
 </html>

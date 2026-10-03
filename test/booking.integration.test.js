@@ -70,7 +70,7 @@ if (!url) {
     assert.ok(before.any.length > 10, 'open day has slots');
     const startAt = before.any[4];
 
-    const appt = await B.createAppointment({ serviceSlug: 'loc-retwist', variationId: RETWIST_V.id, stylistSlug: 'bethany', startAt, client, notes: 'first visit' });
+    const appt = await B.createAppointment({ policyAck: true, serviceSlug: 'loc-retwist', variationId: RETWIST_V.id, stylistSlug: 'bethany', startAt, client, notes: 'first visit' });
     assert.match(appt.code, /^CH-[A-Z2-9]{5}$/);
     assert.equal(new Date(appt.startsAt).toISOString(), startAt);
     assert.equal(appt.variation.name, RETWIST_V.name);
@@ -82,7 +82,7 @@ if (!url) {
 
     // Same slot again — the engine catches it first (409)…
     await assert.rejects(
-      () => B.createAppointment({ serviceSlug: 'loc-retwist', variationId: RETWIST_V.id, stylistSlug: 'bethany', startAt, client }),
+      () => B.createAppointment({ policyAck: true, serviceSlug: 'loc-retwist', variationId: RETWIST_V.id, stylistSlug: 'bethany', startAt, client }),
       (e) => e.status === 409
     );
     // …and even if the engine were bypassed, the DB constraint refuses the overlap.
@@ -112,7 +112,7 @@ if (!url) {
     const { any } = await B.availability({ serviceSlug: PONY.slug, variationId: PONY_V.id, date, stylistSlug: 'bethany' });
     const startAt = any[any.length - 1];
     const results = await Promise.allSettled(
-      Array.from({ length: 6 }, (_, i) => B.createAppointment({
+      Array.from({ length: 6 }, (_, i) => B.createAppointment({ policyAck: true,
         serviceSlug: PONY.slug, variationId: PONY_V.id, stylistSlug: 'bethany', startAt,
         client: { name: 'Racer ' + i, phone: '602555010' + i }
       }))
@@ -136,7 +136,7 @@ if (!url) {
 
   test('validation: bad phone, bad date, unknown service', async () => {
     const date = nextTuesday();
-    await assert.rejects(() => B.createAppointment({ serviceSlug: 'loc-retwist', variationId: RETWIST_V.id, startAt: new Date().toISOString(), client: { name: 'X Y', phone: '123' } }), (e) => e.status === 400);
+    await assert.rejects(() => B.createAppointment({ policyAck: true, serviceSlug: 'loc-retwist', variationId: RETWIST_V.id, startAt: new Date().toISOString(), client: { name: 'X Y', phone: '123' } }), (e) => e.status === 400);
     await assert.rejects(() => B.availability({ serviceSlug: 'loc-retwist', variationId: RETWIST_V.id, date: '2020-01-01' }), (e) => e.status === 400);
     await assert.rejects(() => B.availability({ serviceSlug: 'nope', date }), (e) => e.status === 404);
     assert.equal(B.normalizePhone('602-555-0100'), '16025550100');

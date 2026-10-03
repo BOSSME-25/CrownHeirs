@@ -14,6 +14,7 @@
 //   POST { action: 'move', code, startAt, stylist?, reason? }  reschedule (client notified)
 //   GET  ?action=themes.list / POST { action: 'theme.save', …theme } / { action: 'theme.remove', id }
 const staff = require('../../lib/staff');
+const { BookingError } = require('../../lib/booking');
 const themes = require('../../lib/themes');
 const tickets = require('../../lib/tickets');
 const tokens = require('../../lib/api-tokens');
@@ -36,6 +37,7 @@ module.exports = async (req, res) => {
         case 'tickets.day':  return res.status(200).json({ tickets: await tickets.listDay(q.date) });
         case 'ticket.get':   return res.status(200).json(await tickets.get(q.code));
         case 'retail.list':  return res.status(200).json({ items: await tickets.listRetail(), tax_rate_bps: Number((await getSettings()).tax_rate_bps) || 0 });
+        case 'policy':       { const st = await getSettings(); return res.status(200).json({ deposit_percent: Number(st.deposit_percent) || 0, deposit_min_cents: Number(st.deposit_min_cents) || 0, cancel_window_hours: Number(st.cancel_window_hours) || 0, late_grace_min: Number(st.late_grace_min) || 0, policy_text: st.policy_text || '', square: require('../../lib/square').configured() }); }
         case 'tokens.list':  return res.status(200).json({ tokens: await tokens.list(), scopes: tokens.SCOPES });
         case 'availability': return res.status(200).json(await availability({
           serviceSlug: q.service, variationId: q.variation || null, date: q.date, stylistSlug: q.stylist || null, staff: true
@@ -68,11 +70,23 @@ module.exports = async (req, res) => {
         case 'ticket.refund':  return res.status(200).json(await tickets.refund(b.code, b));
         case 'retail.save':    return res.status(200).json(await tickets.saveRetail(b));
         case 'settings.save': {
-          const bps = Math.round(Number(b.tax_rate_percent) * 100);
-          if (!(bps >= 0 && bps <= 3000)) return res.status(400).json({ error: 'Tax rate must be between 0 and 30 percent' });
-          await query(`INSERT INTO settings (key, value) VALUES ('tax_rate_bps', $1) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value`, [String(bps)]);
-          return res.status(200).json({ ok: true, tax_rate_bps: bps });
+          const put = (k, v) => query(`INSERT INTO settings (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value`, [k, String(v)]);
+          const out = { ok: true };
+          if (b.tax_rate_percent !== undefined) {
+            const bps = Math.round(Number(b.tax_rate_percent) * 100);
+            if (!(bps >= 0 && bps <= 3000)) return res.status(400).json({ error: 'Tax rate must be between 0 and 30 percent' });
+            await put('tax_rate_bps', bps); out.tax_rate_bps = bps;
+          }
+          const num = (k, lo, hi, label) => { if (b[k] === undefined) return null; const n = Number(b[k]); if (!(n >= lo && n <= hi)) throw new BookingError(400, `${label} must be between ${lo} and ${hi}`); return n; };
+          const pct = num('deposit_percent', 0, 100, 'Deposit percent'); if (pct !== null) { await put('deposit_percent', pct); out.deposit_percent = pct; }
+          const min = num('deposit_min_dollars', 0, 1000, 'Minimum deposit'); if (min !== null) { await put('deposit_min_cents', Math.round(min * 100)); out.deposit_min_cents = Math.round(min * 100); }
+          const win = num('cancel_window_hours', 0, 240, 'Cancellation window'); if (win !== null) { await put('cancel_window_hours', win); out.cancel_window_hours = win; }
+          const grace = num('late_grace_min', 0, 120, 'Late grace'); if (grace !== null) { await put('late_grace_min', grace); out.late_grace_min = grace; }
+          if (b.policy_text !== undefined) { await put('policy_text', String(b.policy_text).slice(0, 600)); out.policy_text = String(b.policy_text).slice(0, 600); }
+          return res.status(200).json(out);
         }
+        case 'deposit.mark':   return res.status(200).json(await staff.markDeposit(b.code, b));
+        case 'client.waive':   return res.status(200).json(await staff.waiveFees(b.phone, b.waived));
         case 'token.create':   return res.status(201).json(await tokens.create(b));
         case 'token.revoke':   return res.status(200).json(await tokens.revoke(b.id));
         default: return res.status(400).json({ error: 'Unknown action' });

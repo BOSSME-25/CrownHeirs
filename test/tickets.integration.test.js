@@ -58,7 +58,7 @@ if (!url) {
 
   test('appointment → ticket: prefilled line carries the booked stylist; pay completes the appointment; the hub reads it', async () => {
     const av = await B.availability({ serviceSlug: 'sleek-ponytail', variationId: PONY_V.id, date: TOMORROW, stylistSlug: 'bethany' });
-    const appt = await B.createAppointment({ serviceSlug: 'sleek-ponytail', variationId: PONY_V.id, stylistSlug: 'bethany', startAt: av.stylists[0].slots[2], client: { name: 'Till Client', phone: PHONE } });
+    const appt = await B.createAppointment({ policyAck: true, serviceSlug: 'sleek-ponytail', variationId: PONY_V.id, stylistSlug: 'bethany', startAt: av.stylists[0].slots[2], client: { name: 'Till Client', phone: PHONE } });
 
     const t = await T.open({ appointmentCode: appt.code, rungBy: 'test-till' });
     assert.match(t.code, /^T-[A-Z2-9]{5}$/);

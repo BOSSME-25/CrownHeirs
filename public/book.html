@@ -182,6 +182,10 @@ a.manage { color: var(--terra); font-size: 14px; }
       <div id="themeAckText"></div>
       <label style="display:flex;gap:10px;align-items:flex-start;text-transform:none;letter-spacing:0;font-size:15px;margin:10px 0 0;"><input type="checkbox" id="themeAckBox" style="width:auto;margin-top:3px;"> I understand, and I'd like to book this day anyway.</label>
     </div>
+    <div id="policyBox" class="theme hidden">
+      <div id="policyText"></div>
+      <label style="display:flex;gap:10px;align-items:flex-start;text-transform:none;letter-spacing:0;font-size:15px;margin:10px 0 0;"><input type="checkbox" id="policyAckBox" style="width:auto;margin-top:3px;"> I've read and accept the deposit and cancellation policy.</label>
+    </div>
     <div id="consultNote" class="consult hidden">This service starts with a quick consultation — we’ll confirm the details and final quote when you arrive.</div>
     <label>Your name</label><input id="fName" autocomplete="name" placeholder="First and last name">
     <label>Mobile number</label><input id="fPhone" type="tel" autocomplete="tel" inputmode="tel" placeholder="(602) 555-0100">
@@ -201,6 +205,7 @@ a.manage { color: var(--terra); font-size: 14px; }
     <div class="hint">Save this code — it’s how you look up or cancel.</div>
     <div class="code" id="doneCode"></div>
     <div class="sum" id="doneSum" style="text-align:left;"></div>
+    <div id="doneDeposit" class="theme hidden" style="text-align:left;"></div>
     <div class="row" style="justify-content:center;flex-wrap:wrap;">
       <button class="btn btn-ghost" onclick="downloadIcs()">Add to calendar</button>
       <button class="btn btn-terra" onclick="location.href='/book'">Book another</button>
@@ -405,6 +410,7 @@ function pickTime(iso) {
   $('summary').innerHTML = `<b>${esc(svcLabel())}</b> · ${money(s.price_from_cents)} · ${dur(SEL.variation.duration_min)}<br>${esc(who)}<br>${fmtDate(iso)} at <b>${fmtTime(iso)}</b>`;
   $('consultNote').classList.toggle('hidden', !s.requires_consult);
   showThemeAck(themeFor(SEL.date));
+  showPolicy();
   $('e4').textContent = '';
   go(4);
 }
@@ -412,7 +418,7 @@ function pickTime(iso) {
 /* ── 4 · book ── */
 async function book() {
   if (isVisit()) return bookFamily();
-  if (needAck()) return;
+  if (needAck() || needPolicy()) return;
   const btn = $('bookBtn'); btn.disabled = true; btn.textContent = 'Booking…'; $('e4').textContent = '';
   try {
     const r = await fetch('/api/book/create', {
@@ -420,12 +426,13 @@ async function book() {
       body: JSON.stringify({
         service: SEL.service.slug, variation: SEL.variation.id, stylist: SEL.stylist, startAt: SEL.startAt,
         client: { name: $('fName').value, phone: $('fPhone').value, email: $('fEmail').value },
-        notes: $('fNotes').value, themeAck: themeAck()
+        notes: $('fNotes').value, themeAck: themeAck(), policyAck: policyAck()
       })
     });
     const j = await r.json();
     if (!r.ok) {
       if (j.needsAck) { showThemeAck(j.theme, j.theme.body); $('themeAck').classList.remove('hidden'); $('e4').textContent = 'Please read the note above and tick the box.'; return; }
+      if (j.needsPolicyAck) { POLICY = j; $('policyText').innerHTML = esc(j.terms); $('policyBox').classList.remove('hidden'); $('e4').textContent = 'Please accept the policy to book.'; return; }
       $('e4').textContent = j.error || 'Something went wrong';
       if (r.status === 409) { setTimeout(() => { pickDate(SEL.date); go(3); }, 1200); } // slot gone → refresh times
       return;
@@ -433,9 +440,29 @@ async function book() {
     DONE = j;
     $('doneCode').textContent = j.code;
     $('doneSum').innerHTML = `<b>${esc(j.service.name)}</b>${j.variation?.name && SEL.service.variations.length > 1 ? ` · ${esc(j.variation.name)}` : ''} with ${esc(j.stylist.name)}<br>${fmtDate(j.startsAt)}<br><b>${fmtTime(j.startsAt)}</b> – ${fmtTime(j.endsAt)}` + doneTheme(j.theme);
+    showDoneDeposit(j.deposit);
     go(5);
   } catch (e) { $('e4').textContent = e.message; }
   finally { btn.disabled = false; btn.textContent = 'Book appointment'; }
+}
+
+/* ── deposit and cancellation policy ── */
+let POLICY = null;
+async function showPolicy() {
+  const slugs = isVisit() ? famPeople().flatMap(p => p.services.map(sv => sv.service)) : [SEL.service.slug];
+  try { const r = await fetch('/api/book/policy?services=' + encodeURIComponent(slugs.join(','))); POLICY = r.ok ? await r.json() : null; } catch (e) { POLICY = null; }
+  const box = $('policyBox'); $('policyAckBox').checked = false;
+  if (!POLICY || !POLICY.terms) { box.classList.add('hidden'); return; }
+  $('policyText').innerHTML = (POLICY.deposit_cents ? `<b>Deposit: $${(POLICY.deposit_cents / 100).toFixed(0)}</b>, taken off your total on the day.<br>` : '') + esc(POLICY.terms);
+  box.classList.remove('hidden');
+}
+const policyAck = () => $('policyBox').classList.contains('hidden') ? true : $('policyAckBox').checked;
+function needPolicy() { if (policyAck()) return false; $('e4').textContent = 'Please accept the deposit and cancellation policy to book.'; return true; }
+function showDoneDeposit(d) {
+  const el = $('doneDeposit'); if (!d || !d.cents) { el.classList.add('hidden'); return; }
+  el.innerHTML = `<b>Deposit: $${(d.cents / 100).toFixed(0)}</b> holds your appointment and comes off your total.` +
+    (d.payUrl ? `<br><a class="btn btn-terra" style="margin-top:8px;display:inline-block;" href="${esc(d.payUrl)}">Pay the deposit now</a><br><small style="color:var(--ink-dim)">You'll come back here when it's done.</small>` : '<br>Pay it at the salon, or by the link we text you.');
+  el.classList.remove('hidden');
 }
 
 /* ── theme days ── */
@@ -604,11 +631,12 @@ function pickFamilyTime(startAt) {
   $('summary').innerHTML = optionLines(FAM_OPTION, names) + `<br>${fmtDate(startAt)} · one confirmation code for everyone`;
   $('consultNote').classList.toggle('hidden', !famPeople().some(p => p.services.some(sv => CATS.flatMap(c => c.services).find(x => x.slug === sv.service)?.requires_consult)));
   showThemeAck(themeFor(SEL.date));
+  showPolicy();
   $('e4').textContent = '';
   go(4);
 }
 async function bookFamily() {
-  if (needAck()) return;
+  if (needAck() || needPolicy()) return;
   const btn = $('bookBtn'); btn.disabled = true; btn.textContent = 'Booking…'; $('e4').textContent = '';
   try {
     const holderName = $('fName').value.trim();
@@ -617,10 +645,11 @@ async function bookFamily() {
       services: p.legs.map(l => ({ service: l.service.slug, variation: l.variation.id, stylist: l.stylist.slug, startAt: l.startAt }))
     }));
     const r = await fetch('/api/book/family', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ holder: { name: holderName, phone: $('fPhone').value, email: $('fEmail').value }, people, mode: MODE, notes: $('fNotes').value, themeAck: themeAck() }) });
+      body: JSON.stringify({ holder: { name: holderName, phone: $('fPhone').value, email: $('fEmail').value }, people, mode: MODE, notes: $('fNotes').value, themeAck: themeAck(), policyAck: policyAck() }) });
     const j = await r.json();
     if (!r.ok) {
       if (j.needsAck) { showThemeAck(j.theme, j.theme.body); $('themeAck').classList.remove('hidden'); $('e4').textContent = 'Please read the note above and tick the box.'; return; }
+      if (j.needsPolicyAck) { POLICY = j; $('policyText').innerHTML = esc(j.terms); $('policyBox').classList.remove('hidden'); $('e4').textContent = 'Please accept the policy to book.'; return; }
       $('e4').textContent = j.error || 'Something went wrong';
       if (r.status === 409) setTimeout(() => { pickDate(SEL.date); go(3); }, 1500);
       return;
@@ -629,16 +658,19 @@ async function bookFamily() {
     $('doneCode').textContent = j.code;
     $('doneSum').innerHTML = j.people.map(p => `<b>${esc(p.name)}</b>: ${esc(p.service.name)}${p.variation?.name && p.variation.name !== 'Regular' ? ' · ' + esc(p.variation.name) : ''} with ${esc(p.stylist.name)}, <b>${fmtTime(p.startsAt)}</b>`).join('<br>')
       + `<br>${fmtDate(j.people[0].startsAt)}` + doneTheme(j.theme);
+    showDoneDeposit(j.deposit);
     go(5);
   } catch (e) { $('e4').textContent = e.message; }
   finally { btn.disabled = false; btn.textContent = 'Book appointment'; }
 }
+const depositLine = d => !d || !d.cents ? '' : d.status === 'paid' ? `<br>Deposit: <b>$${(d.cents / 100).toFixed(0)} received</b>` : d.status === 'due' ? `<br>Deposit: <b>$${(d.cents / 100).toFixed(0)} due</b>${d.payUrl ? ` · <a href="${esc(d.payUrl)}" style="color:var(--terra)">Pay it now</a>` : ' (pay at the salon)'}` : d.status === 'forfeited' ? '<br>Deposit: forfeited' : '';
 function renderVisitLookup(v) {
   const future = new Date(v.startsAt) > new Date();
   $('mResult').innerHTML = `
     <div class="sum"><b>${v.visitKind === 'combo' ? 'Your visit' : 'Family visit'}</b> · booked by ${esc(v.holder.name)} (…${esc(v.holder.phoneLast4)}) · Status: <b>${esc(v.status)}</b><br>
-      ${v.people.map(p => `${esc(p.name)}: ${esc(p.service.name)}${p.variation?.name && p.variation.name !== 'Regular' ? ' · ' + esc(p.variation.name) : ''} with ${esc(p.stylist.name)}, ${fmtDate(p.startsAt)} at <b>${fmtTime(p.startsAt)}</b>${p.status !== 'confirmed' ? ` (${esc(p.status)})` : ''}`).join('<br>')}</div>
-    ${v.status === 'confirmed' && future ? `<div class="row"><button class="btn btn-ghost" style="border-color:rgba(160,50,40,.4);color:var(--err);" onclick='cancelAppt(${JSON.stringify(v.code)}, true)'>Cancel the whole visit</button></div>` : ''}`;
+      ${v.people.map(p => `${esc(p.name)}: ${esc(p.service.name)}${p.variation?.name && p.variation.name !== 'Regular' ? ' · ' + esc(p.variation.name) : ''} with ${esc(p.stylist.name)}, ${fmtDate(p.startsAt)} at <b>${fmtTime(p.startsAt)}</b>${p.status !== 'confirmed' ? ` (${esc(p.status)})` : ''}`).join('<br>')}${depositLine(v.deposit)}</div>
+    ${v.status === 'confirmed' && future && v.cancelLate ? `<div class="theme warn">${v.cancelForfeits ? 'This visit is inside our cancellation notice. Cancelling now forfeits the deposit.' : 'This visit is inside our cancellation notice.'} Need to move it instead? Call or text (480) 457-0165.</div>` : ''}
+    ${v.status === 'confirmed' && future ? `<div class="row"><button class="btn btn-ghost" style="border-color:rgba(160,50,40,.4);color:var(--err);" onclick='cancelAppt(${JSON.stringify(v.code)}, true, ${v.cancelForfeits ? 'true' : 'false'})'>Cancel the whole visit</button></div>` : ''}`;
 }
 
 function downloadIcs() {
@@ -670,11 +702,13 @@ async function lookup() {
   const future = new Date(j.startsAt) > new Date();
   $('mResult').innerHTML = `
     <div class="sum"><b>${esc(j.service.name)}</b>${j.variation?.name ? ` · ${esc(j.variation.name)}` : ''} with ${esc(j.stylist.name)}<br>${fmtDate(j.startsAt)} at <b>${fmtTime(j.startsAt)}</b><br>
-      Status: <b>${esc(j.status)}</b> · ${esc(j.client.name)} (…${esc(j.client.phoneLast4)})</div>
-    ${j.status === 'confirmed' && future ? `<div class="row"><button class="btn btn-ghost" style="border-color:rgba(160,50,40,.4);color:var(--err);" onclick='cancelAppt(${JSON.stringify(j.code)})'>Cancel this appointment</button></div>` : ''}`;
+      Status: <b>${esc(j.status)}</b> · ${esc(j.client.name)} (…${esc(j.client.phoneLast4)})${depositLine(j.deposit)}</div>
+    ${j.status === 'confirmed' && future && j.cancelLate ? `<div class="theme warn">${j.cancelForfeits ? 'This appointment is inside our cancellation notice. Cancelling now forfeits your deposit.' : 'This appointment is inside our cancellation notice.'} Need to move it instead? Call or text (480) 457-0165.</div>` : ''}
+    ${j.status === 'confirmed' && future ? `<div class="row"><button class="btn btn-ghost" style="border-color:rgba(160,50,40,.4);color:var(--err);" onclick='cancelAppt(${JSON.stringify(j.code)}, false, ${j.cancelForfeits ? 'true' : 'false'})'>Cancel this appointment</button></div>` : ''}`;
 }
-async function cancelAppt(code, visit) {
-  if (!confirm(visit ? 'Cancel every appointment in this visit?' : 'Cancel this appointment?')) return;
+async function cancelAppt(code, visit, forfeits) {
+  const q = (visit ? 'Cancel every appointment in this visit?' : 'Cancel this appointment?') + (forfeits ? ' Your deposit will be forfeited.' : '');
+  if (!confirm(q)) return;
   const r = await fetch('/api/book/lookup', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code, action: 'cancel' }) });
   const j = await r.json();
   if (!r.ok) { $('em').textContent = j.error; return; }
