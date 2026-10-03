@@ -81,18 +81,29 @@ Double-booking is impossible by construction: `appointments` carries an
 exclusion constraint on `(stylist, time range)`, so if two people submit the
 same slot in the same instant, the database accepts one and rejects the other.
 
-**Family bookings.** One person (the holder) books for a household: on the
-date-and-time step, *Add another person to this visit* takes a first name,
-a service and (optionally) a stylist. The engine (`lib/family.js`) finds
-times when everyone can be seen within the salon's family window
-(`family_window_min` setting, default 60 minutes), one chair at a time, and
-books every appointment in one transaction: if any leg is taken, nothing is
-booked. The holder gets one code (`CF-XXXXX`) that looks up or cancels the
-whole visit, one confirmation, one reminder, and one ticket at the till with
-a line per person under the stylist who did the work. Each person is still
-their own appointment row, so each stylist sees their own, and Team Hub gets
-each leg. Dependents live in the holder's household without a phone; a
-dependent who later books alone just gets a phone of their own.
+**Visits: families and stacked services.** One confirmation code
+(`CF-XXXXX`) can cover several appointments booked together:
+
+- *A family.* The holder books under their own name and phone and adds the
+  others by first name, each with their own service(s). They choose whether
+  everyone must be in a chair *at the same time* (every first appointment
+  starts within the salon's `family_window_min`, default 60 minutes) or
+  whether *the same day* is fine (any times that day). After a day is shown,
+  the page says which day is the soonest for that choice, and offers to look
+  for a sooner day where everyone is seen at different times.
+- *A stack.* One person, several services in the order they add them, done
+  back to back: loc color, then the retwist. Each leg lands only on a
+  stylist qualified for that service (the stylist's services list); the
+  same stylist may do every leg when qualified.
+
+The engine (`lib/family.js`) places every leg against the live book, one
+chair at a time, and books all legs in one transaction: if any is taken,
+nothing is booked. Each leg is still its own appointment row, so each
+stylist sees their own, Team Hub gets each one, and the till opens one
+ticket for the holder with a line per leg under the stylist who did it.
+The holder gets one confirmation, one reminder and one lookup/cancel code.
+Dependents live in the holder's household without a phone; one who later
+books alone just gets a phone of their own.
 
 **Theme days.** Family Fridays, Zin Saturdays, Mother's Day Saturday. Set
 them up under *Theme days* in `/admin/settings`: a weekly rule or a single
@@ -244,6 +255,5 @@ Reminders can also be triggered by hand from `/admin/settings`.
 
 ### Not built yet (natural next steps)
 
-Deposits · per-stylist pricing · reschedule-by-code · multi-stylist
-visits (one person, two stylists) · family booking from the front desk
-(the API supports it: `/api/book/family`).
+Deposits · per-stylist pricing · reschedule-by-code · family and stacked
+visits from the front desk (the API supports it: `/api/book/family`).
