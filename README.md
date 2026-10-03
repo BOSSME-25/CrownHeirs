@@ -94,6 +94,19 @@ their own appointment row, so each stylist sees their own, and Team Hub gets
 each leg. Dependents live in the holder's household without a phone; a
 dependent who later books alone just gets a phone of their own.
 
+**Theme days.** Family Fridays, Zin Saturdays, Mother's Day Saturday. Set
+them up under *Theme days* in `/admin/settings`: a weekly rule or a single
+date, an audience (families and children, adults, everyone), a headline
+and "what to expect". The booking calendar marks the day and shows the
+theme before the client picks a time; the TV announces it (`/tv` asks
+`/api/book/themes?date=` for today); the confirmation carries it. A client
+outside the audience (a solo adult on Family Friday, a Tiny Heirs service
+on Zin Saturday) must tick that they understand their appointment may be
+moved; the front desk sees those bookings flagged *Move?* and can **Move**
+one to a new time, which tells the client. Front-desk bookings are never
+gated. A dated theme can open its date for booking before the usual
+60-day window (*open for booking this many days early*).
+
 ### One-time setup on Vercel
 
 1. **Postgres** — in the Vercel dashboard: **Storage → Create Database →
@@ -232,6 +245,5 @@ Reminders can also be triggered by hand from `/admin/settings`.
 ### Not built yet (natural next steps)
 
 Deposits · per-stylist pricing · reschedule-by-code · multi-stylist
-visits (one person, two stylists) · theme days (Family Fridays, Zin
-Saturdays) · family booking from the front desk (the API supports it:
-`family.*` on `/api/book/family`).
+visits (one person, two stylists) · family booking from the front desk
+(the API supports it: `/api/book/family`).

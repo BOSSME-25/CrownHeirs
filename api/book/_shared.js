@@ -4,7 +4,7 @@ const { httpError } = require('../../lib/db');
 const { BookingError } = require('../../lib/booking');
 
 function fail(res, e) {
-  if (e instanceof BookingError) return res.status(e.status).json({ error: e.message });
+  if (e instanceof BookingError) return res.status(e.status).json({ error: e.message, ...(e.extra || {}) });
   const { status, error } = httpError(e);
   return res.status(status).json({ error });
 }

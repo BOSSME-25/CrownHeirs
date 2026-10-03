@@ -240,6 +240,34 @@ CREATE TABLE IF NOT EXISTS api_tokens (
   revoked_at   timestamptz
 );
 
+-- ── Theme days: Family Fridays, Zin Saturdays, Mother's Day Saturday…
+-- A theme is a weekly rule (every Friday) or a single date. The booking page
+-- shows it, the TV announces it, and a client outside its audience must
+-- accept that their appointment may be moved. A dated theme can open its
+-- date for booking earlier than the usual window (prebook_days).
+CREATE TABLE IF NOT EXISTS day_themes (
+  id           serial PRIMARY KEY,
+  name         text NOT NULL,                                   -- "Family Friday"
+  audience     text NOT NULL DEFAULT 'everyone'
+               CHECK (audience IN ('family', 'adults', 'everyone')),
+  headline     text NOT NULL DEFAULT '',                        -- "It's Family Friday"
+  body         text NOT NULL DEFAULT '',                        -- what to expect
+  tv_body      text NOT NULL DEFAULT '',                        -- TV wording, if different
+  rule_kind    text NOT NULL CHECK (rule_kind IN ('weekly', 'date')),
+  weekday      smallint CHECK (weekday IS NULL OR weekday BETWEEN 0 AND 6),
+  on_date      date,
+  starts_on    date,                                            -- weekly rules can be bounded
+  ends_on      date,
+  prebook_days integer NOT NULL DEFAULT 0 CHECK (prebook_days >= 0),
+  active       boolean NOT NULL DEFAULT true,
+  sort         integer NOT NULL DEFAULT 0,
+  CHECK ((rule_kind = 'weekly' AND weekday IS NOT NULL) OR (rule_kind = 'date' AND on_date IS NOT NULL))
+);
+ALTER TABLE appointments ADD COLUMN IF NOT EXISTS theme_id integer REFERENCES day_themes(id) ON DELETE SET NULL;
+ALTER TABLE appointments ADD COLUMN IF NOT EXISTS theme_fit boolean;      -- was the client the theme's audience?
+ALTER TABLE appointments ADD COLUMN IF NOT EXISTS theme_ack boolean NOT NULL DEFAULT false;
+ALTER TABLE appointments ADD COLUMN IF NOT EXISTS moved_from timestamptz;  -- last reschedule's original start
+
 CREATE TABLE IF NOT EXISTS settings (
   key   text PRIMARY KEY,
   value text NOT NULL

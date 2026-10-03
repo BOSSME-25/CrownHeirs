@@ -22,7 +22,7 @@ module.exports = async (req, res) => {
     }
     if (req.method === 'POST') {
       const b = req.body || {};
-      return res.status(201).json(await family.create({ holder: b.holder, people: b.people, notes: b.notes }));
+      return res.status(201).json(await family.create({ holder: b.holder, people: b.people, notes: b.notes, themeAck: Boolean(b.themeAck) }));
     }
     res.status(405).json({ error: 'Method not allowed' });
   } catch (e) { fail(res, e); }
