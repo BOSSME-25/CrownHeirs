@@ -310,7 +310,7 @@ function renderDates() {
 }
 async function loadDay() {
   $('dayErr').textContent = ''; $('dayTitle').textContent = fmtD(DATE);
-  try { DAY = await api('GET', { action: 'day', date: DATE }); renderDay(); }
+  try { DAY = await api('GET', { action: 'day', date: DATE }); $('dayTitle').textContent = fmtD(DATE) + (DAY.theme ? ' · ' + DAY.theme.name : ''); renderDay(); }
   catch (e) { $('dayList').innerHTML = ''; $('dayErr').textContent = e.message; }
 }
 function renderDay() {
@@ -318,7 +318,8 @@ function renderDay() {
   const appts = DAY.appointments.filter(a => STYLIST === 'all' || a.stylist.slug === STYLIST);
   const off = DAY.timeOff.filter(t => STYLIST === 'all' || t.stylist.slug === STYLIST);
   const items = [...appts.map(a => ({ at: a.startsAt, html: apptHtml(a) })), ...off.map(t => ({ at: t.startsAt, html: offHtml(t) }))].sort((x, y) => new Date(x.at) - new Date(y.at));
-  $('dayList').innerHTML = items.length ? items.map(i => i.html).join('') : '<div class="empty">Nothing on the book.</div>';
+  const banner = DAY.theme ? `<div class="hint" style="background:rgba(200,149,42,.12);border-left:3px solid var(--gold);padding:10px 12px;border-radius:8px;"><b>${esc(DAY.theme.name)}</b>${DAY.theme.headline ? ' · ' + esc(DAY.theme.headline) : ''}<br>${esc(DAY.theme.body || '')}<br><span style="color:var(--ink-dim)">Audience: ${DAY.theme.audience}. Bookings outside it are marked <b>Move?</b> below.</span></div>` : '';
+  $('dayList').innerHTML = banner + (items.length ? items.map(i => i.html).join('') : '<div class="empty">Nothing on the book.</div>');
 }
 function apptHtml(a) {
   const st = { confirmed: '', completed: '<span class="badge ok">Done</span>', cancelled: '<span class="badge">Cancelled</span>', no_show: '<span class="badge err">No-show</span>' }[a.status] || '';
@@ -326,9 +327,11 @@ function apptHtml(a) {
   const phone = a.client.phone || '';
   const tel = phone.replace(/^1(\d{3})(\d{3})(\d{4})$/, '($1) $2-$3');
   const fam = a.visit ? `<span class="badge staff" title="Family visit ${esc(a.visit.code)}, booked by ${esc(a.visit.holder.name)}">Family</span>` : '';
+  const th = a.theme && a.theme.fit === false ? `<span class="badge err" title="Outside the ${esc(a.theme.name)} audience${a.theme.ack ? '; the client accepted it may be moved' : ''}">Move?</span>` : '';
+  const moved = a.movedFrom ? `<span class="badge" title="Moved from ${fmtT(a.movedFrom)}">Moved</span>` : '';
   const who = a.visit && a.visit.holder.name !== a.client.name ? `<b>${esc(a.client.name)}</b>${a.client.relationship ? ` (${esc(a.client.relationship)})` : ''} · booked by ${esc(a.visit.holder.name)}` : `<b>${esc(a.client.name)}</b>`;
   return `<div class="appt ${a.status}">
-    <div class="t">${fmtT(a.startsAt)} – ${fmtT(a.endsAt)}${st}${a.source === 'staff' ? '<span class="badge staff">Phone</span>' : ''}${fam}${hubBadge(a)}</div>
+    <div class="t">${fmtT(a.startsAt)} – ${fmtT(a.endsAt)}${st}${a.source === 'staff' ? '<span class="badge staff">Phone</span>' : ''}${fam}${th}${moved}${hubBadge(a)}</div>
     <div class="m">${who}${phone ? ` · <a href="tel:+${esc(phone)}">${esc(tel)}</a>` : ''}${a.client.email ? ` · ${esc(a.client.email)}` : ''}<br>
       ${esc(a.service.name)}${opt} · ${esc(a.stylist.name)} · <span style="color:var(--ink-dim)">${esc(a.code)}</span>${a.notes ? `<br><i>${esc(a.notes)}</i>` : ''}</div>
     ${a.ticket ? `<div class="m">Ticket <b>${esc(a.ticket.code)}</b> · ${money(a.ticket.total_cents + a.ticket.tip_cents)} · ${esc(a.ticket.status.replace('_', ' '))}</div>` : ''}
@@ -336,6 +339,7 @@ function apptHtml(a) {
       ${a.ticket ? `<button class="btn btn-terra btn-sm" onclick="openTicket('${a.ticket.code}')">Open ticket</button>` : (a.visit ? `<button class="btn btn-terra btn-sm" onclick="checkoutVisit('${a.visit.code}')">Checkout family</button>` : `<button class="btn btn-terra btn-sm" onclick="checkout('${a.code}')">Checkout</button>`)}
       <button class="btn btn-ghost btn-sm" onclick="setStatus('${a.code}','completed')">✓ Done</button>
       <button class="btn btn-ghost btn-sm" onclick="setStatus('${a.code}','no_show')">No-show</button>
+      <button class="btn btn-ghost btn-sm" onclick="moveAppt('${a.code}')">Move</button>
       <button class="btn btn-danger btn-sm" onclick="if(confirm(${a.visit ? "'Cancel just this person\\'s appointment? The rest of the family visit stays. The booking holder will be notified.'" : "'Cancel this appointment? The client will be notified.'"}))setStatus('${a.code}','cancelled')">Cancel</button></div>`
     : `<div class="acts">${a.ticket ? `<button class="btn btn-ghost btn-sm" onclick="openTicket('${a.ticket.code}')">Open ticket</button>` : (a.status === 'completed' ? `<button class="btn btn-terra btn-sm" onclick="checkout('${a.code}')">Checkout</button>` : '')}<button class="btn btn-ghost btn-sm" onclick="setStatus('${a.code}','confirmed')">Restore</button></div>`}
   </div>`;
@@ -450,6 +454,17 @@ async function syncDay() {
 function offHtml(t) {
   return `<div class="off"><span>⏸ ${esc(t.stylist.name)} off ${fmtT(t.startsAt)} – ${fmtT(t.endsAt)}${t.reason ? ` · ${esc(t.reason)}` : ''}</span>
     <button class="btn btn-ghost btn-sm" onclick="removeOff(${t.id})">Remove</button></div>`;
+}
+async function moveAppt(code) {
+  const a = DAY.appointments.find(x => x.code === code); if (!a) return;
+  const cur = new Date(a.startsAt);
+  const def = `${DATE} ${String(cur.getHours()).padStart(2, '0')}:${String(cur.getMinutes()).padStart(2, '0')}`;
+  const when = prompt('New start, as YYYY-MM-DD HH:MM (24h, salon time):', def); if (!when) return;
+  const m = when.trim().match(/^(\d{4}-\d{2}-\d{2})[ T](\d{1,2}):(\d{2})$/); if (!m) return alert('Use YYYY-MM-DD HH:MM');
+  const startAt = new Date(`${m[1]}T${m[2].padStart(2, '0')}:${m[3]}:00`).toISOString();   // the desk runs on salon time
+  const reason = prompt('Reason to tell the client (optional):', a.theme && a.theme.fit === false ? `to make room on ${a.theme.name}` : '') ?? '';
+  try { await api('POST', null, { action: 'move', code, startAt, reason }); toast('Moved and client notified'); loadDay(); }
+  catch (e) { alert(e.message); }
 }
 async function setStatus(code, status) {
   try { await api('POST', null, { action: 'status', code, status }); toast('Updated'); loadDay(); }

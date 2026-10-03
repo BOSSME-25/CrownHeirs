@@ -88,6 +88,13 @@ h2 { font-family: var(--font-serif); font-weight: 600; font-size: 27px; margin-b
 .ok-badge { display: inline-block; background: rgba(61,122,69,0.1); color: var(--ok); border-radius: 100px; padding: 6px 14px; font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; }
 .consult { background: rgba(200,149,42,0.12); border-left: 3px solid var(--gold); padding: 10px 12px; font-size: 14px; border-radius: 6px; margin-top: 12px; }
 .spin { color: var(--ink-dim); font-size: 14px; padding: 12px 0; }
+/* Theme days */
+.theme { background: rgba(200,149,42,0.12); border-left: 3px solid var(--gold); padding: 12px 14px; border-radius: 8px; margin-bottom: 14px; font-size: 14.5px; line-height: 1.5; }
+.theme b { font-weight: 600; }
+.theme.warn { background: rgba(160,50,40,0.07); border-left-color: var(--err); }
+.day.themed { border-color: var(--gold); }
+.day.themed small:last-child { color: var(--gold); font-weight: 600; }
+.day.on.themed small:last-child { color: #fff; }
 /* Family visit */
 .fam { border: 1px dashed var(--border); border-radius: 12px; padding: 12px 14px; margin-bottom: 14px; }
 .fam .person { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 15px; }
@@ -130,6 +137,7 @@ a.manage { color: var(--terra); font-size: 14px; }
   <section id="s3" class="card hidden">
     <h2>When works for you?</h2>
     <div class="hint" id="s3hint"></div>
+    <div id="themeBanner" class="theme hidden"></div>
     <!-- Family: book everyone in one visit, same hour, one code -->
     <div class="fam" id="fam">
       <div id="famList"></div>
@@ -158,6 +166,10 @@ a.manage { color: var(--terra); font-size: 14px; }
   <section id="s4" class="card hidden">
     <h2>Almost there.</h2>
     <div class="sum" id="summary"></div>
+    <div id="themeAck" class="theme warn hidden">
+      <div id="themeAckText"></div>
+      <label style="display:flex;gap:10px;align-items:flex-start;text-transform:none;letter-spacing:0;font-size:15px;margin:10px 0 0;"><input type="checkbox" id="themeAckBox" style="width:auto;margin-top:3px;"> I understand, and I'd like to book this day anyway.</label>
+    </div>
     <div id="consultNote" class="consult hidden">This service starts with a quick consultation — we’ll confirm the details and final quote when you arrive.</div>
     <label>Your name</label><input id="fName" autocomplete="name" placeholder="First and last name">
     <label>Mobile number</label><input id="fPhone" type="tel" autocomplete="tel" inputmode="tel" placeholder="(602) 555-0100">
@@ -209,6 +221,8 @@ let TZ = 'America/Phoenix', MAX_DAYS = 60;
 let CATS = [], SEL = { cat: null, service: null, variation: null, stylist: 'any', date: null, startAt: null, avail: null }, DONE = null;
 // Other people in this visit: [{ name, service, variation, stylist }] (the first person is the holder, in SEL).
 let FAM = [], FAM_PICK = { cat: null, service: null, variation: null }, FAM_OPTION = null;
+// Theme days for the calendar: { today, latest, days: {ymd: theme}, prebook: [...] }
+let THEMES = { days: {}, prebook: [] };
 
 const money = c => c == null ? 'Ask us' : 'From $' + Math.round(c / 100);
 const dur = m => m >= 60 ? `${Math.floor(m / 60)}h${m % 60 ? ' ' + (m % 60) + 'm' : ''}` : `${m}m`;
@@ -246,6 +260,7 @@ async function loadServices() {
     if (r.status === 503) throw new Error('Online booking is almost ready — for now, please call or text the salon to book.');
     if (!r.ok) throw new Error(j.error || 'Could not load services');
     CATS = j.categories; TZ = j.timeZone || TZ; MAX_DAYS = j.maxDaysAhead || MAX_DAYS;
+    try { const t = await fetch('/api/book/themes'); if (t.ok) THEMES = await t.json(); } catch (e) { /* no themes, no marks */ }
     SEL.cat = CATS[0]?.category || null;
     renderCats();
     preselectFromQuery();
@@ -338,14 +353,18 @@ function pickStylist(slug) { SEL.stylist = slug; SEL.date = null; SEL.startAt = 
 function renderDates() {
   const today = ymdToday();
   const days = Array.from({ length: Math.min(MAX_DAYS, 60) }, (_, i) => addDays(today, i));
+  // Dated themes open for early booking (Mother's Day Saturday) sit at the end of the strip.
+  for (const p of (THEMES.prebook || [])) if (!days.includes(p.date)) days.push(p.date);
   $('s3hint').textContent = `${svcLabel()} · ${dur(SEL.variation.duration_min)}${SEL.stylist !== 'any' ? ' · ' + (SEL.avail?.stylists.find(s => s.slug === SEL.stylist)?.name || '') : ''}`;
-  $('dates').innerHTML = days.map(d => { const p = ymdParts(d); return `<button class="day ${d === SEL.date ? 'on' : ''}" onclick='pickDate(${JSON.stringify(d)})'><small>${p.dow}</small><b>${p.day}</b><small>${p.mon}</small></button>`; }).join('');
+  $('dates').innerHTML = days.map(d => { const p = ymdParts(d); const t = THEMES.days && THEMES.days[d];
+    return `<button class="day ${d === SEL.date ? 'on' : ''} ${t ? 'themed' : ''}" ${t ? `title="${esc(t.name)}"` : ''} onclick='pickDate(${JSON.stringify(d)})'><small>${p.dow}</small><b>${p.day}</b><small>${t ? esc(t.name.split(' ')[0]) : p.mon}</small></button>`; }).join('');
   if (!SEL.date) pickDate(days[0]);
 }
 async function pickDate(d) {
   SEL.date = d; SEL.startAt = null;
   [...$('dates').children].forEach(el => el.classList.toggle('on', el.textContent.replace(/\s/g, '') === (ymdParts(d).dow + ymdParts(d).day + ymdParts(d).mon).replace(/\s/g, '')));
   $('timesWrap').innerHTML = '<div class="spin">Finding openings…</div>'; $('e3').textContent = '';
+  showThemeBanner(d);
   if (FAM.length) return pickFamilyDate(d);
   try {
     const q = `${svcQuery()}&date=${d}` + (SEL.stylist !== 'any' ? `&stylist=${encodeURIComponent(SEL.stylist)}` : '');
@@ -370,6 +389,7 @@ function pickTime(iso) {
   const who = SEL.stylist === 'any' ? 'First available stylist' : (SEL.avail.stylists.find(x => x.slug === SEL.stylist)?.name || '');
   $('summary').innerHTML = `<b>${esc(svcLabel())}</b> · ${money(s.price_from_cents)} · ${dur(SEL.variation.duration_min)}<br>${esc(who)}<br>${fmtDate(iso)} at <b>${fmtTime(iso)}</b>`;
   $('consultNote').classList.toggle('hidden', !s.requires_consult);
+  showThemeAck(themeFor(SEL.date));
   $('e4').textContent = '';
   go(4);
 }
@@ -377,6 +397,7 @@ function pickTime(iso) {
 /* ── 4 · book ── */
 async function book() {
   if (FAM.length) return bookFamily();
+  if (needAck()) return;
   const btn = $('bookBtn'); btn.disabled = true; btn.textContent = 'Booking…'; $('e4').textContent = '';
   try {
     const r = await fetch('/api/book/create', {
@@ -384,22 +405,51 @@ async function book() {
       body: JSON.stringify({
         service: SEL.service.slug, variation: SEL.variation.id, stylist: SEL.stylist, startAt: SEL.startAt,
         client: { name: $('fName').value, phone: $('fPhone').value, email: $('fEmail').value },
-        notes: $('fNotes').value
+        notes: $('fNotes').value, themeAck: themeAck()
       })
     });
     const j = await r.json();
     if (!r.ok) {
+      if (j.needsAck) { showThemeAck(j.theme, j.theme.body); $('themeAck').classList.remove('hidden'); $('e4').textContent = 'Please read the note above and tick the box.'; return; }
       $('e4').textContent = j.error || 'Something went wrong';
       if (r.status === 409) { setTimeout(() => { pickDate(SEL.date); go(3); }, 1200); } // slot gone → refresh times
       return;
     }
     DONE = j;
     $('doneCode').textContent = j.code;
-    $('doneSum').innerHTML = `<b>${esc(j.service.name)}</b>${j.variation?.name && SEL.service.variations.length > 1 ? ` · ${esc(j.variation.name)}` : ''} with ${esc(j.stylist.name)}<br>${fmtDate(j.startsAt)}<br><b>${fmtTime(j.startsAt)}</b> – ${fmtTime(j.endsAt)}`;
+    $('doneSum').innerHTML = `<b>${esc(j.service.name)}</b>${j.variation?.name && SEL.service.variations.length > 1 ? ` · ${esc(j.variation.name)}` : ''} with ${esc(j.stylist.name)}<br>${fmtDate(j.startsAt)}<br><b>${fmtTime(j.startsAt)}</b> – ${fmtTime(j.endsAt)}` + doneTheme(j.theme);
     go(5);
   } catch (e) { $('e4').textContent = e.message; }
   finally { btn.disabled = false; btn.textContent = 'Book appointment'; }
 }
+
+/* ── theme days ── */
+const themeFor = d => (THEMES.days && THEMES.days[d]) || null;
+const AUD_WORD = { family: 'a family day', adults: 'a child-free day', everyone: 'a themed day' };
+function showThemeBanner(d) {
+  const t = themeFor(d); const el = $('themeBanner');
+  el.classList.toggle('hidden', !t);
+  if (t) el.innerHTML = `<b>${esc(t.headline || t.name)}</b> · ${esc(AUD_WORD[t.audience])}${t.body ? '<br>' + esc(t.body) : ''}`;
+}
+// Mirrors the server's rule: families and children's services fit a family
+// day; anything but a children's service fits an adults day.
+function themeFits(t) {
+  if (!t) return true;
+  const cats = [SEL.service.category, ...FAM.map(p => p.service.category)];
+  const kids = cats.some(c => /tiny|kid|child/i.test(c || ''));
+  if (t.audience === 'family') return FAM.length > 0 || kids;
+  if (t.audience === 'adults') return !kids;
+  return true;
+}
+function showThemeAck(t, msg) {
+  const el = $('themeAck'); const need = t && !themeFits(t);
+  el.classList.toggle('hidden', !need);
+  $('themeAckBox').checked = false;
+  if (need) $('themeAckText').innerHTML = `<b>${esc(t.name)}</b> is ${esc(AUD_WORD[t.audience])}. ${esc(msg || t.body || '')} If you book anyway, your appointment may be moved to make room.`;
+}
+const themeAck = () => $('themeAck').classList.contains('hidden') ? false : $('themeAckBox').checked;
+function needAck() { if ($('themeAck').classList.contains('hidden') || $('themeAckBox').checked) return false; $('e4').textContent = 'Please tick the box to book this day, or pick another date.'; return true; }
+const doneTheme = t => t ? `<br><span style="color:var(--ink-dim)">${t.fit === false ? `Note: ${esc(t.name)}. Your appointment may be moved to make room.` : `It's ${esc(t.name)}${t.headline ? ': ' + esc(t.headline) : ''}.`}</span>` : '';
 
 /* ── family visit: more than one person, same hour, one code ── */
 const famLabel = p => p.service.variations.length > 1 ? `${p.service.name} · ${p.variation.name}` : p.service.name;
@@ -479,10 +529,12 @@ function pickFamilyTime(startAt) {
   $('summary').innerHTML = FAM_OPTION.people.map((p, i) => `<b>${esc(names[i])}</b>: ${esc(p.service.name)}${p.variation.name && p.variation.name !== 'Regular' ? ' · ' + esc(p.variation.name) : ''} with ${esc(p.stylist.name)}, <b>${fmtTime(p.startAt)}</b>`).join('<br>')
     + `<br>${fmtDate(startAt)} · one confirmation code for everyone`;
   $('consultNote').classList.toggle('hidden', !SEL.service.requires_consult && !FAM.some(p => p.service.requires_consult));
+  showThemeAck(themeFor(SEL.date));
   $('e4').textContent = '';
   go(4);
 }
 async function bookFamily() {
+  if (needAck()) return;
   const btn = $('bookBtn'); btn.disabled = true; btn.textContent = 'Booking…'; $('e4').textContent = '';
   try {
     const holderName = $('fName').value.trim();
@@ -491,9 +543,10 @@ async function bookFamily() {
       service: p.service.slug, variation: p.variation.id, stylist: p.stylist.slug, startAt: p.startAt
     }));
     const r = await fetch('/api/book/family', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ holder: { name: holderName, phone: $('fPhone').value, email: $('fEmail').value }, people, notes: $('fNotes').value }) });
+      body: JSON.stringify({ holder: { name: holderName, phone: $('fPhone').value, email: $('fEmail').value }, people, notes: $('fNotes').value, themeAck: themeAck() }) });
     const j = await r.json();
     if (!r.ok) {
+      if (j.needsAck) { showThemeAck(j.theme, j.theme.body); $('themeAck').classList.remove('hidden'); $('e4').textContent = 'Please read the note above and tick the box.'; return; }
       $('e4').textContent = j.error || 'Something went wrong';
       if (r.status === 409) setTimeout(() => { pickDate(SEL.date); go(3); }, 1500);
       return;
@@ -501,7 +554,7 @@ async function bookFamily() {
     DONE = j;
     $('doneCode').textContent = j.code;
     $('doneSum').innerHTML = j.people.map(p => `<b>${esc(p.name)}</b>: ${esc(p.service.name)}${p.variation?.name && p.variation.name !== 'Regular' ? ' · ' + esc(p.variation.name) : ''} with ${esc(p.stylist.name)}, <b>${fmtTime(p.startsAt)}</b>`).join('<br>')
-      + `<br>${fmtDate(j.people[0].startsAt)}`;
+      + `<br>${fmtDate(j.people[0].startsAt)}` + doneTheme(j.theme);
     go(5);
   } catch (e) { $('e4').textContent = e.message; }
   finally { btn.disabled = false; btn.textContent = 'Book appointment'; }

@@ -94,6 +94,31 @@ table { width:100%; border-collapse:collapse; font-size:14px; margin-top:6px; } 
   </div>
 
   <div class="card">
+    <h2>Theme days</h2>
+    <div class="hint">Family Fridays, Zin Saturdays, Mother's Day Saturday. A theme shows on the booking calendar and the TV. Clients outside its audience see what to expect and must accept that their appointment may be moved. A dated theme can open its date for booking early.</div>
+    <div id="themeList"></div>
+    <div style="border-top:1px solid var(--border);margin-top:14px;padding-top:12px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div><label>Name</label><input id="thName" placeholder="Family Friday"></div>
+        <div><label>Audience</label><select id="thAud"><option value="family">Families and children</option><option value="adults">Adults, child-free</option><option value="everyone">Everyone</option></select></div>
+        <div><label>Repeats</label><select id="thKind" onchange="thKindChange()"><option value="weekly">Every week</option><option value="date">One date</option></select></div>
+        <div id="thWeekdayWrap"><label>Weekday</label><select id="thWeekday"><option value="5">Friday</option><option value="6">Saturday</option><option value="0">Sunday</option><option value="1">Monday</option><option value="2">Tuesday</option><option value="3">Wednesday</option><option value="4">Thursday</option></select></div>
+        <div id="thDateWrap" class="hidden"><label>Date</label><input id="thDate" type="date"></div>
+        <div id="thPrebookWrap" class="hidden"><label>Open for booking this many days early (0 = usual window)</label><input id="thPrebook" type="number" min="0" max="365" value="0"></div>
+      </div>
+      <label>Headline (shown to clients)</label><input id="thHead" placeholder="It's Family Friday">
+      <label>What to expect</label><textarea id="thBody" rows="2" placeholder="Expect children to be present and heard. The TV and music are for them."></textarea>
+      <label>TV wording (optional, if different)</label><textarea id="thTv" rows="2"></textarea>
+      <input type="hidden" id="thId">
+      <div class="status err" id="thErr"></div>
+      <div style="display:flex;gap:10px;margin-top:10px;">
+        <button class="btn btn-terra" onclick="saveTheme()">Save theme</button>
+        <button class="btn btn-ghost" onclick="clearTheme()">Clear</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
     <h2>Public pages</h2>
     <div class="hint"><a href="/" target="_blank">Find your service</a> · <a href="/book" target="_blank">Book online</a> · <a href="/tv" target="_blank">Salon TV</a></div>
   </div>
@@ -177,13 +202,47 @@ async function hubResync() {
     ? `${j.sent} of ${j.total} sent${j.unmatched ? ` · ${j.unmatched} with no stylist mapping in the hub` : ''}${j.failed ? ` · ${j.failed} failed: ${(j.errors || []).join('; ')}` : ''}`
     : (j.error || 'Failed');
 }
+
+/* ── theme days ── */
+const WD = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const AUD = { family: 'families and children', adults: 'adults, child-free', everyone: 'everyone' };
+let THEMES = [];
+function thKindChange() { const d = $('thKind').value === 'date'; $('thWeekdayWrap').classList.toggle('hidden', d); $('thDateWrap').classList.toggle('hidden', !d); $('thPrebookWrap').classList.toggle('hidden', !d); }
+async function loadThemes() {
+  try { THEMES = (await get({ action: 'themes.list' })).themes; } catch (e) { $('themeList').innerHTML = `<div class="status err">${e.message}</div>`; return; }
+  $('themeList').innerHTML = THEMES.length ? '<table>' + THEMES.map(t => `<tr>
+      <td><b>${esc(t.name)}</b>${t.active ? '' : ' <span style="color:var(--ink-dim)">(off)</span>'}<br><span style="color:var(--ink-dim)">${t.ruleKind === 'weekly' ? 'Every ' + WD[t.weekday] : t.onDate}${t.prebookDays ? ' · books ' + t.prebookDays + ' days early' : ''}</span></td>
+      <td>${esc(AUD[t.audience])}<br><span style="color:var(--ink-dim)">${esc(t.headline || '')}</span></td>
+      <td style="white-space:nowrap"><button class="btn btn-ghost" style="padding:6px 12px" onclick="editTheme(${t.id})">Edit</button>
+        <button class="btn btn-ghost" style="padding:6px 12px" onclick="toggleTheme(${t.id})">${t.active ? 'Turn off' : 'Turn on'}</button>
+        <button class="btn btn-ghost" style="padding:6px 12px;color:var(--err)" onclick="removeTheme(${t.id})">Delete</button></td></tr>`).join('') + '</table>'
+    : '<div class="status">No theme days yet.</div>';
+}
+function themeForm() {
+  return { id: $('thId').value || null, name: $('thName').value, audience: $('thAud').value, ruleKind: $('thKind').value, weekday: $('thWeekday').value,
+    onDate: $('thDate').value, prebookDays: $('thPrebook').value, headline: $('thHead').value, body: $('thBody').value, tvBody: $('thTv').value };
+}
+async function saveTheme() {
+  $('thErr').textContent = '';
+  try { const cur = THEMES.find(t => String(t.id) === $('thId').value); await post({ action: 'theme.save', ...themeForm(), active: cur ? cur.active : true, sort: cur ? cur.sort : 0 }); clearTheme(); loadThemes(); }
+  catch (e) { $('thErr').textContent = e.message; }
+}
+function clearTheme() { ['thId','thName','thHead','thBody','thTv','thDate'].forEach(id => $(id).value = ''); $('thPrebook').value = '0'; $('thAud').value = 'family'; $('thKind').value = 'weekly'; thKindChange(); }
+function editTheme(id) {
+  const t = THEMES.find(x => x.id === id); if (!t) return;
+  $('thId').value = t.id; $('thName').value = t.name; $('thAud').value = t.audience; $('thKind').value = t.ruleKind; $('thWeekday').value = t.weekday ?? '5';
+  $('thDate').value = t.onDate || ''; $('thPrebook').value = t.prebookDays; $('thHead').value = t.headline; $('thBody').value = t.body; $('thTv').value = t.tvBody; thKindChange();
+  $('thName').scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+async function toggleTheme(id) { const t = THEMES.find(x => x.id === id); try { await post({ action: 'theme.save', ...t, active: !t.active }); loadThemes(); } catch (e) { alert(e.message); } }
+async function removeTheme(id) { if (!confirm('Delete this theme day?')) return; try { await post({ action: 'theme.remove', id }); loadThemes(); } catch (e) { alert(e.message); } }
 async function runReminders() {
   $('remStatus').textContent = 'Running…';
   const r = await fetch('/api/book/reminders', { headers: { 'x-admin-key': KEY } });
   const j = await r.json().catch(() => ({}));
   $('remStatus').textContent = r.ok ? `Sent ${j.count} reminder(s).` : (j.error || 'Failed');
 }
-AdminShell.requireAuth().then(k => { KEY = k; $('app').classList.remove('hidden'); modeStatus(); bookingStatus(); hubStatus(); loadTill(); loadTokens(); });
+AdminShell.requireAuth().then(k => { KEY = k; $("app").classList.remove("hidden"); modeStatus(); bookingStatus(); hubStatus(); loadTill(); loadTokens(); loadThemes(); });
 </script>
 </body>
 </html>

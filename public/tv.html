@@ -215,6 +215,7 @@ h1 em { font-style: italic; color: var(--terra-hi); }
 @keyframes svcIn { from { opacity: 0; transform: translateY(2vh); } to { opacity: 1; transform: none; } }
 
 /* ── Info slide ──────────────────────────── */
+.slide.theme .kicker { color: var(--gold); }
 .info .body {
   font-family: var(--font-serif); font-weight: 300;
   font-size: 4.4vh; line-height: 1.5; color: var(--paper-dim);
@@ -258,6 +259,7 @@ const bar   = document.getElementById('bar');
 
 let slides = [], idx = -1, timer = null, contentRaw = '';
 let SERVICES = [], svcAt = 0;   // /images/services/index.json — services with a Square photo
+let THEME = null, themeKey = '';   // today's theme day, from /api/book/themes?date=
 
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
@@ -311,6 +313,14 @@ function buildSlides(c) {
   });
 
   const textSlides = [];
+
+  // Today's theme day (Family Friday, Zin Saturday…), from the booking side.
+  if (THEME) {
+    textSlides.push(mk('info theme',
+      `<div class="kicker">Today at The Den</div>
+       <h1>${esc(THEME.headline || THEME.name)}</h1>
+       <div class="body">${esc(THEME.tvBody || THEME.body || '')}</div>`));
+  }
 
   if ((c.memberships || []).length) {
     textSlides.push(mk('memberships',
@@ -462,12 +472,18 @@ async function load(first) {
   try {
     const r = await fetch('/api/content', { cache: 'no-store' });
     const raw = await r.text();
-    if (raw === contentRaw) return;            // nothing changed
-    contentRaw = raw;
     const c = JSON.parse(raw);
     if (!SERVICES.length) {
       try { SERVICES = await (await fetch('/images/services/index.json')).json(); } catch (e) { SERVICES = []; }
     }
+    // Today's theme, re-read with the content (every 3 min), so a new day's theme appears on its own.
+    const tz = c.settings?.timeZone || 'America/Phoenix';
+    const today = new Intl.DateTimeFormat('en-CA', { timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+    let theme = null;
+    try { const t = await fetch('/api/book/themes?date=' + today, { cache: 'no-store' }); if (t.ok) theme = (await t.json()).theme || null; } catch (e) { /* no booking database yet: no slide */ }
+    const key = today + '|' + JSON.stringify(theme);
+    if (raw === contentRaw && key === themeKey) return;            // nothing changed
+    THEME = theme; themeKey = key;
     window.__secs = Math.max(4, Number(c.settings?.secondsPerSlide) || 9);
     window.__tz = c.settings?.timeZone || 'America/Phoenix';
     tick();
@@ -475,6 +491,7 @@ async function load(first) {
     await Promise.all((c.gallery || []).map(g => new Promise(res => {
       const im = new Image(); im.onload = im.onerror = res; im.src = g.url;
     })));
+    contentRaw = raw;
     const fresh = buildSlides(c);
     stage.replaceChildren(...fresh);
     slides = fresh;

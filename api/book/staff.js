@@ -11,7 +11,10 @@
 //   GET  ?action=hub.status                       Team Hub connection check
 //   GET  ?action=hub.hours&email=                 a stylist's weekly hours as Team Hub publishes them
 //   POST { action: 'hub.resync', from, to }       re-push a date range to Team Hub
+//   POST { action: 'move', code, startAt, stylist?, reason? }  reschedule (client notified)
+//   GET  ?action=themes.list / POST { action: 'theme.save', …theme } / { action: 'theme.remove', id }
 const staff = require('../../lib/staff');
+const themes = require('../../lib/themes');
 const tickets = require('../../lib/tickets');
 const tokens = require('../../lib/api-tokens');
 const { availability, createAppointment } = require('../../lib/booking');
@@ -28,6 +31,7 @@ module.exports = async (req, res) => {
         case 'day':          return res.status(200).json(await staff.day(q.date));
         case 'stylists':     return res.status(200).json({ stylists: await staff.listStylists() });
         case 'hub.status':   return res.status(200).json(await staff.hubStatus());
+        case 'themes.list':  return res.status(200).json({ themes: await themes.list() });
         case 'hub.hours':    return res.status(200).json(await staff.hubHours({ email: q.email }));
         case 'tickets.day':  return res.status(200).json({ tickets: await tickets.listDay(q.date) });
         case 'ticket.get':   return res.status(200).json(await tickets.get(q.code));
@@ -47,6 +51,9 @@ module.exports = async (req, res) => {
           startAt: b.startAt, client: b.client, notes: b.notes, staff: true
         }));
         case 'status':         return res.status(200).json(await staff.setStatus(b.code, b.status));
+        case 'move':           return res.status(200).json(await staff.move(b.code, b));
+        case 'theme.save':     return res.status(200).json(await themes.save(b.theme || b));
+        case 'theme.remove':   return res.status(200).json(await themes.remove(b.id));
         case 'timeoff.add':    return res.status(201).json(await staff.addTimeOff(b));
         case 'timeoff.remove': return res.status(200).json(await staff.removeTimeOff(b.id));
         case 'stylist.save':   return res.status(200).json(await staff.saveStylist(b));
