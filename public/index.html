@@ -90,6 +90,9 @@ body {
    SCREEN SYSTEM
 ═══════════════════════════════════════════ */
 .screen { display: none; min-height: 100vh; flex-direction: column; }
+/* Off-screen cards are skipped by layout until scrolled near (cheap screen swaps). */
+.inspo-card, .scard, .mresult { content-visibility: auto; contain-intrinsic-size: 260px 300px; }
+.door.opening { transform: scale(0.985); opacity: 0.85; transition: transform 0.08s, opacity 0.08s; }
 .screen.active { display: flex; }
 
 .subscreen { display: none; }
@@ -1960,12 +1963,19 @@ function getBookingUrl(name){
   return '/book?service='+encodeURIComponent(m.slug)+(m.variation?'&variation='+encodeURIComponent(m.variation):'')+len;
 }
 
+// A door swaps in a whole screen (Show Me alone has 20 photo cards). The
+// click handler returns at once and the swap runs in the next frame, so the
+// tap registers immediately instead of waiting on layout (the INP warning).
 function openDoor(n){
   if(n===1){location.href='/book';return;}
-  if(n===2){showScreen('door2');d2go(0);}
-  if(n===3){showScreen('door3');d3go(1);}
-  if(n===4){showScreen('door4');d4go(0);}
-  if(n===5){showScreen('door5');initBeauty();track({s:'door5'});}
+  const door=document.querySelectorAll('.portal-doors .door')[n-1]; if(door) door.classList.add('opening');
+  requestAnimationFrame(()=>setTimeout(()=>{
+    if(door) door.classList.remove('opening');
+    if(n===2){showScreen('door2');d2go(0);}
+    if(n===3){showScreen('door3');d3go(1);}
+    if(n===4){showScreen('door4');d4go(0);}
+    if(n===5){showScreen('door5');initBeauty();track({s:'door5'});}
+  },0));
 }
 
 /* ── DOOR 2 ── */
