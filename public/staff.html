@@ -323,17 +323,20 @@ function renderDay() {
 function apptHtml(a) {
   const st = { confirmed: '', completed: '<span class="badge ok">Done</span>', cancelled: '<span class="badge">Cancelled</span>', no_show: '<span class="badge err">No-show</span>' }[a.status] || '';
   const opt = a.variation?.name && a.variation.name !== 'Regular' ? ` · ${esc(a.variation.name)}` : '';
-  const tel = a.client.phone.replace(/^1(\d{3})(\d{3})(\d{4})$/, '($1) $2-$3');
+  const phone = a.client.phone || '';
+  const tel = phone.replace(/^1(\d{3})(\d{3})(\d{4})$/, '($1) $2-$3');
+  const fam = a.visit ? `<span class="badge staff" title="Family visit ${esc(a.visit.code)}, booked by ${esc(a.visit.holder.name)}">Family</span>` : '';
+  const who = a.visit && a.visit.holder.name !== a.client.name ? `<b>${esc(a.client.name)}</b>${a.client.relationship ? ` (${esc(a.client.relationship)})` : ''} · booked by ${esc(a.visit.holder.name)}` : `<b>${esc(a.client.name)}</b>`;
   return `<div class="appt ${a.status}">
-    <div class="t">${fmtT(a.startsAt)} – ${fmtT(a.endsAt)}${st}${a.source === 'staff' ? '<span class="badge staff">Phone</span>' : ''}${hubBadge(a)}</div>
-    <div class="m"><b>${esc(a.client.name)}</b> · <a href="tel:+${esc(a.client.phone)}">${esc(tel)}</a>${a.client.email ? ` · ${esc(a.client.email)}` : ''}<br>
+    <div class="t">${fmtT(a.startsAt)} – ${fmtT(a.endsAt)}${st}${a.source === 'staff' ? '<span class="badge staff">Phone</span>' : ''}${fam}${hubBadge(a)}</div>
+    <div class="m">${who}${phone ? ` · <a href="tel:+${esc(phone)}">${esc(tel)}</a>` : ''}${a.client.email ? ` · ${esc(a.client.email)}` : ''}<br>
       ${esc(a.service.name)}${opt} · ${esc(a.stylist.name)} · <span style="color:var(--ink-dim)">${esc(a.code)}</span>${a.notes ? `<br><i>${esc(a.notes)}</i>` : ''}</div>
     ${a.ticket ? `<div class="m">Ticket <b>${esc(a.ticket.code)}</b> · ${money(a.ticket.total_cents + a.ticket.tip_cents)} · ${esc(a.ticket.status.replace('_', ' '))}</div>` : ''}
     ${a.status === 'confirmed' ? `<div class="acts">
-      ${a.ticket ? `<button class="btn btn-terra btn-sm" onclick="openTicket('${a.ticket.code}')">Open ticket</button>` : `<button class="btn btn-terra btn-sm" onclick="checkout('${a.code}')">Checkout</button>`}
+      ${a.ticket ? `<button class="btn btn-terra btn-sm" onclick="openTicket('${a.ticket.code}')">Open ticket</button>` : (a.visit ? `<button class="btn btn-terra btn-sm" onclick="checkoutVisit('${a.visit.code}')">Checkout family</button>` : `<button class="btn btn-terra btn-sm" onclick="checkout('${a.code}')">Checkout</button>`)}
       <button class="btn btn-ghost btn-sm" onclick="setStatus('${a.code}','completed')">✓ Done</button>
       <button class="btn btn-ghost btn-sm" onclick="setStatus('${a.code}','no_show')">No-show</button>
-      <button class="btn btn-danger btn-sm" onclick="if(confirm('Cancel this appointment? The client will be notified.'))setStatus('${a.code}','cancelled')">Cancel</button></div>`
+      <button class="btn btn-danger btn-sm" onclick="if(confirm(${a.visit ? "'Cancel just this person\\'s appointment? The rest of the family visit stays. The booking holder will be notified.'" : "'Cancel this appointment? The client will be notified.'"}))setStatus('${a.code}','cancelled')">Cancel</button></div>`
     : `<div class="acts">${a.ticket ? `<button class="btn btn-ghost btn-sm" onclick="openTicket('${a.ticket.code}')">Open ticket</button>` : (a.status === 'completed' ? `<button class="btn btn-terra btn-sm" onclick="checkout('${a.code}')">Checkout</button>` : '')}<button class="btn btn-ghost btn-sm" onclick="setStatus('${a.code}','confirmed')">Restore</button></div>`}
   </div>`;
 }
@@ -360,6 +363,10 @@ async function loadTickets() {
 async function ensureRetail() { if (!RETAIL.length) RETAIL = (await api('GET', { action: 'retail.list' })).items.filter(i => i.active); }
 async function checkout(apptCode) {
   try { const t = await api('POST', null, { action: 'ticket.open', appointmentCode: apptCode }); openTicket(t.code); }
+  catch (e) { alert(e.message); }
+}
+async function checkoutVisit(visitCode) {
+  try { const t = await api('POST', null, { action: 'ticket.open', visitCode }); openTicket(t.code); }
   catch (e) { alert(e.message); }
 }
 async function openWalkIn() {
