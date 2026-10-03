@@ -88,6 +88,15 @@ h2 { font-family: var(--font-serif); font-weight: 600; font-size: 27px; margin-b
 .ok-badge { display: inline-block; background: rgba(61,122,69,0.1); color: var(--ok); border-radius: 100px; padding: 6px 14px; font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; }
 .consult { background: rgba(200,149,42,0.12); border-left: 3px solid var(--gold); padding: 10px 12px; font-size: 14px; border-radius: 6px; margin-top: 12px; }
 .spin { color: var(--ink-dim); font-size: 14px; padding: 12px 0; }
+/* Family visit */
+.fam { border: 1px dashed var(--border); border-radius: 12px; padding: 12px 14px; margin-bottom: 14px; }
+.fam .person { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 15px; }
+.fam .person small { color: var(--ink-dim); display: block; }
+.fam .person button { background: none; border: 0; color: var(--err); font-size: 14px; cursor: pointer; }
+.fam .opt { margin-top: 8px; padding: 10px 12px; }
+.fam .opt .n { font-size: 17px; }
+.time small { display: block; font-size: 11px; color: var(--ink-dim); margin-top: 2px; }
+.time.on small { color: rgba(255,255,255,.85); }
 a.manage { color: var(--terra); font-size: 14px; }
 </style>
 </head>
@@ -121,6 +130,24 @@ a.manage { color: var(--terra); font-size: 14px; }
   <section id="s3" class="card hidden">
     <h2>When works for you?</h2>
     <div class="hint" id="s3hint"></div>
+    <!-- Family: book everyone in one visit, same hour, one code -->
+    <div class="fam" id="fam">
+      <div id="famList"></div>
+      <a class="manage" href="#" id="famAdd" onclick="famOpen();return false;">＋ Add another person to this visit</a>
+      <div id="famPanel" class="hidden">
+        <label>Their first name</label><input id="famName" placeholder="e.g. Kai" autocomplete="off">
+        <label>Their service</label>
+        <div class="pills" id="famCats"></div>
+        <div id="famSvcs"></div>
+        <div id="famVar" class="hidden"><label>Option</label><div id="famVarList"></div></div>
+        <label>Stylist</label><select id="famStylist"><option value="any">First available</option></select>
+        <div class="err" id="famErr"></div>
+        <div class="row">
+          <button class="btn btn-ghost" onclick="famClose()">Cancel</button>
+          <button class="btn btn-terra" onclick="famCommit()">Add to visit</button>
+        </div>
+      </div>
+    </div>
     <div class="dates" id="dates"></div>
     <div id="timesWrap"><div class="spin">Pick a day above.</div></div>
     <div class="err" id="e3"></div>
@@ -180,6 +207,8 @@ const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;
 
 let TZ = 'America/Phoenix', MAX_DAYS = 60;
 let CATS = [], SEL = { cat: null, service: null, variation: null, stylist: 'any', date: null, startAt: null, avail: null }, DONE = null;
+// Other people in this visit: [{ name, service, variation, stylist }] (the first person is the holder, in SEL).
+let FAM = [], FAM_PICK = { cat: null, service: null, variation: null }, FAM_OPTION = null;
 
 const money = c => c == null ? 'Ask us' : 'From $' + Math.round(c / 100);
 const dur = m => m >= 60 ? `${Math.floor(m / 60)}h${m % 60 ? ' ' + (m % 60) + 'm' : ''}` : `${m}m`;
@@ -303,7 +332,7 @@ async function loadStylists() {
     </button>`).join('');
   if (!list.length) $('stylistList').innerHTML += `<div class="empty">No stylist is set up for this service yet — please call the salon.</div>`;
 }
-function pickStylist(slug) { SEL.stylist = slug; SEL.date = null; SEL.startAt = null; renderDates(); go(3); }
+function pickStylist(slug) { SEL.stylist = slug; SEL.date = null; SEL.startAt = null; FAM_OPTION = null; famRender(); renderDates(); go(3); }
 
 /* ── 3 · date & time ── */
 function renderDates() {
@@ -317,6 +346,7 @@ async function pickDate(d) {
   SEL.date = d; SEL.startAt = null;
   [...$('dates').children].forEach(el => el.classList.toggle('on', el.textContent.replace(/\s/g, '') === (ymdParts(d).dow + ymdParts(d).day + ymdParts(d).mon).replace(/\s/g, '')));
   $('timesWrap').innerHTML = '<div class="spin">Finding openings…</div>'; $('e3').textContent = '';
+  if (FAM.length) return pickFamilyDate(d);
   try {
     const q = `${svcQuery()}&date=${d}` + (SEL.stylist !== 'any' ? `&stylist=${encodeURIComponent(SEL.stylist)}` : '');
     const r = await fetch('/api/book/availability?' + q);
@@ -346,6 +376,7 @@ function pickTime(iso) {
 
 /* ── 4 · book ── */
 async function book() {
+  if (FAM.length) return bookFamily();
   const btn = $('bookBtn'); btn.disabled = true; btn.textContent = 'Booking…'; $('e4').textContent = '';
   try {
     const r = await fetch('/api/book/create', {
@@ -370,13 +401,128 @@ async function book() {
   finally { btn.disabled = false; btn.textContent = 'Book appointment'; }
 }
 
+/* ── family visit: more than one person, same hour, one code ── */
+const famLabel = p => p.service.variations.length > 1 ? `${p.service.name} · ${p.variation.name}` : p.service.name;
+function famRender() {
+  $('famList').innerHTML = FAM.map((p, i) => `<div class="person"><div>${esc(p.name)}<small>${esc(famLabel(p))}${p.stylistName ? ' · ' + esc(p.stylistName) : ''}</small></div><button onclick="famRemove(${i})">Remove</button></div>`).join('');
+  $('famAdd').textContent = FAM.length ? '＋ Add someone else' : '＋ Add another person to this visit';
+  $('famAdd').classList.toggle('hidden', FAM.length >= 5);
+}
+function famOpen() {
+  FAM_PICK = { cat: CATS[0]?.category || null, service: null, variation: null };
+  $('famName').value = ''; $('famErr').textContent = ''; $('famVar').classList.add('hidden');
+  $('famStylist').innerHTML = '<option value="any">First available</option>';
+  famCats(); $('famPanel').classList.remove('hidden'); $('famAdd').classList.add('hidden');
+  $('famName').focus();
+}
+function famClose() { $('famPanel').classList.add('hidden'); famRender(); }
+function famCats() {
+  $('famCats').innerHTML = CATS.map(c => `<button class="pill ${c.category === FAM_PICK.cat ? 'on' : ''}" onclick="FAM_PICK.cat=${JSON.stringify(c.category)};FAM_PICK.service=null;famCats()">${esc(c.category)}</button>`).join('');
+  const cat = CATS.find(c => c.category === FAM_PICK.cat);
+  $('famSvcs').innerHTML = (cat?.services || []).map(sv => `
+    <button class="opt ${FAM_PICK.service?.slug === sv.slug ? 'on' : ''}" onclick='famPickService(${JSON.stringify(sv.slug)})'>
+      <div class="t"><div class="n">${esc(sv.name)}</div></div><div class="p"><b>${money(sv.price_from_cents)}</b><small>${sv.variations.length > 1 ? 'from ' : ''}${dur(sv.duration_min)}</small></div>
+    </button>`).join('');
+}
+async function famPickService(slug) {
+  FAM_PICK.service = CATS.flatMap(c => c.services).find(x => x.slug === slug);
+  FAM_PICK.variation = FAM_PICK.service.variations.length === 1 ? FAM_PICK.service.variations[0] : null;
+  famCats();
+  const multi = FAM_PICK.service.variations.length > 1;
+  $('famVar').classList.toggle('hidden', !multi);
+  if (multi) $('famVarList').innerHTML = FAM_PICK.service.variations.map(v => `<button class="opt ${FAM_PICK.variation?.id === v.id ? 'on' : ''}" onclick="FAM_PICK.variation=FAM_PICK.service.variations.find(x=>x.id===${v.id});famPickService(${JSON.stringify(slug)})"><div class="t"><div class="n" style="font-size:16px;">${esc(v.name)}</div></div><div class="p"><small>${dur(v.duration_min)}</small></div></button>`).join('');
+  // Who offers it
+  const vid = (FAM_PICK.variation || FAM_PICK.service.variations[0]).id;
+  const r = await fetch(`/api/book/availability?service=${encodeURIComponent(slug)}&variation=${vid}&date=${ymdToday()}`);
+  const j = r.ok ? await r.json() : { stylists: [] };
+  $('famStylist').innerHTML = '<option value="any">First available</option>' + (j.stylists || []).map(st => `<option value="${esc(st.slug)}">${esc(st.name)}</option>`).join('');
+}
+function famCommit() {
+  const name = $('famName').value.trim();
+  if (!name) return $('famErr').textContent = 'Add their first name.';
+  if (!FAM_PICK.service) return $('famErr').textContent = 'Pick their service.';
+  if (!FAM_PICK.variation) return $('famErr').textContent = 'Pick an option.';
+  const sel = $('famStylist');
+  FAM.push({ name, service: FAM_PICK.service, variation: FAM_PICK.variation, stylist: sel.value, stylistName: sel.value === 'any' ? '' : sel.options[sel.selectedIndex].text });
+  famClose();
+  SEL.startAt = null; FAM_OPTION = null;
+  if (SEL.date) pickDate(SEL.date);
+}
+function famRemove(i) { FAM.splice(i, 1); famRender(); SEL.startAt = null; FAM_OPTION = null; if (SEL.date) pickDate(SEL.date); }
+// Everyone in the visit, the holder first. The holder's name comes later (step 4).
+const famPeople = () => [
+  { self: true, name: '', service: SEL.service.slug, variation: SEL.variation.id, stylist: SEL.stylist },
+  ...FAM.map(p => ({ name: p.name, service: p.service.slug, variation: p.variation.id, stylist: p.stylist }))
+];
+async function pickFamilyDate(d) {
+  try {
+    const r = await fetch(`/api/book/family?date=${d}&people=${encodeURIComponent(JSON.stringify(famPeople()))}`);
+    const j = await r.json();
+    if (!r.ok) throw new Error(j.error || 'Could not load times');
+    SEL.famAvail = j;
+    if (!j.options.length) { $('timesWrap').innerHTML = `<div class="empty">No time this day fits everyone within ${j.windowMin} minutes. Try another date, or a different stylist for someone.</div>`; return; }
+    const groups = { Morning: [], Afternoon: [], Evening: [] };
+    for (const o of j.options) {
+      const h = Number(new Date(o.startAt).toLocaleTimeString('en-US', { hour: 'numeric', hour12: false, timeZone: TZ }));
+      (h < 12 ? groups.Morning : h < 17 ? groups.Afternoon : groups.Evening).push(o);
+    }
+    $('s3hint').textContent = `${FAM.length + 1} people · everyone starts within ${j.windowMin} minutes`;
+    $('timesWrap').innerHTML = Object.entries(groups).filter(([, v]) => v.length).map(([k, v]) => `
+      <div class="tgroup"><h4>${k}</h4><div class="times">${v.map((o, i) => { const last = o.people.map(p => new Date(p.startAt)).sort((a, b) => b - a)[0];
+        return `<button class="time" onclick='pickFamilyTime(${JSON.stringify(o.startAt)})'>${fmtTime(o.startAt)}<small>${last.getTime() === new Date(o.startAt).getTime() ? 'together' : 'to ' + fmtTime(last)}</small></button>`; }).join('')}</div></div>`).join('');
+  } catch (e) { $('timesWrap').innerHTML = ''; $('e3').textContent = e.message; }
+}
+function pickFamilyTime(startAt) {
+  FAM_OPTION = SEL.famAvail.options.find(o => o.startAt === startAt); if (!FAM_OPTION) return;
+  SEL.startAt = startAt;
+  const names = ['You', ...FAM.map(p => p.name)];
+  $('summary').innerHTML = FAM_OPTION.people.map((p, i) => `<b>${esc(names[i])}</b>: ${esc(p.service.name)}${p.variation.name && p.variation.name !== 'Regular' ? ' · ' + esc(p.variation.name) : ''} with ${esc(p.stylist.name)}, <b>${fmtTime(p.startAt)}</b>`).join('<br>')
+    + `<br>${fmtDate(startAt)} · one confirmation code for everyone`;
+  $('consultNote').classList.toggle('hidden', !SEL.service.requires_consult && !FAM.some(p => p.service.requires_consult));
+  $('e4').textContent = '';
+  go(4);
+}
+async function bookFamily() {
+  const btn = $('bookBtn'); btn.disabled = true; btn.textContent = 'Booking…'; $('e4').textContent = '';
+  try {
+    const holderName = $('fName').value.trim();
+    const people = FAM_OPTION.people.map((p, i) => ({
+      self: i === 0, name: i === 0 ? holderName : FAM[i - 1].name,
+      service: p.service.slug, variation: p.variation.id, stylist: p.stylist.slug, startAt: p.startAt
+    }));
+    const r = await fetch('/api/book/family', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ holder: { name: holderName, phone: $('fPhone').value, email: $('fEmail').value }, people, notes: $('fNotes').value }) });
+    const j = await r.json();
+    if (!r.ok) {
+      $('e4').textContent = j.error || 'Something went wrong';
+      if (r.status === 409) setTimeout(() => { pickDate(SEL.date); go(3); }, 1500);
+      return;
+    }
+    DONE = j;
+    $('doneCode').textContent = j.code;
+    $('doneSum').innerHTML = j.people.map(p => `<b>${esc(p.name)}</b>: ${esc(p.service.name)}${p.variation?.name && p.variation.name !== 'Regular' ? ' · ' + esc(p.variation.name) : ''} with ${esc(p.stylist.name)}, <b>${fmtTime(p.startsAt)}</b>`).join('<br>')
+      + `<br>${fmtDate(j.people[0].startsAt)}`;
+    go(5);
+  } catch (e) { $('e4').textContent = e.message; }
+  finally { btn.disabled = false; btn.textContent = 'Book appointment'; }
+}
+function renderVisitLookup(v) {
+  const future = new Date(v.startsAt) > new Date();
+  $('mResult').innerHTML = `
+    <div class="sum"><b>Family visit</b> · booked by ${esc(v.holder.name)} (…${esc(v.holder.phoneLast4)}) · Status: <b>${esc(v.status)}</b><br>
+      ${v.people.map(p => `${esc(p.name)}: ${esc(p.service.name)}${p.variation?.name && p.variation.name !== 'Regular' ? ' · ' + esc(p.variation.name) : ''} with ${esc(p.stylist.name)}, ${fmtDate(p.startsAt)} at <b>${fmtTime(p.startsAt)}</b>${p.status !== 'confirmed' ? ` (${esc(p.status)})` : ''}`).join('<br>')}</div>
+    ${v.status === 'confirmed' && future ? `<div class="row"><button class="btn btn-ghost" style="border-color:rgba(160,50,40,.4);color:var(--err);" onclick='cancelAppt(${JSON.stringify(v.code)}, true)'>Cancel the whole visit</button></div>` : ''}`;
+}
+
 function downloadIcs() {
   if (!DONE) return;
   const z = d => new Date(d).toISOString().replace(/[-:]|\.\d{3}/g, '');
-  const ics = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Crown Heirs//Booking//EN', 'BEGIN:VEVENT',
-    `UID:${DONE.code}@crownheirs`, `DTSTAMP:${z(new Date())}`, `DTSTART:${z(DONE.startsAt)}`, `DTEND:${z(DONE.endsAt)}`,
-    `SUMMARY:Crown Heirs — ${DONE.service.name}${DONE.variation?.name ? ' (' + DONE.variation.name + ')' : ''}`, `DESCRIPTION:With ${DONE.stylist.name}. Confirmation ${DONE.code}.`,
-    'END:VEVENT', 'END:VCALENDAR'].join('\r\n');
+  const legs = DONE.people ? DONE.people : [DONE];
+  const events = legs.flatMap(l => ['BEGIN:VEVENT',
+    `UID:${l.code}@crownheirs`, `DTSTAMP:${z(new Date())}`, `DTSTART:${z(l.startsAt)}`, `DTEND:${z(l.endsAt)}`,
+    `SUMMARY:Crown Heirs — ${l.name ? l.name + ': ' : ''}${l.service.name}${l.variation?.name && l.variation.name !== 'Regular' ? ' (' + l.variation.name + ')' : ''}`,
+    `DESCRIPTION:With ${l.stylist.name}. Confirmation ${DONE.code}.`, 'END:VEVENT']);
+  const ics = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Crown Heirs//Booking//EN', ...events, 'END:VCALENDAR'].join('\r\n');
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([ics], { type: 'text/calendar' })); a.download = `crown-heirs-${DONE.code}.ics`; a.click();
 }
@@ -393,14 +539,15 @@ async function lookup() {
   const r = await fetch('/api/book/lookup?code=' + encodeURIComponent(code));
   const j = await r.json();
   if (!r.ok) { $('mResult').innerHTML = ''; $('em').textContent = j.error || 'Not found'; return; }
+  if (j.kind === 'visit') return renderVisitLookup(j);
   const future = new Date(j.startsAt) > new Date();
   $('mResult').innerHTML = `
     <div class="sum"><b>${esc(j.service.name)}</b>${j.variation?.name ? ` · ${esc(j.variation.name)}` : ''} with ${esc(j.stylist.name)}<br>${fmtDate(j.startsAt)} at <b>${fmtTime(j.startsAt)}</b><br>
       Status: <b>${esc(j.status)}</b> · ${esc(j.client.name)} (…${esc(j.client.phoneLast4)})</div>
     ${j.status === 'confirmed' && future ? `<div class="row"><button class="btn btn-ghost" style="border-color:rgba(160,50,40,.4);color:var(--err);" onclick='cancelAppt(${JSON.stringify(j.code)})'>Cancel this appointment</button></div>` : ''}`;
 }
-async function cancelAppt(code) {
-  if (!confirm('Cancel this appointment?')) return;
+async function cancelAppt(code, visit) {
+  if (!confirm(visit ? 'Cancel every appointment in this visit?' : 'Cancel this appointment?')) return;
   const r = await fetch('/api/book/lookup', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code, action: 'cancel' }) });
   const j = await r.json();
   if (!r.ok) { $('em').textContent = j.error; return; }

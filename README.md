@@ -81,6 +81,19 @@ Double-booking is impossible by construction: `appointments` carries an
 exclusion constraint on `(stylist, time range)`, so if two people submit the
 same slot in the same instant, the database accepts one and rejects the other.
 
+**Family bookings.** One person (the holder) books for a household: on the
+date-and-time step, *Add another person to this visit* takes a first name,
+a service and (optionally) a stylist. The engine (`lib/family.js`) finds
+times when everyone can be seen within the salon's family window
+(`family_window_min` setting, default 60 minutes), one chair at a time, and
+books every appointment in one transaction: if any leg is taken, nothing is
+booked. The holder gets one code (`CF-XXXXX`) that looks up or cancels the
+whole visit, one confirmation, one reminder, and one ticket at the till with
+a line per person under the stylist who did the work. Each person is still
+their own appointment row, so each stylist sees their own, and Team Hub gets
+each leg. Dependents live in the holder's household without a phone; a
+dependent who later books alone just gets a phone of their own.
+
 ### One-time setup on Vercel
 
 1. **Postgres** — in the Vercel dashboard: **Storage → Create Database →
@@ -218,5 +231,7 @@ Reminders can also be triggered by hand from `/admin/settings`.
 
 ### Not built yet (natural next steps)
 
-Deposits · per-stylist pricing · reschedule-by-code · the homepage finder
-handing off to `/book` with the service pre-selected.
+Deposits · per-stylist pricing · reschedule-by-code · multi-stylist
+visits (one person, two stylists) · theme days (Family Fridays, Zin
+Saturdays) · family booking from the front desk (the API supports it:
+`family.*` on `/api/book/family`).

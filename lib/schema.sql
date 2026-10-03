@@ -82,6 +82,41 @@ CREATE TABLE IF NOT EXISTS clients (
   created_at timestamptz NOT NULL DEFAULT now()
 );
 
+-- ── Households: one booking holder (phone, email, pays) and the people they
+-- book for. A dependent needs no phone of their own; they are identified by
+-- their household and name. A dependent who later books alone just gets a phone.
+CREATE TABLE IF NOT EXISTS households (
+  id         serial PRIMARY KEY,
+  holder_id  integer NOT NULL REFERENCES clients(id) ON DELETE CASCADE,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+ALTER TABLE clients ALTER COLUMN phone DROP NOT NULL;
+ALTER TABLE clients ADD COLUMN IF NOT EXISTS household_id integer;
+ALTER TABLE clients DROP CONSTRAINT IF EXISTS clients_household_id_fkey;
+ALTER TABLE clients ADD CONSTRAINT clients_household_id_fkey FOREIGN KEY (household_id) REFERENCES households(id) ON DELETE CASCADE;
+ALTER TABLE households DROP CONSTRAINT IF EXISTS households_holder_id_fkey;
+ALTER TABLE households ADD CONSTRAINT households_holder_id_fkey FOREIGN KEY (holder_id) REFERENCES clients(id) ON DELETE CASCADE;
+ALTER TABLE clients ADD COLUMN IF NOT EXISTS relationship text NOT NULL DEFAULT '';   -- "daughter", "son", "partner"…
+ALTER TABLE clients ADD COLUMN IF NOT EXISTS birth_year integer;
+ALTER TABLE clients DROP CONSTRAINT IF EXISTS clients_phone_or_household;
+ALTER TABLE clients ADD CONSTRAINT clients_phone_or_household CHECK (phone IS NOT NULL OR household_id IS NOT NULL);
+CREATE INDEX IF NOT EXISTS clients_household_idx ON clients (household_id);
+
+-- ── Visits: one confirmation code for several appointments booked together
+-- (a family in the same hour, or one person with two stylists). Each leg is
+-- still its own appointment row, so chairs can't double-book and each stylist
+-- sees their own.
+CREATE TABLE IF NOT EXISTS visits (
+  id           serial PRIMARY KEY,
+  code         text UNIQUE NOT NULL,                -- CF-XXXXX
+  holder_id    integer NOT NULL REFERENCES clients(id) ON DELETE CASCADE,
+  household_id integer REFERENCES households(id) ON DELETE SET NULL,
+  kind         text NOT NULL DEFAULT 'family' CHECK (kind IN ('family', 'combo')),
+  notes        text NOT NULL DEFAULT '',
+  source       text NOT NULL DEFAULT 'online',
+  created_at   timestamptz NOT NULL DEFAULT now()
+);
+
 CREATE TABLE IF NOT EXISTS appointments (
   id         serial PRIMARY KEY,
   code       text UNIQUE NOT NULL,   -- confirmation code the client keeps, e.g. CH-7K3M9
@@ -113,6 +148,12 @@ ALTER TABLE appointments ADD COLUMN IF NOT EXISTS reminder_sent_at timestamptz;
 -- Whether Team Hub has this appointment (see lib/teamhub.js).
 ALTER TABLE appointments ADD COLUMN IF NOT EXISTS hub_synced_at timestamptz;
 ALTER TABLE appointments ADD COLUMN IF NOT EXISTS hub_error text;
+ALTER TABLE visits DROP CONSTRAINT IF EXISTS visits_holder_id_fkey;
+ALTER TABLE visits ADD CONSTRAINT visits_holder_id_fkey FOREIGN KEY (holder_id) REFERENCES clients(id) ON DELETE CASCADE;
+ALTER TABLE visits DROP CONSTRAINT IF EXISTS visits_household_id_fkey;
+ALTER TABLE visits ADD CONSTRAINT visits_household_id_fkey FOREIGN KEY (household_id) REFERENCES households(id) ON DELETE SET NULL;
+ALTER TABLE appointments ADD COLUMN IF NOT EXISTS visit_id integer REFERENCES visits(id);
+CREATE INDEX IF NOT EXISTS appointments_visit_idx ON appointments (visit_id);
 CREATE INDEX IF NOT EXISTS appointments_stylist_time_idx ON appointments (stylist_id, starts_at);
 CREATE INDEX IF NOT EXISTS appointments_client_idx ON appointments (client_id);
 
@@ -156,6 +197,8 @@ CREATE TABLE IF NOT EXISTS tickets (
 );
 CREATE INDEX IF NOT EXISTS tickets_paid_idx ON tickets (paid_at);
 CREATE INDEX IF NOT EXISTS tickets_appt_idx ON tickets (appointment_id);
+ALTER TABLE tickets ADD COLUMN IF NOT EXISTS visit_id integer REFERENCES visits(id);
+CREATE INDEX IF NOT EXISTS tickets_visit_idx ON tickets (visit_id);
 
 CREATE TABLE IF NOT EXISTS ticket_lines (
   id              serial PRIMARY KEY,
@@ -206,5 +249,6 @@ INSERT INTO settings (key, value) VALUES
   ('lead_min',       '120'),   -- earliest booking is 2h from now
   ('max_days_ahead', '60'),
   ('step_min',       '15'),
-  ('tax_rate_bps',   '0')     -- retail sales tax, basis points (860 = 8.6%); services untaxed
+  ('tax_rate_bps',   '0'),    -- retail sales tax, basis points (860 = 8.6%); services untaxed
+  ('family_window_min', '60') -- a family's appointments all start within this many minutes
 ON CONFLICT (key) DO NOTHING;
