@@ -22,6 +22,8 @@ if (!url) {
   const { addDays, todayIn, weekdayOf } = require('../lib/tz');
   const familyApi = require('../api/book/family');
   const lookupApi = require('../api/book/lookup');
+  const staffApi = require('../api/book/staff');
+  const ADMIN = { 'x-admin-key': 'test-admin-key' };
 
   const req = (method, { query = {}, body, headers = {} } = {}) => ({ method, query, body, headers });
   const res = () => ({ statusCode: 200, headers: {}, body: undefined, setHeader(k, v) { this.headers[k] = v; }, status(c) { this.statusCode = c; return this; }, json(o) { this.body = o; return this; } });
@@ -170,6 +172,25 @@ if (!url) {
     const x = await call(lookupApi, req('POST', { body: { code: c.body.code, action: 'cancel' } }));
     assert.equal(x.statusCode, 200); assert.equal(x.body.status, 'cancelled');
     assert.equal((await call(familyApi, req('GET', { query: { date, people: 'nope' } }))).statusCode, 400);
+  });
+
+  test('front desk: books a visit for today with no lead time and no policy tick; the legs read Phone', async () => {
+    const date = todayIn('America/Phoenix');
+    // The desk route carries staff:true, so the lead time is 0 and the policy box is not required.
+    const g = await call(staffApi, req('GET', { headers: ADMIN, query: { action: 'visit.availability', date: addDays(nextTuesday(), 4), mode: 'sameday', people: JSON.stringify(people()) } }));
+    assert.equal(g.statusCode, 200, JSON.stringify(g.body)); assert.ok(g.body.options.length);
+    const so = await call(staffApi, req('GET', { headers: ADMIN, query: { action: 'visit.soonest', mode: 'together', people: JSON.stringify(people()) } }));
+    assert.equal(so.statusCode, 200); assert.ok(so.body.date);
+    const o = g.body.options[0];
+    const ppl = fromOption(o);
+    const c = await call(staffApi, req('POST', { headers: ADMIN, body: { action: 'visit.book', holder: HOLDER, people: ppl, mode: 'sameday', notes: 'by phone' } }));
+    assert.equal(c.statusCode, 201, JSON.stringify(c.body)); assert.match(c.body.code, /^CF-/); assert.equal(c.body.source, 'staff');
+    const { rows } = await db.query(`SELECT policy_ack, source FROM appointments WHERE visit_id = (SELECT id FROM visits WHERE code = $1)`, [c.body.code]);
+    assert.equal(rows.length, 2);
+    assert.ok(rows.every(r => r.policy_ack === true && r.source === 'staff'), 'desk bookings count as acknowledged and read Phone');
+    assert.equal((await call(staffApi, req('GET', { query: { action: 'visit.availability', date, people: '[]' } }))).statusCode, 401, 'needs the admin key');
+    assert.equal((await call(staffApi, req('GET', { headers: ADMIN, query: { action: 'visit.availability', date, people: 'nope' } }))).statusCode, 400);
+    await F.cancel(c.body.code);
   });
 
   test('stack: one person, loc color then retwist, back to back, only on qualified stylists', async () => {
