@@ -47,7 +47,19 @@ table { width:100%; border-collapse:collapse; font-size:14px; margin-top:6px; } 
 
   <div class="card">
     <h2>Till</h2>
-    <div class="hint">Tickets are rung at the front desk (Book tab → Checkout, or a walk-in ticket). Every line records who delivered it; that is what Team Hub pays on. In this phase the card itself is taken on the Square terminal and the ticket records it; capturing the card from here is the next phase.</div>
+    <div class="hint">Tickets are rung at the front desk (Book tab → Checkout, or a walk-in ticket). Every line records who delivered it; that is what Team Hub pays on. With a Square Terminal paired below, the desk sends what is due to the Terminal and the ticket is paid when the card clears; otherwise the card is taken on the Terminal as before and the ticket records it by hand.</div>
+    <h2 style="font-size:20px;margin-top:18px;">Square Terminal</h2>
+    <div class="status" id="termStatus">Checking…</div>
+    <div id="termPairBox" class="hidden" style="margin-top:8px;">
+      <div style="display:flex;gap:8px;align-items:end;flex-wrap:wrap;">
+        <div><label>Name for this Terminal</label><input id="termName" placeholder="Front till" style="max-width:220px;"></div>
+        <button class="btn btn-ghost" onclick="termPair()">Pair a Terminal</button>
+        <button class="btn btn-ghost" onclick="termDevices()">Choose one already paired</button>
+        <button class="btn btn-ghost" id="termForget" onclick="termForget()">Forget</button>
+      </div>
+      <div class="status" id="termOut" style="margin-top:10px;"></div>
+      <div id="termList"></div>
+    </div>
     <label>Retail sales tax rate (%) — services are untaxed</label>
     <div style="display:flex;gap:8px;align-items:center;"><input id="taxRate" inputmode="decimal" style="max-width:120px;" placeholder="8.6"><button class="btn btn-ghost" onclick="saveTax()">Save</button><span class="status" id="taxOut" style="margin:0;"></span></div>
     <h2 style="font-size:20px;margin-top:18px;">Retail items</h2>
@@ -183,6 +195,48 @@ async function loadTill() {
         <button class="btn btn-ghost" style="padding:6px 12px;font-size:13px;" onclick="toggleRetail(${i.id}, ${!i.active})">${i.active ? 'Retire' : 'Restore'}</button></div>`).join('') : 'No retail items yet.';
   } catch (e) { $('retailList').textContent = e.message; }
 }
+let TERM_SEQ = 0;
+async function loadTerminal() {
+  try {
+    const t = await get({ action: 'terminal.status' });
+    $('termPairBox').classList.toggle('hidden', !t.configured);
+    $('termForget').classList.toggle('hidden', !t.device);
+    $('termStatus').className = 'status ' + (t.device ? 'ok' : '');
+    $('termStatus').innerHTML = !t.configured ? 'Square is <b>not connected</b>: add <code>SQUARE_ACCESS_TOKEN</code> and <code>SQUARE_LOCATION_ID</code> in Vercel (and <code>SQUARE_ENV=sandbox</code> to test), then redeploy. Until then the desk records card payments by hand.'
+      : t.device ? `Paired with <b>${esc(t.device.name)}</b> (${esc(t.device.id)})${t.env === 'sandbox' ? ' · <b>sandbox</b>: no real charges' : ''}. The desk's <b>Charge on Terminal</b> sends payments here.`
+      : `Square is connected${t.env === 'sandbox' ? ' (sandbox)' : ''} but no Terminal is paired yet.`;
+  } catch (e) { $('termStatus').textContent = e.message; $('termStatus').className = 'status err'; }
+}
+async function termPair() {
+  const seq = ++TERM_SEQ; $('termList').innerHTML = '';
+  try {
+    const d = await post({ action: 'terminal.pair', name: $('termName').value || 'Front till' });
+    $('termOut').innerHTML = `On the Terminal: <b>Sign in → Settings → Terminal API → Enter code</b>, and type <b style="font-size:22px;letter-spacing:.2em;">${esc(d.code)}</b>. Waiting for it to pair… (the code is good for about 5 minutes)`;
+    const started = Date.now();
+    const tick = async () => {
+      if (seq !== TERM_SEQ) return;
+      try {
+        const c = await get({ action: 'terminal.pair.check', id: d.id });
+        if (c.status === 'PAIRED') { $('termOut').innerHTML = `<span style="color:var(--ok)">Paired with <b>${esc(c.device ? c.device.name : c.name)}</b>.</span>`; loadTerminal(); return; }
+        if (c.status === 'EXPIRED' || Date.now() - started > 6 * 60000) { $('termOut').textContent = 'That code expired before the Terminal used it. Press Pair a Terminal for a new one.'; return; }
+      } catch (e) { $('termOut').textContent = e.message; return; }
+      setTimeout(tick, 3000);
+    };
+    setTimeout(tick, 3000);
+  } catch (e) { $('termOut').textContent = e.message; }
+}
+async function termDevices() {
+  TERM_SEQ++; $('termOut').textContent = '';
+  try {
+    const { devices } = await get({ action: 'terminal.devices' });
+    $('termList').innerHTML = devices.length ? devices.map(d => `<div style="display:flex;gap:10px;align-items:center;padding:4px 0;border-top:1px solid var(--border);">
+        <span style="flex:1;">${esc(d.name)}${d.model ? ` <code>${esc(d.model)}</code>` : ''}${d.status ? ` · ${esc(d.status.toLowerCase())}` : ''}</span>
+        <button class="btn btn-ghost" style="padding:6px 12px;font-size:13px;" onclick="termUse('${esc(d.id)}','${esc(d.name)}')">Use this one</button></div>`).join('')
+      : '<div class="status">No Terminals are paired to this Square account yet. Press Pair a Terminal.</div>';
+  } catch (e) { $('termOut').textContent = e.message; }
+}
+async function termUse(deviceId, name) { try { await post({ action: 'terminal.use', deviceId, name }); $('termList').innerHTML = ''; loadTerminal(); } catch (e) { $('termOut').textContent = e.message; } }
+async function termForget() { if (!confirm('Forget this Terminal? The desk goes back to recording card payments by hand until one is paired.')) return; try { await post({ action: 'terminal.forget' }); $('termOut').textContent = ''; loadTerminal(); } catch (e) { $('termOut').textContent = e.message; } }
 async function saveTax() { try { const j = await post({ action: 'settings.save', tax_rate_percent: $('taxRate').value }); $('taxOut').textContent = `Saved: ${(j.tax_rate_bps / 100).toFixed(2)}%`; } catch (e) { $('taxOut').textContent = e.message; } }
 async function addRetail() { try { await post({ action: 'retail.save', name: $('rName').value, price_cents: $('rPrice').value, sku: $('rSku').value }); $('rName').value = $('rPrice').value = $('rSku').value = ''; loadTill(); } catch (e) { alert(e.message); } }
 async function toggleRetail(id, active) {
@@ -279,7 +333,7 @@ async function runReminders() {
   const j = await r.json().catch(() => ({}));
   $('remStatus').textContent = r.ok ? `Sent ${j.count} reminder(s).` : (j.error || 'Failed');
 }
-AdminShell.requireAuth().then(k => { KEY = k; $("app").classList.remove("hidden"); modeStatus(); bookingStatus(); hubStatus(); loadTill(); loadTokens(); loadThemes(); loadPolicy(); });
+AdminShell.requireAuth().then(k => { KEY = k; $("app").classList.remove("hidden"); modeStatus(); bookingStatus(); hubStatus(); loadTill(); loadTerminal(); loadTokens(); loadThemes(); loadPolicy(); });
 </script>
 </body>
 </html>

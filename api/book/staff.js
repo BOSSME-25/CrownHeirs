@@ -16,6 +16,9 @@
 //   GET  ?action=visit.availability&date=&people=<json>&mode=   family or stacked visit, no lead time
 //   GET  ?action=visit.soonest&people=<json>&mode=[&from=]
 //   POST { action: 'visit.book', holder, people, mode, notes }   (source=staff; no policy tick, theme gate advisory)
+//   GET  ?action=terminal.status | terminal.devices | terminal.pair.check&id=   Square Terminal pairing
+//   POST { action: 'terminal.pair', name } / { action: 'terminal.use', deviceId, name } / { action: 'terminal.forget' }
+//   POST { action: 'ticket.terminal.start', code } / { action: 'ticket.terminal.cancel', code }; GET ?action=ticket.terminal.status&code=
 const staff = require('../../lib/staff');
 const family = require('../../lib/family');
 const { BookingError } = require('../../lib/booking');
@@ -25,6 +28,8 @@ const tokens = require('../../lib/api-tokens');
 const { availability, createAppointment } = require('../../lib/booking');
 const { query, getSettings } = require('../../lib/db');
 const { fail, noStore, isAdmin } = require('./_shared');
+const square = require('../../lib/square');
+const putSetting = (k, v) => query(`INSERT INTO settings (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value`, [k, String(v)]);
 
 module.exports = async (req, res) => {
   if (!isAdmin(req)) return res.status(401).json({ error: 'Not authorized' });
@@ -43,6 +48,14 @@ module.exports = async (req, res) => {
         case 'retail.list':  return res.status(200).json({ items: await tickets.listRetail(), tax_rate_bps: Number((await getSettings()).tax_rate_bps) || 0 });
         case 'policy':       { const st = await getSettings(); return res.status(200).json({ deposit_percent: Number(st.deposit_percent) || 0, deposit_min_cents: Number(st.deposit_min_cents) || 0, cancel_window_hours: Number(st.cancel_window_hours) || 0, late_grace_min: Number(st.late_grace_min) || 0, policy_text: st.policy_text || '', square: require('../../lib/square').configured() }); }
         case 'tokens.list':  return res.status(200).json({ tokens: await tokens.list(), scopes: tokens.SCOPES });
+        case 'terminal.status': return res.status(200).json({ configured: square.configured(), env: process.env.SQUARE_ENV === 'sandbox' ? 'sandbox' : 'production', device: await tickets.terminalDevice() });
+        case 'terminal.devices': { if (!square.configured()) return res.status(400).json({ error: 'Square is not connected' }); return res.status(200).json({ devices: await square.listDevices() }); }
+        case 'terminal.pair.check': {
+          const d = await square.getDeviceCode(q.id);
+          if (d.status === 'PAIRED' && d.deviceId) { await putSetting('square_device_id', d.deviceId); await putSetting('square_device_name', d.name || 'Square Terminal'); }
+          return res.status(200).json({ ...d, device: await tickets.terminalDevice() });
+        }
+        case 'ticket.terminal.status': return res.status(200).json(await tickets.terminalStatus(q.code));
         case 'availability': return res.status(200).json(await availability({
           serviceSlug: q.service, variationId: q.variation || null, date: q.date, stylistSlug: q.stylist || null, staff: true
         }));
@@ -81,6 +94,18 @@ module.exports = async (req, res) => {
         case 'ticket.line.update': return res.status(200).json(await tickets.updateLine(b.code, b.lineId, b.patch || {}));
         case 'ticket.line.remove': return res.status(200).json(await tickets.removeLine(b.code, b.lineId));
         case 'ticket.pay':     return res.status(200).json(await tickets.pay(b.code, b));
+        case 'ticket.terminal.start':  return res.status(200).json(await tickets.terminalStart(b.code, { tipping: b.tipping !== false }));
+        case 'ticket.terminal.cancel': return res.status(200).json(await tickets.terminalCancel(b.code));
+        case 'terminal.pair': {
+          if (!square.configured()) return res.status(400).json({ error: 'Square is not connected: add SQUARE_ACCESS_TOKEN and SQUARE_LOCATION_ID in Vercel' });
+          return res.status(201).json(await square.createDeviceCode({ name: b.name || 'Crown Heirs till' }));
+        }
+        case 'terminal.use': {
+          if (!b.deviceId) return res.status(400).json({ error: 'deviceId required' });
+          await putSetting('square_device_id', String(b.deviceId)); await putSetting('square_device_name', String(b.name || 'Square Terminal').slice(0, 80));
+          return res.status(200).json({ device: await tickets.terminalDevice() });
+        }
+        case 'terminal.forget': { await putSetting('square_device_id', ''); await putSetting('square_device_name', ''); return res.status(200).json({ device: null }); }
         case 'ticket.void':    return res.status(200).json(await tickets.voidTicket(b.code, b.reason));
         case 'ticket.refund':  return res.status(200).json(await tickets.refund(b.code, b));
         case 'retail.save':    return res.status(200).json(await tickets.saveRetail(b));
