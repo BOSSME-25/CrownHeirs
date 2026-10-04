@@ -123,6 +123,13 @@ header.top p { color: var(--ink-dim); margin-top: 6px; }
   </div>
 
   <div class="card">
+    <h2>Notes from clients</h2>
+    <div class="hint">Reviews shown on the home page, one at a time. Paste the words as the client wrote them; stars are optional.</div>
+    <div id="reviewList"></div>
+    <button class="btn btn-ghost btn-sm" style="margin-top:12px;" onclick="addReview()">＋ Add a note</button>
+  </div>
+
+  <div class="card">
     <h2>Products</h2>
     <div class="hint">What you sell at the front. Price and description are optional.</div>
     <div id="prodList"></div>
@@ -179,7 +186,7 @@ async function enter() {
   $('savebar').style.display = 'flex';
   const r = await fetch('/api/content', { cache: 'no-store' });
   C = await r.json();
-  C.gallery ??= []; C.memberships ??= []; C.products ??= []; C.infoSlides ??= [];
+  C.gallery ??= []; C.memberships ??= []; C.products ??= []; C.infoSlides ??= []; C.reviews ??= [];
   C.settings ??= {};
   $('secs').value = C.settings.secondsPerSlide || 9;
   $('igHandle').value = C.settings.instagramHandle ?? 'crownheirs';
@@ -188,7 +195,7 @@ async function enter() {
   renderAll();
 }
 
-function renderAll() { renderPhotos(); renderMembers(); renderProds(); renderInfos(); }
+function renderAll() { renderPhotos(); renderMembers(); renderReviews(); renderProds(); renderInfos(); }
 
 /* ── Photos ── */
 const isVideo = g => g.type === 'video' || /\.(mp4|webm|mov)(\?|$)/i.test(g.url);
@@ -325,6 +332,24 @@ function renderMembers() {
 }
 function addMember() { C.memberships.push({ name: '', price: '', perks: [] }); renderMembers(); }
 
+/* ── Notes from clients ── */
+function renderReviews() {
+  $('reviewList').innerHTML = C.reviews.map((r, i) => `
+    <div class="item">
+      <label>What they said</label><textarea onchange="C.reviews[${i}].text=this.value">${esc(r.text || '')}</textarea>
+      <label>Name</label><input value="${esc(r.name || '')}" placeholder="e.g. Sofia A." onchange="C.reviews[${i}].name=this.value">
+      <label>Stars (1 to 5, optional)</label><input value="${esc(r.stars || '')}" inputmode="numeric" placeholder="5" onchange="C.reviews[${i}].stars=this.value">
+      <div class="row-end">
+        <div class="move">
+          <button onclick="moveItem(C.reviews,${i},-1,renderReviews)" ${i === 0 ? 'disabled' : ''}>↑</button>
+          <button onclick="moveItem(C.reviews,${i},1,renderReviews)" ${i === C.reviews.length - 1 ? 'disabled' : ''}>↓</button>
+        </div>
+        <button class="btn btn-danger btn-sm" onclick="rmItem(C.reviews,${i},renderReviews)">Remove</button>
+      </div>
+    </div>`).join('');
+}
+function addReview() { C.reviews.push({ text: '', name: '', stars: '5' }); renderReviews(); }
+
 /* ── Products ── */
 function renderProds() {
   $('prodList').innerHTML = C.products.map((p, i) => `
@@ -392,6 +417,7 @@ async function saveAll() {
   // Drop empty rows so the TV never shows blanks
   C.memberships = C.memberships.filter(m => m.name || m.price || (m.perks || []).length);
   C.products    = C.products.filter(p => p.name || p.blurb);
+  C.reviews     = (C.reviews || []).filter(r => r.text);
   C.infoSlides  = C.infoSlides.filter(s => s.title || s.body || s.qrUrl);
   const r = await fetch('/api/content', {
     method: 'POST',
