@@ -117,10 +117,10 @@ table { width:100%; border-collapse:collapse; font-size:14px; margin-top:6px; } 
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
         <div><label>Name</label><input id="thName" placeholder="Family Friday"></div>
         <div><label>Audience</label><select id="thAud"><option value="family">Families and children</option><option value="adults">Adults, child-free</option><option value="everyone">Everyone</option></select></div>
-        <div><label>Repeats</label><select id="thKind" onchange="thKindChange()"><option value="weekly">Every week</option><option value="date">One date</option></select></div>
+        <div><label>When</label><select id="thKind" onchange="thKindChange()"><option value="weekly">Every week, on a weekday</option><option value="date">A single date on the calendar</option></select></div>
         <div id="thWeekdayWrap"><label>Weekday</label><select id="thWeekday"><option value="5">Friday</option><option value="6">Saturday</option><option value="0">Sunday</option><option value="1">Monday</option><option value="2">Tuesday</option><option value="3">Wednesday</option><option value="4">Thursday</option></select></div>
-        <div id="thDateWrap" class="hidden"><label>Date</label><input id="thDate" type="date"></div>
-        <div id="thPrebookWrap" class="hidden"><label>Open for booking this many days early (0 = usual window)</label><input id="thPrebook" type="number" min="0" max="365" value="0"></div>
+        <div id="thDateWrap" class="hidden"><label>Date (one day only)</label><input id="thDate" type="date"></div>
+        <div id="thPrebookWrap" class="hidden"><label>Open this date for booking early, in days (0 = usual window)</label><input id="thPrebook" type="number" min="0" max="365" value="0"></div>
       </div>
       <label>Headline (shown to clients)</label><input id="thHead" placeholder="It's Family Friday">
       <label>What to expect</label><textarea id="thBody" rows="2" placeholder="Expect children to be present and heard. The TV and music are for them."></textarea>
