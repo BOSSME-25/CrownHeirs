@@ -310,6 +310,8 @@ function pickService(slug) {
 // straight on that service — and on the option, if the finder knew it.
 function preselectFromQuery() {
   const q = new URLSearchParams(location.search);
+  const cat = q.get('cat');
+  if (cat && CATS.some(c => c.category === cat)) { SEL.cat = cat; renderCats(); }
   const slug = q.get('service'); if (!slug) return;
   const s = CATS.flatMap(c => c.services).find(x => x.slug === slug); if (!s) return;
   SEL.cat = s.category;

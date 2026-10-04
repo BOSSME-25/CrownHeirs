@@ -10,12 +10,12 @@ The internal employee Team Hub lives in its own **private** repository,
 
 | Path | What it is |
 |---|---|
-| `/` | The "Find Your Service" experience |
+| `/` | The home page: hero from the team shoot, the five ways in (the "Find Your Service" finder), service tiles, About, Team, notes from clients, memberships and products from `/admin/tv`, Visit |
 | `/tv` | **Salon TV display** — full-screen auto-rotating slideshow (photos & videos of work, Instagram-framed posts, a "Follow us" slide, memberships, products, announcements). AirPlay or open this URL on the TV and leave it. |
 | `/book` | **Online booking** for customers. |
 | `/admin` | **The admin site** — one sign-in (`ADMIN_PASSWORD`) for everything below. Home shows today at a glance. |
 | `/admin/desk` | Front desk: today's book, phone bookings, time off. `?tab=team` for the roster. |
-| `/admin/tv` | What plays on the salon TV: photos and short videos (≤100 MB), Instagram-style posts, memberships, products, announcements, timing. |
+| `/admin/tv` | What plays on the salon TV and feeds the home page: photos and short videos (≤100 MB), Instagram-style posts, memberships, products, notes from clients, announcements, timing. |
 | `/admin/settings` | Booking database setup, notification variables, run reminders now. |
 
 The TV re-checks for new content every 3 minutes, so saves in `/admin` show up
