@@ -160,7 +160,8 @@ if (!url) {
     const date = addDays(MONDAY, 1);
     const ppl = [
       { self: true, name: client.name, services: [{ service: 'sleek-ponytail', variation: PONY_V.id, stylist: 'test-dep' }] },
-      { name: 'Kai', services: [{ service: 'loc-retwist', variation: (await B.listServices()).flatMap(c => c.services).find(s => s.slug === 'loc-retwist').variations[0].id, stylist: 'bethany' }] }
+      // Both on this suite's own stylist (sameday seats them one after the other), so no other suite's bookings can clash.
+      { name: 'Kai', services: [{ service: 'loc-retwist', variation: (await B.listServices()).flatMap(c => c.services).find(s => s.slug === 'loc-retwist').variations[0].id, stylist: 'test-dep' }] }
     ];
     const av = await F.availability({ people: ppl, date, mode: 'sameday' });
     assert.ok(av.options.length);

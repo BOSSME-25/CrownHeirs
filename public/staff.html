@@ -238,9 +238,15 @@ h2 { font-family: var(--font-serif); font-weight: 600; font-size: 25px; margin-b
       <div class="row" style="margin-top:8px;"><button class="btn btn-ghost btn-sm" onclick="tAddLine()">＋ Add line</button></div>
     </div>
     <div id="tTotals" class="sum" style="margin-top:12px;"></div>
+    <div id="tTerm" class="hidden" style="margin-top:12px;border:1px solid var(--gold);background:rgba(200,149,42,.1);border-radius:12px;padding:12px 14px;">
+      <div style="font-family:var(--font-serif);font-size:19px;font-weight:600;" id="tTermTitle">Waiting on the Terminal…</div>
+      <div class="hint" id="tTermHint" style="margin:4px 0 8px;"></div>
+      <button class="btn btn-ghost btn-sm" onclick="tTerminalCancel()">Take it back off the Terminal</button>
+    </div>
     <div id="tPay">
+      <div class="hint" id="tPayHint" style="margin-top:10px;"></div>
       <div class="grid2">
-        <div><label>Tender</label><select id="tTender"><option value="card">Card — taken on the Square terminal</option><option value="cash">Cash</option><option value="other">Other</option></select></div>
+        <div><label>Tender</label><select id="tTender"><option value="card">Card — recorded by hand</option><option value="cash">Cash</option><option value="other">Other</option></select></div>
         <div><label>Tip $</label><input id="tTip" inputmode="decimal" value="0"></div>
       </div>
       <label>Reference (Square payment id — optional)</label><input id="tRef" placeholder="e.g. the Square receipt number">
@@ -320,6 +326,7 @@ async function enter() {
     CATS = cat.categories || []; TZ = cat.timeZone || TZ;
     STYLISTS = (await api('GET', { action: 'stylists' })).stylists;
   } catch (e) { $('dayErr').textContent = e.message; }
+  try { TERMINAL = await api('GET', { action: 'terminal.status' }); } catch (e) { TERMINAL = null; }
   DATE = today(); renderDates(); loadDay();
   if (new URLSearchParams(location.search).get('tab') === 'team') showTab('team');
 }
@@ -387,7 +394,8 @@ function apptHtml(a) {
 
 /* ── tickets ── */
 const money = c => (c == null ? '—' : '$' + (c / 100).toFixed(2));
-let TICKET = null, RETAIL = [];
+let TICKET = null, RETAIL = [], TERMINAL = null, TERM_POLL = 0;
+const TERM_LIVE = ['PENDING', 'IN_PROGRESS', 'CANCEL_REQUESTED'];
 async function loadTickets() {
   $('tixTitle').textContent = fmtD(DATE);
   try {
@@ -451,8 +459,29 @@ function renderTicket() {
   $('tTotals').innerHTML = `Subtotal <b class="money">${money(t.subtotal_cents)}</b> · Discount <b class="money">−${money(t.discount_cents)}</b> · Tax <b class="money">${money(t.tax_cents)}</b><br>
     Total <b class="money">${money(t.total_cents)}</b>${t.deposit_cents ? ` · Deposit already paid <b class="money" style="color:var(--ok)">−${money(t.deposit_cents)}</b> · <b>Due today ${money(Math.max(0, t.total_cents - t.deposit_cents))}</b>` : ''}${t.tip_cents ? ` · Tip <b class="money">${money(t.tip_cents)}</b>` : ''}${t.refunded_cents ? ` · Refunded <b class="money" style="color:var(--err)">${money(t.refunded_cents)}</b>` : ''}${unpriced ? `<br><span style="color:var(--err)">${unpriced} line${unpriced === 1 ? '' : 's'} without a price — enter it before paying.</span>` : ''}`;
   $('tErr').textContent = '';
+  const live = openT && t.terminal && TERM_LIVE.includes(t.terminal.status);
+  const paired = TERMINAL && TERMINAL.configured && TERMINAL.device;
+  $('tTerm').classList.toggle('hidden', !live);
+  $('tPay').classList.toggle('hidden', !openT || live);
+  if (live) {
+    const due = t.terminal.amountCents != null ? t.terminal.amountCents : Math.max(0, t.total_cents - t.deposit_cents);
+    $('tTermTitle').textContent = `${money(due)} is on ${paired ? paired.name : 'the Terminal'}`;
+    $('tTermHint').textContent = t.terminal.status === 'IN_PROGRESS' ? 'The client is at the Terminal: card, then tip.' : 'Waiting for the Terminal to pick it up… hand it to the client.';
+    tTerminalWatch();
+  } else { TERM_POLL++; }
+  if (openT && !live) {
+    $('tPayHint').innerHTML = paired ? `<b>Charge on Terminal</b> sends what is due to <b>${esc(paired.name)}</b>; the client taps and adds the tip there, and the ticket is paid when it clears. Or record a payment taken another way below.`
+      : (TERMINAL && TERMINAL.configured ? 'No Square Terminal is paired yet (Settings → Till). Record the payment below.' : '');
+    if (t.terminal && t.terminal.status === 'CANCELED') $('tPayHint').innerHTML += ' <span style="color:var(--warn)">The last Terminal checkout was cancelled.</span>';
+  }
   const acts = [];
-  if (openT) { acts.push(`<button class="btn btn-danger btn-sm" onclick="tVoid()">Void</button>`); acts.push(`<button class="btn btn-terra" onclick="tPay()">Take payment</button>`); }
+  if (openT) {
+    acts.push(`<button class="btn btn-danger btn-sm" onclick="tVoid()">Void</button>`);
+    if (!live) {
+      if (paired) acts.push(`<button class="btn btn-terra" onclick="tTerminalStart()">Charge on Terminal</button>`);
+      acts.push(`<button class="btn ${paired ? 'btn-ghost' : 'btn-terra'}" onclick="tPay()">${paired ? 'Record payment' : 'Take payment'}</button>`);
+    }
+  }
   else if (t.status === 'paid' || t.status === 'partially_refunded') { acts.push(`<button class="btn btn-danger btn-sm" onclick="tRefund()">Refund…</button>`); if (t.status === 'paid') acts.push(`<button class="btn btn-ghost btn-sm" onclick="tVoid()">Void</button>`); }
   $('tActions').innerHTML = acts.join('');
 }
@@ -473,6 +502,30 @@ async function tPay() {
   if (!confirm(`Take ${$('tTender').value} payment for ${TICKET.code}?`)) return;
   await tCall({ action: 'ticket.pay', tender: $('tTender').value, tipCents: $('tTip').value, tenderRef: $('tRef').value });
   if (TICKET.status === 'paid') toast('Paid · ' + TICKET.code);
+}
+/* Square Terminal: push, watch, take back. */
+async function tTerminalStart() {
+  $('tErr').textContent = '';
+  await tCall({ action: 'ticket.terminal.start' });
+}
+function tTerminalWatch() {
+  const seq = ++TERM_POLL, code = TICKET.code;
+  const tick = async () => {
+    if (seq !== TERM_POLL || $('mTicket').classList.contains('hidden')) return;
+    try {
+      const t = await api('GET', { action: 'ticket.terminal.status', code });
+      if (seq !== TERM_POLL) return;
+      if (t.status === 'paid') { TICKET = t; renderTicket(); toast(`Paid on the Terminal · ${t.code}${t.tip_cents ? ' · tip ' + money(t.tip_cents) : ''}`); return; }
+      if (!TERM_LIVE.includes(t.terminal && t.terminal.status)) { TICKET = t; renderTicket(); $('tErr').textContent = t.terminal && t.terminal.status === 'CANCELED' ? 'The Terminal checkout was cancelled' + (t.terminal.cancelReason ? ` (${t.terminal.cancelReason.toLowerCase().replace(/_/g, ' ')})` : '') + '. Try again or record the payment by hand.' : `Terminal checkout ${t.terminal ? t.terminal.status.toLowerCase() : 'ended'}.`; return; }
+      if (t.terminal.status !== (TICKET.terminal && TICKET.terminal.status)) { TICKET = t; renderTicket(); return; }   // renderTicket restarts the watch
+    } catch (e) { $('tTermHint').textContent = e.message; }
+    setTimeout(tick, 2000);
+  };
+  setTimeout(tick, 2000);
+}
+async function tTerminalCancel() {
+  TERM_POLL++;
+  await tCall({ action: 'ticket.terminal.cancel' });
 }
 async function tVoid() { const r = prompt('Void this ticket? Reason (optional):'); if (r === null) return; await tCall({ action: 'ticket.void', reason: r }); }
 async function tRefund() {

@@ -310,6 +310,9 @@ ALTER TABLE visits ADD COLUMN IF NOT EXISTS pay_url text;                       
 ALTER TABLE visits ADD COLUMN IF NOT EXISTS pay_ref text;
 ALTER TABLE appointments ADD COLUMN IF NOT EXISTS pay_url text;
 ALTER TABLE tickets ADD COLUMN IF NOT EXISTS deposit_cents integer NOT NULL DEFAULT 0 CHECK (deposit_cents >= 0);  -- credit applied
+ALTER TABLE tickets ADD COLUMN IF NOT EXISTS terminal_checkout_id text;      -- Square Terminal checkout pushed for this ticket
+ALTER TABLE tickets ADD COLUMN IF NOT EXISTS terminal_status text;           -- PENDING | IN_PROGRESS | COMPLETED | CANCELED | …
+ALTER TABLE tickets ADD COLUMN IF NOT EXISTS terminal_started_at timestamptz;
 
 CREATE TABLE IF NOT EXISTS settings (
   key   text PRIMARY KEY,

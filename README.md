@@ -208,9 +208,20 @@ never inferred; the till operator is kept separately. Gross, discount (with
 reason) and tax are separate amounts per line; commission is paid on gross,
 KPIs use net. A line with no price stays unpriced and **blocks payment**
 rather than becoming $0. Paying a ticket marks its appointment completed;
-refunds are linked to their ticket; voids close it. In this phase the card
-is taken on the Square terminal and the ticket records the tender and
-reference — capturing the card from here is Phase 2.
+refunds are linked to their ticket; voids close it.
+
+**Cards on the Square Terminal (Phase 2).** With `SQUARE_ACCESS_TOKEN` and
+`SQUARE_LOCATION_ID` set, `/admin/settings` → Till pairs a Terminal: *Pair a
+Terminal* shows a code to type on the device (Settings → Terminal API), and
+the device is remembered once it pairs (or pick one already paired to the
+account). The ticket's **Charge on Terminal** then pushes what is due today
+(total less any deposit credit) to the device; the client taps and adds the
+tip on the Terminal's own screen; the desk polls and, when Square reports
+the checkout complete, pays the ticket as *card* with the Square payment id
+and card in the reference and the tip recorded. *Take it back off the
+Terminal* cancels; a checkout left alone times out after ten minutes.
+Without a paired Terminal the card is taken on the Square app as before
+and the ticket records the tender and reference by hand.
 
 Retail items and the retail tax rate live in `/admin/settings`.
 
@@ -280,5 +291,5 @@ Reminders can also be triggered by hand from `/admin/settings`.
 
 ### Not built yet (natural next steps)
 
-Per-stylist pricing · reschedule-by-code · card payments at the till
-through Square Terminal.
+Per-stylist pricing · reschedule-by-code · refunds pushed back to Square
+(today a refund is recorded on the ticket and issued from the Square app).
