@@ -1096,6 +1096,52 @@ footer a:hover { color: var(--ink); }
   .hero-img.on, .hero-inner > *, .hero-scroll span { animation: none; opacity: 1; transform: none; }
   .hero-img { transition: none; } .svc-img img, .member img { transition: none; }
 }
+
+/* ═══════════════════════════════════════════
+   FINDER 2026 — the same skin as the home page
+═══════════════════════════════════════════ */
+.screen:not(#welcome) { background: var(--paper); }
+.progress-bar-wrap { background: #fff; border-bottom: 1px solid var(--border); padding: 14px 32px; }
+.progress-bar-inner { max-width: 560px; }
+.progress-rail { height: 1px; background: var(--border-mid); }
+.progress-fill { background: var(--gold); }
+.progress-labels span { font-size: 0.62rem; letter-spacing: 0.18em; }
+.progress-labels span.act { color: var(--ink); }
+.agent-block { max-width: 760px; margin: 34px auto 6px; }
+.agent-bubble { border-radius: 0 14px 14px 14px; box-shadow: 0 6px 20px rgba(0,0,0,0.05); }
+.agent-bubble p { font-size: 1.12rem; }
+.sec-head { margin: 22px auto 26px; }
+.sec-head h2 { font-size: clamp(1.8rem, 3.4vw, 2.5rem); }
+.container { max-width: 980px; }
+.nav-row { max-width: 980px; padding-bottom: 60px; }
+.grid-2up { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px; }
+.grid-3up { gap: 20px; max-width: 820px; margin: 0 auto; }
+.length-grid { max-width: 820px; gap: 20px; }
+.card, .scard, .mresult, .inspo-card, .msg, .tryon-inner { border-radius: 0; }
+.card, .scard, .mresult { box-shadow: 0 8px 24px rgba(0,0,0,0.06); border-color: transparent; }
+.card:hover, .scard:hover, .mresult:hover { box-shadow: 0 16px 36px rgba(0,0,0,0.1); border-color: transparent; }
+.card.sel { border-color: var(--terra); box-shadow: 0 0 0 2px var(--terra), 0 12px 30px rgba(0,0,0,0.08); }
+.card.sel::after, .inspo-card.sel::after { border-radius: 0; }
+.lcard { padding-bottom: 16px; } .lcard-vis { margin-bottom: 14px; } .lcard.who .lcard-vis { aspect-ratio: 4 / 3; } .lcard.who .lcard-vis img { object-position: center 22%; }
+.card-body h3, .scard-body h3, .mresult-body h3 { font-family: var(--font-serif); font-size: 1.35rem; font-weight: 500; letter-spacing: 0; }
+.card-body p, .scard-body p, .mresult-body p { font-size: 0.88rem; }
+.lcard .card-body h3 { font-size: 1.3rem; }
+.scard-vis, .mresult-vis { aspect-ratio: 4 / 3; }
+.sbadge { border-radius: 0; font-size: 0.6rem; padding: 5px 10px; background: var(--char); }
+.scard-body { padding: 18px 18px 8px; } .scard-meta .price { font-size: 0.95rem; }
+.btn-terra, .btn-outline, .book-now-btn, .pill, .inspo-overlay { border-radius: 0; }
+.btn-terra, .btn-outline { font-size: 0.92rem; padding: 13px 30px; letter-spacing: 0.03em; }
+.btn-terra:hover { transform: none; }
+.book-now-btn { width: calc(100% - 36px); margin: 0 18px 18px; font-size: 0.9rem; padding: 12px; letter-spacing: 0.03em; }
+.pill { font-size: 0.88rem; padding: 10px 18px; }
+.btn-back { font-size: 0.9rem; color: var(--ink-mid); }
+.inspo-card { border-width: 0; box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
+.inspo-card.sel { box-shadow: 0 0 0 3px var(--terra), 0 8px 24px rgba(0,0,0,0.08); }
+.inspo-overlay h3 { font-family: var(--font-serif); font-size: 1.1rem; font-weight: 500; }
+.inspo-section, .grid-goals + .inspo-section { color: var(--ink-dim); font-size: 0.68rem; }
+.mresult-body { padding: 18px; }
+.screen:not(#welcome) .site-footer { margin-top: auto; }
+@media (max-width: 900px) { .screen:not(#welcome) .site-nav { top: 64px; } .progress-bar-wrap { padding: 12px 18px; } }
 </style>
 </head>
 <body>
@@ -1286,11 +1332,14 @@ footer a:hover { color: var(--ink); }
 <div class="screen" id="door2">
   <header class="site-header">
     <a class="site-logo" href="/" onclick="goHome();return false;" aria-label="Crown Heirs Hair Den, home"><img class="logo-mark" src="/images/logo-ch-light.png" alt=""></a>
+    <button class="nav-burger" onclick="toggleNavIn(this)" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
     <nav class="site-nav">
       <a href="/" class="nav-link" onclick="goHome();return false;">Home</a>
-      <a href="#about" class="nav-link nav-about nav-keep" onclick="goSection('about');return false;">About</a>
-      <a href="#visit" class="nav-link nav-keep" onclick="goSection('visit');return false;">Visit</a>
-      <a href="/book" class="nav-cta">Book</a>
+      <a href="#services" class="nav-link" onclick="goSection('services');return false;">Services</a>
+      <a href="#about" class="nav-link nav-about" onclick="goSection('about');return false;">About</a>
+      <a href="#team" class="nav-link" onclick="goSection('team');return false;">Team</a>
+      <a href="#visit" class="nav-link" onclick="goSection('visit');return false;">Visit</a>
+      <a href="/book" class="nav-cta">Book Now</a>
     </nav>
   </header>
   <div class="progress-bar-wrap">
@@ -1312,17 +1361,17 @@ footer a:hover { color: var(--ink); }
     <div class="sec-head"><h2>Who's this for?</h2><p>Pick the one that fits</p></div>
     <div class="container" style="margin-bottom:0">
       <div class="grid-3up">
-        <div class="card" style="padding:20px 16px;text-align:center" onclick="pickGender('women',this)">
-          <span style="font-size:1.8rem;display:block;margin-bottom:10px">👑</span>
-          <div class="card-body" style="padding:0"><h3>For Her</h3><p>Women's services</p></div>
+        <div class="card lcard who" onclick="pickGender('women',this)">
+          <div class="lcard-vis"><img src="/images/length/long.jpg" alt="" loading="lazy"></div>
+          <div class="card-body"><h3>For Her</h3><p>Women's services</p></div>
         </div>
-        <div class="card" style="padding:20px 16px;text-align:center" onclick="pickGender('men',this)">
-          <span style="font-size:1.8rem;display:block;margin-bottom:10px">💈</span>
-          <div class="card-body" style="padding:0"><h3>For Him</h3><p>Men's cuts, beards, braids, locs</p></div>
+        <div class="card lcard who" onclick="pickGender('men',this)">
+          <div class="lcard-vis"><img src="/images/length/men-short.jpg" alt="" loading="lazy"></div>
+          <div class="card-body"><h3>For Him</h3><p>Cuts, beards, braids, locs</p></div>
         </div>
-        <div class="card" style="padding:20px 16px;text-align:center" onclick="pickGender('tiny',this)">
-          <span style="font-size:1.8rem;display:block;margin-bottom:10px">🌱</span>
-          <div class="card-body" style="padding:0"><h3>Tiny Heirs</h3><p>For my child</p></div>
+        <div class="card lcard who" onclick="pickGender('tiny',this)">
+          <div class="lcard-vis"><img src="/images/tiny/child.jpg" alt="" loading="lazy"></div>
+          <div class="card-body"><h3>Tiny Heirs</h3><p>For my child</p></div>
         </div>
       </div>
     </div>
@@ -1675,7 +1724,11 @@ footer a:hover { color: var(--ink); }
     </div>
   </div>
 
-  <footer><p>Crown Heirs Hair Den · <a href="tel:+14804570165">(480) 457-0165</a> (call or text) · <a href="mailto:info@crownheirs.com">info@crownheirs.com</a></p></footer>
+  <footer class="site-footer">
+    <img src="/images/logo-ch-light.png" alt="" class="foot-mark">
+    <p class="foot-name">Crown Heirs Hair Den</p>
+    <p>7625 W. Lower Buckeye Rd., Suite 140, Phoenix, AZ 85043 · <a href="tel:+14804570165">(480) 457-0165</a> (call or text) · <a href="mailto:info@crownheirs.com">info@crownheirs.com</a></p>
+  </footer>
 </div>
 
 <!-- ═══════════════════════════════════════
@@ -1684,11 +1737,14 @@ footer a:hover { color: var(--ink); }
 <div class="screen" id="door3">
   <header class="site-header">
     <a class="site-logo" href="/" onclick="goHome();return false;" aria-label="Crown Heirs Hair Den, home"><img class="logo-mark" src="/images/logo-ch-light.png" alt=""></a>
+    <button class="nav-burger" onclick="toggleNavIn(this)" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
     <nav class="site-nav">
       <a href="/" class="nav-link" onclick="goHome();return false;">Home</a>
-      <a href="#about" class="nav-link nav-about nav-keep" onclick="goSection('about');return false;">About</a>
-      <a href="#visit" class="nav-link nav-keep" onclick="goSection('visit');return false;">Visit</a>
-      <a href="/book" class="nav-cta">Book</a>
+      <a href="#services" class="nav-link" onclick="goSection('services');return false;">Services</a>
+      <a href="#about" class="nav-link nav-about" onclick="goSection('about');return false;">About</a>
+      <a href="#team" class="nav-link" onclick="goSection('team');return false;">Team</a>
+      <a href="#visit" class="nav-link" onclick="goSection('visit');return false;">Visit</a>
+      <a href="/book" class="nav-cta">Book Now</a>
     </nav>
   </header>
   <div class="progress-bar-wrap">
@@ -1886,7 +1942,11 @@ footer a:hover { color: var(--ink); }
     </div>
   </div>
 
-  <footer><p>Crown Heirs Hair Den · <a href="tel:+14804570165">(480) 457-0165</a> (call or text) · <a href="mailto:info@crownheirs.com">info@crownheirs.com</a></p></footer>
+  <footer class="site-footer">
+    <img src="/images/logo-ch-light.png" alt="" class="foot-mark">
+    <p class="foot-name">Crown Heirs Hair Den</p>
+    <p>7625 W. Lower Buckeye Rd., Suite 140, Phoenix, AZ 85043 · <a href="tel:+14804570165">(480) 457-0165</a> (call or text) · <a href="mailto:info@crownheirs.com">info@crownheirs.com</a></p>
+  </footer>
 </div>
 
 <!-- ═══════════════════════════════════════
@@ -1895,11 +1955,14 @@ footer a:hover { color: var(--ink); }
 <div class="screen" id="door4">
   <header class="site-header">
     <a class="site-logo" href="/" onclick="goHome();return false;" aria-label="Crown Heirs Hair Den, home"><img class="logo-mark" src="/images/logo-ch-light.png" alt=""></a>
+    <button class="nav-burger" onclick="toggleNavIn(this)" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
     <nav class="site-nav">
       <a href="/" class="nav-link" onclick="goHome();return false;">Home</a>
-      <a href="#about" class="nav-link nav-about nav-keep" onclick="goSection('about');return false;">About</a>
-      <a href="#visit" class="nav-link nav-keep" onclick="goSection('visit');return false;">Visit</a>
-      <a href="/book" class="nav-cta">Book</a>
+      <a href="#services" class="nav-link" onclick="goSection('services');return false;">Services</a>
+      <a href="#about" class="nav-link nav-about" onclick="goSection('about');return false;">About</a>
+      <a href="#team" class="nav-link" onclick="goSection('team');return false;">Team</a>
+      <a href="#visit" class="nav-link" onclick="goSection('visit');return false;">Visit</a>
+      <a href="/book" class="nav-cta">Book Now</a>
     </nav>
   </header>
   <div class="progress-bar-wrap">
@@ -1986,7 +2049,11 @@ footer a:hover { color: var(--ink); }
     </div>
   </div>
 
-  <footer><p>Crown Heirs Hair Den · <a href="tel:+14804570165">(480) 457-0165</a> (call or text) · <a href="mailto:info@crownheirs.com">info@crownheirs.com</a></p></footer>
+  <footer class="site-footer">
+    <img src="/images/logo-ch-light.png" alt="" class="foot-mark">
+    <p class="foot-name">Crown Heirs Hair Den</p>
+    <p>7625 W. Lower Buckeye Rd., Suite 140, Phoenix, AZ 85043 · <a href="tel:+14804570165">(480) 457-0165</a> (call or text) · <a href="mailto:info@crownheirs.com">info@crownheirs.com</a></p>
+  </footer>
 </div>
 
 <!-- ═══════════════════════════════════════
@@ -1995,11 +2062,14 @@ footer a:hover { color: var(--ink); }
 <div class="screen" id="door5">
   <header class="site-header">
     <a class="site-logo" href="/" onclick="goHome();return false;" aria-label="Crown Heirs Hair Den, home"><img class="logo-mark" src="/images/logo-ch-light.png" alt=""></a>
+    <button class="nav-burger" onclick="toggleNavIn(this)" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
     <nav class="site-nav">
       <a href="/" class="nav-link" onclick="goHome();return false;">Home</a>
-      <a href="#about" class="nav-link nav-about nav-keep" onclick="goSection('about');return false;">About</a>
-      <a href="#visit" class="nav-link nav-keep" onclick="goSection('visit');return false;">Visit</a>
-      <a href="/book" class="nav-cta">Book</a>
+      <a href="#services" class="nav-link" onclick="goSection('services');return false;">Services</a>
+      <a href="#about" class="nav-link nav-about" onclick="goSection('about');return false;">About</a>
+      <a href="#team" class="nav-link" onclick="goSection('team');return false;">Team</a>
+      <a href="#visit" class="nav-link" onclick="goSection('visit');return false;">Visit</a>
+      <a href="/book" class="nav-cta">Book Now</a>
     </nav>
   </header>
 
@@ -2018,7 +2088,11 @@ footer a:hover { color: var(--ink); }
     </div>
   </div>
 
-  <footer><p>Crown Heirs Hair Den · <a href="tel:+14804570165">(480) 457-0165</a> (call or text) · <a href="mailto:info@crownheirs.com">info@crownheirs.com</a></p></footer>
+  <footer class="site-footer">
+    <img src="/images/logo-ch-light.png" alt="" class="foot-mark">
+    <p class="foot-name">Crown Heirs Hair Den</p>
+    <p>7625 W. Lower Buckeye Rd., Suite 140, Phoenix, AZ 85043 · <a href="tel:+14804570165">(480) 457-0165</a> (call or text) · <a href="mailto:info@crownheirs.com">info@crownheirs.com</a></p>
+  </footer>
 </div>
 
 <script src="/finder-engine.js"></script>
@@ -2049,6 +2123,7 @@ window.addEventListener('popstate',e=>{
 history.replaceState({s:'welcome'},'',location.pathname+location.search);
 
 function showScreen(id){
+  document.querySelectorAll('.site-nav.open').forEach(n=>n.classList.remove('open')); document.body.style.overflow='';
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   window.scrollTo(0,0);
@@ -2744,7 +2819,8 @@ const REDUCED=matchMedia('(prefers-reduced-motion: reduce)').matches;
   const io=new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } }),{rootMargin:'0px 0px -8% 0px',threshold:0.08});
   els.forEach(e=>io.observe(e));
 })();
-// Mobile nav.
+// Mobile nav (home, and each finder screen has its own).
+function toggleNavIn(btn){ const nav=btn.parentElement.querySelector('.site-nav'); const open=!nav.classList.contains('open'); nav.classList.toggle('open',open); btn.setAttribute('aria-expanded',String(open)); document.body.style.overflow=open&&innerWidth<=900?'hidden':''; }
 function toggleNav(force){ const nav=document.getElementById('siteNav'), b=document.querySelector('.nav-burger'); const open=force!==undefined?force:!nav.classList.contains('open'); nav.classList.toggle('open',open); b.setAttribute('aria-expanded',String(open)); document.body.style.overflow=open&&innerWidth<=900?'hidden':''; }
 // Services menu: the whole catalog by category, each line straight to booking.
 let MEGA_BUILT=false;

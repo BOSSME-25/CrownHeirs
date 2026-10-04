@@ -105,12 +105,66 @@ h2 { font-family: var(--font-serif); font-weight: 600; font-size: 27px; margin-b
 .time small { display: block; font-size: 11px; color: var(--ink-dim); margin-top: 2px; }
 .time.on small { color: rgba(255,255,255,.85); }
 a.manage { color: var(--terra); font-size: 14px; }
+
+/* ── 2026 skin: the same look as the home page ── */
+:root { --char: #1c1a18; --paper: #f3efe8; }
+body { background: var(--paper); }
+.site-header { background: var(--char); height: 72px; padding: 0 40px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
+.site-logo img { height: 44px; display: block; }
+.site-nav { display: flex; align-items: center; gap: 30px; }
+.site-nav a { font-size: 0.92rem; color: rgba(255,255,255,0.78); text-decoration: none; letter-spacing: 0.02em; }
+.site-nav a:hover { color: #fff; }
+.site-nav .nav-cta { background: var(--gold); color: var(--char); padding: 12px 26px; font-weight: 500; }
+.site-nav .nav-cta:hover { background: #e0aa35; color: var(--char); }
+@media (max-width: 640px) { .site-header { padding: 0 18px; height: 64px; } .site-nav { gap: 16px; } .site-nav a:not(.nav-cta) { display: none; } .site-nav .nav-cta { padding: 10px 18px; } }
+.wrap { max-width: 720px; padding: 30px 18px 70px; }
+header.top { text-align: center; padding: 10px 0 6px; }
+header.top .eyebrow { font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-dim); margin-bottom: 8px; }
+header.top h1 { font-family: var(--font-serif); font-weight: 400; font-size: clamp(2rem, 5vw, 2.8rem); letter-spacing: 0; text-transform: none; margin: 0; }
+.steps { margin: 22px 0 26px; } .steps span { height: 2px; border-radius: 0; }
+.card { border-radius: 0; border-color: transparent; box-shadow: 0 10px 30px rgba(0,0,0,0.06); padding: 26px; }
+h2 { font-weight: 400; font-size: 30px; }
+.hint { font-size: 14.5px; }
+.btn, .pill, .opt, .opt .ph, .day, .time, .sum, .theme, .consult, .fam, input, textarea, select { border-radius: 0; }
+.btn { font-size: 0.92rem; padding: 13px 28px; letter-spacing: 0.03em; }
+.btn-ghost { border-color: var(--ink); color: var(--ink); } .btn-ghost:hover { background: var(--ink); color: #fff; }
+.pill { font-size: 0.86rem; padding: 10px 18px; }
+.opt { background: #fff; border-color: var(--border); box-shadow: 0 4px 14px rgba(0,0,0,0.04); padding: 14px 16px; }
+.opt:hover { border-color: var(--terra); }
+.opt .ph { width: 84px; height: 84px; }
+.opt .n { font-weight: 500; font-size: 22px; }
+.opt .d { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.opt.on .d, .opt:focus .d { -webkit-line-clamp: unset; }
+@media (max-width: 520px) {
+  .opt { flex-wrap: wrap; gap: 10px 12px; }
+  .opt .ph { width: 64px; height: 64px; }
+  .opt .t { flex: 1 1 60%; }
+  .opt .p { width: 100%; text-align: left; display: flex; gap: 10px; align-items: baseline; border-top: 1px solid var(--border); padding-top: 8px; }
+  .opt .p b { display: inline; }
+}
+.day { width: 70px; padding: 12px 0; } .day b { font-family: var(--font-serif); font-size: 22px; }
+.time { padding: 12px 0; }
+.code { font-family: var(--font-serif); font-size: 34px; letter-spacing: 0.12em; }
+.ok-badge { border-radius: 0; }
+.site-footer { background: var(--char); color: rgba(255,255,255,0.7); text-align: center; padding: 48px 24px 36px; font-size: 0.88rem; line-height: 1.8; }
+.site-footer a { color: #fff; text-decoration: none; border-bottom: 1px solid rgba(255,255,255,0.25); }
+.site-footer .foot-mark { height: 52px; margin-bottom: 8px; } .site-footer .foot-name { font-family: var(--font-serif); font-size: 1.4rem; color: #fff; margin-bottom: 6px; }
 </style>
 </head>
 <body>
+<header class="site-header">
+  <a class="site-logo" href="/" aria-label="Crown Heirs Hair Den, home"><img class="logo-mark" src="/images/logo-ch-light.png" alt=""></a>
+  <nav class="site-nav">
+    <a href="/">Home</a>
+    <a href="/#services">Services</a>
+    <a href="/#about">About</a>
+    <a href="/#visit">Visit</a>
+    <a href="/book" class="nav-cta">Book Now</a>
+  </nav>
+</header>
 <div class="wrap">
   <header class="top">
-    <img src="/images/logo-1.png" alt="Crown Heirs">
+    <p class="eyebrow">Crown Heirs Hair Den</p>
     <h1>Book Your Visit</h1>
   </header>
   <div class="steps" id="steps"><span></span><span></span><span></span><span></span></div>
@@ -225,6 +279,11 @@ a.manage { color: var(--terra); font-size: 14px; }
     </div>
   </section>
 </div>
+<footer class="site-footer">
+  <img src="/images/logo-ch-light.png" alt="" class="foot-mark">
+  <p class="foot-name">Crown Heirs Hair Den</p>
+  <p>7625 W. Lower Buckeye Rd., Suite 140, Phoenix, AZ 85043 · <a href="tel:+14804570165">(480) 457-0165</a> (call or text) · <a href="mailto:info@crownheirs.com">info@crownheirs.com</a></p>
+</footer>
 
 <script>
 /* ════════════════════════════════════════════
