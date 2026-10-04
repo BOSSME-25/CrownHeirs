@@ -13,7 +13,11 @@
 //   POST { action: 'hub.resync', from, to }       re-push a date range to Team Hub
 //   POST { action: 'move', code, startAt, stylist?, reason? }  reschedule (client notified)
 //   GET  ?action=themes.list / POST { action: 'theme.save', …theme } / { action: 'theme.remove', id }
+//   GET  ?action=visit.availability&date=&people=<json>&mode=   family or stacked visit, no lead time
+//   GET  ?action=visit.soonest&people=<json>&mode=[&from=]
+//   POST { action: 'visit.book', holder, people, mode, notes }   (source=staff; no policy tick, theme gate advisory)
 const staff = require('../../lib/staff');
+const family = require('../../lib/family');
 const { BookingError } = require('../../lib/booking');
 const themes = require('../../lib/themes');
 const tickets = require('../../lib/tickets');
@@ -42,6 +46,14 @@ module.exports = async (req, res) => {
         case 'availability': return res.status(200).json(await availability({
           serviceSlug: q.service, variationId: q.variation || null, date: q.date, stylistSlug: q.stylist || null, staff: true
         }));
+        case 'visit.availability':
+        case 'visit.soonest': {
+          let people;
+          try { people = JSON.parse(q.people || '[]'); } catch (e) { return res.status(400).json({ error: 'people must be JSON' }); }
+          const mode = q.mode || 'together';
+          if (q.action === 'visit.soonest') return res.status(200).json(await family.soonest({ people, mode, from: q.from || null, staff: true }));
+          return res.status(200).json(await family.availability({ people, date: q.date, mode, staff: true }));
+        }
         default: return res.status(400).json({ error: 'Unknown action' });
       }
     }
@@ -51,6 +63,9 @@ module.exports = async (req, res) => {
         case 'book': return res.status(201).json(await createAppointment({
           serviceSlug: b.service, variationId: b.variation ?? null, stylistSlug: b.stylist || 'any',
           startAt: b.startAt, client: b.client, notes: b.notes, staff: true
+        }));
+        case 'visit.book': return res.status(201).json(await family.create({
+          holder: b.holder, people: b.people, notes: b.notes, mode: b.mode || 'together', themeAck: Boolean(b.themeAck), staff: true
         }));
         case 'status':         return res.status(200).json(await staff.setStatus(b.code, b.status));
         case 'move':           return res.status(200).json(await staff.move(b.code, b));

@@ -187,7 +187,14 @@ TEST_DATABASE_URL=postgres://… npm test    # + integration and API tests again
 **Book** tab: the day's appointments per stylist
 (complete / no-show / cancel / restore), phone or walk-in bookings with no
 lead time, and time blocking (lunch, days off — existing bookings inside the
-window are listed, not moved). **Team** tab: stylists, weekly hours, and
+window are listed, not moved). *New appointment* books one appointment, or
+— under **Family or stacked services** — a whole visit: several people each
+with their services, or one person with services back to back, seated
+either together (first appointments within the family window) or on the
+same day at whatever times fit. *Find times* lists the fits for the chosen
+day; *Soonest day* walks forward to the first day with one. The client
+named below holds the visit and pays; the desk never ticks the policy box,
+and theme days don't block it. **Team** tab: stylists, weekly hours, and
 which services each offers — this is where the placeholder "Bethany" gets
 replaced with the real team. Only active stylists with hours are bookable.
 
@@ -273,6 +280,5 @@ Reminders can also be triggered by hand from `/admin/settings`.
 
 ### Not built yet (natural next steps)
 
-Per-stylist pricing · reschedule-by-code · family and stacked visits
-from the front desk (the API supports it: `/api/book/family`) · card
-payments at the till through Square Terminal.
+Per-stylist pricing · reschedule-by-code · card payments at the till
+through Square Terminal.

@@ -90,6 +90,18 @@ h2 { font-family: var(--font-serif); font-weight: 600; font-size: 25px; margin-b
 .tk { border: 1px solid var(--border); border-left: 4px solid var(--gold); border-radius: 12px; padding: 12px 14px; margin-top: 10px; background: var(--surface-dim); }
 .tk.paid { border-left-color: var(--ok); } .tk.voided { opacity: .6; } .tk.refunded, .tk.partially_refunded { border-left-color: var(--err); }
 .money { font-variant-numeric: tabular-nums; }
+.person { border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px; margin-top: 10px; background: var(--surface-dim); }
+.person .ph { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.person .ph .n { font-family: var(--font-serif); font-size: 18px; font-weight: 600; }
+.person .ph input { padding: 8px 10px; font-size: 14px; }
+.person .leg { display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 6px; margin-top: 6px; align-items: center; }
+.person .leg select { padding: 8px 10px; font-size: 14px; }
+.person .x { background: none; border: none; color: var(--ink-dim); font-size: 18px; padding: 4px 6px; }
+.person .add { font-size: 13px; background: none; border: none; color: var(--terra); margin-top: 6px; padding: 0; }
+.vopt { width: 100%; text-align: left; border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px; margin-top: 8px; background: var(--surface); font-size: 14px; color: var(--ink-mid); line-height: 1.5; }
+.vopt .t { font-family: var(--font-serif); font-size: 18px; font-weight: 600; color: var(--ink); }
+.vopt.on { border-color: var(--terra); box-shadow: 0 0 0 2px var(--terra) inset; }
+@media (max-width: 520px) { .person .leg { grid-template-columns: 1fr 1fr; } }
 </style>
 </head>
 <body>
@@ -151,15 +163,35 @@ h2 { font-family: var(--font-serif); font-weight: 600; font-size: 25px; margin-b
   <div class="modal">
     <h2>New appointment</h2>
     <div class="hint">Phone or walk-in booking. Same rules as online, minus the lead time.</div>
-    <div class="grid2">
-      <div><label>Stylist</label><select id="nStylist" onchange="nTimes()"></select></div>
-      <div><label>Date</label><input id="nDate" type="date" onchange="nTimes()"></div>
+    <div class="pills" style="margin-bottom:4px;">
+      <button class="pill on" id="nKindOne" onclick="nKind('one')">One appointment</button>
+      <button class="pill" id="nKindVisit" onclick="nKind('visit')">Family or stacked services</button>
     </div>
-    <label>Service</label><select id="nService" onchange="nVariations()"></select>
-    <label>Option</label><select id="nVariation" onchange="nTimes()"></select>
-    <label>Time</label><select id="nTime"><option value="">Pick stylist, service and date first</option></select>
     <div class="grid2">
-      <div><label>Client name</label><input id="nName" autocomplete="off"></div>
+      <div><label>Date</label><input id="nDate" type="date" onchange="nDateChange()"></div>
+      <div id="nStylistWrap"><label>Stylist</label><select id="nStylist" onchange="nTimes()"></select></div>
+    </div>
+    <div id="nOne">
+      <label>Service</label><select id="nService" onchange="nVariations()"></select>
+      <label>Option</label><select id="nVariation" onchange="nTimes()"></select>
+      <label>Time</label><select id="nTime"><option value="">Pick stylist, service and date first</option></select>
+    </div>
+    <div id="nVisit" class="hidden">
+      <div class="hint" style="margin-top:8px;">Several services for one person go back to back, in this order. Several people are each seated with a stylist who offers their service. One confirmation code; the client below holds it and pays.</div>
+      <div class="pills">
+        <button class="pill on" id="vModeTogether" onclick="vMode('together')">Everyone in a chair together</button>
+        <button class="pill" id="vModeSameday" onclick="vMode('sameday')">Same day, any times</button>
+      </div>
+      <div id="vPeople"></div>
+      <div class="row" style="margin-top:8px;">
+        <button class="btn btn-ghost btn-sm" onclick="vAddPerson()">＋ Add a person</button>
+        <button class="btn btn-terra btn-sm" onclick="vFind()">Find times</button>
+        <button class="btn btn-ghost btn-sm" onclick="vSoonest()">Soonest day</button>
+      </div>
+      <div id="vOptions"></div>
+    </div>
+    <div class="grid2">
+      <div><label id="nNameLabel">Client name</label><input id="nName" autocomplete="off" oninput="vNameSync()"></div>
       <div><label>Mobile</label><input id="nPhone" type="tel" inputmode="tel"></div>
     </div>
     <label>Email (optional)</label><input id="nEmail" type="email">
@@ -167,7 +199,7 @@ h2 { font-family: var(--font-serif); font-weight: 600; font-size: 25px; margin-b
     <div class="err" id="nErr"></div>
     <div class="row" style="justify-content:space-between;margin-top:12px;">
       <button class="btn btn-ghost" onclick="closeModal('mNew')">Cancel</button>
-      <button class="btn btn-terra" id="nGo" onclick="nBook()">Book it</button>
+      <button class="btn btn-terra" id="nGo" onclick="N_KIND === 'visit' ? vBook() : nBook()">Book it</button>
     </div>
   </div>
 </div>
@@ -497,14 +529,25 @@ function stylistOptions(sel, withAny) {
   const act = STYLISTS.filter(s => s.active);
   sel.innerHTML = (withAny ? '<option value="any">First available</option>' : '') + act.map(s => `<option value="${esc(s.slug)}">${esc(s.name)}</option>`).join('');
 }
+let N_KIND = 'one';
 function openNew() {
   stylistOptions($('nStylist'), true);
   if (STYLIST !== 'all') $('nStylist').value = STYLIST;
   $('nDate').value = DATE;
   $('nService').innerHTML = CATS.map(c => `<optgroup label="${esc(c.category)}">${c.services.map(s => `<option value="${esc(s.slug)}">${esc(s.name)}</option>`).join('')}</optgroup>`).join('');
   ['nName', 'nPhone', 'nEmail', 'nNotes'].forEach(id => $(id).value = ''); $('nErr').textContent = '';
-  nVariations(); openModal('mNew');
+  vReset(); nKind('one'); nVariations(); openModal('mNew');
 }
+function nKind(kind) {
+  N_KIND = kind;
+  $('nKindOne').classList.toggle('on', kind === 'one'); $('nKindVisit').classList.toggle('on', kind === 'visit');
+  $('nOne').classList.toggle('hidden', kind !== 'one'); $('nStylistWrap').classList.toggle('hidden', kind !== 'one');
+  $('nVisit').classList.toggle('hidden', kind !== 'visit');
+  $('nNameLabel').textContent = kind === 'visit' ? 'Client (holds the booking, pays)' : 'Client name';
+  $('nErr').textContent = '';
+  if (kind === 'visit') vRender();
+}
+function nDateChange() { if (N_KIND === 'one') nTimes(); else { V.options = []; V.pick = null; vRenderOptions(); } }
 function nVariations() {
   const s = CATS.flatMap(c => c.services).find(x => x.slug === $('nService').value);
   $('nVariation').innerHTML = (s?.variations || []).map(v => `<option value="${v.id}">${esc(v.name)} · ${dur(v.duration_min)}</option>`).join('');
@@ -527,6 +570,90 @@ async function nBook() {
     const j = await api('POST', null, { action: 'book', service: $('nService').value, variation: Number($('nVariation').value), stylist: $('nStylist').value,
       startAt: $('nTime').value, client: { name: $('nName').value, phone: $('nPhone').value, email: $('nEmail').value }, notes: $('nNotes').value });
     closeModal('mNew'); toast(`Booked · ${j.code}`); DATE = $('nDate').value; renderDates(); loadDay();
+  } catch (e) { $('nErr').textContent = e.message; }
+  finally { $('nGo').disabled = false; }
+}
+
+/* ── family / stacked visit ── */
+// V.people[0] is the client below (self); the rest are booked under them.
+let V = { mode: 'together', people: [], options: [], pick: null, finding: 0 };
+const allServices = () => CATS.flatMap(c => c.services);
+const svcBySlug = slug => allServices().find(s => s.slug === slug);
+const newLeg = () => { const s = allServices()[0]; return { service: s ? s.slug : '', variation: s && s.variations[0] ? s.variations[0].id : null, stylist: 'any' }; };
+function vReset() { V = { mode: 'together', people: [{ self: true, name: '', relationship: '', legs: [newLeg()] }], options: [], pick: null, finding: 0 }; }
+function vMode(mode) { V.mode = mode; V.options = []; V.pick = null; $('vModeTogether').classList.toggle('on', mode === 'together'); $('vModeSameday').classList.toggle('on', mode === 'sameday'); vRenderOptions(); }
+function vAddPerson() { if (V.people.length >= 6) return alert('Up to 6 people per visit'); V.people.push({ self: false, name: '', relationship: '', legs: [newLeg()] }); vTouch(); }
+function vRemovePerson(i) { V.people.splice(i, 1); vTouch(); }
+function vAddLeg(i) { V.people[i].legs.push(newLeg()); vTouch(); }
+function vRemoveLeg(i, k) { V.people[i].legs.splice(k, 1); if (!V.people[i].legs.length && i > 0) V.people.splice(i, 1); if (!V.people[0].legs.length) V.people[0].legs.push(newLeg()); vTouch(); }
+function vSet(i, k, field, value) {
+  const leg = V.people[i].legs[k];
+  leg[field] = field === 'variation' ? Number(value) : value;
+  if (field === 'service') { const s = svcBySlug(value); leg.variation = s && s.variations[0] ? s.variations[0].id : null; leg.stylist = 'any'; }
+  if (field === 'service' || field === 'variation') vTouch(); else { V.options = []; V.pick = null; vRenderOptions(); }
+}
+function vSetPerson(i, field, value) { V.people[i][field] = value; }
+function vNameSync() { if (N_KIND === 'visit') { const n = document.querySelector('#vPeople .n'); if (n) n.textContent = $('nName').value.trim() || 'The client'; } }
+function vTouch() { V.options = []; V.pick = null; vRender(); }
+function vRender() {
+  const act = STYLISTS.filter(s => s.active);
+  $('vPeople').innerHTML = V.people.map((p, i) => `<div class="person">
+    <div class="ph">${p.self ? `<span class="n">${esc($('nName').value.trim() || 'The client')}</span>` : `<input placeholder="First name" value="${esc(p.name)}" oninput="vSetPerson(${i},'name',this.value)"><input placeholder="Relationship (optional)" value="${esc(p.relationship)}" oninput="vSetPerson(${i},'relationship',this.value)" style="max-width:46%"><button class="x" title="Remove" onclick="vRemovePerson(${i})">×</button>`}</div>
+    ${p.legs.map((l, k) => { const s = svcBySlug(l.service); const who = act.filter(st => st.services.includes(l.service));
+      return `<div class="leg">
+        <select onchange="vSet(${i},${k},'service',this.value)">${CATS.map(c => `<optgroup label="${esc(c.category)}">${c.services.map(x => `<option value="${esc(x.slug)}" ${x.slug === l.service ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</optgroup>`).join('')}</select>
+        <select onchange="vSet(${i},${k},'variation',this.value)">${(s?.variations || []).map(v => `<option value="${v.id}" ${v.id === l.variation ? 'selected' : ''}>${esc(v.name)} · ${dur(v.duration_min)}</option>`).join('')}</select>
+        <select onchange="vSet(${i},${k},'stylist',this.value)"><option value="any">First qualified</option>${who.map(st => `<option value="${esc(st.slug)}" ${st.slug === l.stylist ? 'selected' : ''}>${esc(st.name)}</option>`).join('')}</select>
+        <button class="x" title="Remove this service" onclick="vRemoveLeg(${i},${k})">×</button>
+      </div>`; }).join('')}
+    <button class="add" onclick="vAddLeg(${i})">＋ another service for ${p.self ? 'the client' : (esc(p.name) || 'this person')}, right after</button>
+  </div>`).join('');
+  vRenderOptions();
+}
+function vPayload() {
+  return V.people.map(p => ({ self: p.self, name: p.self ? $('nName').value.trim() : p.name.trim(), relationship: p.relationship.trim(),
+    services: p.legs.map(l => ({ service: l.service, variation: l.variation, stylist: l.stylist })) }));
+}
+function vRenderOptions() {
+  const box = $('vOptions');
+  if (V.finding) { box.innerHTML = '<div class="hint" style="margin-top:10px;">Finding times…</div>'; return; }
+  if (!V.options.length) { box.innerHTML = ''; return; }
+  const legs = V.options.length === 1 && V.options[0].date ? `<div class="hint" style="margin-top:10px;">First day that works: <b>${fmtD(V.options[0].date)}</b></div>` : '';
+  box.innerHTML = legs + V.options.map((o, i) => `<button class="vopt ${V.pick === i ? 'on' : ''}" onclick="V.pick=${i};vRenderOptions()">
+    <div class="t">${fmtT(o.startAt)} – ${fmtT(o.endsAt)}</div>
+    ${o.people.map(p => `${esc(p.name || $('nName').value.trim() || 'Client')}: ` + p.legs.map(l => `${esc(l.service.name)} with ${esc(l.stylist.name)} ${fmtT(l.startAt)}–${fmtT(l.endsAt)}`).join(', then ')).join('<br>')}
+  </button>`).join('');
+}
+async function vFind() {
+  $('nErr').textContent = ''; V.options = []; V.pick = null; V.finding = 1; vRenderOptions();
+  try {
+    const j = await api('GET', { action: 'visit.availability', date: $('nDate').value, mode: V.mode, people: JSON.stringify(vPayload()) });
+    V.options = j.options;
+    if (!j.options.length) $('nErr').textContent = V.mode === 'together' ? 'Nothing that day with everyone seated together. Try "Same day, any times", another day, or Soonest day.' : 'Nothing that day. Try another day or Soonest day.';
+  } catch (e) { $('nErr').textContent = e.message; }
+  finally { V.finding = 0; vRenderOptions(); }
+}
+async function vSoonest() {
+  $('nErr').textContent = ''; V.options = []; V.pick = null; V.finding = 1; vRenderOptions();
+  try {
+    const j = await api('GET', { action: 'visit.soonest', from: $('nDate').value, mode: V.mode, people: JSON.stringify(vPayload()) });
+    if (!j.date) { $('nErr').textContent = 'No day in the booking window fits this visit' + (V.mode === 'together' ? ' with everyone seated together. Try "Same day, any times".' : '.'); }
+    else { $('nDate').value = j.date; V.options = [{ ...j.option, date: j.date }]; V.pick = 0; }
+  } catch (e) { $('nErr').textContent = e.message; }
+  finally { V.finding = 0; vRenderOptions(); }
+}
+async function vBook() {
+  $('nErr').textContent = '';
+  const o = V.options[V.pick];
+  if (!o) { $('nErr').textContent = 'Find times and pick one first'; return; }
+  $('nGo').disabled = true;
+  try {
+    const people = vPayload().map((p, i) => ({ ...p, services: p.services.map((sv, k) => ({ ...sv, stylist: o.people[i].legs[k].stylist.slug, startAt: o.people[i].legs[k].startAt })) }));
+    const j = await api('POST', null, { action: 'visit.book', mode: V.mode, people, notes: $('nNotes').value,
+      holder: { name: $('nName').value, phone: $('nPhone').value, email: $('nEmail').value } });
+    closeModal('mNew');
+    toast(`Booked · ${j.code}` + (j.deposit && j.deposit.cents ? ` · deposit ${money(j.deposit.cents)} due` : ''));
+    DATE = $('nDate').value; renderDates(); loadDay();
   } catch (e) { $('nErr').textContent = e.message; }
   finally { $('nGo').disabled = false; }
 }
