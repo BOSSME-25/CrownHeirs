@@ -1091,6 +1091,14 @@ a.work-item { display: block; aspect-ratio: 1 / 1; text-decoration: none; box-sh
 .visit > div { border-radius: 0; }
 .visit-cta { text-align: center; margin: 36px 0 0; }
 
+/* dolls band */
+.dolls-band { margin-top: 80px; background: var(--paper); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 56px 40px; }
+.dolls-inner { max-width: 1000px; margin: 0 auto; display: grid; grid-template-columns: 220px 1fr; gap: 44px; align-items: center; }
+.dolls-art svg { width: 100%; height: auto; display: block; filter: drop-shadow(0 14px 24px rgba(0,0,0,0.12)); }
+.dolls-text h2 { font-family: var(--font-serif); font-weight: 400; font-size: clamp(2rem, 3.6vw, 2.8rem); line-height: 1.08; color: var(--ink); margin-bottom: 14px; }
+.dolls-text p { font-size: 1rem; line-height: 1.7; color: var(--ink-mid); margin-bottom: 18px; max-width: 540px; }
+@media (max-width: 700px) { .dolls-band { padding: 40px 20px; } .dolls-inner { grid-template-columns: 1fr; gap: 20px; text-align: center; } .dolls-art { max-width: 160px; margin: 0 auto; } .dolls-text p { margin-left: auto; margin-right: auto; } }
+
 /* footer */
 .site-footer { background: var(--char); color: rgba(255,255,255,0.7); text-align: center; padding: 56px 24px 40px; margin-top: 80px; font-size: 0.88rem; line-height: 1.8; }
 .site-footer a { color: #fff; text-decoration: none; border-bottom: 1px solid rgba(255,255,255,0.25); } .site-footer a:hover { border-bottom-color: #fff; }
@@ -1171,6 +1179,7 @@ a.work-item { display: block; aspect-ratio: 1 / 1; text-decoration: none; box-sh
       </span>
       <a href="#about" class="nav-link nav-about" onclick="goSection('about');return false;">About</a>
       <a href="#team" class="nav-link" onclick="goSection('team');return false;">Team</a>
+      <a href="/dolls" class="nav-link">Dolls</a>
       <a href="#visit" class="nav-link" onclick="goSection('visit');return false;">Visit</a>
       <a href="/book" class="nav-cta">Book Now</a>
     </nav>
@@ -1314,6 +1323,21 @@ a.work-item { display: block; aspect-ratio: 1 / 1; text-decoration: none; box-sh
     <p class="home-note">Available at the front desk.</p>
   </section>
 
+  <!-- DOLLS -->
+  <section class="dolls-band" id="dolls">
+    <div class="dolls-inner reveal">
+      <div class="dolls-art" aria-hidden="true">
+        <svg viewBox="0 0 200 260"><path d="M58 92 a42 42 0 0 1 84 0 v-4 a42 44 0 0 0 -84 0z" fill="#6b1f3a"/><g stroke="#6b1f3a" stroke-width="7" stroke-linecap="round" fill="none"><path d="M62 84 q-4 60 2 110"/><path d="M74 76 q-2 60 4 118"/><path d="M126 76 q2 60 -4 118"/><path d="M138 84 q4 60 -2 110"/><path d="M88 72 q0 70 2 126"/><path d="M112 72 q0 70 -2 126"/></g><rect x="86" y="126" width="28" height="18" fill="#8c5c3c"/><path d="M62 150 q38 -22 76 0 v70 q-38 10 -76 0z" fill="#c8952a"/><path d="M62 150 q-14 6 -16 46 q6 8 14 2 l6 -36z" fill="#8c5c3c"/><path d="M138 150 q14 6 16 46 q-6 8 -14 2 l-6 -36z" fill="#8c5c3c"/><rect x="76" y="218" width="18" height="30" fill="#8c5c3c"/><rect x="106" y="218" width="18" height="30" fill="#8c5c3c"/><path d="M72 246 h26 v10 h-30z" fill="#1c1a18"/><path d="M102 246 h26 v10 h-30z" fill="#1c1a18"/><circle cx="100" cy="92" r="40" fill="#8c5c3c"/><path d="M58 92 a42 42 0 0 1 84 0 v-4 a42 44 0 0 0 -84 0z" fill="#6b1f3a"/><circle cx="86" cy="96" r="3.2" fill="#1c1a18"/><circle cx="114" cy="96" r="3.2" fill="#1c1a18"/><path d="M90 112 q10 8 20 0" fill="none" stroke="#1c1a18" stroke-width="2.4" stroke-linecap="round"/></svg>
+      </div>
+      <div class="dolls-text">
+        <p class="eyebrow">Crown Heirs Dolls</p>
+        <h2>A doll that looks like them.</h2>
+        <p>Hand-made at the Den. Pick the yarn shade, the hair colour and the style, and tell us the outfit you have in mind. We'll text you a quote.</p>
+        <a class="btn-solid" href="/dolls">Build your doll</a>
+      </div>
+    </div>
+  </section>
+
   <!-- VISIT -->
   <section class="home-sec" id="visit">
     <div class="sec-head reveal"><h2>Visit The Den</h2><p>We can't wait to see you</p></div>
@@ -1348,6 +1372,7 @@ a.work-item { display: block; aspect-ratio: 1 / 1; text-decoration: none; box-sh
       <a href="#services" class="nav-link" onclick="goSection('services');return false;">Services</a>
       <a href="#about" class="nav-link nav-about" onclick="goSection('about');return false;">About</a>
       <a href="#team" class="nav-link" onclick="goSection('team');return false;">Team</a>
+      <a href="/dolls" class="nav-link">Dolls</a>
       <a href="#visit" class="nav-link" onclick="goSection('visit');return false;">Visit</a>
       <a href="/book" class="nav-cta">Book Now</a>
     </nav>
@@ -1753,6 +1778,7 @@ a.work-item { display: block; aspect-ratio: 1 / 1; text-decoration: none; box-sh
       <a href="#services" class="nav-link" onclick="goSection('services');return false;">Services</a>
       <a href="#about" class="nav-link nav-about" onclick="goSection('about');return false;">About</a>
       <a href="#team" class="nav-link" onclick="goSection('team');return false;">Team</a>
+      <a href="/dolls" class="nav-link">Dolls</a>
       <a href="#visit" class="nav-link" onclick="goSection('visit');return false;">Visit</a>
       <a href="/book" class="nav-cta">Book Now</a>
     </nav>
@@ -1972,6 +1998,7 @@ a.work-item { display: block; aspect-ratio: 1 / 1; text-decoration: none; box-sh
       <a href="#services" class="nav-link" onclick="goSection('services');return false;">Services</a>
       <a href="#about" class="nav-link nav-about" onclick="goSection('about');return false;">About</a>
       <a href="#team" class="nav-link" onclick="goSection('team');return false;">Team</a>
+      <a href="/dolls" class="nav-link">Dolls</a>
       <a href="#visit" class="nav-link" onclick="goSection('visit');return false;">Visit</a>
       <a href="/book" class="nav-cta">Book Now</a>
     </nav>
@@ -2079,6 +2106,7 @@ a.work-item { display: block; aspect-ratio: 1 / 1; text-decoration: none; box-sh
       <a href="#services" class="nav-link" onclick="goSection('services');return false;">Services</a>
       <a href="#about" class="nav-link nav-about" onclick="goSection('about');return false;">About</a>
       <a href="#team" class="nav-link" onclick="goSection('team');return false;">Team</a>
+      <a href="/dolls" class="nav-link">Dolls</a>
       <a href="#visit" class="nav-link" onclick="goSection('visit');return false;">Visit</a>
       <a href="/book" class="nav-cta">Book Now</a>
     </nav>

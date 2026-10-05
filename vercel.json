@@ -12,6 +12,7 @@
     { "source": "/admin/desk", "destination": "/staff.html" },
     { "source": "/admin/settings", "destination": "/admin-settings.html" },
     { "source": "/book", "destination": "/book.html" },
+    { "source": "/dolls", "destination": "/dolls.html" },
     { "source": "/staff", "destination": "/staff.html" },
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ],

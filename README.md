@@ -13,6 +13,7 @@ The internal employee Team Hub lives in its own **private** repository,
 | `/` | The home page: hero from the team shoot, the five ways in (the "Find Your Service" finder), service tiles, About, Team, notes from clients, memberships and products from `/admin/tv`, Visit |
 | `/tv` | **Salon TV display** — full-screen auto-rotating slideshow (photos & videos of work, Instagram-framed posts, a "Follow us" slide, memberships, products, announcements). AirPlay or open this URL on the TV and leave it. |
 | `/book` | **Online booking** for customers. |
+| `/dolls` | **Crown Heirs Dolls**: build a doll (yarn shade, hair colour and style, outfit wishes) and send the request; the desk quotes it under its Dolls tab. |
 | `/admin` | **The admin site** — one sign-in (`ADMIN_PASSWORD`) for everything below. Home shows today at a glance. |
 | `/admin/desk` | Front desk: today's book, phone bookings, time off. `?tab=team` for the roster. |
 | `/admin/tv` | What plays on the salon TV and feeds the home page: photos and short videos (≤100 MB), Instagram-style posts, memberships, products, notes from clients, announcements, timing. |
@@ -289,6 +290,23 @@ booking flow works with none of them set.
 | `INSTAGRAM_ACCESS_TOKEN` | Feeds *From the Den* on the home page from the salon's Instagram (see below). |
 
 Reminders can also be triggered by hand from `/admin/settings`.
+
+## Crown Heirs Dolls (`/dolls`)
+
+A client builds their doll on the page, with a live preview: the yarn shade
+(eight skin tones), the hair colour (twelve, or a mix they describe), the
+hair style (locs, box braids, twists, cornrows, afro puffs, curly afro,
+Bantu knots, straight, ponytail, top bun), how many (up to five), outfit
+wishes (top or dress, bottoms, shoes, colours) and notes, then their name
+and number. No payment is taken: the request gets a code (`DL-XXXXX`), the
+client is texted that a quote is coming, and the salon is texted and
+emailed. Outfit wishes are stored as wishes: the page and every message
+say they are considered but can't be guaranteed.
+
+The desk's **Dolls** tab lists requests and moves each along, new → quoted
+(the quote is typed in and texted to the client) → making → ready (the
+client is texted to pick up) → done, or cancelled. The choices live in
+`lib/dolls.js`.
 
 ## From the Den: Instagram
 

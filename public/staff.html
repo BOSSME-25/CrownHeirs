@@ -111,6 +111,7 @@ h2 { font-family: var(--font-serif); font-weight: 600; font-size: 25px; margin-b
   <div class="tabs">
     <button class="tab on" id="tabBook" onclick="showTab('book')">Book</button>
     <button class="tab" id="tabTix" onclick="showTab('tix')">Tickets</button>
+    <button class="tab" id="tabDolls" onclick="showTab('dolls')">Dolls</button>
     <button class="tab" id="tabTeam" onclick="showTab('team')">Team</button>
   </div>
 
@@ -139,6 +140,13 @@ h2 { font-family: var(--font-serif); font-weight: 600; font-size: 25px; margin-b
     </div>
     <div class="hint">Tickets opened on the day shown in the Book tab. Every line names who delivered it — that is what Team Hub pays on.</div>
     <div id="tixList"><div class="empty">Loading…</div></div>
+  </section>
+
+  <!-- ═══ DOLLS ═══ -->
+  <section id="viewDolls" class="hidden">
+    <div class="hint">Doll requests from <a href="/dolls" target="_blank">/dolls</a>. Quote it, then move it along; the client is texted at each step (Quoted sends the quote). Outfit wishes are considered, never promised.</div>
+    <div class="pills" id="dollPills"></div>
+    <div id="dollList"><div class="empty">Loading…</div></div>
   </section>
 
   <!-- ═══ TEAM ═══ -->
@@ -331,10 +339,38 @@ async function enter() {
   if (new URLSearchParams(location.search).get('tab') === 'team') showTab('team');
 }
 function showTab(t) {
-  $('viewBook').classList.toggle('hidden', t !== 'book'); $('viewTeam').classList.toggle('hidden', t !== 'team'); $('viewTix').classList.toggle('hidden', t !== 'tix');
-  $('tabBook').classList.toggle('on', t === 'book'); $('tabTeam').classList.toggle('on', t === 'team'); $('tabTix').classList.toggle('on', t === 'tix');
+  for (const [k, v] of [['book', 'viewBook'], ['tix', 'viewTix'], ['dolls', 'viewDolls'], ['team', 'viewTeam']]) $(v).classList.toggle('hidden', t !== k);
+  for (const [k, v] of [['book', 'tabBook'], ['tix', 'tabTix'], ['dolls', 'tabDolls'], ['team', 'tabTeam']]) $(v).classList.toggle('on', t === k);
   if (t === 'team') renderTeam();
   if (t === 'tix') loadTickets();
+  if (t === 'dolls') loadDolls();
+}
+
+/* ── dolls ── */
+let DOLL_FILTER = 'open', DOLLS = [];
+const DOLL_NEXT = { new: ['quoted', 'cancelled'], quoted: ['making', 'cancelled'], making: ['ready', 'cancelled'], ready: ['done'], done: [], cancelled: ['new'] };
+async function loadDolls() {
+  try { DOLLS = (await api('GET', { action: 'dolls.list' })).dolls; } catch (e) { $('dollList').innerHTML = `<div class="empty">${esc(e.message)}</div>`; return; }
+  const counts = { open: DOLLS.filter(d => !['done', 'cancelled'].includes(d.status)).length, all: DOLLS.length };
+  $('dollPills').innerHTML = [['open', `Open (${counts.open})`], ['new', 'New'], ['quoted', 'Quoted'], ['making', 'Making'], ['ready', 'Ready'], ['all', `All (${counts.all})`]].map(([k, l]) => `<button class="pill ${DOLL_FILTER === k ? 'on' : ''}" onclick="DOLL_FILTER='${k}';loadDolls()">${l}</button>`).join('');
+  const list = DOLLS.filter(d => DOLL_FILTER === 'all' ? true : DOLL_FILTER === 'open' ? !['done', 'cancelled'].includes(d.status) : d.status === DOLL_FILTER);
+  $('dollList').innerHTML = list.length ? list.map(d => {
+    const tel = String(d.client.phone || '').replace(/^1(\d{3})(\d{3})(\d{4})$/, '($1) $2-$3');
+    const o = d.outfit || {}; const wishes = [o.top && 'Top/dress: ' + o.top, o.bottom && 'Bottoms: ' + o.bottom, o.shoes && 'Shoes: ' + o.shoes, o.colors && 'Colours: ' + o.colors].filter(Boolean);
+    const badge = { new: 'staff', quoted: '', making: '', ready: 'ok', done: 'ok', cancelled: 'err' }[d.status];
+    return `<div class="appt ${d.status === 'cancelled' ? 'cancelled' : d.status === 'done' ? 'completed' : ''}">
+      <div class="t">${esc(d.summary)}${d.quantity > 1 ? ` × ${d.quantity}` : ''}<span class="badge ${badge}">${esc(d.status)}</span></div>
+      <div class="m"><b>${esc(d.client.name)}</b> · <a href="tel:+${esc(d.client.phone)}">${esc(tel)}</a>${d.client.email ? ` · ${esc(d.client.email)}` : ''} · <span style="color:var(--ink-dim)">${esc(d.code)} · ${new Date(d.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+        ${d.forWhom ? `<br>For: ${esc(d.forWhom)}` : ''}${wishes.length ? `<br>${wishes.map(esc).join(' · ')}` : '<br><span style="color:var(--ink-dim)">No outfit wishes</span>'}${d.notes ? `<br><i>${esc(d.notes)}</i>` : ''}${d.quote ? `<br>Quote: <b>${esc(d.quote)}</b>` : ''}</div>
+      <div class="acts">${DOLL_NEXT[d.status].map(n => `<button class="btn ${n === 'cancelled' ? 'btn-danger' : 'btn-ghost'} btn-sm" onclick="dollStatus('${d.code}','${n}')">${{ quoted: 'Send quote…', making: 'Started making', ready: 'Ready for pick-up', done: 'Picked up', cancelled: 'Cancel', new: 'Reopen' }[n]}</button>`).join('')}</div>
+    </div>`; }).join('') : '<div class="empty">No doll requests here.</div>';
+}
+async function dollStatus(code, status) {
+  let quote = null;
+  if (status === 'quoted') { quote = prompt('The quote to text the client (price and timeline), e.g. "$45 each, about 2 weeks":'); if (quote === null) return; }
+  if (status === 'cancelled' && !confirm('Cancel this doll request? The client will be told.')) return;
+  try { await api('POST', null, { action: 'doll.status', code, status, quote }); toast(status === 'quoted' ? 'Quote sent' : 'Updated'); loadDolls(); }
+  catch (e) { alert(e.message); }
 }
 
 /* ── day view ── */

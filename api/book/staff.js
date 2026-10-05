@@ -18,9 +18,11 @@
 //   POST { action: 'visit.book', holder, people, mode, notes }   (source=staff; no policy tick, theme gate advisory)
 //   GET  ?action=terminal.status | terminal.devices | terminal.pair.check&id=   Square Terminal pairing
 //   POST { action: 'terminal.pair', name } / { action: 'terminal.use', deviceId, name } / { action: 'terminal.forget' }
+//   GET  ?action=dolls.list[&status=] / POST { action: 'doll.status', code, status, quote?, tell? }   Crown Heirs Dolls
 //   POST { action: 'ticket.terminal.start', code } / { action: 'ticket.terminal.cancel', code }; GET ?action=ticket.terminal.status&code=
 const staff = require('../../lib/staff');
 const family = require('../../lib/family');
+const dolls = require('../../lib/dolls');
 const { BookingError } = require('../../lib/booking');
 const themes = require('../../lib/themes');
 const tickets = require('../../lib/tickets');
@@ -56,6 +58,7 @@ module.exports = async (req, res) => {
           return res.status(200).json({ ...d, device: await tickets.terminalDevice() });
         }
         case 'ticket.terminal.status': return res.status(200).json(await tickets.terminalStatus(q.code));
+        case 'dolls.list':   return res.status(200).json({ dolls: await dolls.list({ status: q.status || null }), statuses: dolls.STATUSES });
         case 'availability': return res.status(200).json(await availability({
           serviceSlug: q.service, variationId: q.variation || null, date: q.date, stylistSlug: q.stylist || null, staff: true
         }));
@@ -96,6 +99,7 @@ module.exports = async (req, res) => {
         case 'ticket.pay':     return res.status(200).json(await tickets.pay(b.code, b));
         case 'ticket.terminal.start':  return res.status(200).json(await tickets.terminalStart(b.code, { tipping: b.tipping !== false }));
         case 'ticket.terminal.cancel': return res.status(200).json(await tickets.terminalCancel(b.code));
+        case 'doll.status':    return res.status(200).json(await dolls.setStatus(b.code, { status: b.status, quote: b.quote, tell: b.tell !== false }));
         case 'terminal.pair': {
           if (!square.configured()) return res.status(400).json({ error: 'Square is not connected: add SQUARE_ACCESS_TOKEN and SQUARE_LOCATION_ID in Vercel' });
           return res.status(201).json(await square.createDeviceCode({ name: b.name || 'Crown Heirs till' }));
