@@ -1210,8 +1210,8 @@ footer a:hover { color: var(--ink); }
       <a class="svc-tile reveal" href="/book?cat=Cuts%20%26%20Styling"><div class="svc-img"><img src="/images/services/silk-press-flat-iron-straightening.jpg" alt="" loading="lazy"><p>Silk press, curl definition, natural styling, sleek ponytails, cuts and trims that keep your ends healthy.</p></div><div class="svc-cap"><h3>Cuts &amp; Styling</h3><span>&rarr;</span></div></a>
       <a class="svc-tile reveal" href="/book?cat=Weaves%20%26%20Extensions"><div class="svc-img"><img src="/images/services/weave-installation.jpg" alt="" loading="lazy"><p>Sew-ins, quick weaves and extensions installed to protect what is underneath.</p></div><div class="svc-cap"><h3>Weaves &amp; Extensions</h3><span>&rarr;</span></div></a>
       <a class="svc-tile reveal" href="/book?cat=Chemical%20%26%20Color"><div class="svc-img"><img src="/images/services/color.jpg" alt="" loading="lazy"><p>Color on loose hair and locs, relaxers, perms and keratin smoothing, with a consultation first when it matters.</p></div><div class="svc-cap"><h3>Color &amp; Chemical</h3><span>&rarr;</span></div></a>
-      <a class="svc-tile reveal" href="#" onclick="openDoor(2);return false;"><div class="svc-img"><img src="/images/tiny/child.jpg" alt="" loading="lazy"><p>Gentle first cuts, wash and style, braids and twists, and loc care for toddlers through teens.</p></div><div class="svc-cap"><h3>Tiny Heirs</h3><span>&rarr;</span></div></a>
-      <a class="svc-tile reveal" href="/book?service=barber-s-corner"><div class="svc-img"><img src="/images/length/men-short.jpg" alt="" loading="lazy"><p>Traditional cuts, fades, edge-ups and beard work.</p></div><div class="svc-cap"><h3>Barber's Corner</h3><span>&rarr;</span></div></a>
+      <a class="svc-tile reveal" href="#" onclick="openDoor(2);return false;"><div class="svc-img"><img src="/images/tiny/heir.jpg" alt="" loading="lazy"><p>Gentle first cuts, wash and style, braids and twists, and loc care for toddlers through teens.</p></div><div class="svc-cap"><h3>Tiny Heirs</h3><span>&rarr;</span></div></a>
+      <a class="svc-tile reveal" href="/book?service=barber-s-corner"><div class="svc-img"><img src="/images/barber/fade.jpg" alt="" loading="lazy"><p>Traditional cuts, fades, edge-ups and beard work.</p></div><div class="svc-cap"><h3>Barber's Corner</h3><span>&rarr;</span></div></a>
       <a class="svc-tile reveal" href="#" onclick="openDoor(5);return false;"><div class="svc-img"><img src="/images/services/lash-extensions-full-sets.jpg" alt="" loading="lazy"><p>Lash sets and fills, full and half face makeup, face and body waxing.</p></div><div class="svc-cap"><h3>Beauty</h3><span>&rarr;</span></div></a>
     </div>
   </section>
@@ -1365,11 +1365,11 @@ footer a:hover { color: var(--ink); }
           <div class="card-body"><h3>For Her</h3><p>Women's services</p></div>
         </div>
         <div class="card lcard who" onclick="pickGender('men',this)">
-          <div class="lcard-vis"><img src="/images/length/men-short.jpg" alt="" loading="lazy"></div>
+          <div class="lcard-vis"><img src="/images/barber/fade.jpg" alt="" loading="lazy"></div>
           <div class="card-body"><h3>For Him</h3><p>Cuts, beards, braids, locs</p></div>
         </div>
         <div class="card lcard who" onclick="pickGender('tiny',this)">
-          <div class="lcard-vis"><img src="/images/tiny/child.jpg" alt="" loading="lazy"></div>
+          <div class="lcard-vis"><img src="/images/tiny/heir.jpg" alt="" loading="lazy"></div>
           <div class="card-body"><h3>Tiny Heirs</h3><p>For my child</p></div>
         </div>
       </div>
@@ -1837,7 +1837,7 @@ footer a:hover { color: var(--ink); }
         <!-- MEN'S STYLES — brief Section 2A -->
         <div class="inspo-section">Men's Services</div>
         <div class="inspo-card" data-category="men-fade" data-priority="CRITICAL" onclick="toggleInspo(this,'men-fade')">
-          <img class="inspo-img" src="/images/length/men-short.jpg" alt="Cut and Fade" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <img class="inspo-img" src="/images/barber/fade.jpg" alt="Cut and Fade" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
           <div class="inspo-ph ph7" style="display:none"><span class="inspo-ph-icon">💈</span></div>
           <div class="inspo-overlay"><h3>Cut &amp; Fade</h3><p>Precision barber work</p></div>
         </div>
@@ -1865,7 +1865,8 @@ footer a:hover { color: var(--ink); }
         <!-- TINY HEIRS — brief Section 2A -->
         <div class="inspo-section">Tiny Heirs</div>
         <div class="inspo-card" data-category="tiny-braids" data-priority="CRITICAL" onclick="toggleInspo(this,'tiny-braids')">
-          <div class="inspo-ph ph2"><span class="inspo-ph-icon">🌱</span></div>
+          <img class="inspo-img" src="/images/tiny/braids.jpg" alt="Tiny Heirs Braids" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <div class="inspo-ph ph2" style="display:none"><span class="inspo-ph-icon">🌱</span></div>
           <div class="inspo-overlay"><h3>Tiny Heirs Braids</h3><p>Gentle protective styles</p></div>
         </div>
         <div class="inspo-card" data-category="tiny-cut" data-priority="HIGH" onclick="toggleInspo(this,'tiny-cut')">
@@ -2170,7 +2171,7 @@ const SVC_PHOTOS=new Set(["back-ii-school-service-menu-limited-time", "barber-s-
 // Cards whose Square photo doesn't show the client they're for (review:
 // "every men's barber card uses one photo", "Tiny Heirs results use adult
 // photos") use the finder's own portraits instead.
-const CARD_PHOTOS={'Barber Cut & Fade':'/images/length/men-short.jpg','Line-up & Beard Sculpt':'/images/length/men-very-short.jpg',
+const CARD_PHOTOS={'Barber Cut & Fade':'/images/barber/fade.jpg','Tiny Heirs Braids & Twists':'/images/tiny/braids.jpg','Line-up & Beard Sculpt':'/images/length/men-very-short.jpg',
   "Men's Natural Styling":'/images/length/men-medium.jpg',"Men's Loc Retwist":'/images/services/loc-styles.jpg',
   'Hot Towel Treatment':'/images/services/luxury-experience-add-ons.jpg',
   'Tiny Heirs Wash & Style':'/images/tiny/girl.jpg','Tiny Heirs First Cut':'/images/tiny/toddler.jpg','Tiny Heirs Cut':'/images/tiny/boy.jpg',
