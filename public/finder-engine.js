@@ -28,7 +28,7 @@
     {"id":"chemical","e":"🧪","img":"color","p":"ph1","l":"Chemical Service","d":"Relaxer, perm, or color on loose hair","gender":["women"]},
     {"id":"shampoo","e":"💧","img":"shampoo-and-blow-dry","p":"ph3","l":"Shampoo & Style","d":"Wash, condition, style, between appointments","gender":["women","men"]},
     {"id":"health","e":"🌱","img":"consultations","p":"ph5","l":"Hair Health","d":"Thinning, breakage, edges, shedding or damage","gender":["women","men"]},
-    {"id":"barber","e":"💈","imgPath":"/images/length/men-short.jpg","p":"ph7","l":"Cut & Fade","d":"Fresh cut, taper, fade, or shape-up","gender":["men"]},
+    {"id":"barber","e":"💈","imgPath":"/images/barber/fade.jpg","p":"ph7","l":"Cut & Fade","d":"Fresh cut, taper, fade, or shape-up","gender":["men"]},
     {"id":"beard","e":"🧔🏾","imgPath":"/images/length/men-very-short.jpg","p":"ph7","l":"Beard & Line-up","d":"Crisp hairline and beard sculpt","gender":["men"]},
     {"id":"braids_m","e":"🌿","img":"natural-hair-braiding","p":"ph2","l":"Braids & Cornrows","d":"Custom cornrows or braids built for you","gender":["men"]}
   ];
