@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Build Your Doll — Crown Heirs Hair Den</title>
+<meta name="description" content="Build your Crown Heirs doll: pick the yarn shade, the hair colour and style, and tell us your outfit wishes. We make it at the Den.">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #ece8e2; --paper: #f3efe8; --surface: #ffffff; --char: #1c1a18;
+  --terra: #a0624a; --terra-hi: #b8714f; --gold: #c8952a; --gold-hi: #e0aa35;
+  --ink: #1a1816; --ink-mid: #4a4540; --ink-dim: #8a837a;
+  --border: rgba(26,24,22,0.12); --border-mid: rgba(26,24,22,0.22); --ok: #3d7a45; --err: #a03228;
+  --font-ui: 'Jost', sans-serif; --font-serif: 'Cormorant Garamond', serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--paper); color: var(--ink); font-family: var(--font-ui); font-weight: 300; font-size: 16px; }
+button { font-family: var(--font-ui); cursor: pointer; }
+input, textarea, select { font-family: var(--font-ui); font-size: 16px; font-weight: 300; color: var(--ink); width: 100%; padding: 13px 14px; border: 1px solid var(--border); background: var(--surface); }
+input:focus, textarea:focus, select:focus { outline: 2px solid var(--terra); outline-offset: -1px; }
+label { display: block; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-dim); margin: 16px 0 6px; }
+
+.site-header { background: var(--char); height: 72px; padding: 0 40px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
+.site-logo img { height: 44px; display: block; }
+.site-nav { display: flex; align-items: center; gap: 30px; }
+.site-nav a { font-size: 0.92rem; color: rgba(255,255,255,0.78); text-decoration: none; letter-spacing: 0.02em; }
+.site-nav a:hover { color: #fff; }
+.site-nav .nav-cta { background: var(--gold); color: var(--char); padding: 12px 26px; font-weight: 500; }
+.site-nav .nav-cta:hover { background: var(--gold-hi); color: var(--char); }
+@media (max-width: 640px) { .site-header { padding: 0 18px; height: 64px; } .site-nav { gap: 16px; } .site-nav a:not(.nav-cta) { display: none; } .site-nav .nav-cta { padding: 10px 18px; } }
+
+.hero { background: var(--char); color: #fff; text-align: center; padding: 56px 24px 50px; }
+.hero .eyebrow { font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.6); margin-bottom: 10px; }
+.hero h1 { font-family: var(--font-serif); font-weight: 400; font-size: clamp(2.2rem, 5vw, 3.4rem); line-height: 1.05; }
+.hero p { max-width: 560px; margin: 14px auto 0; color: rgba(255,255,255,0.8); line-height: 1.6; font-size: 1.02rem; }
+
+.wrap { max-width: 1100px; margin: 0 auto; padding: 36px 24px 80px; display: grid; grid-template-columns: 380px 1fr; gap: 36px; align-items: start; }
+@media (max-width: 900px) { .wrap { grid-template-columns: 1fr; padding: 24px 16px 60px; } }
+.preview { position: sticky; top: 92px; background: var(--surface); box-shadow: 0 10px 30px rgba(0,0,0,0.07); padding: 22px; text-align: center; }
+@media (max-width: 900px) { .preview { position: static; } }
+.preview svg { width: 100%; max-width: 300px; height: auto; display: block; margin: 0 auto; }
+.preview .sum { font-family: var(--font-serif); font-size: 1.35rem; margin-top: 12px; line-height: 1.3; }
+.preview .sub { font-size: 0.85rem; color: var(--ink-dim); margin-top: 4px; }
+.card { background: var(--surface); box-shadow: 0 10px 30px rgba(0,0,0,0.06); padding: 26px; margin-bottom: 18px; }
+.card h2 { font-family: var(--font-serif); font-weight: 400; font-size: 28px; margin-bottom: 4px; }
+.card .hint { color: var(--ink-dim); font-size: 14.5px; margin-bottom: 10px; line-height: 1.5; }
+.step { font-size: 0.68rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--terra); margin-bottom: 4px; }
+.swatches { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 6px; }
+.sw { width: 56px; height: 56px; border: 2px solid transparent; padding: 0; position: relative; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.08); transition: transform 0.15s; }
+.sw:hover { transform: scale(1.06); }
+.sw.on { border-color: var(--ink); box-shadow: 0 0 0 2px #fff inset; }
+.sw span { position: absolute; left: 0; right: 0; bottom: -20px; font-size: 0.62rem; color: var(--ink-dim); letter-spacing: 0.04em; white-space: nowrap; text-align: center; }
+.swatches.labeled { margin-bottom: 28px; gap: 14px 12px; }
+.styles { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 10px; margin-top: 6px; }
+.st { background: var(--paper); border: 1px solid var(--border); padding: 12px 8px 10px; text-align: center; font-size: 0.86rem; color: var(--ink-mid); }
+.st svg { width: 54px; height: 54px; display: block; margin: 0 auto 6px; }
+.st.on { border-color: var(--ink); background: #fff; color: var(--ink); box-shadow: 0 0 0 1px var(--ink); }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 14px; }
+@media (max-width: 520px) { .grid2 { grid-template-columns: 1fr; } }
+.note { background: rgba(200,149,42,0.12); border-left: 3px solid var(--gold); padding: 12px 14px; font-size: 14.5px; line-height: 1.5; margin: 14px 0 4px; }
+.qty { display: inline-flex; align-items: center; border: 1px solid var(--border); background: #fff; }
+.qty button { width: 44px; height: 44px; border: none; background: none; font-size: 1.2rem; color: var(--ink); } .qty b { width: 40px; text-align: center; font-weight: 400; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid var(--terra); background: var(--terra); color: #fff; padding: 14px 30px; font-size: 0.95rem; letter-spacing: 0.03em; text-decoration: none; }
+.btn:hover { background: var(--terra-hi); } .btn:disabled { background: #c8a898; border-color: #c8a898; cursor: default; }
+.btn-ghost { background: transparent; color: var(--ink); border-color: var(--ink); } .btn-ghost:hover { background: var(--ink); color: #fff; }
+.err { color: var(--err); font-size: 14px; margin-top: 10px; min-height: 18px; }
+.hidden { display: none !important; }
+.done { text-align: center; padding: 10px 0 0; }
+.done .code { font-family: var(--font-serif); font-size: 34px; letter-spacing: 0.12em; color: var(--terra); margin: 10px 0; }
+.done p { color: var(--ink-mid); line-height: 1.65; max-width: 520px; margin: 8px auto; }
+.site-footer { background: var(--char); color: rgba(255,255,255,0.7); text-align: center; padding: 48px 24px 36px; font-size: 0.88rem; line-height: 1.8; }
+.site-footer a { color: #fff; text-decoration: none; border-bottom: 1px solid rgba(255,255,255,0.25); }
+.site-footer .foot-mark { height: 52px; margin-bottom: 8px; } .site-footer .foot-name { font-family: var(--font-serif); font-size: 1.4rem; color: #fff; margin-bottom: 6px; }
+</style>
+</head>
+<body>
+<header class="site-header">
+  <a class="site-logo" href="/" aria-label="Crown Heirs Hair Den, home"><img src="/images/logo-ch-light.png" alt=""></a>
+  <nav class="site-nav">
+    <a href="/">Home</a>
+    <a href="/#services">Services</a>
+    <a href="/dolls">Dolls</a>
+    <a href="/#visit">Visit</a>
+    <a href="/book" class="nav-cta">Book Now</a>
+  </nav>
+</header>
+
+<section class="hero">
+  <p class="eyebrow">Crown Heirs Dolls</p>
+  <h1>Build your doll</h1>
+  <p>Hand-made at the Den. Pick the yarn shade, the hair colour and the style, and tell us the outfit you have in mind. We'll text you a quote and a timeline.</p>
+</section>
+
+<div class="wrap">
+  <aside class="preview" aria-live="polite">
+    <svg id="doll" viewBox="0 0 200 260" role="img" aria-label="Your doll"></svg>
+    <div class="sum" id="sum">Pick a shade to begin</div>
+    <div class="sub" id="sub"></div>
+  </aside>
+
+  <div id="form">
+    <section class="card">
+      <div class="step">Step 1</div>
+      <h2>Yarn shade</h2>
+      <div class="hint">The doll's skin. Pick the one that feels right.</div>
+      <div class="swatches labeled" id="shades"></div>
+    </section>
+
+    <section class="card">
+      <div class="step">Step 2</div>
+      <h2>Hair colour</h2>
+      <div class="swatches labeled" id="colors"></div>
+      <div id="mixedWrap" class="hidden"><label>Tell us the mix</label><input id="mixed" placeholder="e.g. burgundy with honey tips"></div>
+    </section>
+
+    <section class="card">
+      <div class="step">Step 3</div>
+      <h2>Hair style</h2>
+      <div class="styles" id="styles"></div>
+    </section>
+
+    <section class="card">
+      <div class="step">Step 4</div>
+      <h2>Outfit wishes</h2>
+      <div class="hint">Colours, a skirt, pants or a dress, the kind of shoes. We'll consider every wish, but outfits depend on what we have, so they can't be guaranteed.</div>
+      <div class="grid2">
+        <div><label>Top or dress</label><input id="oTop" placeholder="e.g. yellow dress"></div>
+        <div><label>Bottoms</label><input id="oBottom" placeholder="e.g. denim skirt"></div>
+        <div><label>Shoes</label><input id="oShoes" placeholder="e.g. white sneakers"></div>
+        <div><label>Colours you love</label><input id="oColors" placeholder="e.g. pink and gold"></div>
+      </div>
+      <label>Anything else? <span style="text-transform:none;letter-spacing:0;">(optional)</span></label>
+      <textarea id="notes" rows="2" placeholder="Glasses, a bow, a name on the shirt…"></textarea>
+      <div class="note">Outfit wishes are considered but can't be guaranteed. The yarn shade, hair colour and style are yours to choose.</div>
+    </section>
+
+    <section class="card">
+      <div class="step">Step 5</div>
+      <h2>Who it's for, and you</h2>
+      <div class="grid2">
+        <div><label>Who's it for? <span style="text-transform:none;letter-spacing:0;">(optional)</span></label><input id="forWhom" placeholder="e.g. my daughter Ava, turning 6"></div>
+        <div><label>How many</label><div class="qty"><button type="button" onclick="qty(-1)" aria-label="Fewer">−</button><b id="qtyN">1</b><button type="button" onclick="qty(1)" aria-label="More">+</button></div></div>
+        <div><label>Your name</label><input id="fName" autocomplete="name" placeholder="First and last name"></div>
+        <div><label>Mobile number</label><input id="fPhone" type="tel" autocomplete="tel" inputmode="tel" placeholder="(602) 555-0100"></div>
+      </div>
+      <label>Email <span style="text-transform:none;letter-spacing:0;">(optional, for your confirmation)</span></label><input id="fEmail" type="email" autocomplete="email" placeholder="you@example.com">
+      <div class="err" id="err"></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;align-items:center;">
+        <button class="btn" id="go" onclick="send()">Send my doll request</button>
+        <span style="color:var(--ink-dim);font-size:14px;">No payment now. We'll text you a quote first.</span>
+      </div>
+    </section>
+  </div>
+
+  <div id="thanks" class="card done hidden">
+    <h2>Your doll is on our list.</h2>
+    <div class="code" id="doneCode"></div>
+    <p id="doneSum"></p>
+    <p>We'll text <b id="donePhone"></b> with a quote and a timeline. Outfit wishes are considered but can't be guaranteed. Pick-up is at the Den.</p>
+    <p><a class="btn btn-ghost" href="/dolls">Build another</a> <a class="btn" href="/" style="margin-left:8px">Back to the Den</a></p>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <img src="/images/logo-ch-light.png" alt="" class="foot-mark">
+  <p class="foot-name">Crown Heirs Hair Den</p>
+  <p>7625 W. Lower Buckeye Rd., Suite 140, Phoenix, AZ 85043 · <a href="tel:+14804570165">(480) 457-0165</a> (call or text) · <a href="mailto:info@crownheirs.com">info@crownheirs.com</a></p>
+</footer>
+
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+let OPT = null;
+const D = { shade: null, hairColor: null, hairStyle: null, quantity: 1 };
+
+/* ── the doll, drawn from the choices ── */
+function hairSvg(style, color, head) {
+  // head: { cx, cy, r }. Returns shapes behind and in front of the head.
+  const { cx, cy, r } = head; const c = color; const sw = 'stroke-width';
+  const strands = (n, len, spread, wobble = 0) => Array.from({ length: n }, (_, i) => {
+    const t = n === 1 ? 0 : (i / (n - 1)) * 2 - 1; const x0 = cx + t * spread, y0 = cy - r * 0.2 + Math.abs(t) * r * 0.5;
+    const x1 = x0 + t * 10 + (i % 2 ? wobble : -wobble);
+    return `<path d="M${x0} ${y0} Q${x0 + t * 6} ${y0 + len / 2} ${x1} ${y0 + len}" fill="none" stroke="${c}" ${sw}="7" stroke-linecap="round"/>`;
+  }).join('');
+  const cap = `<path d="M${cx - r} ${cy} a${r} ${r} 0 0 1 ${2 * r} 0 v-${r * 0.1} a${r} ${r * 1.05} 0 0 0 -${2 * r} 0z" fill="${c}"/>`;
+  switch (style) {
+    case 'locs':        return { back: strands(11, 120, r * 1.05, 2), front: cap };
+    case 'box-braids':  return { back: strands(9, 130, r * 1.0, 0) + strands(8, 125, r * 0.85, 0), front: cap + Array.from({ length: 6 }, (_, i) => `<line x1="${cx - r + 8 + i * (2 * r - 16) / 5}" y1="${cy - r * 0.95}" x2="${cx - r + 8 + i * (2 * r - 16) / 5}" y2="${cy - r * 0.15}" stroke="rgba(255,255,255,0.35)" ${sw}="1.5"/>`).join('') };
+    case 'twists':      return { back: strands(10, 110, r * 1.0, 3), front: cap };
+    case 'cornrows':    return { back: strands(5, 70, r * 0.9, 0), front: cap + Array.from({ length: 5 }, (_, i) => `<path d="M${cx - r * 0.8 + i * r * 0.4} ${cy - r * 0.1} Q${cx - r * 0.8 + i * r * 0.4} ${cy - r * 1.1} ${cx} ${cy - r * 1.05}" fill="none" stroke="rgba(255,255,255,0.35)" ${sw}="1.5"/>`).join('') };
+    case 'afro-puffs':  return { back: `<circle cx="${cx - r * 0.95}" cy="${cy - r * 0.85}" r="${r * 0.62}" fill="${c}"/><circle cx="${cx + r * 0.95}" cy="${cy - r * 0.85}" r="${r * 0.62}" fill="${c}"/>`, front: cap };
+    case 'curly-afro':  return { back: `<circle cx="${cx}" cy="${cy - r * 0.25}" r="${r * 1.55}" fill="${c}"/>` + Array.from({ length: 10 }, (_, i) => { const a = (i / 10) * Math.PI * 2; return `<circle cx="${cx + Math.cos(a) * r * 1.45}" cy="${cy - r * 0.25 + Math.sin(a) * r * 1.45}" r="${r * 0.3}" fill="${c}"/>`; }).join(''), front: '' };
+    case 'bantu-knots': return { back: '', front: cap + [[-0.75, -0.95], [-0.25, -1.15], [0.25, -1.15], [0.75, -0.95]].map(([x, y]) => `<circle cx="${cx + x * r}" cy="${cy + y * r}" r="${r * 0.22}" fill="${c}" stroke="rgba(0,0,0,0.15)"/>`).join('') };
+    case 'straight':    return { back: `<path d="M${cx - r * 1.05} ${cy - r * 0.3} v120 q${r * 1.05} 14 ${2 * r * 1.05} 0 v-120z" fill="${c}"/>`, front: cap };
+    case 'ponytail':    return { back: `<path d="M${cx + r * 0.6} ${cy - r * 0.6} q40 10 30 110 q-18 20 -34 0 q6 -70 -8 -95z" fill="${c}"/>`, front: cap + `<circle cx="${cx + r * 0.75}" cy="${cy - r * 0.55}" r="6" fill="#c8952a"/>` };
+    case 'bun':         return { back: '', front: cap + `<circle cx="${cx}" cy="${cy - r * 1.2}" r="${r * 0.45}" fill="${c}"/>` };
+    default:            return { back: '', front: '' };
+  }
+}
+function draw() {
+  const shade = OPT && OPT.shades.find(s => s.id === D.shade);
+  const hc = OPT && OPT.hairColors.find(c => c.id === D.hairColor);
+  const skin = shade ? shade.hex : '#d9c7b3';
+  const hair = hc ? (hc.id === 'mixed' ? 'url(#mix)' : hc.hex) : '#2a2a2a';
+  const head = { cx: 100, cy: 92, r: 40 };
+  const h = D.hairStyle ? hairSvg(D.hairStyle, hair, head) : { back: '', front: '' };
+  const top = ($('oColors').value || '').toLowerCase();
+  const outfit = /pink/.test(top) ? '#d26a9a' : /blue/.test(top) ? '#2f4f9e' : /yellow|gold/.test(top) ? '#c8952a' : /green/.test(top) ? '#3d7a45' : /purple/.test(top) ? '#6a3fa0' : /red/.test(top) ? '#b2321f' : /white/.test(top) ? '#f3efe8' : '#a0624a';
+  $('doll').innerHTML = `
+    <defs><linearGradient id="mix" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6b1f3a"/><stop offset=".5" stop-color="#c9963e"/><stop offset="1" stop-color="#2f4f9e"/></linearGradient></defs>
+    ${h.back}
+    <rect x="86" y="126" width="28" height="18" fill="${skin}"/>
+    <path d="M62 150 q38 -22 76 0 v70 q-38 10 -76 0z" fill="${outfit}"/>
+    <path d="M62 150 q-14 6 -16 46 q6 8 14 2 l6 -36z" fill="${skin}"/><path d="M138 150 q14 6 16 46 q-6 8 -14 2 l-6 -36z" fill="${skin}"/>
+    <rect x="76" y="218" width="18" height="30" fill="${skin}"/><rect x="106" y="218" width="18" height="30" fill="${skin}"/>
+    <path d="M72 246 h26 v10 h-30z" fill="#1c1a18"/><path d="M102 246 h26 v10 h-30z" fill="#1c1a18"/>
+    <circle cx="${head.cx}" cy="${head.cy}" r="${head.r}" fill="${skin}"/>
+    ${h.front}
+    <circle cx="86" cy="96" r="3.2" fill="#1c1a18"/><circle cx="114" cy="96" r="3.2" fill="#1c1a18"/>
+    <path d="M90 112 q10 8 20 0" fill="none" stroke="#1c1a18" stroke-width="2.4" stroke-linecap="round"/>
+    <circle cx="80" cy="106" r="4" fill="rgba(210,106,154,0.35)"/><circle cx="120" cy="106" r="4" fill="rgba(210,106,154,0.35)"/>`;
+  const hs = OPT && OPT.hairStyles.find(s => s.id === D.hairStyle);
+  $('sum').textContent = shade ? `${shade.name} yarn${hc ? ', ' + hc.name.replace(', tell us', '').toLowerCase() : ''}${hs ? ' ' + hs.name.toLowerCase() : ''}` : 'Pick a shade to begin';
+  $('sub').textContent = D.quantity > 1 ? `${D.quantity} dolls` : (shade && hc && hs ? 'Looking good. Tell us about the outfit below.' : '');
+}
+
+/* ── choices ── */
+function pick(k, v) { D[k] = v; render(); }
+function render() {
+  if (!OPT) return;
+  $('shades').innerHTML = OPT.shades.map(s => `<button type="button" class="sw ${D.shade === s.id ? 'on' : ''}" style="background:${s.hex}" onclick="pick('shade','${s.id}')" aria-label="${esc(s.name)}" aria-pressed="${D.shade === s.id}"><span>${esc(s.name)}</span></button>`).join('');
+  $('colors').innerHTML = OPT.hairColors.map(c => `<button type="button" class="sw ${D.hairColor === c.id ? 'on' : ''}" style="background:${c.hex}" onclick="pick('hairColor','${c.id}')" aria-label="${esc(c.name)}" aria-pressed="${D.hairColor === c.id}"><span>${esc(c.name.replace(', tell us', ''))}</span></button>`).join('');
+  $('mixedWrap').classList.toggle('hidden', D.hairColor !== 'mixed');
+  $('styles').innerHTML = OPT.hairStyles.map(s => { const h = hairSvg(s.id, '#2a2a2a', { cx: 30, cy: 26, r: 14 }); return `<button type="button" class="st ${D.hairStyle === s.id ? 'on' : ''}" onclick="pick('hairStyle','${s.id}')" aria-pressed="${D.hairStyle === s.id}"><svg viewBox="0 0 60 60">${h.back}<circle cx="30" cy="26" r="14" fill="#c4986c"/>${h.front}</svg>${esc(s.name)}</button>`; }).join('');
+  $('qtyN').textContent = D.quantity;
+  draw();
+}
+function qty(n) { D.quantity = Math.max(1, Math.min(OPT ? OPT.maxQuantity : 5, D.quantity + n)); render(); }
+$('oColors').addEventListener('input', draw);
+
+async function send() {
+  $('err').textContent = ''; $('go').disabled = true;
+  try {
+    const notes = [$('notes').value.trim(), D.hairColor === 'mixed' && $('mixed').value.trim() ? 'Hair colour mix: ' + $('mixed').value.trim() : ''].filter(Boolean).join(' · ');
+    const body = { name: $('fName').value, phone: $('fPhone').value, email: $('fEmail').value, shade: D.shade, hairColor: D.hairColor, hairStyle: D.hairStyle, quantity: D.quantity,
+      outfit: { top: $('oTop').value, bottom: $('oBottom').value, shoes: $('oShoes').value, colors: $('oColors').value }, notes, forWhom: $('forWhom').value };
+    const r = await fetch('/api/dolls', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(j.error || 'Could not send your request');
+    $('form').classList.add('hidden'); $('thanks').classList.remove('hidden');
+    $('doneCode').textContent = j.code; $('doneSum').textContent = (j.quantity > 1 ? j.quantity + ' dolls: ' : '') + j.summary + '. Outfit wishes: ' + j.wishes + '.';
+    $('donePhone').textContent = $('fPhone').value;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } catch (e) { $('err').textContent = e.message; }
+  finally { $('go').disabled = false; }
+}
+
+fetch('/api/dolls').then(r => r.json()).then(o => { OPT = o; render(); }).catch(() => { $('err').textContent = 'Could not load the choices. Please refresh.'; });
+</script>
+</body>
+</html>

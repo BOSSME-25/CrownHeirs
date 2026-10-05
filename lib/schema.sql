@@ -314,6 +314,29 @@ ALTER TABLE tickets ADD COLUMN IF NOT EXISTS terminal_checkout_id text;      -- 
 ALTER TABLE tickets ADD COLUMN IF NOT EXISTS terminal_status text;           -- PENDING | IN_PROGRESS | COMPLETED | CANCELED | …
 ALTER TABLE tickets ADD COLUMN IF NOT EXISTS terminal_started_at timestamptz;
 
+-- ── Crown Heirs Dolls ─────────────────────────────────────────────────────
+-- A doll built on /dolls and requested; the desk quotes and moves it along.
+CREATE TABLE IF NOT EXISTS doll_orders (
+  id         serial PRIMARY KEY,
+  code       text UNIQUE NOT NULL,                                 -- DL-XXXXX
+  name       text NOT NULL,
+  phone      text NOT NULL,
+  email      text,
+  shade      text NOT NULL,                                        -- yarn shade id
+  hair_color text NOT NULL,
+  hair_style text NOT NULL,
+  quantity   integer NOT NULL DEFAULT 1 CHECK (quantity BETWEEN 1 AND 5),
+  outfit     jsonb NOT NULL DEFAULT '{}'::jsonb,                   -- wishes: top, bottom, shoes, colors
+  notes      text NOT NULL DEFAULT '',
+  for_whom   text NOT NULL DEFAULT '',
+  status     text NOT NULL DEFAULT 'new'
+             CHECK (status IN ('new', 'quoted', 'making', 'ready', 'done', 'cancelled')),
+  quote      text,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS doll_orders_status_idx ON doll_orders (status, created_at DESC);
+
 CREATE TABLE IF NOT EXISTS settings (
   key   text PRIMARY KEY,
   value text NOT NULL
