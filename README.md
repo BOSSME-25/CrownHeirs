@@ -286,8 +286,36 @@ booking flow works with none of them set.
 | `NOTIFY_EMAIL`, `NOTIFY_SMS_TO` | Where the salon's copies go. |
 | `CRON_SECRET` | Any long random string. Enables the daily reminder run (`vercel.json` cron, 16:00 UTC = 9 AM Phoenix). |
 | `SITE_URL` | Used in message links; defaults to the vercel.app URL. |
+| `INSTAGRAM_ACCESS_TOKEN` | Feeds *From the Den* on the home page from the salon's Instagram (see below). |
 
 Reminders can also be triggered by hand from `/admin/settings`.
+
+## From the Den: Instagram
+
+With `INSTAGRAM_ACCESS_TOKEN` set, the home page's *From the Den* shows the
+salon's latest Instagram posts, each linking to the post, sorted into the
+same categories as the Services section (Locs, Braids & Twists, Cuts &
+Styling, Weaves & Extensions, Color & Chemical, Tiny Heirs, Barber's
+Corner, Beauty) by the words in the caption and hashtags; pills filter
+them. Without the token it shows the TV gallery from `/admin/tv`, where
+each photo can be given a category.
+
+Getting the token (the account must be a professional account, Business
+or Creator, which is a switch in Instagram's settings):
+
+1. https://developers.facebook.com → My Apps → Create App → use case
+   "Other" → type "Business" → name it (e.g. Crown Heirs Site).
+2. In the app, add the **Instagram** product → "API setup with Instagram
+   login".
+3. Under *Generate access tokens*, add the @crownheirs account and press
+   **Generate token**; sign in as the salon and allow it. Copy the token.
+4. In Vercel: Settings → Environment Variables → `INSTAGRAM_ACCESS_TOKEN`
+   (Sensitive) → redeploy.
+
+The token lasts 60 days. While the site is visited it refreshes itself
+about weekly (the refreshed token is kept in settings). If the site goes
+unvisited for two months the token lapses: generate a new one the same way.
+The feed is cached ten minutes.
 
 ### Not built yet (natural next steps)
 

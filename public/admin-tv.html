@@ -198,6 +198,7 @@ async function enter() {
 function renderAll() { renderPhotos(); renderMembers(); renderReviews(); renderProds(); renderInfos(); }
 
 /* ── Photos ── */
+const WORK_CATS = ['Locs', 'Braids & Twists', 'Cuts & Styling', 'Weaves & Extensions', 'Color & Chemical', 'Tiny Heirs', "Barber's Corner", 'Beauty'];
 const isVideo = g => g.type === 'video' || /\.(mp4|webm|mov)(\?|$)/i.test(g.url);
 
 function renderPhotos() {
@@ -209,6 +210,7 @@ function renderPhotos() {
       <div class="ph-body">
         <input value="${esc(g.caption || '')}" placeholder="Caption (optional)"
                onchange="C.gallery[${i}].caption=this.value">
+        <select onchange="C.gallery[${i}].category=this.value" title="Category on the home page"><option value="">Category (home page)…</option>${WORK_CATS.map(c => `<option ${g.category === c ? 'selected' : ''}>${esc(c)}</option>`).join('')}</select>
         <label class="igtog"><input type="checkbox" ${g.ig ? 'checked' : ''}
                onchange="C.gallery[${i}].ig=this.checked"> Show as IG post</label>
         <div class="ph-btns">

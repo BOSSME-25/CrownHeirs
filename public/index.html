@@ -1078,6 +1078,15 @@ footer a:hover { color: var(--ink); }
 .dark-band .home-sec { padding-top: 60px; } .dark-band .sec-head h2 { color: #fff; } .dark-band .sec-head p, .dark-band .home-note { color: rgba(255,255,255,0.7); }
 .dark-band .tier { background: var(--char-hi); border-color: rgba(255,255,255,0.1); } .dark-band .tier h3 { color: #fff; } .dark-band .tier li { color: rgba(255,255,255,0.8); border-color: rgba(255,255,255,0.1); } .dark-band .tier .t-price { color: var(--gold); }
 .work-grid { gap: 14px; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); } .work-item { border-radius: 0; }
+.work-pills { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin: -10px 0 22px; }
+.work-pills button { font-family: var(--font-ui); font-size: 0.82rem; letter-spacing: 0.04em; padding: 9px 16px; border: 1px solid var(--border-mid); background: #fff; color: var(--ink-mid); cursor: pointer; transition: background 0.2s, color 0.2s, border-color 0.2s; }
+.work-pills button:hover { border-color: var(--ink); color: var(--ink); }
+.work-pills button.on { background: var(--char); border-color: var(--char); color: #fff; }
+a.work-item { display: block; aspect-ratio: 1 / 1; text-decoration: none; box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
+.work-item img, .work-item video { transition: transform 0.8s ease; } .work-item:hover img, .work-item:hover video { transform: scale(1.05); }
+.work-item span { font-size: 0.8rem; padding: 26px 12px 10px; line-height: 1.35; }
+.work-item .wc { position: absolute; top: 10px; left: 10px; background: rgba(28,26,24,0.8); color: #fff; font-size: 0.6rem; letter-spacing: 0.12em; text-transform: uppercase; padding: 4px 8px; }
+@media (max-width: 640px) { .work-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; } }
 .tier, .prod { border-radius: 0; }
 .visit > div { border-radius: 0; }
 .visit-cta { text-align: center; margin: 36px 0 0; }
@@ -1287,8 +1296,10 @@ footer a:hover { color: var(--ink); }
   <!-- From the TV content (/api/content): the same work photos, memberships and
        products Bethany manages in /admin/tv. Sections stay hidden until loaded. -->
   <section class="home-sec" id="ourwork" hidden>
-    <div class="sec-head reveal"><h2>From the Den</h2><p>Real clients, done right here</p></div>
+    <div class="sec-head reveal"><h2>From the Den</h2><p id="workSub">Real clients, done right here</p></div>
+    <div class="work-pills" id="workPills"></div>
     <div class="work-grid" id="workGrid"></div>
+    <p class="home-note" id="workMore" hidden><a href="https://instagram.com/crownheirs" target="_blank" rel="noopener">See more on Instagram &rarr;</a></p>
   </section>
   <section class="dark-band" id="memberships" hidden>
     <div class="home-sec">
@@ -2776,19 +2787,41 @@ function initBeauty(){
 }
 
 const esc=t=>String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-/* ── HOME: work photos, memberships, products (the TV's content) ── */
+/* ── FROM THE DEN: Instagram first, the TV gallery when there is no feed ── */
+const WORK_CATS=['Locs','Braids & Twists','Cuts & Styling','Weaves & Extensions','Color & Chemical','Tiny Heirs',"Barber's Corner",'Beauty'];
+let WORK=[],WORK_CAT='All',WORK_SRC=null,TV_GALLERY=null;
+function renderWork(){
+  const present=WORK_CATS.filter(c=>WORK.some(w=>w.cats.includes(c)));
+  if(!present.includes(WORK_CAT)) WORK_CAT='All';
+  document.getElementById('workPills').innerHTML=present.length?['All',...present].map(c=>`<button class="${c===WORK_CAT?'on':''}" data-c="${esc(c)}" onclick="WORK_CAT=this.dataset.c;renderWork()">${esc(c)}</button>`).join(''):'';
+  const items=(WORK_CAT==='All'?WORK:WORK.filter(w=>w.cats.includes(WORK_CAT))).slice(0,12);
+  document.getElementById('workGrid').innerHTML=items.map(w=>{
+    const media=w.video?`<video src="${esc(w.video)}" poster="${esc(w.url)}" muted loop playsinline autoplay preload="metadata"></video>`:`<img src="${esc(w.url)}" alt="${esc(w.caption||'Crown Heirs work')}" loading="lazy">`;
+    const tag=w.cats[0]?`<em class="wc">${esc(w.cats[0])}</em>`:'';
+    const inner=`${media}${tag}${w.caption?`<span>${esc(w.caption)}</span>`:''}`;
+    return w.href?`<a class="work-item" href="${esc(w.href)}" target="_blank" rel="noopener">${inner}</a>`:`<div class="work-item">${inner}</div>`;
+  }).join('');
+  document.getElementById('ourwork').hidden=!items.length;
+}
+(function loadWork(){
+  fetch('/api/instagram').then(r=>r.ok?r.json():null).then(j=>{
+    if(j&&j.posts&&j.posts.length){
+      WORK=j.posts.map(p=>({url:p.url, video:p.video, caption:p.caption, cats:p.categories||[], href:p.permalink})); WORK_SRC='instagram';
+      document.getElementById('workSub').textContent='Fresh from our Instagram';
+      document.getElementById('workMore').hidden=false;
+      renderWork(); return;
+    }
+    WORK_SRC='none'; workFallback();
+  }).catch(()=>{ WORK_SRC='none'; workFallback(); });
+})();
+function workFallback(){ if(WORK_SRC!=='none'||!TV_GALLERY) return; WORK=TV_GALLERY; renderWork(); }
+
+/* ── HOME: memberships, products, notes (the TV's content) ── */
 (function loadHome(){
   fetch('/api/content',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(c=>{
     if(!c) return;
-    const photos=(c.gallery||[]).filter(g=>g.url).slice(0,8);
-    if(photos.length){
-      document.getElementById('workGrid').innerHTML=photos.map(g=>{
-        const vid=g.type==='video'||/\.(mp4|webm|mov)(\?|$)/i.test(g.url);
-        const media=vid?`<video src="${esc(g.url)}" muted loop playsinline autoplay preload="metadata"></video>`:`<img src="${esc(g.url)}" alt="${esc(g.caption||'Crown Heirs work')}" loading="lazy">`;
-        return `<div class="work-item">${media}${g.caption?`<span>${esc(g.caption)}</span>`:''}</div>`;
-      }).join('');
-      document.getElementById('ourwork').hidden=false;
-    }
+    TV_GALLERY=(c.gallery||[]).filter(g=>g.url).map(g=>({url:g.url, video:(g.type==='video'||/\.(mp4|webm|mov)(\?|$)/i.test(g.url))?g.url:null, caption:g.caption||'', cats:g.category?[g.category]:[], href:null}));
+    workFallback();
     if((c.memberships||[]).length){
       document.getElementById('tierGrid').innerHTML=c.memberships.map(m=>`<div class="tier"><h3>${esc(m.name)}</h3><div class="t-price">${esc(m.price)}</div><ul>${(m.perks||[]).map(x=>`<li>${esc(String(x).replace(/^\+\s*/,''))}</li>`).join('')}</ul></div>`).join('');
       document.getElementById('memberships').hidden=false;
