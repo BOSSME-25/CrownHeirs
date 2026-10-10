@@ -67,6 +67,9 @@ label { display: block; font-size: 13px; letter-spacing: 0.08em; text-transform:
 .maker-mark b { font-family: var(--font-serif); font-weight: 400; font-size: 4rem; line-height: 1; letter-spacing: 0.04em; }
 .maker-mark span { font-size: 0.7rem; letter-spacing: 0.22em; text-transform: uppercase; margin-top: 12px; color: rgba(255,255,255,0.8); }
 .maker-mark img { width: 100%; height: 100%; object-fit: cover; }
+.maker-mark.logo { background: transparent; box-shadow: none; padding: 0; transition: transform 0.4s ease; }
+.maker-mark.logo:hover { transform: rotate(-3deg) scale(1.02); }
+@media (prefers-reduced-motion: reduce) { .maker-mark.logo, .maker-mark.logo:hover { transition: none; transform: none; } }
 .maker .eyebrow { font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--terra); margin-bottom: 8px; }
 .maker h2 { font-family: var(--font-serif); font-weight: 400; font-size: clamp(2rem, 4vw, 2.8rem); line-height: 1.05; }
 .maker .brand { font-size: 0.95rem; color: var(--ink-mid); margin: 8px 0 18px; }
@@ -202,11 +205,11 @@ label { display: block; font-size: 13px; letter-spacing: 0.08em; text-transform:
 
 <section class="maker" id="maker">
   <div class="maker-inner">
-    <div class="maker-mark" id="makerMark"><b>CP</b><span>A Touch of BLU</span></div>
+    <a class="maker-mark logo" id="makerMark" href="https://atouchofbludesigns.wixsite.com/home" target="_blank" rel="noopener"><img src="/images/dolls/a-touch-of-blu.jpg" alt="A Touch of BLU Designs" width="560" height="560" loading="lazy"></a>
     <div>
       <p class="eyebrow">Meet the maker</p>
       <h2>Coletta Peterson</h2>
-      <p class="brand">Crochet designer and maker behind <b>A Touch of BLU</b>: <i>&ldquo;Black and Brown dolls for Black and Brown people.&rdquo;</i></p>
+      <p class="brand">Crochet designer and maker behind <b>A Touch of BLU Designs</b>: <i>&ldquo;Black and Brown dolls for Black and Brown people.&rdquo;</i></p>
       <p class="body">Coletta picked up crochet to beat the boredom that set in after losing a job she loved. She mastered the basics with endless hats, dish towels and scarves, then made her first bespoke doll for an expectant friend.</p>
       <p class="body">She puts a small piece of herself into every doll, and sees each one as &ldquo;a showcase for the beauty and style of an all too often underrepresented people.&rdquo; Every Crown Heirs doll you build here is made by her hand.</p>
       <blockquote>&ldquo;Doll making gives me the freedom to be all of the things that kid me wanted to grow up to be: a ballerina doctor who is also a firefighter and a veterinarian.&rdquo;<cite>Coletta Peterson</cite></blockquote>
