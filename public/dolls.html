@@ -62,7 +62,13 @@ label { display: block; font-size: 13px; letter-spacing: 0.08em; text-transform:
 
 /* meet the maker */
 .maker { background: var(--surface); border-top: 1px solid var(--border); padding: 64px 24px; }
-.maker-inner { max-width: 1000px; margin: 0 auto; display: grid; grid-template-columns: 260px 1fr; gap: 48px; align-items: start; }
+.maker-inner { max-width: 1040px; margin: 0 auto; display: grid; grid-template-columns: 320px 1fr; gap: 52px; align-items: start; }
+.maker-photo { position: relative; }
+.maker-photo > img { display: block; width: 100%; height: auto; filter: drop-shadow(0 14px 22px rgba(0,0,0,0.12)); }
+.maker-badge { position: absolute; right: -4%; bottom: -3%; width: 38%; border-radius: 50%; background: #fff; box-shadow: 0 8px 20px rgba(0,0,0,0.15); transition: transform 0.4s ease; }
+.maker-badge img { display: block; width: 100%; height: auto; border-radius: 50%; }
+.maker-badge:hover { transform: rotate(-6deg) scale(1.04); }
+@media (prefers-reduced-motion: reduce) { .maker-badge, .maker-badge:hover { transition: none; transform: none; } }
 .maker-mark { aspect-ratio: 1 / 1; background: #1f3a6b; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; box-shadow: 0 14px 30px rgba(0,0,0,0.12); }
 .maker-mark b { font-family: var(--font-serif); font-weight: 400; font-size: 4rem; line-height: 1; letter-spacing: 0.04em; }
 .maker-mark span { font-size: 0.7rem; letter-spacing: 0.22em; text-transform: uppercase; margin-top: 12px; color: rgba(255,255,255,0.8); }
@@ -78,7 +84,7 @@ label { display: block; font-size: 13px; letter-spacing: 0.08em; text-transform:
 .maker blockquote { font-family: var(--font-serif); font-size: clamp(1.3rem, 2.4vw, 1.6rem); line-height: 1.4; color: var(--ink); border-left: 3px solid var(--gold); padding: 4px 0 4px 20px; margin: 22px 0; }
 .maker blockquote cite { display: block; font-family: var(--font-ui); font-style: normal; font-size: 0.8rem; letter-spacing: 0.08em; color: var(--ink-dim); margin-top: 10px; }
 .maker .links { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
-@media (max-width: 760px) { .maker { padding: 44px 18px; } .maker-inner { grid-template-columns: 1fr; gap: 24px; } .maker-mark { max-width: 200px; } }
+@media (max-width: 760px) { .maker { padding: 44px 18px; } .maker-inner { grid-template-columns: 1fr; gap: 28px; } .maker-photo { max-width: 280px; margin: 0 auto; } }
 .hero .by { margin-top: 18px; font-size: 0.9rem; color: rgba(255,255,255,0.7); }
 .hero .by a { color: #fff; border-bottom: 1px solid rgba(255,255,255,0.4); text-decoration: none; }
 .card { background: var(--surface); box-shadow: 0 10px 30px rgba(0,0,0,0.06); padding: 26px; margin-bottom: 18px; }
@@ -205,7 +211,10 @@ label { display: block; font-size: 13px; letter-spacing: 0.08em; text-transform:
 
 <section class="maker" id="maker">
   <div class="maker-inner">
-    <a class="maker-mark logo" id="makerMark" href="https://atouchofbludesigns.wixsite.com/home" target="_blank" rel="noopener"><img src="/images/dolls/a-touch-of-blu.jpg" alt="A Touch of BLU Designs" width="560" height="560" loading="lazy"></a>
+    <div class="maker-photo" id="makerMark">
+      <img src="/images/dolls/coletta.webp" alt="Coletta Peterson" width="640" height="728" loading="lazy">
+      <a class="maker-badge" href="https://atouchofbludesigns.wixsite.com/home" target="_blank" rel="noopener" aria-label="A Touch of BLU Designs"><img src="/images/dolls/a-touch-of-blu.jpg" alt="A Touch of BLU Designs logo" width="560" height="560" loading="lazy"></a>
+    </div>
     <div>
       <p class="eyebrow">Meet the maker</p>
       <h2>Coletta Peterson</h2>
