@@ -293,7 +293,11 @@ Reminders can also be triggered by hand from `/admin/settings`.
 
 ## Crown Heirs Dolls (`/dolls`)
 
-A client builds their doll on the page, with a live preview: the yarn shade
+Dolls are crocheted by Coletta Peterson of A Touch of BLU, who has a
+*Meet the maker* feature at the foot of the page. A client builds their
+doll on the page, with a live preview that redraws as they choose (it pins
+under the header on phones), including the outfit, shoes and extras read
+from what they type: the yarn shade
 (eight skin tones), the hair colour (twelve, or a mix they describe), the
 hair style (locs, box braids, twists, cornrows, afro puffs, curly afro,
 Bantu knots, straight, ponytail, top bun), how many (up to five), outfit

@@ -41,12 +41,43 @@ label { display: block; font-size: 13px; letter-spacing: 0.08em; text-transform:
 .hero p { max-width: 560px; margin: 14px auto 0; color: rgba(255,255,255,0.8); line-height: 1.6; font-size: 1.02rem; }
 
 .wrap { max-width: 1100px; margin: 0 auto; padding: 36px 24px 80px; display: grid; grid-template-columns: 380px 1fr; gap: 36px; align-items: start; }
-@media (max-width: 900px) { .wrap { grid-template-columns: 1fr; padding: 24px 16px 60px; } }
 .preview { position: sticky; top: 92px; background: var(--surface); box-shadow: 0 10px 30px rgba(0,0,0,0.07); padding: 22px; text-align: center; }
-@media (max-width: 900px) { .preview { position: static; } }
 .preview svg { width: 100%; max-width: 300px; height: auto; display: block; margin: 0 auto; }
 .preview .sum { font-family: var(--font-serif); font-size: 1.35rem; margin-top: 12px; line-height: 1.3; }
-.preview .sub { font-size: 0.85rem; color: var(--ink-dim); margin-top: 4px; }
+.preview .sub { font-size: 0.85rem; color: var(--ink-dim); margin-top: 4px; line-height: 1.45; }
+.preview .tag { font-size: 0.66rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--terra); margin-bottom: 6px; }
+#doll.pop { animation: pop 0.35s ease; }
+@keyframes pop { 0% { transform: scale(1); } 40% { transform: scale(1.04) translateY(-3px); } 100% { transform: scale(1); } }
+@media (prefers-reduced-motion: reduce) { #doll.pop { animation: none; } }
+/* Phones: the preview pins under the header as a slim bar, so the doll stays in view while choosing. */
+@media (max-width: 900px) {
+  .wrap { display: block; padding: 0 16px 60px; }
+  .preview { top: 64px; z-index: 30; margin: 0 -16px 18px; padding: 10px 16px; display: grid; grid-template-columns: 92px 1fr; gap: 14px; align-items: center; text-align: left; box-shadow: 0 6px 18px rgba(0,0,0,0.1); }
+  .preview svg { max-width: 92px; }
+  .preview .sum { font-size: 1.1rem; margin-top: 0; }
+  .preview .sub { font-size: 0.8rem; }
+  .preview .tag { margin-bottom: 2px; }
+  .card { margin-top: 0; }
+}
+
+/* meet the maker */
+.maker { background: var(--surface); border-top: 1px solid var(--border); padding: 64px 24px; }
+.maker-inner { max-width: 1000px; margin: 0 auto; display: grid; grid-template-columns: 260px 1fr; gap: 48px; align-items: start; }
+.maker-mark { aspect-ratio: 1 / 1; background: #1f3a6b; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; box-shadow: 0 14px 30px rgba(0,0,0,0.12); }
+.maker-mark b { font-family: var(--font-serif); font-weight: 400; font-size: 4rem; line-height: 1; letter-spacing: 0.04em; }
+.maker-mark span { font-size: 0.7rem; letter-spacing: 0.22em; text-transform: uppercase; margin-top: 12px; color: rgba(255,255,255,0.8); }
+.maker-mark img { width: 100%; height: 100%; object-fit: cover; }
+.maker .eyebrow { font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--terra); margin-bottom: 8px; }
+.maker h2 { font-family: var(--font-serif); font-weight: 400; font-size: clamp(2rem, 4vw, 2.8rem); line-height: 1.05; }
+.maker .brand { font-size: 0.95rem; color: var(--ink-mid); margin: 8px 0 18px; }
+.maker .brand i { font-family: var(--font-serif); font-size: 1.1rem; }
+.maker p.body { font-size: 1rem; line-height: 1.75; color: var(--ink-mid); margin-bottom: 14px; }
+.maker blockquote { font-family: var(--font-serif); font-size: clamp(1.3rem, 2.4vw, 1.6rem); line-height: 1.4; color: var(--ink); border-left: 3px solid var(--gold); padding: 4px 0 4px 20px; margin: 22px 0; }
+.maker blockquote cite { display: block; font-family: var(--font-ui); font-style: normal; font-size: 0.8rem; letter-spacing: 0.08em; color: var(--ink-dim); margin-top: 10px; }
+.maker .links { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
+@media (max-width: 760px) { .maker { padding: 44px 18px; } .maker-inner { grid-template-columns: 1fr; gap: 24px; } .maker-mark { max-width: 200px; } }
+.hero .by { margin-top: 18px; font-size: 0.9rem; color: rgba(255,255,255,0.7); }
+.hero .by a { color: #fff; border-bottom: 1px solid rgba(255,255,255,0.4); text-decoration: none; }
 .card { background: var(--surface); box-shadow: 0 10px 30px rgba(0,0,0,0.06); padding: 26px; margin-bottom: 18px; }
 .card h2 { font-family: var(--font-serif); font-weight: 400; font-size: 28px; margin-bottom: 4px; }
 .card .hint { color: var(--ink-dim); font-size: 14.5px; margin-bottom: 10px; line-height: 1.5; }
@@ -56,7 +87,7 @@ label { display: block; font-size: 13px; letter-spacing: 0.08em; text-transform:
 .sw:hover { transform: scale(1.06); }
 .sw.on { border-color: var(--ink); box-shadow: 0 0 0 2px #fff inset; }
 .sw span { position: absolute; left: 0; right: 0; bottom: -20px; font-size: 0.62rem; color: var(--ink-dim); letter-spacing: 0.04em; white-space: nowrap; text-align: center; }
-.swatches.labeled { margin-bottom: 28px; gap: 14px 12px; }
+.swatches.labeled { margin-bottom: 28px; gap: 30px 12px; }
 .styles { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 10px; margin-top: 6px; }
 .st { background: var(--paper); border: 1px solid var(--border); padding: 12px 8px 10px; text-align: center; font-size: 0.86rem; color: var(--ink-mid); }
 .st svg { width: 54px; height: 54px; display: block; margin: 0 auto 6px; }
@@ -94,14 +125,16 @@ label { display: block; font-size: 13px; letter-spacing: 0.08em; text-transform:
 <section class="hero">
   <p class="eyebrow">Crown Heirs Dolls</p>
   <h1>Build your doll</h1>
-  <p>Hand-made at the Den. Pick the yarn shade, the hair colour and the style, and tell us the outfit you have in mind. We'll text you a quote and a timeline.</p>
+  <p>Hand-made for the Den. Pick the yarn shade, the hair colour and the style, and tell us the outfit you have in mind. Your doll changes as you choose. We'll text you a quote and a timeline.</p>
+  <p class="by">Crocheted by <a href="#maker">Coletta Peterson of A Touch of BLU</a></p>
 </section>
 
 <div class="wrap">
   <aside class="preview" aria-live="polite">
     <svg id="doll" viewBox="0 0 200 260" role="img" aria-label="Your doll"></svg>
+    <div><div class="tag">Your doll</div>
     <div class="sum" id="sum">Pick a shade to begin</div>
-    <div class="sub" id="sub"></div>
+    <div class="sub" id="sub"></div></div>
   </aside>
 
   <div id="form">
@@ -167,6 +200,24 @@ label { display: block; font-size: 13px; letter-spacing: 0.08em; text-transform:
   </div>
 </div>
 
+<section class="maker" id="maker">
+  <div class="maker-inner">
+    <div class="maker-mark" id="makerMark"><b>CP</b><span>A Touch of BLU</span></div>
+    <div>
+      <p class="eyebrow">Meet the maker</p>
+      <h2>Coletta Peterson</h2>
+      <p class="brand">Crochet designer and maker behind <b>A Touch of BLU</b>: <i>&ldquo;Black and Brown dolls for Black and Brown people.&rdquo;</i></p>
+      <p class="body">Coletta picked up crochet to beat the boredom that set in after losing a job she loved. She mastered the basics with endless hats, dish towels and scarves, then made her first bespoke doll for an expectant friend.</p>
+      <p class="body">She puts a small piece of herself into every doll, and sees each one as &ldquo;a showcase for the beauty and style of an all too often underrepresented people.&rdquo; Every Crown Heirs doll you build here is made by her hand.</p>
+      <blockquote>&ldquo;Doll making gives me the freedom to be all of the things that kid me wanted to grow up to be: a ballerina doctor who is also a firefighter and a veterinarian.&rdquo;<cite>Coletta Peterson</cite></blockquote>
+      <div class="links">
+        <a class="btn btn-ghost" href="https://atouchofbludesigns.wixsite.com/home" target="_blank" rel="noopener">Visit A Touch of BLU</a>
+        <a class="btn btn-ghost" href="https://www.etsy.com/shop/ATouchOfBluDesigns" target="_blank" rel="noopener">Her dolls and patterns on Etsy</a>
+      </div>
+    </div>
+  </div>
+</section>
+
 <footer class="site-footer">
   <img src="/images/logo-ch-light.png" alt="" class="foot-mark">
   <p class="foot-name">Crown Heirs Hair Den</p>
@@ -203,31 +254,98 @@ function hairSvg(style, color, head) {
     default:            return { back: '', front: '' };
   }
 }
+/* What was typed, read for the preview. The words decide the garment, the
+   shoes and the colours; anything we can't draw is still sent as written. */
+const COLORS = [
+  ['hot pink', '#e0457b'], ['pink', '#e07fa8'], ['blush', '#efb6c4'], ['red', '#c0392b'], ['burgundy', '#6b1f3a'], ['maroon', '#6b1f3a'], ['wine', '#6b1f3a'],
+  ['orange', '#e07b2e'], ['coral', '#ec7e6a'], ['peach', '#f1b48e'], ['yellow', '#e9bf3c'], ['mustard', '#c9962b'], ['gold', '#c8952a'],
+  ['mint', '#9fd3b4'], ['sage', '#9aae8c'], ['olive', '#6b7a3a'], ['green', '#3d8a4f'], ['teal', '#2a8a8a'], ['turquoise', '#3cb7b1'],
+  ['sky blue', '#8cc4ea'], ['light blue', '#8cc4ea'], ['navy', '#22325e'], ['denim', '#4a6a94'], ['jean', '#4a6a94'], ['blue', '#2f6fbf'],
+  ['lavender', '#b49ad8'], ['lilac', '#b49ad8'], ['purple', '#6a3fa0'], ['violet', '#6a3fa0'],
+  ['white', '#f7f4ee'], ['ivory', '#f1e8d6'], ['cream', '#eadcc4'], ['beige', '#d8c3a0'], ['tan', '#c4a074'], ['khaki', '#b8a06e'],
+  ['brown', '#6b4a32'], ['black', '#1f1d1b'], ['grey', '#8a8a8a'], ['gray', '#8a8a8a'], ['silver', '#bfc3c7'], ['rainbow', 'url(#rainbow)']
+];
+const colorsIn = t => { const w = ' ' + String(t || '').toLowerCase() + ' '; const hits = []; for (const [k, v] of COLORS) { const i = w.search(new RegExp('[^a-z]' + k + 's?[^a-z]')); if (i >= 0 && !hits.some(h => h.v === v || h.k.includes(k))) hits.push({ k, v, i }); } return hits.sort((a, b) => a.i - b.i); };
+const firstColor = t => (colorsIn(t)[0] || {}).v;
+const nameOf = v => (COLORS.find(c => c[1] === v) || [''])[0];
+function readOutfit() {
+  const top = $('oTop').value, bottom = $('oBottom').value, shoes = $('oShoes').value, colors = $('oColors').value, notes = $('notes').value;
+  const T = top.toLowerCase(), B = bottom.toLowerCase(), S = shoes.toLowerCase(), N = notes.toLowerCase();
+  const loves = colorsIn(colors).map(c => c.v);
+  let kind = 'dress';
+  if (/dress|gown|romper|jumpsuit|tutu/.test(T)) kind = /tutu/.test(T) ? 'tutu' : 'dress';
+  else if (/tutu/.test(B)) kind = 'tutu';
+  else if (/skirt/.test(B)) kind = 'skirt';
+  else if (/short/.test(B)) kind = 'shorts';
+  else if (/pant|jean|legging|trouser|overall|jogger|sweats/.test(B)) kind = 'pants';
+  else if (T.trim() || B.trim()) kind = 'pants';
+  const topC = firstColor(top) || loves[0] || '#a0624a';
+  const botC = firstColor(bottom) || (kind === 'pants' && /jean|denim/.test(B) ? '#4a6a94' : null) || loves[1] || (kind === 'pants' ? '#4a6a94' : kind === 'shorts' ? '#4a6a94' : topC);
+  const shoe = /sneaker|tennis|trainer|kicks|jordan|air force/.test(S) ? 'sneakers' : /boot/.test(S) ? 'boots' : /sandal|slide|flip/.test(S) ? 'sandals' : /heel|wedge/.test(S) ? 'heels' : /mary|flat|ballet|dress shoe/.test(S) ? 'flats' : 'flats';
+  const shoeC = firstColor(shoes) || (shoe === 'sneakers' ? '#f7f4ee' : shoe === 'boots' ? '#6b4a32' : '#1f1d1b');
+  return { kind, topC, botC, shoe, shoeC, bow: /bow|ribbon/.test(N + ' ' + T), glasses: /glasses|spectacles/.test(N), crown: /crown|tiara|princess/.test(N + ' ' + T),
+    bowC: firstColor(N.replace(/.*?(\w+\s+)?bow.*/, '$1bow')) || loves[0] || '#e07fa8',
+    words: { top: top.trim(), bottom: bottom.trim(), shoes: shoes.trim() } };
+}
+function outfitSvg(o, skin) {
+  const legs = `<rect x="76" y="214" width="18" height="34" fill="${skin}"/><rect x="106" y="214" width="18" height="34" fill="${skin}"/>`;
+  const top = `<path d="M64 150 q36 -20 72 0 v40 h-72z" fill="${o.topC}"/>`;
+  let body;
+  switch (o.kind) {
+    case 'skirt':  body = legs + top + `<path d="M64 186 h72 l10 34 q-46 10 -92 0z" fill="${o.botC}"/>`; break;
+    case 'tutu':   body = legs + top + `<path d="M62 186 h76 l16 26 q-54 14 -108 0z" fill="${o.botC}" opacity="0.85"/><path d="M66 188 h68 l12 22 q-46 10 -92 0z" fill="${o.botC}"/>`; break;
+    case 'shorts': body = legs + top + `<path d="M66 186 h68 v28 h-31 v-6 h-6 v6 h-31z" fill="${o.botC}"/>`; break;
+    case 'pants':  body = legs + top + `<path d="M66 186 h68 v60 h-29 v-44 h-10 v44 h-29z" fill="${o.botC}"/>`; break;
+    default:       body = legs + `<path d="M66 150 q34 -20 68 0 l12 74 q-46 12 -92 0z" fill="${o.topC}"/>`;
+  }
+  const shoe = x => {
+    switch (o.shoe) {
+      case 'sneakers': return `<path d="M${x - 4} 244 h27 q5 0 5 6 v6 h-34 q-2 -8 2 -12z" fill="${o.shoeC}" stroke="#1f1d1b" stroke-width="1.2"/><line x1="${x - 5}" y1="253" x2="${x + 28}" y2="253" stroke="#1f1d1b" stroke-width="1.2"/>`;
+      case 'boots':    return `<path d="M${x} 226 h18 v22 h6 q4 0 4 4 v4 h-30z" fill="${o.shoeC}"/>`;
+      case 'sandals':  return `<path d="M${x - 4} 252 h30 v4 h-30z" fill="${o.shoeC}"/><path d="M${x} 247 h18 M${x + 2} 242 l14 8" stroke="${o.shoeC}" stroke-width="2.5"/>`;
+      case 'heels':    return `<path d="M${x - 2} 246 h24 q4 0 4 4 v3 h-28z" fill="${o.shoeC}"/><rect x="${x - 2}" y="253" width="4" height="4" fill="${o.shoeC}"/>`;
+      default:         return `<path d="M${x - 4} 246 h26 q4 0 4 4 v6 h-30z" fill="${o.shoeC}"/><path d="M${x} 247 h18" stroke="rgba(255,255,255,0.35)" stroke-width="1.5"/>`;
+    }
+  };
+  return body + shoe(76) + shoe(106);
+}
+let LAST = '';
 function draw() {
   const shade = OPT && OPT.shades.find(s => s.id === D.shade);
   const hc = OPT && OPT.hairColors.find(c => c.id === D.hairColor);
+  const hs = OPT && OPT.hairStyles.find(s => s.id === D.hairStyle);
   const skin = shade ? shade.hex : '#d9c7b3';
-  const hair = hc ? (hc.id === 'mixed' ? 'url(#mix)' : hc.hex) : '#2a2a2a';
+  const hair = hc ? (hc.id === 'mixed' ? 'url(#mix)' : hc.hex) : '#3a2a22';
   const head = { cx: 100, cy: 92, r: 40 };
-  const h = D.hairStyle ? hairSvg(D.hairStyle, hair, head) : { back: '', front: '' };
-  const top = ($('oColors').value || '').toLowerCase();
-  const outfit = /pink/.test(top) ? '#d26a9a' : /blue/.test(top) ? '#2f4f9e' : /yellow|gold/.test(top) ? '#c8952a' : /green/.test(top) ? '#3d7a45' : /purple/.test(top) ? '#6a3fa0' : /red/.test(top) ? '#b2321f' : /white/.test(top) ? '#f3efe8' : '#a0624a';
-  $('doll').innerHTML = `
-    <defs><linearGradient id="mix" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6b1f3a"/><stop offset=".5" stop-color="#c9963e"/><stop offset="1" stop-color="#2f4f9e"/></linearGradient></defs>
+  const h = hairSvg(D.hairStyle || 'curly-afro', hair, head);
+  const o = readOutfit();
+  const extras = (o.crown ? `<path d="M80 ${D.hairStyle === 'curly-afro' || !D.hairStyle ? 22 : 46} l6 -14 l7 10 l7 -14 l7 14 l7 -10 l6 14z" fill="#c8952a" stroke="#8a6414" stroke-width="1"/>` : '')
+    + (o.bow ? `<path d="M118 60 l14 -8 v18z M118 60 l-14 -8 v18z" fill="${o.bowC}"/><circle cx="118" cy="60" r="4" fill="${o.bowC}" stroke="rgba(0,0,0,0.2)"/>` : '')
+    + (o.glasses ? `<g fill="none" stroke="#1f1d1b" stroke-width="2"><circle cx="86" cy="96" r="8"/><circle cx="114" cy="96" r="8"/><path d="M94 96 h12"/></g>` : '');
+  const svg = `
+    <defs><linearGradient id="mix" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6b1f3a"/><stop offset=".5" stop-color="#c9963e"/><stop offset="1" stop-color="#2f4f9e"/></linearGradient>
+      <linearGradient id="rainbow" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c0392b"/><stop offset=".25" stop-color="#e9bf3c"/><stop offset=".5" stop-color="#3d8a4f"/><stop offset=".75" stop-color="#2f6fbf"/><stop offset="1" stop-color="#6a3fa0"/></linearGradient></defs>
     ${h.back}
     <rect x="86" y="126" width="28" height="18" fill="${skin}"/>
-    <path d="M62 150 q38 -22 76 0 v70 q-38 10 -76 0z" fill="${outfit}"/>
     <path d="M62 150 q-14 6 -16 46 q6 8 14 2 l6 -36z" fill="${skin}"/><path d="M138 150 q14 6 16 46 q-6 8 -14 2 l-6 -36z" fill="${skin}"/>
-    <rect x="76" y="218" width="18" height="30" fill="${skin}"/><rect x="106" y="218" width="18" height="30" fill="${skin}"/>
-    <path d="M72 246 h26 v10 h-30z" fill="#1c1a18"/><path d="M102 246 h26 v10 h-30z" fill="#1c1a18"/>
+    ${outfitSvg(o, skin)}
     <circle cx="${head.cx}" cy="${head.cy}" r="${head.r}" fill="${skin}"/>
     ${h.front}
     <circle cx="86" cy="96" r="3.2" fill="#1c1a18"/><circle cx="114" cy="96" r="3.2" fill="#1c1a18"/>
     <path d="M90 112 q10 8 20 0" fill="none" stroke="#1c1a18" stroke-width="2.4" stroke-linecap="round"/>
-    <circle cx="80" cy="106" r="4" fill="rgba(210,106,154,0.35)"/><circle cx="120" cy="106" r="4" fill="rgba(210,106,154,0.35)"/>`;
-  const hs = OPT && OPT.hairStyles.find(s => s.id === D.hairStyle);
+    <circle cx="80" cy="106" r="4" fill="rgba(210,106,154,0.35)"/><circle cx="120" cy="106" r="4" fill="rgba(210,106,154,0.35)"/>
+    ${extras}`;
+  const el = $('doll');
+  el.innerHTML = svg;
+  const key = [D.shade, D.hairColor, D.hairStyle, o.kind, o.topC, o.botC, o.shoe, o.shoeC, o.bow, o.glasses, o.crown].join('|');
+  if (LAST && key !== LAST) { el.classList.remove('pop'); void el.getBoundingClientRect(); el.classList.add('pop'); }
+  LAST = key;
   $('sum').textContent = shade ? `${shade.name} yarn${hc ? ', ' + hc.name.replace(', tell us', '').toLowerCase() : ''}${hs ? ' ' + hs.name.toLowerCase() : ''}` : 'Pick a shade to begin';
-  $('sub').textContent = D.quantity > 1 ? `${D.quantity} dolls` : (shade && hc && hs ? 'Looking good. Tell us about the outfit below.' : '');
+  const garment = { dress: 'dress', tutu: 'tutu', skirt: 'top and skirt', shorts: 'top and shorts', pants: 'top and pants' }[o.kind];
+  const wore = o.words.top || o.words.bottom || o.words.shoes
+    ? [nameOf(o.topC) && nameOf(o.topC) + ' ' + garment.split(' ')[0], o.kind !== 'dress' && o.kind !== 'tutu' && nameOf(o.botC) ? nameOf(o.botC) + ' ' + garment.split(' ').pop() : '', o.words.shoes && (nameOf(o.shoeC) ? nameOf(o.shoeC) + ' ' : '') + o.shoe].filter(Boolean).join(', ')
+    : '';
+  $('sub').textContent = (D.quantity > 1 ? `${D.quantity} dolls. ` : '') + (wore ? 'Wearing ' + wore + '.' : (shade && hc && hs ? 'Now tell us about the outfit.' : !shade ? 'Your doll changes as you choose.' : ''));
 }
 
 /* ── choices ── */
@@ -237,12 +355,13 @@ function render() {
   $('shades').innerHTML = OPT.shades.map(s => `<button type="button" class="sw ${D.shade === s.id ? 'on' : ''}" style="background:${s.hex}" onclick="pick('shade','${s.id}')" aria-label="${esc(s.name)}" aria-pressed="${D.shade === s.id}"><span>${esc(s.name)}</span></button>`).join('');
   $('colors').innerHTML = OPT.hairColors.map(c => `<button type="button" class="sw ${D.hairColor === c.id ? 'on' : ''}" style="background:${c.hex}" onclick="pick('hairColor','${c.id}')" aria-label="${esc(c.name)}" aria-pressed="${D.hairColor === c.id}"><span>${esc(c.name.replace(', tell us', ''))}</span></button>`).join('');
   $('mixedWrap').classList.toggle('hidden', D.hairColor !== 'mixed');
-  $('styles').innerHTML = OPT.hairStyles.map(s => { const h = hairSvg(s.id, '#2a2a2a', { cx: 30, cy: 26, r: 14 }); return `<button type="button" class="st ${D.hairStyle === s.id ? 'on' : ''}" onclick="pick('hairStyle','${s.id}')" aria-pressed="${D.hairStyle === s.id}"><svg viewBox="0 0 60 60">${h.back}<circle cx="30" cy="26" r="14" fill="#c4986c"/>${h.front}</svg>${esc(s.name)}</button>`; }).join('');
+  $('styles').innerHTML = OPT.hairStyles.map(s => { const hcol = OPT.hairColors.find(c => c.id === D.hairColor); const sk = (OPT.shades.find(x => x.id === D.shade) || {}).hex || '#c4986c';
+    const h = hairSvg(s.id, hcol ? (hcol.id === 'mixed' ? '#6b1f3a' : hcol.hex) : '#2a2a2a', { cx: 30, cy: 26, r: 14 }); return `<button type="button" class="st ${D.hairStyle === s.id ? 'on' : ''}" onclick="pick('hairStyle','${s.id}')" aria-pressed="${D.hairStyle === s.id}"><svg viewBox="0 0 60 60">${h.back}<circle cx="30" cy="26" r="14" fill="${sk}"/>${h.front}</svg>${esc(s.name)}</button>`; }).join('');
   $('qtyN').textContent = D.quantity;
   draw();
 }
 function qty(n) { D.quantity = Math.max(1, Math.min(OPT ? OPT.maxQuantity : 5, D.quantity + n)); render(); }
-$('oColors').addEventListener('input', draw);
+['oTop', 'oBottom', 'oShoes', 'oColors', 'notes'].forEach(id => $(id).addEventListener('input', draw));
 
 async function send() {
   $('err').textContent = ''; $('go').disabled = true;
