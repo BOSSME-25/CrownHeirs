@@ -35,7 +35,18 @@ label { display: block; font-size: 13px; letter-spacing: 0.08em; text-transform:
 .site-nav .nav-cta:hover { background: var(--gold-hi); color: var(--char); }
 @media (max-width: 640px) { .site-header { padding: 0 18px; height: 64px; } .site-nav { gap: 16px; } .site-nav a:not(.nav-cta) { display: none; } .site-nav .nav-cta { padding: 10px 18px; } }
 
-.hero { background: var(--char); color: #fff; text-align: center; padding: 56px 24px 50px; }
+.hero { background: var(--char) url('/images/dolls/dolls-poster-v1.jpg') center 55% / cover no-repeat; color: #fff; text-align: center; position: relative; overflow: hidden; isolation: isolate;
+  min-height: clamp(500px, 80vh, 740px); display: flex; flex-direction: column; justify-content: flex-end; align-items: center; padding: 120px 24px 40px; }
+.hero-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 55%; z-index: -2; opacity: 0; transition: opacity 0.8s ease; }
+.hero-video.on { opacity: 1; }
+.hero::before { content: ''; position: absolute; inset: 0; z-index: -1; background: linear-gradient(to bottom, rgba(28,26,24,0.05) 0%, rgba(28,26,24,0.12) 50%, rgba(28,26,24,0.78) 74%, rgba(28,26,24,0.94) 100%); }
+.hero h1, .hero p { text-shadow: 0 2px 14px rgba(0,0,0,0.45); }
+/* Phones: the video sits above the words instead of under them. */
+@media (max-width: 640px) {
+  .hero { min-height: 0; padding: 262px 18px 30px; background: var(--char) url('/images/dolls/dolls-poster-v1.jpg') center top / auto 290px no-repeat; }
+  .hero-video { height: 290px; bottom: auto; }
+  .hero::before { bottom: auto; height: 292px; background: linear-gradient(to bottom, rgba(28,26,24,0) 62%, rgba(28,26,24,1) 100%); }
+}
 .hero .eyebrow { font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.6); margin-bottom: 10px; }
 .hero h1 { font-family: var(--font-serif); font-weight: 400; font-size: clamp(2.2rem, 5vw, 3.4rem); line-height: 1.05; }
 .hero p { max-width: 560px; margin: 14px auto 0; color: rgba(255,255,255,0.8); line-height: 1.6; font-size: 1.02rem; }
@@ -132,9 +143,11 @@ label { display: block; font-size: 13px; letter-spacing: 0.08em; text-transform:
 </header>
 
 <section class="hero">
+  <video class="hero-video" id="heroVideo" muted loop playsinline preload="none" aria-hidden="true" tabindex="-1"
+         data-webm="/images/dolls/dolls-loop-v1.webm" data-mp4="/images/dolls/dolls-loop-v1.mp4"></video>
   <p class="eyebrow">Crown Heirs Dolls</p>
   <h1>Build your doll</h1>
-  <p>Hand-made for the Den. Pick the yarn shade, the hair colour and the style, and tell us the outfit you have in mind. Your doll changes as you choose. We'll text you a quote and a timeline.</p>
+  <p>Pick the yarn shade, the hair and the outfit, and watch your doll take shape as you choose. We'll text you a quote and a timeline.</p>
   <p class="by">Crocheted by <a href="#maker">Coletta Peterson of A Touch of BLU</a></p>
 </section>
 
@@ -391,6 +404,21 @@ async function send() {
   } catch (e) { $('err').textContent = e.message; }
   finally { $('go').disabled = false; }
 }
+
+(function heroVideo() {
+  const v = $('heroVideo'); if (!v) return;
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const saver = navigator.connection && (navigator.connection.saveData || /(^|-)2g$/.test(navigator.connection.effectiveType || ''));
+  if (reduce || saver) return;                       // the still frame behind the banner stays
+  const start = () => {
+    const webm = v.canPlayType('video/webm; codecs="vp9"'), src = webm ? v.dataset.webm : v.dataset.mp4;
+    v.src = src; v.preload = 'auto';
+    v.addEventListener('playing', () => v.classList.add('on'), { once: true });
+    v.play().catch(() => {});
+    if ('IntersectionObserver' in window) new IntersectionObserver(es => es.forEach(e => e.isIntersecting ? v.play().catch(() => {}) : v.pause())).observe(v);
+  };
+  if (document.readyState === 'complete') setTimeout(start, 0); else addEventListener('load', () => setTimeout(start, 0), { once: true });
+})();
 
 fetch('/api/dolls').then(r => r.json()).then(o => { OPT = o; render(); }).catch(() => { $('err').textContent = 'Could not load the choices. Please refresh.'; });
 </script>
