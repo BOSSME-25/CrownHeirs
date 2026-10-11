@@ -32,7 +32,7 @@ if (!url) {
 
   test('the choices are served, and a request needs the real ones', async () => {
     const o = await call(dollsApi, req('GET'));
-    assert.equal(o.statusCode, 200); assert.equal(o.body.shades.length, 8); assert.ok(o.body.hairColors.length >= 12); assert.equal(o.body.hairStyles.length, 10); assert.equal(o.body.maxQuantity, 5);
+    assert.equal(o.statusCode, 200); assert.equal(o.body.shades.length, 8); assert.ok(o.body.hairColors.length >= 12); assert.equal(o.body.hairStyles.length, 11); assert.equal(o.body.maxQuantity, 5);
     for (const [bad, msg] of [[{ ...base, name: 'A' }, /name/], [{ ...base, phone: '123' }, /phone/], [{ ...base, shade: 'neon' }, /shade/], [{ ...base, hairColor: 'x' }, /colour/], [{ ...base, hairStyle: 'mullet' }, /style/], [{ ...base, email: 'nope' }, /email/]]) {
       const r = await call(dollsApi, req('POST', { body: bad }));
       assert.equal(r.statusCode, 400, JSON.stringify(r.body)); assert.match(r.body.error, msg);
@@ -58,12 +58,12 @@ if (!url) {
     assert.equal((await call(dollsApi, req('GET', { query: { code: 'DL-NOPE1' } }))).statusCode, 404);
   });
 
-  test('two hair colours: a second colour from the same list, never the same one twice', async () => {
+  test('highlights: a second colour from the same list, never the same one twice', async () => {
     const o = (await call(dollsApi, req('GET'))).body;
     assert.ok(!o.hairColors.some(c => c.id === 'mixed'), 'mixed is gone; two colours replace it');
     const ok = await call(dollsApi, req('POST', { body: { ...base, hairColor: 'burgundy', hairColor2: 'honey-blonde' } }));
     assert.equal(ok.statusCode, 201, JSON.stringify(ok.body));
-    assert.equal(ok.body.summary, 'Caramel yarn, Burgundy and honey blonde box braids');
+    assert.equal(ok.body.summary, 'Caramel yarn, Burgundy box braids with honey blonde highlights');
     assert.equal(ok.body.hairColor2, 'honey-blonde');
     const same = await call(dollsApi, req('POST', { body: { ...base, hairColor: 'burgundy', hairColor2: 'burgundy' } }));
     assert.equal(same.statusCode, 400); assert.match(same.body.error, /differs/);

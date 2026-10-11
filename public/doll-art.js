@@ -4,12 +4,13 @@
  *   DollArt.tile(style, hair1, hair2, skin, id) → SVG markup for a 60×60 head-and-hair tile
  *
  * o = { skin, hair1, hair2?, style, kind, topC, botC, shoe, shoeC, bow, bowC, glasses, crown }
- * `id` keeps gradient and pattern ids unique when several dolls share a page.
+ * hair2 is the highlight colour: whole strands of it mixed through hair1.
+ * `id` keeps gradient, pattern and clip ids unique when several dolls share a page.
  *
  * Her dolls are tall and slim, with a big oval head, shiny black eyes, a
  * small nose and a stitched smile; long yarn locs or braids that hang behind
- * and over the shoulders (often with ombre ends); a crown on the shirt; and
- * chunky sneakers. Everything wears a faint crochet-stitch texture.
+ * and over the shoulders (often with strands of a second colour); a crown on
+ * the shirt; and chunky sneakers. Everything wears a faint crochet-stitch texture.
  */
 (function (root) {
   const f = n => +(+n).toFixed(1);
@@ -27,97 +28,138 @@
 
   function defs(id, h, c1, c2) {
     const top = h.cy - h.ry * 1.2, bot = h.cy + h.ry * 3.3;
-    const stops = c2
-      ? `<stop offset="0" stop-color="${c1}"/><stop offset=".4" stop-color="${c1}"/><stop offset=".78" stop-color="${c2}"/><stop offset="1" stop-color="${c2}"/>`
-      : `<stop offset="0" stop-color="${shade(c1, 0.06)}"/><stop offset="1" stop-color="${shade(c1, -0.14)}"/>`;
+    const grad = (gid, c) => `<linearGradient id="${gid}" gradientUnits="userSpaceOnUse" x1="0" y1="${f(top)}" x2="0" y2="${f(bot)}"><stop offset="0" stop-color="${shade(c, 0.06)}"/><stop offset="1" stop-color="${shade(c, -0.14)}"/></linearGradient>`;
     const k = h.ry / 36;
     return `<defs>
       <pattern id="${id}-knit" width="${f(5 * k)}" height="${f(4 * k)}" patternUnits="userSpaceOnUse"><path d="M0 ${f(.8 * k)}l${f(1.25 * k)} ${f(1.7 * k)} ${f(1.25 * k)} ${f(-1.7 * k)}M${f(2.5 * k)} ${f(.8 * k)}l${f(1.25 * k)} ${f(1.7 * k)} ${f(1.25 * k)} ${f(-1.7 * k)}" fill="none" stroke="rgba(0,0,0,.14)" stroke-width="${f(.6 * k)}"/></pattern>
-      <linearGradient id="${id}-hair" gradientUnits="userSpaceOnUse" x1="0" y1="${f(top)}" x2="0" y2="${f(bot)}">${stops}</linearGradient>
+      ${grad(`${id}-hair`, c1)}${c2 ? grad(`${id}-hl`, c2) : ''}
     </defs>`;
   }
 
   /* Hair: { back } is drawn behind the body, { over } in front of the
-     shoulders, { front } on top of the head. P is the hair paint. */
-  function hair(style, P, h, c1, K) {
+     shoulders, { front } on top of the head. P is the hair paint; Q, when
+     there is a second colour, paints the highlights: whole strands of it
+     from root to tip, mixed through the first. */
+  function hair(style, P, Q, h, c1, K, id) {
     const { cx, cy, rx, ry } = h; const s = ry / 36;
     const dark = shade(c1, -0.35);
-    const strand = (x0, y0, x1, y1, w, bend, tex) => {
-      const d = `M${f(x0)} ${f(y0)}Q${f((x0 + x1) / 2 + bend)} ${f((y0 + y1) / 2)} ${f(x1)} ${f(y1)}`;
-      return `<path d="${d}" fill="none" stroke="${P}" stroke-width="${f(w)}" stroke-linecap="round"/>`
-        + (tex ? `<path d="${d}" fill="none" stroke="${tex.c}" stroke-width="${f(w * tex.w)}" stroke-dasharray="${tex.d}" stroke-linecap="round"/>` : '');
+    const hl = i => Q && i % 3 === 1;                              // every third strand is a highlight
+    const line = (d, w, paint, tex) => `<path d="${d}" fill="none" stroke="${paint}" stroke-width="${f(w)}" stroke-linecap="round" stroke-linejoin="round"/>`
+      + (tex ? `<path d="${d}" fill="none" stroke="${tex.c}" stroke-width="${f(w * tex.w)}" stroke-dasharray="${tex.d}" stroke-linecap="round"/>` : '');
+    const strand = (x0, y0, x1, y1, w, bend, tex, paint) =>
+      line(`M${f(x0)} ${f(y0)}Q${f((x0 + x1) / 2 + bend)} ${f((y0 + y1) / 2)} ${f(x1)} ${f(y1)}`, w, paint || P, tex);
+    // A loose curl: a soft S-wave that starts flat at the root and opens up toward the tip.
+    const curl = (x0, y0, x1, y1, w, amp, per, tex, paint) => {
+      const dx = x1 - x0, dy = y1 - y0, L = Math.hypot(dx, dy), nx = -dy / L, ny = dx / L;
+      const n = Math.max(12, Math.round(L / (per / 14)));
+      let d = '';
+      for (let j = 0; j <= n; j++) {
+        const u = j / n, a = amp * Math.min(1, u * 3) * Math.sin(u * L / per * Math.PI * 2);
+        d += (j ? 'L' : 'M') + f(x0 + dx * u + nx * a) + ' ' + f(y0 + dy * u + ny * a);
+      }
+      return line(d, w, paint || P, tex);
     };
-    const hang = (n, w, endY, spread, tex, frontEach, frontLen) => {
+    const hang = (n, w, endY, spread, tex, frontEach, frontLen, draw) => {
+      draw = draw || strand;
       let back = '', over = '';
       for (let i = 0; i < n; i++) {
         const t = n === 1 ? 0.5 : i / (n - 1);
         const a = Math.PI * (0.97 + 1.06 * t);                    // from beside one ear, over the top, to the other
         const x0 = cx + Math.cos(a) * rx * 0.94, y0 = cy + Math.sin(a) * ry * 0.94;
         const x1 = cx + (x0 - cx) * spread, y1 = endY - Math.abs(t - 0.5) * 14 * s;
-        back += strand(x0, y0, x1, y1, w, (t - 0.5) * 8 * s, tex);
+        back += draw(x0, y0, x1, y1, w, (t - 0.5) * 8 * s, tex, hl(i) ? Q : P);
       }
       for (let k = 0; k < frontEach; k++) for (const side of [-1, 1]) {
         const x0 = cx + side * rx * (0.88 - k * 0.1), y0 = cy - ry * (0.3 - k * 0.1);
         const x1 = cx + side * rx * (0.96 + k * 0.16), y1 = cy + ry * (frontLen - k * 0.2);
-        over += strand(x0, y0, x1, y1, w, side * 3 * s, tex);
+        over += draw(x0, y0, x1, y1, w, side * 3 * s, tex, hl(k + (side > 0 ? 1 : 0)) ? Q : P);
       }
       return { back, over };
     };
     const capD = `M${f(cx - rx * 1.03)} ${f(cy + ry * 0.12)}C${f(cx - rx * 1.1)} ${f(cy - ry * 1.42)} ${f(cx + rx * 1.1)} ${f(cy - ry * 1.42)} ${f(cx + rx * 1.03)} ${f(cy + ry * 0.12)}`
       + `C${f(cx + rx * 0.86)} ${f(cy - ry * 0.18)} ${f(cx + rx * 0.5)} ${f(cy - ry * 0.56)} ${f(cx)} ${f(cy - ry * 0.5)}`
       + `C${f(cx - rx * 0.5)} ${f(cy - ry * 0.56)} ${f(cx - rx * 0.86)} ${f(cy - ry * 0.18)} ${f(cx - rx * 1.03)} ${f(cy + ry * 0.12)}Z`;
-    const cap = `<path d="${capD}" fill="${P}"/><path d="${capD}" fill="${K}"/>`;
-    const blob = (x, y, r) => `<circle cx="${f(x)}" cy="${f(y)}" r="${f(r)}" fill="${P}"/><circle cx="${f(x)}" cy="${f(y)}" r="${f(r)}" fill="${K}"/>`;
-    const ring = (x, y, r, n, br) => Array.from({ length: n }, (_, i) => { const a = (i / n) * Math.PI * 2; return blob(x + Math.cos(a) * r, y + Math.sin(a) * r, br); }).join('');
+    // Highlights carry on over the top of the head: streaks fanned from the
+    // crown to the hairline, trimmed to the cap.
+    const capHl = (n, w) => {
+      if (!Q) return '';
+      let d = '';
+      for (let i = 0; i < n; i++) {
+        if (!hl(i)) continue;
+        const u = n === 1 ? 0 : i / (n - 1) * 2 - 1;
+        const x0 = cx + u * rx * 0.25, y0 = cy - ry * 1.2, x1 = cx + u * rx * 1.15, y1 = cy - ry * 0.45 + Math.abs(u) * ry * 0.75;
+        d += `M${f(x0)} ${f(y0)}Q${f(cx + u * rx * 0.95)} ${f(cy - ry * 1.05)} ${f(x1)} ${f(y1)}`;
+      }
+      return `<clipPath id="${id}-cap"><path d="${capD}"/></clipPath><g clip-path="url(#${id}-cap)">${line(d, w, Q)}</g>`;
+    };
+    const cap = (n, w) => `<path d="${capD}" fill="${P}"/>` + capHl(n || 13, w || 4.2 * s) + `<path d="${capD}" fill="${K}"/>`;
+    const blob = (x, y, r, paint) => `<circle cx="${f(x)}" cy="${f(y)}" r="${f(r)}" fill="${paint || P}"/><circle cx="${f(x)}" cy="${f(y)}" r="${f(r)}" fill="${K}"/>`;
+    const ring = (x, y, r, n, br) => Array.from({ length: n }, (_, i) => { const a = (i / n) * Math.PI * 2; return blob(x + Math.cos(a) * r, y + Math.sin(a) * r, br, hl(i) ? Q : P); }).join('');
     const tie = (x, y, r) => `<circle cx="${f(x)}" cy="${f(y)}" r="${f(r)}" fill="none" stroke="#c8952a" stroke-width="${f(2.2 * s)}"/>`;
+    // Streaks down a solid shape (a silk press, a ponytail), trimmed to it.
+    const sheet = (key, d, paths, w) => `<path d="${d}" fill="${P}"/>`
+      + (Q ? `<clipPath id="${id}-${key}"><path d="${d}"/></clipPath><g clip-path="url(#${id}-${key})">${line(paths, w, Q)}</g>` : '')
+      + `<path d="${d}" fill="${K}"/>`;
     switch (style) {
-      case 'locs': { const H = hang(19, 7.6 * s, cy + ry * 3.4, 1.78, { c: 'rgba(0,0,0,.22)', w: .5, d: `${f(2.2 * s)} ${f(2.6 * s)}` }, 3, 3.0); return { back: H.back, over: H.over, front: cap }; }
-      case 'box-braids': { const H = hang(27, 4.8 * s, cy + ry * 3.55, 1.72, { c: 'rgba(255,255,255,.22)', w: .45, d: `${f(1.8 * s)} ${f(1.6 * s)}` }, 4, 3.1); return { back: H.back, over: H.over, front: cap }; }
-      case 'twists': { const H = hang(21, 5.8 * s, cy + ry * 2.75, 1.75, { c: 'rgba(0,0,0,.3)', w: .6, d: `${f(1.5 * s)} ${f(2.2 * s)}` }, 3, 2.3); return { back: H.back, over: H.over, front: cap }; }
+      case 'locs': { const H = hang(19, 7.6 * s, cy + ry * 3.4, 1.78, { c: 'rgba(0,0,0,.22)', w: .5, d: `${f(2.2 * s)} ${f(2.6 * s)}` }, 3, 3.0); return { back: H.back, over: H.over, front: cap(11, 6 * s) }; }
+      case 'box-braids': { const H = hang(27, 4.8 * s, cy + ry * 3.55, 1.72, { c: 'rgba(255,255,255,.22)', w: .45, d: `${f(1.8 * s)} ${f(1.6 * s)}` }, 4, 3.1); return { back: H.back, over: H.over, front: cap(16, 3.6 * s) }; }
+      case 'twists': { const H = hang(21, 5.8 * s, cy + ry * 2.75, 1.75, { c: 'rgba(0,0,0,.3)', w: .6, d: `${f(1.5 * s)} ${f(2.2 * s)}` }, 3, 2.3); return { back: H.back, over: H.over, front: cap(13, 4.6 * s) }; }
+      case 'loose-curls': {
+        const draw = (x0, y0, x1, y1, w, bend, tex, paint) => curl(x0, y0, x1, y1, w, 4.6 * s, 17 * s, tex, paint);
+        const H = hang(16, 6.4 * s, cy + ry * 2.75, 1.85, null, 2, 2.3, draw);
+        return { back: H.back, over: H.over, front: cap(13, 4.6 * s) };
+      }
       case 'cornrows': {
         let rows = '';
         for (let i = 0; i < 6; i++) {
           const x = cx - rx * 0.72 + i * rx * 0.288;
-          rows += `<path d="M${f(x)} ${f(cy - ry * 0.48)}Q${f(x + (x - cx) * 0.15)} ${f(cy - ry * 0.95)} ${f(cx + (x - cx) * 0.45)} ${f(cy - ry * 1.08)}" fill="none" stroke="${dark}" stroke-width="${f(1.3 * s)}" stroke-dasharray="${f(2 * s)} ${f(1.2 * s)}"/>`;
+          const d = `M${f(x)} ${f(cy - ry * 0.48)}Q${f(x + (x - cx) * 0.15)} ${f(cy - ry * 0.95)} ${f(cx + (x - cx) * 0.45)} ${f(cy - ry * 1.08)}`;
+          if (Q && i % 2) rows += `<path d="${d}" fill="none" stroke="${Q}" stroke-width="${f(3.8 * s)}" stroke-linecap="round"/>`;
+          rows += `<path d="${d}" fill="none" stroke="${dark}" stroke-width="${f(1.3 * s)}" stroke-dasharray="${f(2 * s)} ${f(1.2 * s)}"/>`;
         }
         let back = '';
-        for (let i = 0; i < 6; i++) { const x = cx - rx * 0.55 + i * rx * 0.22; back += strand(x, cy + ry * 0.3, x + (x - cx) * 0.25, cy + ry * 1.75, 3.6 * s, 0, { c: 'rgba(255,255,255,.2)', w: .45, d: `${f(1.8 * s)} ${f(1.6 * s)}` }); }
-        return { back, over: '', front: cap + rows };
+        for (let i = 0; i < 6; i++) { const x = cx - rx * 0.55 + i * rx * 0.22; back += strand(x, cy + ry * 0.3, x + (x - cx) * 0.25, cy + ry * 1.75, 3.6 * s, 0, { c: 'rgba(255,255,255,.2)', w: .45, d: `${f(1.8 * s)} ${f(1.6 * s)}` }, Q && i % 2 ? Q : P); }
+        return { back, over: '', front: `<path d="${capD}" fill="${P}"/><path d="${capD}" fill="${K}"/><clipPath id="${id}-rows"><path d="${capD}"/></clipPath><g clip-path="url(#${id}-rows)">${rows}</g>` };
       }
       case 'afro-puffs': {
         const L = [cx - rx * 0.98, cy - ry * 0.78], R = [cx + rx * 0.98, cy - ry * 0.78], r = rx * 0.6;
-        const puff = ([x, y]) => blob(x, y, r) + ring(x, y, r * 0.92, 10, r * 0.24);
-        return { back: puff(L) + puff(R), over: '', front: cap + tie(L[0] + rx * 0.32, L[1] + ry * 0.36, 3.2 * s) + tie(R[0] - rx * 0.32, R[1] + ry * 0.36, 3.2 * s) };
+        const puff = ([x, y]) => blob(x, y, r) + ring(x, y, r * 0.92, 10, r * 0.24) + (Q ? blob(x - r * 0.25, y - r * 0.2, r * 0.22, Q) + blob(x + r * 0.3, y + r * 0.25, r * 0.2, Q) : '');
+        return { back: puff(L) + puff(R), over: '', front: cap(13, 4.2 * s) + tie(L[0] + rx * 0.32, L[1] + ry * 0.36, 3.2 * s) + tie(R[0] - rx * 0.32, R[1] + ry * 0.36, 3.2 * s) };
       }
       case 'curly-afro': {
         const x = cx, y = cy - ry * 0.32, r = rx * 1.48;
         let fringe = '';
-        for (let i = 0; i < 7; i++) { const a = Math.PI * (1.12 + 0.76 * (i / 6)); fringe += blob(cx + Math.cos(a) * rx * 0.86, cy - ry * 0.18 + Math.sin(a) * ry * 0.62, rx * 0.2); }
-        return { back: blob(x, y, r) + ring(x, y, r * 0.95, 16, r * 0.22), over: '', front: cap + fringe };
+        for (let i = 0; i < 7; i++) { const a = Math.PI * (1.12 + 0.76 * (i / 6)); fringe += blob(cx + Math.cos(a) * rx * 0.86, cy - ry * 0.18 + Math.sin(a) * ry * 0.62, rx * 0.2, Q && i % 2 ? Q : P); }
+        return { back: blob(x, y, r) + ring(x, y, r * 0.95, 16, r * 0.22), over: '', front: cap(13, 4.2 * s) + fringe };
       }
       case 'bantu-knots': {
         let knots = '';
         for (let i = 0; i < 5; i++) {
           const a = Math.PI * (1.12 + 0.76 * (i / 4)), x = cx + Math.cos(a) * rx * 0.9, y = cy - ry * 0.2 + Math.sin(a) * ry * 0.98, r = rx * 0.25;
-          knots += blob(x, y, r) + `<path d="M${f(x)} ${f(y - r * 0.55)}a${f(r * 0.55)} ${f(r * 0.55)} 0 1 1 ${f(-r * 0.5)} ${f(r * 0.6)}" fill="none" stroke="${dark}" stroke-width="${f(1.1 * s)}"/>`;
+          knots += blob(x, y, r, Q && i % 2 ? Q : P) + `<path d="M${f(x)} ${f(y - r * 0.55)}a${f(r * 0.55)} ${f(r * 0.55)} 0 1 1 ${f(-r * 0.5)} ${f(r * 0.6)}" fill="none" stroke="${dark}" stroke-width="${f(1.1 * s)}"/>`;
         }
-        return { back: '', over: '', front: cap + knots };
+        return { back: '', over: '', front: cap(13, 4.2 * s) + knots };
       }
       case 'straight': {
         const d = `M${f(cx - rx * 1.06)} ${f(cy - ry * 0.3)}C${f(cx - rx * 1.28)} ${f(cy + ry * 1.1)} ${f(cx - rx * 1.22)} ${f(cy + ry * 1.9)} ${f(cx - rx * 1.02)} ${f(cy + ry * 2.3)}L${f(cx + rx * 1.02)} ${f(cy + ry * 2.3)}C${f(cx + rx * 1.22)} ${f(cy + ry * 1.9)} ${f(cx + rx * 1.28)} ${f(cy + ry * 1.1)} ${f(cx + rx * 1.06)} ${f(cy - ry * 0.3)}Z`;
         const part = `<path d="M${f(cx - rx * 0.32)} ${f(cy - ry * 1.02)}Q${f(cx - rx * 0.3)} ${f(cy - ry * 0.75)} ${f(cx - rx * 0.22)} ${f(cy - ry * 0.52)}" fill="none" stroke="${dark}" stroke-width="${f(1.2 * s)}"/>`;
-        return { back: `<path d="${d}" fill="${P}"/><path d="${d}" fill="${K}"/>`, over: '', front: cap + part };
+        let lines = '';
+        for (const u of [-1.12, -0.84, 0.84, 1.12]) lines += `M${f(cx + u * rx * 0.94)} ${f(cy - ry * 0.4)}C${f(cx + u * rx * 1.1)} ${f(cy + ry * 1.1)} ${f(cx + u * rx * 1.04)} ${f(cy + ry * 1.9)} ${f(cx + u * rx * 0.9)} ${f(cy + ry * 2.4)}`;
+        return { back: sheet('sheet', d, lines, 4.4 * s), over: '', front: cap(13, 4.2 * s) + part };
       }
       case 'ponytail': {
         const x = cx + rx * 0.5, y = cy - ry * 0.86;
         const d = `M${f(x)} ${f(y)}C${f(x + rx * 0.95)} ${f(y + ry * 0.2)} ${f(x + rx * 0.75)} ${f(y + ry * 1.7)} ${f(x + rx * 0.35)} ${f(y + ry * 2.95)}C${f(x + rx * 0.05)} ${f(y + ry * 2.2)} ${f(x + rx * 0.15)} ${f(y + ry * 0.95)} ${f(x - rx * 0.2)} ${f(y + ry * 0.25)}Z`;
-        return { back: `<path d="${d}" fill="${P}"/><path d="${d}" fill="${K}"/>`, over: '', front: cap + tie(x, y + ry * 0.05, 3.4 * s) };
+        let lines = '';
+        for (const u of [0.22, 0.55]) lines += `M${f(x + rx * u * 0.4)} ${f(y)}C${f(x + rx * (0.3 + u * 0.6))} ${f(y + ry * 0.4)} ${f(x + rx * (0.25 + u * 0.4))} ${f(y + ry * 1.8)} ${f(x + rx * 0.35)} ${f(y + ry * 3)}`;
+        return { back: sheet('tail', d, lines, 3.6 * s), over: '', front: cap(13, 4.2 * s) + tie(x, y + ry * 0.05, 3.4 * s) };
       }
       case 'bun': {
         const x = cx, y = cy - ry * 1.16, r = rx * 0.5;
-        return { back: '', over: '', front: cap + blob(x, y, r) + `<path d="M${f(x)} ${f(y - r * 0.6)}a${f(r * 0.6)} ${f(r * 0.6)} 0 1 1 ${f(-r * 0.55)} ${f(r * 0.65)}" fill="none" stroke="${dark}" stroke-width="${f(1.3 * s)}"/>` };
+        const swirl = `M${f(x)} ${f(y - r * 0.6)}a${f(r * 0.6)} ${f(r * 0.6)} 0 1 1 ${f(-r * 0.55)} ${f(r * 0.65)}`;
+        return { back: '', over: '', front: cap(13, 4.2 * s) + blob(x, y, r) + (Q ? `<path d="${swirl}" fill="none" stroke="${Q}" stroke-width="${f(4 * s)}" stroke-linecap="round"/>` : '') + `<path d="${swirl}" fill="none" stroke="${dark}" stroke-width="${f(1.3 * s)}"/>` };
       }
-      default: return { back: '', over: '', front: cap };
+      default: return { back: '', over: '', front: cap() };
     }
   }
 
@@ -134,8 +176,8 @@
   function render(o, id) {
     id = id || 'doll';
     const S = o.skin || '#c4986c', h = { cx: 100, cy: 66, rx: 33, ry: 36 };
-    const c1 = o.hair1 || '#2a1d17', P = `url(#${id}-hair)`, K = `url(#${id}-knit)`;
-    const H = hair(o.style || 'locs', P, h, c1, K);
+    const c1 = o.hair1 || '#2a1d17', P = `url(#${id}-hair)`, Q = o.hair2 ? `url(#${id}-hl)` : null, K = `url(#${id}-knit)`;
+    const H = hair(o.style || 'locs', P, Q, h, c1, K, id);
     const fp = (d, fill, extra) => `<path d="${d}" fill="${fill}"${extra || ''}/><path d="${d}" fill="${K}"/>`;
     const limb = (x1, y1, x2, y2, w, c) => [c, K].map(p => `<path d="M${x1} ${y1}L${x2} ${y2}" fill="none" stroke="${p}" stroke-width="${w}" stroke-linecap="round"/>`).join('');
     const ball = (x, y, r, c) => `<circle cx="${x}" cy="${y}" r="${r}" fill="${c}"/><circle cx="${x}" cy="${y}" r="${r}" fill="${K}"/>`;
@@ -189,8 +231,8 @@
 
   function tile(style, hair1, hair2, skin, id) {
     const h = { cx: 30, cy: 30, rx: 12.5, ry: 13.6 }, S = skin || '#c4986c';
-    const c1 = hair1 || '#2a1d17', P = `url(#${id}-hair)`, K = `url(#${id}-knit)`;
-    const H = hair(style, P, h, c1, K);
+    const c1 = hair1 || '#2a1d17', P = `url(#${id}-hair)`, Q = hair2 ? `url(#${id}-hl)` : null, K = `url(#${id}-knit)`;
+    const H = hair(style, P, Q, h, c1, K, id);
     const er = 1.7;
     return defs(id, h, c1, hair2) + H.back
       + `<rect x="26.5" y="40" width="7" height="12" rx="2" fill="${S}"/>`

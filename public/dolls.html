@@ -174,17 +174,17 @@ label { display: block; font-size: 13px; letter-spacing: 0.08em; text-transform:
     <section class="card">
       <div class="step">Step 2</div>
       <h2>Hair colour</h2>
-      <div class="hint">One colour, or two blended from the roots to the ends.</div>
+      <div class="hint">One colour, or a main colour with highlights: whole strands of a second colour mixed through.</div>
       <div class="tone" role="group" aria-label="How many hair colours">
         <button type="button" class="tone-b on" id="toneOne" onclick="setTone(1)" aria-pressed="true">One colour</button>
-        <button type="button" class="tone-b" id="toneTwo" onclick="setTone(2)" aria-pressed="false">Two colours</button>
+        <button type="button" class="tone-b" id="toneTwo" onclick="setTone(2)" aria-pressed="false">With highlights</button>
       </div>
-      <label id="c1Label" class="hidden">Roots</label>
+      <label id="c1Label" class="hidden">Main colour</label>
       <div class="swatches labeled" id="colors"></div>
       <div id="color2Wrap" class="hidden">
-        <label>Ends</label>
+        <label>Highlights</label>
         <div class="swatches labeled" id="colors2"></div>
-        <div class="hint">Want them mixed through or in sections instead? Say so in the notes.</div>
+        <div class="hint">Want more or fewer highlights, or the colour only at the ends? Say so in the notes.</div>
       </div>
     </section>
 
@@ -316,8 +316,8 @@ function draw() {
   const key = [D.shade, D.hairColor, D.hairColor2, D.tone, D.hairStyle, o.kind, o.topC, o.botC, o.shoe, o.shoeC, o.bow, o.glasses, o.crown].join('|');
   if (LAST && key !== LAST) { el.classList.remove('pop'); void el.getBoundingClientRect(); el.classList.add('pop'); }
   LAST = key;
-  const hairName = hc ? hc.name.toLowerCase() + (hc2 ? ' and ' + hc2.name.toLowerCase() : '') : '';
-  $('sum').textContent = shade ? `${shade.name} yarn${hairName ? ', ' + hairName : ''}${hs ? ' ' + hs.name.toLowerCase() : ''}` : 'Pick a shade to begin';
+  const hairName = [hc && hc.name.toLowerCase(), hs && hs.name.toLowerCase()].filter(Boolean).join(' ') + (hc2 ? ' with ' + hc2.name.toLowerCase() + ' highlights' : '');
+  $('sum').textContent = shade ? `${shade.name} yarn${hairName ? ', ' + hairName : ''}` : 'Pick a shade to begin';
   const garment = { dress: 'dress', tutu: 'tutu', skirt: 'top and skirt', shorts: 'top and shorts', pants: 'top and pants' }[o.kind];
   const wore = o.words.top || o.words.bottom || o.words.shoes
     ? [nameOf(o.topC) && nameOf(o.topC) + ' ' + garment.split(' ')[0], o.kind !== 'dress' && o.kind !== 'tutu' && nameOf(o.botC) ? nameOf(o.botC) + ' ' + garment.split(' ').pop() : '', o.words.shoes && (nameOf(o.shoeC) ? nameOf(o.shoeC) + ' ' : '') + o.shoe].filter(Boolean).join(', ')
@@ -349,7 +349,7 @@ function qty(n) { D.quantity = Math.max(1, Math.min(OPT ? OPT.maxQuantity : 5, D
 async function send() {
   $('err').textContent = ''; $('go').disabled = true;
   try {
-    if (D.tone === 2 && !D.hairColor2) throw new Error('Pick the second hair colour, or switch back to one colour');
+    if (D.tone === 2 && !D.hairColor2) throw new Error('Pick the highlight colour, or switch back to one colour');
     const notes = $('notes').value.trim();
     const body = { name: $('fName').value, phone: $('fPhone').value, email: $('fEmail').value, shade: D.shade, hairColor: D.hairColor, hairColor2: D.tone === 2 ? D.hairColor2 : null, hairStyle: D.hairStyle, quantity: D.quantity,
       outfit: { top: $('oTop').value, bottom: $('oBottom').value, shoes: $('oShoes').value, colors: $('oColors').value }, notes, forWhom: $('forWhom').value };
