@@ -40,7 +40,7 @@ if (!url) {
     assert.deepEqual(o.body.shades.map(s => s.name), ['Rich Espresso', 'Deep Brown', 'Warm Brown', 'Golden Brown', 'Caramel']);
     for (const [bad, msg] of [[{ ...base, name: 'A' }, /name/], [{ ...base, phone: '123' }, /phone/], [{ ...base, shade: 'neon' }, /complexion/], [{ ...base, hairColor: 'x' }, /colour/], [{ ...base, hairStyle: 'mullet' }, /style/], [{ ...base, email: 'nope' }, /email/],
       [{ ...base, base: 'alien' }, /base/], [{ ...base, top: 'cape' }, /top/], [{ ...base, topColor: 'neon' }, /colour/], [{ ...base, shoes: '' }, /shoes/],
-      [{ ...base, accessories: ['crown'] }, /isn't available/], [{ ...base, hairStyle: 'afro-puffs', accessories: ['hat'] }, /can't sit on afro puffs/], [{ ...base, accessories: ['cape'] }, /accessories/]]) {
+      [{ ...base, accessories: ['crown', 'hat'] }, /Crown Heirs crown or the bucket hat, not both/], [{ ...base, hairStyle: 'afro-puffs', accessories: ['hat'] }, /can't sit on afro puffs/], [{ ...base, accessories: ['cape'] }, /accessories/]]) {
       const r = await call(dollsApi, req('POST', { body: bad }));
       assert.equal(r.statusCode, 400, JSON.stringify(r.body)); assert.match(r.body.error, msg);
     }

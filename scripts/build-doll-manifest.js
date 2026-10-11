@@ -36,7 +36,7 @@ function build() {
     brandSource: [
       { file: 'brand-source/brand_source_logo_primary.png', status: 'supplied', use: 'Reveal page and the Save & Share card' },
       { file: 'brand-source/brand_source_ch_monogram.png', status: 'supplied', use: 'Crown Heirs branded tops' },
-      { file: 'brand-source/brand_source_crown_original.png', status: 'needed', use: 'The crown accessory (shown as coming soon until this file is supplied)' }
+      { file: 'brand-source/brand_source_crown_original.png', status: 'supplied', use: 'The crown accessory, placed on the head' }
     ],
     bases: D.BASES.map(b => ({ id: b.id, name: b.name, defaults: b.defaults })),
     complexions: D.SHADES.map(s => ({ id: s.id, name: s.name, hex: s.hex, files: bases.map(b => file(b, 'skin', s.id)) })),
@@ -46,7 +46,7 @@ function build() {
     tops: garments('top', D.TOPS),
     bottoms: garments('bottom', D.BOTTOMS),
     shoes: garments('shoes', D.SHOES),
-    accessories: D.ACCESSORIES.map(a => ({ id: a.id, name: a.name, ...(a.available === false ? { status: 'coming soon' } : {}), ...(a.clashes ? { notWith: a.clashes } : {}),
+    accessories: D.ACCESSORIES.map(a => ({ id: a.id, name: a.name, ...(a.available === false ? { status: 'coming soon' } : {}), ...(a.clashes ? { notWith: a.clashes } : {}), ...(a.excludes ? { notWornWith: a.excludes } : {}),
       files: a.id === 'crown' ? ['brand-source/brand_source_crown_original.png'] : bases.map(b => file(b, 'acc', a.id)) })),
     backgrounds: D.BACKGROUNDS.map(b => ({ id: b.id, name: b.name, files: [file('all', 'bg', b.id)] }))
   };

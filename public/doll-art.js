@@ -211,6 +211,7 @@
     const top = o.top || { look: 'tee', color: '#c0392b' }, bot = o.bottom || { look: 'jeans', color: '#4a6a94' };
     const sh = o.shoes || { look: 'sneakers', main: '#f7f4ee', trim: '#f7f4ee' }, acc = new Set(o.accessories || []);
     const logo = o.brandSrc || '/doll-maker/brand-source/brand_source_ch_monogram.png';   // the approved CH mark, as supplied
+    const crownSrc = o.crownSrc || '/doll-maker/brand-source/brand_source_crown_original.png'; // the approved crown, as supplied
     const gd = '#c8952a', cream = '#f7f4ee';
     let pdefs = '';
 
@@ -294,7 +295,8 @@
       + (acc.has('glasses') ? `<g fill="none" stroke="#1f1d1b" stroke-width="2"><circle cx="87.5" cy="72" r="8.5"/><circle cx="112.5" cy="72" r="8.5"/><path d="M96 72 h8"/></g>` : '')
       + (acc.has('jewelry') ? `<g fill="none" stroke="${gd}" stroke-width="1.6"><circle cx="66" cy="82" r="4.5"/><circle cx="134" cy="82" r="4.5"/></g><path d="M89 110 Q100 126 111 110" fill="none" stroke="${gd}" stroke-width="1.2"/><circle cx="100" cy="122" r="2.2" fill="${gd}"/>` : '')
       + (acc.has('bag') ? `<path d="M78 113 L126 174" stroke="#8a5a32" stroke-width="2.6" stroke-linecap="round"/><rect x="116" y="168" width="22" height="18" rx="3" fill="#b07a45"/><path d="M116 171 Q127 180 138 171 V168 H116 Z" fill="#8a5a32"/><circle cx="127" cy="176" r="1.6" fill="${gd}"/>` : '')
-      + (acc.has('crown') && o.crownSrc ? `<image href="${o.crownSrc}" x="76" y="${hatTop - 22}" width="48" height="30" preserveAspectRatio="xMidYMax meet"/>` : '');
+      // The crown sits on the head, its band over the crown of the hair, tipped the way it's drawn.
+      + (acc.has('crown') ? `<image href="${crownSrc}" x="76" y="${hatTop - 21}" width="50" height="50.1" preserveAspectRatio="xMidYMid meet"/>` : '');
 
     return defs(id, h, c1, o.hair2) + (pdefs ? `<defs>${pdefs}</defs>` : '')
       + H.back                                                                        // 04 hair behind
@@ -313,7 +315,7 @@
 
   /* A close crop of one part of the doll, for an option's thumbnail. */
   const CROPS = { top: '56 98 88 100', bottom: '54 176 92 84', shoes: '64 236 72 34', head: '50 8 100 104',
-    bag: '66 104 84 96', glasses: '62 44 76 56', hat: '50 0 100 80', bow: '66 18 76 60', jewelry: '58 58 84 74', crown: '50 0 100 80' };
+    bag: '66 104 84 96', glasses: '62 44 76 56', hat: '50 0 100 80', bow: '66 18 76 60', jewelry: '58 58 84 74', crown: '56 0 92 78' };
   function crop(part) { return CROPS[part] || '0 0 200 290'; }
 
   /* The reveal: the finished doll set in a scene, for a 300×380 viewBox.

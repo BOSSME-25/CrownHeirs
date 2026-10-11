@@ -334,8 +334,9 @@ desk's **Dolls** tab shows the look with a *See the doll* link.
 **Brand marks are never drawn.** Every Crown Heirs mark comes from a source
 file in `public/doll-maker/brand-source/`: the primary logo (from the handoff;
 a resized web copy beside it) on the reveal and the share card, and the CH
-monogram on the branded tops. The crown accessory shows as *coming soon* until
-`brand_source_crown_original.png` is supplied. The throne setting is drawn
+monogram on the branded tops, and the crown accessory places
+`brand_source_crown_original.png` on the head (it can't be worn with the
+bucket hat; picking one takes off the other). The throne setting is drawn
 environment only, with no crown. `test/doll-manifest.test.js` guards this.
 
 **The art.** Until painted layer art arrives, the doll is drawn in SVG by

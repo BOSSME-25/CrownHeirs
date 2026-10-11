@@ -65,8 +65,8 @@
   },
   {
    "file": "brand-source/brand_source_crown_original.png",
-   "status": "needed",
-   "use": "The crown accessory (shown as coming soon until this file is supplied)"
+   "status": "supplied",
+   "use": "The crown accessory, placed on the head"
   }
  ],
  "bases": [
@@ -732,6 +732,9 @@
     "bun",
     "bantu-knots"
    ],
+   "notWornWith": [
+    "crown"
+   ],
    "files": [
     "chd_girl_acc_hat_v01.webp",
     "chd_boy_acc_hat_v01.webp"
@@ -756,7 +759,9 @@
   {
    "id": "crown",
    "name": "Crown Heirs crown",
-   "status": "coming soon",
+   "notWornWith": [
+    "hat"
+   ],
    "files": [
     "brand-source/brand_source_crown_original.png"
    ]
