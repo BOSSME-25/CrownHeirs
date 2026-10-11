@@ -76,10 +76,11 @@
    "defaults": {
     "hairStyle": "locs",
     "hairColor": "black",
-    "top": "ch-hoodie",
+    "top": "cardigan",
+    "topColor": "ivory",
     "bottom": "joggers",
-    "bottomColor": "pink",
-    "shoes": "sneakers-pink"
+    "bottomColor": "sage",
+    "shoes": "sneakers-white"
    }
   },
   {
@@ -88,9 +89,10 @@
    "defaults": {
     "hairStyle": "short-curls",
     "hairColor": "black",
-    "top": "ch-sweater",
-    "bottom": "jeans",
-    "bottomColor": "denim",
+    "top": "flannel",
+    "topColor": "sage",
+    "bottom": "dress-pants",
+    "bottomColor": "ivory",
     "shoes": "sneakers-black"
    }
   }
