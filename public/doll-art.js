@@ -76,7 +76,16 @@
       for (let k = 0; k < frontEach; k++) for (const side of [-1, 1]) {
         const x0 = cx + side * rx * (0.88 - k * 0.1), y0 = cy - ry * (0.3 - k * 0.1);
         const x1 = cx + side * rx * (0.96 + k * 0.16), y1 = cy + ry * (frontLen - k * 0.2);
-        over += draw(x0, y0, x1, y1, w, side * 3 * s, tex, hl(k + (side > 0 ? 1 : 0)) ? Q : P);
+        const paint = hl(k + (side > 0 ? 1 : 0)) ? Q : P;
+        if (draw === strand) {
+          // A single yarn path runs from the crown, around the temple, to the tip.
+          // Starting at the temple made the hanging hair look attached separately.
+          const rootX = cx + side * (4 + k * 6) * s, rootY = cy - ry * (1.04 - k * .06);
+          const d = `M${f(rootX)} ${f(rootY)}C${f(cx + side * rx * .76)} ${f(rootY - 5 * s)} ${f(x0)} ${f(y0 - 14 * s)} ${f(x0)} ${f(y0)}Q${f((x0 + x1) / 2 + side * 3 * s)} ${f((y0 + y1) / 2)} ${f(x1)} ${f(y1)}`;
+          over += line(d, w, paint, tex);
+        } else {
+          over += draw(x0, y0, x1, y1, w, side * 3 * s, tex, paint);
+        }
       }
       return { back, over };
     };
@@ -333,7 +342,7 @@
       + L('head', '02 base body: head and face', ball(67, 72, 6, S) + ball(133, 72, 6, S)
           + `<ellipse cx="${h.cx}" cy="${h.cy}" rx="${h.rx}" ry="${h.ry}" fill="${paint(S)}"/><ellipse cx="${h.cx}" cy="${h.cy}" rx="${h.rx}" ry="${h.ry}" fill="${K}"/>`
           + face(h, S))
-      + L('hair-front', '08 hair front', H.over + H.front)
+      + L('hair-front', '08 hair front', H.front + H.over)
       + L('accessories', '09 accessories', accL);
   }
 
@@ -389,7 +398,7 @@
       + `<rect x="26.5" y="40" width="7" height="12" rx="2" fill="${S}"/>`
       + `<ellipse cx="${h.cx}" cy="${h.cy}" rx="${h.rx}" ry="${h.ry}" fill="${S}"/><ellipse cx="${h.cx}" cy="${h.cy}" rx="${h.rx}" ry="${h.ry}" fill="${K}"/>`
       + face(h, S)
-      + H.over + H.front;
+      + H.front + H.over;
   }
 
   root.DollArt = { render, reveal, tile, crop, shade };
