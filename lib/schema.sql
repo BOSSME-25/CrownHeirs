@@ -336,6 +336,7 @@ CREATE TABLE IF NOT EXISTS doll_orders (
   updated_at timestamptz NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS doll_orders_status_idx ON doll_orders (status, created_at DESC);
+ALTER TABLE doll_orders ADD COLUMN IF NOT EXISTS hair_color2 text;               -- two-colour hair: roots (hair_color) to ends
 
 CREATE TABLE IF NOT EXISTS settings (
   key   text PRIMARY KEY,

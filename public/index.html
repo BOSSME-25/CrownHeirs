@@ -1327,7 +1327,7 @@ a.work-item { display: block; aspect-ratio: 1 / 1; text-decoration: none; box-sh
   <section class="dolls-band" id="dolls">
     <div class="dolls-inner reveal">
       <div class="dolls-art" aria-hidden="true">
-        <svg viewBox="0 0 200 260"><path d="M58 92 a42 42 0 0 1 84 0 v-4 a42 44 0 0 0 -84 0z" fill="#6b1f3a"/><g stroke="#6b1f3a" stroke-width="7" stroke-linecap="round" fill="none"><path d="M62 84 q-4 60 2 110"/><path d="M74 76 q-2 60 4 118"/><path d="M126 76 q2 60 -4 118"/><path d="M138 84 q4 60 -2 110"/><path d="M88 72 q0 70 2 126"/><path d="M112 72 q0 70 -2 126"/></g><rect x="86" y="126" width="28" height="18" fill="#8c5c3c"/><path d="M62 150 q38 -22 76 0 v70 q-38 10 -76 0z" fill="#c8952a"/><path d="M62 150 q-14 6 -16 46 q6 8 14 2 l6 -36z" fill="#8c5c3c"/><path d="M138 150 q14 6 16 46 q-6 8 -14 2 l-6 -36z" fill="#8c5c3c"/><rect x="76" y="218" width="18" height="30" fill="#8c5c3c"/><rect x="106" y="218" width="18" height="30" fill="#8c5c3c"/><path d="M72 246 h26 v10 h-30z" fill="#1c1a18"/><path d="M102 246 h26 v10 h-30z" fill="#1c1a18"/><circle cx="100" cy="92" r="40" fill="#8c5c3c"/><path d="M58 92 a42 42 0 0 1 84 0 v-4 a42 44 0 0 0 -84 0z" fill="#6b1f3a"/><circle cx="86" cy="96" r="3.2" fill="#1c1a18"/><circle cx="114" cy="96" r="3.2" fill="#1c1a18"/><path d="M90 112 q10 8 20 0" fill="none" stroke="#1c1a18" stroke-width="2.4" stroke-linecap="round"/></svg>
+        <svg id="homeDoll" viewBox="0 0 200 290"></svg>
       </div>
       <div class="dolls-text">
         <p class="eyebrow">Crown Heirs Dolls</p>
@@ -2955,6 +2955,11 @@ function chat(id){
   setTimeout(()=>{logEl.insertAdjacentHTML('beforeend',`<div class="msg a">${esc(getReply(msg))}</div>`);logEl.scrollTop=logEl.scrollHeight;},600);
   logEl.scrollTop=logEl.scrollHeight;
 }
+</script>
+<script src="/doll-art.js"></script>
+<script>
+/* The home page doll, drawn like Coletta's: brown locs with honey ends, the red crown tee, white sneakers. */
+try { document.getElementById('homeDoll').innerHTML = DollArt.render({ skin: '#8c5c3c', hair1: '#5c3a21', hair2: '#c9963e', style: 'locs', kind: 'pants', topC: '#c0392b', botC: '#1f1d1b', shoe: 'sneakers', shoeC: '#f7f4ee' }, 'home'); } catch (e) {}
 </script>
 </body>
 </html>

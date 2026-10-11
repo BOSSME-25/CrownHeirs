@@ -295,10 +295,12 @@ Reminders can also be triggered by hand from `/admin/settings`.
 
 Dolls are crocheted by Coletta Peterson of A Touch of BLU, who has a
 *Meet the maker* feature at the foot of the page. A client builds their
-doll on the page, with a live preview that redraws as they choose (it pins
+doll on the page, with a live preview drawn like Coletta's own dolls (in
+`public/doll-art.js`, shared with the home page) that redraws as they choose (it pins
 under the header on phones), including the outfit, shoes and extras read
 from what they type: the yarn shade
-(eight skin tones), the hair colour (twelve, or a mix they describe), the
+(eight skin tones), the hair colour (one of twelve, or two of them blended from roots to
+ends), the
 hair style (locs, box braids, twists, cornrows, afro puffs, curly afro,
 Bantu knots, straight, ponytail, top bun), how many (up to five), outfit
 wishes (top or dress, bottoms, shoes, colours) and notes, then their name
