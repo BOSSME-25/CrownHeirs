@@ -51,3 +51,27 @@ test('a dry run counts and writes nothing', () => {
   assert.match(said, /batches: 720/); assert.match(said, /total: 1,846,800/);
   assert.equal(fs.existsSync(out), false);
 });
+
+test('delivery includes only the selected images, numbered ZIP parts and contact sheet', () => {
+  const out = fs.mkdtempSync(path.join(os.tmpdir(), 'option3-delivery-'));
+  try {
+    const script = path.join(__dirname, '..', 'scripts', 'export-option3-library.js');
+    execFileSync(process.execPath, [script, '--base', 'boy', '--shade', 'caramel', '--style', 'box-braids', '--hair-color', 'black', '--limit', '3', '--zip', '--zip-images', '2', '--contact-sheet', '--out', out]);
+    const dir = path.join(out, 'boy/caramel/box-braids/black');
+    const meta = JSON.parse(fs.readFileSync(path.join(dir, 'batch.json')));
+    assert.equal(meta.status, 'partial');
+    assert.equal(meta.imageCount, 3);
+    assert.equal(meta.zipFiles.length, 2);
+    const names = meta.zipFiles.flatMap(file => execFileSync('unzip', ['-Z1', path.join(dir, file)], { encoding: 'utf8' }).trim().split('\n').filter(n => n.startsWith('images/')));
+    assert.equal(new Set(names).size, 3);
+    assert.equal(names.length, 3);
+    assert.match(fs.readFileSync(path.join(dir, 'contact-sheet.svg'), 'utf8'), /data:image\/svg\+xml;base64/);
+    assert.equal(fs.readFileSync(path.join(dir, 'manifest.csv'), 'utf8').trim().split('\n').length, 4);
+    assert.match(fs.readFileSync(path.join(out, 'manifests/batches.csv'), 'utf8'), /part-002.zip/);
+  } finally { fs.rmSync(out, { recursive: true, force: true }); }
+});
+
+test('help works without filters and ZIP part sizes are validated', () => {
+  assert.equal(X.parseArgs(['--help']).help, true);
+  assert.throws(() => X.parseArgs(['--dry-run', '--zip-images', '1.5']), /positive integer/);
+});
