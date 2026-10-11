@@ -338,6 +338,10 @@ monogram on the branded tops, and the crown accessory places
 `brand_source_crown_original.png` on the head (it can't be worn with the
 bucket hat; picking one takes off the other). The throne setting is drawn
 environment only, with no crown. `test/doll-manifest.test.js` guards this.
+Site-wide, the dark headers, the home hero and the footers use the supplied
+light logo (the script mark in white under the gold crown),
+`public/images/brand/brand_source_logo_script_light.webp`, through a
+240px-tall copy beside it; it is placed as supplied, with no fade or shadow.
 
 **The art.** Until painted layer art arrives, the doll is drawn in SVG by
 `public/doll-art.js` (also used on the home page), in the handoff's layer
