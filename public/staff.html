@@ -369,7 +369,7 @@ async function loadDolls() {
 }
 async function dollStatus(code, status) {
   let quote = null;
-  if (status === 'quoted') { quote = prompt('The quote to text the client (price and timeline), e.g. "$45 each, about 2 weeks":'); if (quote === null) return; }
+  if (status === 'quoted') { quote = prompt('The price to text the client, e.g. "$45 each" (the text adds the 4–6 week turnaround):'); if (quote === null) return; }
   if (status === 'cancelled' && !confirm('Cancel this doll request? The client will be told.')) return;
   try { await api('POST', null, { action: 'doll.status', code, status, quote }); toast(status === 'quoted' ? 'Quote sent' : 'Updated'); loadDolls(); }
   catch (e) { alert(e.message); }

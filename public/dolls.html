@@ -240,6 +240,7 @@ label, .lbl { display: block; font-size: 13px; letter-spacing: 0.08em; text-tran
       <button class="btn btn-gold" id="homeBtn" onclick="bringHome()">Bring Them Home</button>
       <button class="btn btn-ghost" id="shareBtn" onclick="saveShare()">Save &amp; Share</button>
     </div>
+    <p class="small">Price by quote · Turnaround <span class="turn">4–6 weeks</span> · No payment now</p>
     <div id="shareOut" class="hidden">
       <p class="small" id="shareMsg"></p>
       <div class="sharebox"><input id="shareLink" readonly aria-label="Link to this Crown Heir"><button class="btn btn-ghost" onclick="copyLink()">Copy</button></div>
@@ -250,7 +251,7 @@ label, .lbl { display: block; font-size: 13px; letter-spacing: 0.08em; text-tran
   <section class="home hidden" id="home" aria-labelledby="homeTitle">
     <div id="form">
       <h2 id="homeTitle" tabindex="-1">Bring Them Home</h2>
-      <div class="terms"><b>Every Crown Heir is handmade to order</b> by Coletta Peterson, so no two are exactly alike. We match your look as closely as our yarn allows. Price and turnaround depend on the look, so we text you a quote and a timeline before anything is made. No payment now. Anything extra you ask for in the notes is considered, but can't be guaranteed.</div>
+      <div class="terms"><b>Every Crown Heir is handmade to order</b> by Coletta Peterson, so no two are exactly alike.<br><b>Price:</b> by quote. We text you one for your doll before anything is made, and there's no payment now.<br><b>Turnaround:</b> <span class="turn">4–6 weeks</span>.<br>We match your look as closely as our yarn allows. Anything extra you ask for in the notes is considered, but can't be guaranteed.</div>
       <div class="grid2">
         <div><label for="forWhom">Who's it for? <span style="text-transform:none;letter-spacing:0;">(optional)</span></label><input id="forWhom" placeholder="e.g. my daughter Ava, turning 6"></div>
         <div><span class="lbl" id="qtyLbl">How many</span><div class="qty" role="group" aria-labelledby="qtyLbl"><button type="button" onclick="qty(-1)" aria-label="One fewer">−</button><b id="qtyN" aria-live="polite">1</b><button type="button" onclick="qty(1)" aria-label="One more">+</button></div></div>
@@ -270,7 +271,7 @@ label, .lbl { display: block; font-size: 13px; letter-spacing: 0.08em; text-tran
       <h2 tabindex="-1" id="thanksTitle">Your Crown Heir is on our list.</h2>
       <div class="code" id="doneCode"></div>
       <p id="doneSum"></p>
-      <p>We'll text <b id="donePhone"></b> with a quote and a timeline. Pick-up is at the Den.</p>
+      <p>We'll text <b id="donePhone"></b> with your quote. Turnaround is <span class="turn">4–6 weeks</span>, and pick-up is at the Den.</p>
       <p><button class="btn btn-ghost" onclick="startOver()">Build another</button> <a class="btn" href="/" style="margin-left:8px">Back to the Den</a></p>
     </div>
   </section>
@@ -657,6 +658,7 @@ async function send() {
 
 fetch('/api/dolls').then(r => r.json()).then(o => {
   OPT = o;
+  if (o.turnaround) document.querySelectorAll('.turn').forEach(e => { e.textContent = o.turnaround; });
   const step = readUrl();
   if (!step) applyDefaults();
   STEP = step || 'base';

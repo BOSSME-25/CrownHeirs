@@ -33,7 +33,7 @@ if (!url) {
 
   test('the choices are served, and a request needs the real ones', async () => {
     const o = await call(dollsApi, req('GET'));
-    assert.equal(o.statusCode, 200); assert.equal(o.body.maxQuantity, 5);
+    assert.equal(o.statusCode, 200); assert.equal(o.body.maxQuantity, 5); assert.equal(o.body.pricing, 'quote'); assert.equal(o.body.turnaround, '4–6 weeks');
     const n = k => o.body[k].length;
     assert.deepEqual([n('bases'), n('shades'), n('hairStyles'), n('tops'), n('bottoms'), n('shoes'), n('accessories'), n('backgrounds')], [2, 5, 12, 6, 5, 5, 6, 2]);
     assert.ok(o.body.hairColors.length >= 12);
@@ -59,7 +59,7 @@ if (!url) {
     assert.deepEqual(d.outfit, { base: 'girl', top: 'tee', topColor: 'yellow', bottom: 'skirt', bottomColor: 'pink', shoes: 'sneakers-white', shoesColor: null, accessories: ['bag', 'glasses'], look });
     assert.equal(d.client.phone, PHONE);
     const sms = notify.outbox.filter(m => m.channel === 'sms');
-    assert.ok(sms.some(m => m.to === '+' + PHONE && /2 dolls/.test(m.body) && m.body.includes(d.code) && /can't be promised/.test(m.body)), 'client texted');
+    assert.ok(sms.some(m => m.to === '+' + PHONE && /2 dolls/.test(m.body) && m.body.includes(d.code) && /Price is by quote/.test(m.body) && /Turnaround is 4–6 weeks/.test(m.body) && /can't be promised/.test(m.body)), 'client texted');
     assert.ok(sms.some(m => m.to === '+16025550000' && /New doll request/.test(m.body) && /Yellow tee/.test(m.body)), 'salon texted');
     assert.ok(notify.outbox.some(m => m.channel === 'email' && m.to === 'desk@example.com' && /Ava, turning 6/.test(m.text)), 'salon emailed with who it is for');
     const l = await call(dollsApi, req('GET', { query: { code: d.code.toLowerCase() } }));
@@ -97,12 +97,12 @@ if (!url) {
     assert.equal(l.statusCode, 200); assert.ok(l.body.dolls.some(d => d.code === CODE)); assert.deepEqual(l.body.statuses, D.STATUSES);
     assert.equal((await call(staffApi, req('GET', { query: { action: 'dolls.list' } }))).statusCode, 401);
     notify.outbox.length = 0;
-    const q = await call(staffApi, req('POST', { headers: ADMIN, body: { action: 'doll.status', code: CODE, status: 'quoted', quote: '$45 each, about 2 weeks' } }));
-    assert.equal(q.statusCode, 200, JSON.stringify(q.body)); assert.equal(q.body.status, 'quoted'); assert.equal(q.body.quote, '$45 each, about 2 weeks');
-    assert.ok(notify.outbox.some(m => m.channel === 'sms' && m.to === '+' + PHONE && /\$45 each/.test(m.body)), 'client gets the quote');
+    const q = await call(staffApi, req('POST', { headers: ADMIN, body: { action: 'doll.status', code: CODE, status: 'quoted', quote: '$45 each' } }));
+    assert.equal(q.statusCode, 200, JSON.stringify(q.body)); assert.equal(q.body.status, 'quoted'); assert.equal(q.body.quote, '$45 each');
+    assert.ok(notify.outbox.some(m => m.channel === 'sms' && m.to === '+' + PHONE && /\$45 each/.test(m.body) && /Turnaround is 4–6 weeks/.test(m.body)), 'client gets the quote and the turnaround');
     notify.outbox.length = 0;
     const m = await D.setStatus(CODE, { status: 'making', tell: false });
-    assert.equal(m.status, 'making'); assert.equal(m.quote, '$45 each, about 2 weeks', 'quote kept'); assert.equal(notify.outbox.length, 0, 'quiet when asked');
+    assert.equal(m.status, 'making'); assert.equal(m.quote, '$45 each', 'quote kept'); assert.equal(notify.outbox.length, 0, 'quiet when asked');
     const r = await D.setStatus(CODE, { status: 'ready' });
     assert.equal(r.status, 'ready'); assert.ok(notify.outbox.some(x => /ready to pick up/.test(x.body || '')));
     await assert.rejects(() => D.setStatus(CODE, { status: 'lost' }), (e) => e.status === 400);
