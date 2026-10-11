@@ -338,7 +338,7 @@ function itemName(key, id, color) {
 function applyDefaults() {
   const b = byId(OPT.bases, D.base) || OPT.bases[0];
   for (const [k, v] of Object.entries(b.defaults)) if (!touched.has(k)) D[k] = v;
-  for (const k of ['topColor', 'shoesColor']) if (!touched.has(k)) D[k] = null;
+  for (const k of ['topColor', 'shoesColor']) if (!touched.has(k) && !(k in b.defaults)) D[k] = null;
 }
 const garment = (key, id, color) => { const it = byId(OPT[key], id) || OPT[key][0]; const hex = hexOf(color || (it.colors || [])[0]); return { look: it.look, color: hex, brand: !!it.brand, main: it.main || hex, trim: it.trim || it.main || hex }; };
 function dollOf(extra) {
