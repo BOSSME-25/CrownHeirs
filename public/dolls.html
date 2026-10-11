@@ -500,7 +500,7 @@ function panel() {
   }
   const back = i > 0 ? `<button type="button" class="btn btn-ghost" onclick="goTo('${STEPS[i - 1].id}')">Back</button>` : '<span></span>';
   const next = STEP === 'review' ? `<button type="button" class="btn btn-gold" onclick="goTo('reveal')">Take Your Seat</button>` : `<button type="button" class="btn" onclick="goTo('${STEPS[i + 1].id}')">Next: ${STEPS[i + 1].label}</button>`;
-  $('panel').innerHTML = `<h2 id="panelTitle" tabindex="-1">${s.title}</h2>${STEP !== 'look' ? noticeFor(STEP) : ''}${body}<div class="nav">${back}${next}</div>`;
+  $('panel').innerHTML = `<h2 id="panelTitle" tabindex="-1">${s.title}</h2>${STEP !== 'look' ? noticeFor(STEP) : ''}${body}<div class="nav">${back}${next}</div><p style="margin-top:18px"><button type="button" class="link" onclick="startOver()">Start Over</button></p>`;
 }
 function render() { if (!OPT) return; renderSteps(); panel(); draw(); }
 
