@@ -25,15 +25,22 @@ if (!url) {
   const ADMIN = { 'x-admin-key': 'test-admin-key' };
   // This suite owns phone …0899.
   const PHONE = '16025550899';
-  const base = { name: 'Doll Parent', phone: '602-555-0899', email: 'doll@example.com', shade: 'caramel', hairColor: 'burgundy', hairStyle: 'box-braids' };
+  const base = { name: 'Doll Parent', phone: '602-555-0899', email: 'doll@example.com', shade: 'caramel', hairColor: 'burgundy', hairStyle: 'box-braids',
+    base: 'girl', top: 'tee', topColor: 'yellow', bottom: 'skirt', bottomColor: 'pink', shoes: 'sneakers-white' };
 
   test.before(async () => { await migrate(); await db.query(`DELETE FROM doll_orders WHERE phone = $1`, [PHONE]); });
   test.after(async () => { await db.getPool().end(); });
 
   test('the choices are served, and a request needs the real ones', async () => {
     const o = await call(dollsApi, req('GET'));
-    assert.equal(o.statusCode, 200); assert.equal(o.body.shades.length, 8); assert.ok(o.body.hairColors.length >= 12); assert.equal(o.body.hairStyles.length, 11); assert.equal(o.body.maxQuantity, 5);
-    for (const [bad, msg] of [[{ ...base, name: 'A' }, /name/], [{ ...base, phone: '123' }, /phone/], [{ ...base, shade: 'neon' }, /shade/], [{ ...base, hairColor: 'x' }, /colour/], [{ ...base, hairStyle: 'mullet' }, /style/], [{ ...base, email: 'nope' }, /email/]]) {
+    assert.equal(o.statusCode, 200); assert.equal(o.body.maxQuantity, 5);
+    const n = k => o.body[k].length;
+    assert.deepEqual([n('bases'), n('shades'), n('hairStyles'), n('tops'), n('bottoms'), n('shoes'), n('accessories'), n('backgrounds')], [2, 5, 12, 6, 5, 5, 6, 2]);
+    assert.ok(o.body.hairColors.length >= 12);
+    assert.deepEqual(o.body.shades.map(s => s.name), ['Rich Espresso', 'Deep Brown', 'Warm Brown', 'Golden Brown', 'Caramel']);
+    for (const [bad, msg] of [[{ ...base, name: 'A' }, /name/], [{ ...base, phone: '123' }, /phone/], [{ ...base, shade: 'neon' }, /complexion/], [{ ...base, hairColor: 'x' }, /colour/], [{ ...base, hairStyle: 'mullet' }, /style/], [{ ...base, email: 'nope' }, /email/],
+      [{ ...base, base: 'alien' }, /base/], [{ ...base, top: 'cape' }, /top/], [{ ...base, topColor: 'neon' }, /colour/], [{ ...base, shoes: '' }, /shoes/],
+      [{ ...base, accessories: ['crown'] }, /isn't available/], [{ ...base, hairStyle: 'afro-puffs', accessories: ['hat'] }, /can't sit on afro puffs/], [{ ...base, accessories: ['cape'] }, /accessories/]]) {
       const r = await call(dollsApi, req('POST', { body: bad }));
       assert.equal(r.statusCode, 400, JSON.stringify(r.body)); assert.match(r.body.error, msg);
     }
@@ -42,16 +49,18 @@ if (!url) {
   let CODE;
   test('a request is stored with its wishes, the client and the salon are told', async () => {
     notify.outbox.length = 0;
-    const r = await call(dollsApi, req('POST', { body: { ...base, quantity: 2, outfit: { top: 'yellow dress', shoes: 'white sneakers', colors: 'pink and gold' }, notes: 'a bow please', forWhom: 'Ava, turning 6' } }));
+    const look = 'b=girl&c=caramel&h=box-braids&hc=burgundy&t=tee.yellow&p=skirt.pink&s=sneakers-white&a=bag,glasses';
+    const r = await call(dollsApi, req('POST', { body: { ...base, quantity: 2, accessories: ['bag', 'glasses', 'bag'], look, notes: 'a name on the shirt please', forWhom: 'Ava, turning 6' } }));
     assert.equal(r.statusCode, 201, JSON.stringify(r.body));
     const d = r.body; CODE = d.code;
     assert.match(d.code, /^DL-[A-Z2-9]{5}$/); assert.equal(d.status, 'new'); assert.equal(d.quantity, 2);
-    assert.equal(d.summary, 'Caramel yarn, Burgundy box braids');
-    assert.equal(d.wishes, 'top/dress: yellow dress, shoes: white sneakers, colours: pink and gold');
-    assert.equal(d.outfit.bottom, ''); assert.equal(d.client.phone, PHONE);
+    assert.equal(d.summary, 'Caramel girl, burgundy box braids');
+    assert.equal(d.wishes, 'Yellow tee, Pink skirt, White sneakers; with crossbody bag, glasses');
+    assert.deepEqual(d.outfit, { base: 'girl', top: 'tee', topColor: 'yellow', bottom: 'skirt', bottomColor: 'pink', shoes: 'sneakers-white', shoesColor: null, accessories: ['bag', 'glasses'], look });
+    assert.equal(d.client.phone, PHONE);
     const sms = notify.outbox.filter(m => m.channel === 'sms');
     assert.ok(sms.some(m => m.to === '+' + PHONE && /2 dolls/.test(m.body) && m.body.includes(d.code) && /can't be promised/.test(m.body)), 'client texted');
-    assert.ok(sms.some(m => m.to === '+16025550000' && /New doll request/.test(m.body) && /yellow dress/.test(m.body)), 'salon texted');
+    assert.ok(sms.some(m => m.to === '+16025550000' && /New doll request/.test(m.body) && /Yellow tee/.test(m.body)), 'salon texted');
     assert.ok(notify.outbox.some(m => m.channel === 'email' && m.to === 'desk@example.com' && /Ava, turning 6/.test(m.text)), 'salon emailed with who it is for');
     const l = await call(dollsApi, req('GET', { query: { code: d.code.toLowerCase() } }));
     assert.equal(l.statusCode, 200); assert.equal(l.body.code, d.code);
@@ -63,14 +72,24 @@ if (!url) {
     assert.ok(!o.hairColors.some(c => c.id === 'mixed'), 'mixed is gone; two colours replace it');
     const ok = await call(dollsApi, req('POST', { body: { ...base, hairColor: 'burgundy', hairColor2: 'honey-blonde' } }));
     assert.equal(ok.statusCode, 201, JSON.stringify(ok.body));
-    assert.equal(ok.body.summary, 'Caramel yarn, Burgundy box braids with honey blonde highlights');
+    assert.equal(ok.body.summary, 'Caramel girl, burgundy box braids with honey blonde highlights');
     assert.equal(ok.body.hairColor2, 'honey-blonde');
     const same = await call(dollsApi, req('POST', { body: { ...base, hairColor: 'burgundy', hairColor2: 'burgundy' } }));
     assert.equal(same.statusCode, 400); assert.match(same.body.error, /differs/);
     const bad = await call(dollsApi, req('POST', { body: { ...base, hairColor2: 'neon' } }));
     assert.equal(bad.statusCode, 400); assert.match(bad.body.error, /second hair colour/);
     const one = await call(dollsApi, req('POST', { body: { ...base, hairColor2: '' } }));
-    assert.equal(one.body.hairColor2, null); assert.equal(one.body.summary, 'Caramel yarn, Burgundy box braids');
+    assert.equal(one.body.hairColor2, null); assert.equal(one.body.summary, 'Caramel girl, burgundy box braids');
+  });
+
+  test('a garment with no colour picked takes its own; a bad share link is dropped; older requests still read', async () => {
+    const r = await call(dollsApi, req('POST', { body: { ...base, base: 'boy', hairStyle: 'short-curls', top: 'ch-sweater', topColor: undefined, bottom: 'jeans', bottomColor: undefined, shoes: 'boots', look: '<script>' } }));
+    assert.equal(r.statusCode, 201, JSON.stringify(r.body));
+    assert.equal(r.body.summary, 'Caramel boy, burgundy short curls / fade');
+    assert.equal(r.body.wishes, 'Royal blue Crown Heirs sweater, Blue jeans, Brown boots');
+    assert.equal(r.body.outfit.look, '');
+    const old = D.describe({ shade: 'cocoa', hair_color: 'black', hair_style: 'locs', outfit: { top: 'yellow dress', colors: 'pink' } });
+    assert.deepEqual(old, { doll: 'Cocoa yarn, Black locs', wishes: 'top/dress: yellow dress, colours: pink' });
   });
 
   test('the desk lists requests and moves one along; the client hears about the quote and when it is ready', async () => {

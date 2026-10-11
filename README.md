@@ -13,7 +13,7 @@ The internal employee Team Hub lives in its own **private** repository,
 | `/` | The home page: hero from the team shoot, the five ways in (the "Find Your Service" finder), service tiles, About, Team, notes from clients, memberships and products from `/admin/tv`, Visit |
 | `/tv` | **Salon TV display** — full-screen auto-rotating slideshow (photos & videos of work, Instagram-framed posts, a "Follow us" slide, memberships, products, announcements). AirPlay or open this URL on the TV and leave it. |
 | `/book` | **Online booking** for customers. |
-| `/dolls` | **Crown Heirs Dolls**: build a doll (yarn shade, hair colour and style, outfit wishes) and send the request; the desk quotes it under its Dolls tab. |
+| `/dolls` | **Crown Heirs Doll Maker**: build a Crown Heir step by step (base, complexion, hair, the look), reveal it on the throne, save and share it, and ask us to bring them home; the desk quotes it under its Dolls tab. |
 | `/admin` | **The admin site** — one sign-in (`ADMIN_PASSWORD`) for everything below. Home shows today at a glance. |
 | `/admin/desk` | Front desk: today's book, phone bookings, time off. `?tab=team` for the roster. |
 | `/admin/tv` | What plays on the salon TV and feeds the home page: photos and short videos (≤100 MB), Instagram-style posts, memberships, products, notes from clients, announcements, timing. |
@@ -291,28 +291,66 @@ booking flow works with none of them set.
 
 Reminders can also be triggered by hand from `/admin/settings`.
 
-## Crown Heirs Dolls (`/dolls`)
+## Crown Heirs Doll Maker (`/dolls`)
 
-Dolls are crocheted by Coletta Peterson of A Touch of BLU, who has a
-*Meet the maker* feature at the foot of the page. A client builds their
-doll on the page, with a live preview drawn like Coletta's own dolls (in
-`public/doll-art.js`, shared with the home page) that redraws as they choose (it pins
-under the header on phones), including the outfit, shoes and extras read
-from what they type: the yarn shade
-(eight skin tones), the hair colour (one of twelve, or a main colour with
-highlights: whole strands of a second colour mixed through), the
-hair style (locs, box braids, twists, cornrows, afro puffs, curly afro,
-loose curls, Bantu knots, straight, ponytail, top bun), how many (up to five), outfit
-wishes (top or dress, bottoms, shoes, colours) and notes, then their name
-and number. No payment is taken: the request gets a code (`DL-XXXXX`), the
-client is texted that a quote is coming, and the salon is texted and
-emailed. Outfit wishes are stored as wishes: the page and every message
-say they are considered but can't be guaranteed.
+Built to the *Crown Heirs Doll Maker Developer Handoff* (v1.0). Dolls are
+crocheted by Coletta Peterson of A Touch of BLU, who has a *Meet the maker*
+feature at the foot of the page.
 
-The desk's **Dolls** tab lists requests and moves each along, new → quoted
-(the quote is typed in and texted to the client) → making → ready (the
-client is texted to pick up) → done, or cancelled. The choices live in
-`lib/dolls.js`.
+**The flow.** A short welcome (the doll video, *Build Your Crown Heir*), then
+one step at a time beside a live preview of the doll (pinned under the header
+on phones, with Back/Next at the bottom of the screen):
+
+1. **Choose Your Base**: girl or boy. Each base fills in a starting look;
+   anything the guest has picked themselves is never reset.
+2. **Choose Your Complexion**: Rich Espresso, Deep Brown, Warm Brown,
+   Golden Brown, Caramel.
+3. **Choose Your Crown**: twelve styles (the handoff's eight, plus loose curls,
+   Bantu knots, ponytail and top bun) and the hair colour: one of twelve, or a
+   main colour with highlights (every third strand in the second colour,
+   root to tip).
+4. **Style Your Look**: tabs for tops (two Crown Heirs branded, two casual,
+   one dressy, one seasonal), bottoms, shoes and accessories. Garments with
+   more than one colour show a colour row. An accessory that can't sit on the
+   chosen hair (the bucket hat on puffs, a fro, knots or a bun) is greyed out,
+   and comes off with a note if the hair changes under it.
+5. **Review**, with an Edit link for each part, then **Take Your Seat**.
+
+The **reveal** (*Your Crown Heir Is Ready*) sets the doll in the signature
+throne or the plain Crown Heirs setting, with the primary logo and a summary.
+**Save & Share** makes a 1080 × 1350 picture card (the share sheet on phones,
+a download elsewhere) and a link. **Bring Them Home** opens the request form:
+who it's for, how many (up to five), name, number, email and notes. No payment
+is taken: the request gets a code (`DL-XXXXX`), the client is texted that a
+quote and timeline are coming, and the salon is texted and emailed.
+
+**State and links.** The whole look lives in the URL (`?b=girl&c=caramel&h=locs&hc=black&hl=honey-blonde&t=tee.red&p=jeans.denim&s=boots.brown&a=bag,glasses&bg=throne&step=reveal`),
+so every step is a page in the browser's history (Back and Forward keep the
+choices) and a shared link reopens the same Crown Heir. If a link names
+something no longer offered, the rest is kept and the page opens on that
+step to ask for a new pick. Requests store the picks and this link; the
+desk's **Dolls** tab shows the look with a *See the doll* link.
+
+**Brand marks are never drawn.** Every Crown Heirs mark comes from a source
+file in `public/doll-maker/brand-source/`: the primary logo (from the handoff;
+a resized web copy beside it) on the reveal and the share card, and the CH
+monogram on the branded tops. The crown accessory shows as *coming soon* until
+`brand_source_crown_original.png` is supplied. The throne setting is drawn
+environment only, with no crown. `test/doll-manifest.test.js` guards this.
+
+**The art.** Until painted layer art arrives, the doll is drawn in SVG by
+`public/doll-art.js` (also used on the home page), in the handoff's layer
+order: hair behind, body, bottoms, top (with any brand overlay), shoes, head
+and face, hair in front, accessories. `public/doll-maker/manifest.json` lists
+every option id and display name and the layer file each will need
+(`chd_[base]_[category]_[option]_[variant]_v##.webp` on a 2400 × 3200 master
+canvas). It is generated from the catalog: run
+`node scripts/build-doll-manifest.js` after changing options in
+`lib/dolls.js`, where all the choices live.
+
+The desk's **Dolls** tab moves each request along, new → quoted (the quote is
+typed in and texted to the client) → making → ready (the client is texted to
+pick up) → done, or cancelled.
 
 ## From the Den: Instagram
 

@@ -40,7 +40,7 @@
      shoulders, { front } on top of the head. P is the hair paint; Q, when
      there is a second colour, paints the highlights: whole strands of it
      from root to tip, mixed through the first. */
-  function hair(style, P, Q, h, c1, K, id) {
+  function hair(style, P, Q, h, c1, K, id, S) {
     const { cx, cy, rx, ry } = h; const s = ry / 36;
     const dark = shade(c1, -0.35);
     const hl = i => Q && i % 3 === 1;                              // every third strand is a highlight
@@ -159,80 +159,205 @@
         const swirl = `M${f(x)} ${f(y - r * 0.6)}a${f(r * 0.6)} ${f(r * 0.6)} 0 1 1 ${f(-r * 0.55)} ${f(r * 0.65)}`;
         return { back: '', over: '', front: cap(13, 4.2 * s) + blob(x, y, r) + (Q ? `<path d="${swirl}" fill="none" stroke="${Q}" stroke-width="${f(4 * s)}" stroke-linecap="round"/>` : '') + `<path d="${swirl}" fill="none" stroke="${dark}" stroke-width="${f(1.3 * s)}"/>` };
       }
+      case 'short-curls': {
+        // A close cap of tight curls, faded at the temples.
+        const capS = `M${f(cx - rx * 1.0)} ${f(cy - ry * 0.05)}C${f(cx - rx * 1.06)} ${f(cy - ry * 1.3)} ${f(cx + rx * 1.06)} ${f(cy - ry * 1.3)} ${f(cx + rx * 1.0)} ${f(cy - ry * 0.05)}`
+          + `C${f(cx + rx * 0.84)} ${f(cy - ry * 0.3)} ${f(cx + rx * 0.5)} ${f(cy - ry * 0.62)} ${f(cx)} ${f(cy - ry * 0.58)}`
+          + `C${f(cx - rx * 0.5)} ${f(cy - ry * 0.62)} ${f(cx - rx * 0.84)} ${f(cy - ry * 0.3)} ${f(cx - rx * 1.0)} ${f(cy - ry * 0.05)}Z`;
+        const fade = `<linearGradient id="${id}-fade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${S}" stop-opacity="0"/><stop offset="1" stop-color="${S}" stop-opacity=".85"/></linearGradient>`
+          + `<clipPath id="${id}-sc"><path d="${capS}"/></clipPath><g clip-path="url(#${id}-sc)">`
+          + [-1, 1].map(side => `<rect x="${f(side < 0 ? cx - rx * 1.1 : cx + rx * 0.6)}" y="${f(cy - ry * 0.62)}" width="${f(rx * 0.5)}" height="${f(ry * 0.6)}" fill="url(#${id}-fade)"/>`).join('') + '</g>';
+        let curls = '', k = 0;
+        for (const [n, rr, from, to, r] of [[12, 0.97, 1.16, 1.84, 0.15], [8, 0.66, 1.2, 1.8, 0.13]]) {
+          for (let i = 0; i < n; i++, k++) {
+            const a = Math.PI * (from + (to - from) * (i / (n - 1)));
+            const x = cx + Math.cos(a) * rx * rr, y = cy - ry * 0.08 + Math.sin(a) * ry * rr;
+            curls += blob(x, y, rx * r, hl(k) ? Q : P) + `<path d="M${f(x - rx * r * 0.45)} ${f(y)}a${f(rx * r * 0.45)} ${f(rx * r * 0.45)} 0 1 1 ${f(rx * r * 0.5)} ${f(rx * r * 0.35)}" fill="none" stroke="${dark}" stroke-width="${f(0.7 * s)}" opacity=".7"/>`;
+          }
+        }
+        return { back: '', over: '', front: `<path d="${capS}" fill="${P}"/><path d="${capS}" fill="${K}"/>` + fade + curls };
+      }
       default: return { back: '', over: '', front: cap() };
     }
   }
 
-  function face(h, S) {
+  function face(h, S, lashes) {
     const { cx, cy, rx, ry } = h; const s = ry / 36;
     const ex = rx * 0.38, ey = cy + ry * 0.16, er = 4.3 * s;
     const eye = x => `<circle cx="${f(x)}" cy="${f(ey)}" r="${f(er)}" fill="#141210"/><circle cx="${f(x + er * 0.32)}" cy="${f(ey - er * 0.36)}" r="${f(er * 0.3)}" fill="#fff"/>`;
     const brow = x => `<path d="M${f(x - 5 * s)} ${f(ey - 9 * s)}q${f(5 * s)} ${f(-3 * s)} ${f(10 * s)} 0" fill="none" stroke="#2a1d17" stroke-width="${f(1.5 * s)}" stroke-linecap="round"/>`;
-    return eye(cx - ex) + eye(cx + ex) + brow(cx - ex) + brow(cx + ex)
+    const lash = (x, side) => `<path d="M${f(x + side * er * 0.7)} ${f(ey - er * 0.7)}l${f(side * 2.2 * s)} ${f(-1.6 * s)}" stroke="#141210" stroke-width="${f(1.1 * s)}" stroke-linecap="round"/>`;
+    return eye(cx - ex) + eye(cx + ex) + brow(cx - ex) + brow(cx + ex) + (lashes ? lash(cx - ex, -1) + lash(cx + ex, 1) : '')
       + `<ellipse cx="${cx}" cy="${f(cy + ry * 0.44)}" rx="${f(3.8 * s)}" ry="${f(3.1 * s)}" fill="${shade(S, -0.18)}"/>`
       + `<path d="M${f(cx - 6 * s)} ${f(cy + ry * 0.66)}q${f(6 * s)} ${f(4.5 * s)} ${f(12 * s)} 0" fill="none" stroke="#5a2a22" stroke-width="${f(1.8 * s)}" stroke-linecap="round"/>`;
   }
 
+  /* The whole doll, in the Doll Maker's layer order: hair that sits behind,
+     the body, bottoms, top (with any Crown Heirs mark placed from its source
+     file, never drawn), shoes, the head and face, the hair in front, then
+     accessories.
+       o = { base, skin, hair1, hair2?, style,
+             top: { look, color, brand }, bottom: { look, color },
+             shoes: { look, main, trim }, accessories: [ids], brandSrc? } */
   function render(o, id) {
     id = id || 'doll';
-    const S = o.skin || '#c4986c', h = { cx: 100, cy: 66, rx: 33, ry: 36 };
-    const c1 = o.hair1 || '#2a1d17', P = `url(#${id}-hair)`, Q = o.hair2 ? `url(#${id}-hl)` : null, K = `url(#${id}-knit)`;
-    const H = hair(o.style || 'locs', P, Q, h, c1, K, id);
+    const S = o.skin || '#7d4a2c', h = { cx: 100, cy: 66, rx: 33, ry: 36 };
+    const c1 = o.hair1 || '#1b1b1b', P = `url(#${id}-hair)`, Q = o.hair2 ? `url(#${id}-hl)` : null, K = `url(#${id}-knit)`;
+    const style = o.style || 'locs';
+    const H = style === 'none' ? { back: '', over: '', front: '' } : hair(style, P, Q, h, c1, K, id, S);
     const fp = (d, fill, extra) => `<path d="${d}" fill="${fill}"${extra || ''}/><path d="${d}" fill="${K}"/>`;
     const limb = (x1, y1, x2, y2, w, c) => [c, K].map(p => `<path d="M${x1} ${y1}L${x2} ${y2}" fill="none" stroke="${p}" stroke-width="${w}" stroke-linecap="round"/>`).join('');
     const ball = (x, y, r, c) => `<circle cx="${x}" cy="${y}" r="${r}" fill="${c}"/><circle cx="${x}" cy="${y}" r="${r}" fill="${K}"/>`;
-    const topC = o.topC || '#a0624a', botC = o.botC || '#4a6a94', kind = o.kind || 'pants';
+    const top = o.top || { look: 'tee', color: '#c0392b' }, bot = o.bottom || { look: 'jeans', color: '#4a6a94' };
+    const sh = o.shoes || { look: 'sneakers', main: '#f7f4ee', trim: '#f7f4ee' }, acc = new Set(o.accessories || []);
+    const logo = o.brandSrc || '/doll-maker/brand-source/brand_source_ch_monogram.png';   // the approved CH mark, as supplied
+    const gd = '#c8952a', cream = '#f7f4ee';
+    let pdefs = '';
 
-    // Bottoms, then the top over the waistband.
+    // 05 Bottoms
+    const bc = bot.color || '#4a6a94', bdk = shade(bc, -0.2);
+    const bottoms = {
+      joggers: () => fp('M70 180 H130 L126 250 H104 L101 204 H99 L96 250 H74 Z', bc)
+        + `<path d="M70 180 H130 V187 H70 Z" fill="${bdk}"/><path d="M74 243 H96 V251 H74 Z M104 243 H126 V251 H104 Z" fill="${bdk}"/>`
+        + `<path d="M97 187 l-1.5 9 M103 187 l1.5 9" stroke="${cream}" stroke-width="1.3" stroke-linecap="round"/>`,
+      jeans: () => fp('M70 180 H130 L125 254 H104 L101 204 H99 L96 254 H75 Z', bc)
+        + `<path d="M100 184 V203 M75 188 Q81 195 88 188 M125 188 Q119 195 112 188" fill="none" stroke="${shade(bc, 0.35)}" stroke-width=".9" stroke-dasharray="2 1.4"/>`
+        + `<path d="M75 247 H96 V254 H75 Z M104 247 H125 V254 H104 Z" fill="${shade(bc, 0.14)}"/>`,
+      shorts: () => fp('M70 180 H130 L131 214 H104 L101 200 H99 L96 214 H69 Z', bc) + `<path d="M69 209 H96 M104 209 H131" stroke="${bdk}" stroke-width="1.4"/>`,
+      skirt: () => fp('M70 180 L130 180 L140 224 Q100 233 60 224 Z', bc) + `<path d="M70 180 H130 V186 H70 Z" fill="${bdk}"/>`,
+      wide: () => fp('M70 180 H130 L137 254 H103 L100 208 L97 254 H63 Z', bc) + `<path d="M84 196 V253 M116 196 V253" stroke="${bdk}" stroke-width="1" opacity=".55"/><path d="M70 180 H130 V185 H70 Z" fill="${bdk}"/>`
+    };
+    const bottomL = (bottoms[bot.look] || bottoms.jeans)();
+
+    // 06 Top, 10 brand overlay
     const T = 'M71 112 Q100 100 129 112 L132 188 Q100 196 68 188 Z';
-    let bottoms = '', over = '';
-    if (kind === 'skirt')  bottoms = fp('M70 180 L130 180 L140 224 Q100 233 60 224 Z', botC);
-    if (kind === 'shorts') bottoms = fp('M70 180 H130 L131 214 H104 L101 200 H99 L96 214 H69 Z', botC);
-    if (kind === 'pants')  bottoms = fp('M70 180 H130 L125 256 H104 L101 204 H99 L96 256 H75 Z', botC);
-    if (kind === 'tutu')   bottoms = fp('M66 180 Q100 172 134 180 L152 212 Q100 226 48 212 Z', botC, ' opacity=".85"') + fp('M68 182 Q100 175 132 182 L144 206 Q100 216 56 206 Z', shade(botC, 0.15));
-    if (kind === 'dress')  over = fp('M70 168 L130 168 L144 232 Q100 244 56 232 Z', topC);
-    const sleeves = limb(73, 119, 68, 150, 18.5, topC) + limb(127, 119, 132, 150, 18.5, topC);
-    const neckline = fp('M91 108 Q100 120 109 108 Z', S);
-    const crownC = lum(topC) > 0.6 ? '#7a5512' : '#e0aa35';
-    const emblem = `<path d="M92 147 l1.8 -9 l4 5 l2.2 -7 l2.2 7 l4 -5 l1.8 9 z" fill="${crownC}"/>`;
+    const tc = top.color || '#c0392b', tdk = shade(tc, -0.18);
+    const longS = (p, cuff) => limb(73, 119, 64, 180, 17.5, p) + limb(127, 119, 136, 180, 17.5, p) + (cuff ? limb(64.6, 177, 63.8, 183, 18, cuff) + limb(135.4, 177, 136.2, 183, 18, cuff) : '');
+    const shortS = p => limb(73, 119, 69, 141, 18.5, p) + limb(127, 119, 131, 141, 18.5, p);
+    const scoop = fp('M91 108 Q100 120 109 108 Z', S);
+    const mark = (x, y, w) => `<image href="${logo}" x="${x}" y="${y}" width="${w}" height="${f(w * 449 / 202)}" preserveAspectRatio="xMidYMid meet"/>`;
+    const tops = {
+      hoodie: () => fp(T, tc) + longS(tc, tdk)
+        + `<path d="M82 111 Q100 128 118 111 Q114 103 100 104 Q86 103 82 111 Z" fill="${tdk}"/>`
+        + `<path d="M81 170 H119 L122 187 Q100 191 78 187 Z" fill="${tdk}" opacity=".55"/>`
+        + `<path d="M93.5 116 L92.5 126 M106.5 116 L107.5 126" stroke="${cream}" stroke-width="1.4" stroke-linecap="round"/>`
+        + (top.brand ? mark(91.5, 128, 17) : ''),
+      sweater: () => fp(T, tc) + longS(tc, tdk)
+        + `<path d="M88 107 Q100 121 112 107" fill="none" stroke="${tdk}" stroke-width="4"/>`
+        + `<path d="M69 183 Q100 191 131 183 L132 188 Q100 196 68 188 Z" fill="${tdk}"/>`
+        + (top.brand ? `<rect x="87" y="124" width="26" height="46" rx="2.5" fill="${cream}" stroke="${shade(tc, -0.3)}" stroke-width=".8"/>` + mark(91, 126, 18.6) : ''),
+      tee: () => fp(T, tc) + shortS(tc) + scoop,
+      jacket: () => {
+        const dn = '#5b7fae', ddk = shade(dn, -0.2);
+        return fp(T, dn) + fp('M91 108 L109 108 L107 193 L93 193 Z', tc) + longS(dn, ddk)
+          + `<path d="M89 108 L97 136 L92 111 Z M111 108 L103 136 L108 111 Z" fill="${ddk}"/>`
+          + `<path d="M77 132 H89 V140 H77 Z M111 132 H123 V140 H111 Z" fill="none" stroke="${shade(dn, 0.3)}" stroke-width=".9" stroke-dasharray="1.6 1.2"/>`
+          + `<circle cx="90" cy="150" r="1.4" fill="${gd}"/><circle cx="90" cy="168" r="1.4" fill="${gd}"/><circle cx="110" cy="150" r="1.4" fill="${gd}"/><circle cx="110" cy="168" r="1.4" fill="${gd}"/>`;
+      },
+      cardigan: () => {
+        pdefs += `<pattern id="${id}-fuzz" width="4" height="4" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r="1" fill="rgba(255,255,255,.4)"/><circle cx="3" cy="3" r=".9" fill="rgba(0,0,0,.07)"/></pattern>`;
+        const Z = `url(#${id}-fuzz)`;
+        return fp(T, cream) + scoop
+          + [`M71 112 Q84 106 92 109 L95 193 Q80 193 68 188 Z`, `M129 112 Q116 106 108 109 L105 193 Q120 193 132 188 Z`].map(d => fp(d, tc) + `<path d="${d}" fill="${Z}"/>`).join('')
+          + longS(tc) + limb(73, 119, 64, 180, 17.5, Z) + limb(127, 119, 136, 180, 17.5, Z);
+      },
+      flannel: () => {
+        pdefs += `<pattern id="${id}-plaid" width="12" height="12" patternUnits="userSpaceOnUse"><rect width="12" height="12" fill="${tc}"/><rect y="4" width="12" height="4" fill="${shade(tc, -0.4)}" opacity=".5"/><rect x="4" width="4" height="12" fill="${shade(tc, -0.4)}" opacity=".5"/><path d="M0 10H12M10 0V12" stroke="${cream}" stroke-width=".7" opacity=".6"/></pattern>`;
+        const PL = `url(#${id}-plaid)`;
+        return fp(T, PL) + longS(PL, shade(tc, -0.3)) + scoop
+          + `<path d="M88 107 L96 121 L99 110 Z M112 107 L104 121 L101 110 Z" fill="${shade(tc, -0.25)}"/>`
+          + [132, 148, 164, 180].map(y => `<circle cx="100" cy="${y}" r="1.3" fill="${cream}"/>`).join('');
+      }
+    };
+    const topL = (tops[top.look] || tops.tee)();
 
-    const shoeC = o.shoeC || '#f7f4ee', sole = lum(shoeC) > 0.75 ? '#d9d2c6' : shade(shoeC, -0.3), line = lum(shoeC) > 0.5 ? '#3a2f28' : '#f3efe8';
+    // 07 Shoes: drawn for the right foot, mirrored for the left.
     const shoeR = x => {
-      switch (o.shoe) {
-        case 'boots':   return fp(`M${x - 9} 226 H${x + 9} V250 Q${x + 17} 251 ${x + 17} 259 V265 H${x - 10} Z`, shoeC);
-        case 'sandals': return `<path d="M${x - 10} 260 H${x + 16} V265 H${x - 10} Z" fill="${shoeC}"/><path d="M${x - 7} 254 L${x + 10} 254 M${x - 3} 249 L${x + 9} 258" stroke="${shoeC}" stroke-width="3" stroke-linecap="round"/>`;
-        case 'heels':   return fp(`M${x - 9} 252 Q${x - 9} 247 ${x - 3} 247 H${x + 4} Q${x + 15} 251 ${x + 16} 262 H${x - 4} L${x - 6} 266 H${x - 9} Z`, shoeC);
-        case 'flats':   return fp(`M${x - 10} 255 Q${x - 10} 250 ${x - 3} 250 H${x + 5} Q${x + 15} 252 ${x + 16} 262 V265 H${x - 10} Z`, shoeC) + `<path d="M${x - 6} 252 H${x + 7}" stroke="${line}" stroke-width="1.6" opacity=".55"/>`;
-        default:        return fp(`M${x - 11} 254 Q${x - 11} 246 ${x - 3} 246 H${x + 5} Q${x + 15} 248 ${x + 17} 259 V266 H${x - 12} Z`, shoeC, ` stroke="${shade(shoeC, -0.45)}" stroke-width=".9"`)
-                          + `<path d="M${x - 12} 262 H${x + 17}" stroke="${sole}" stroke-width="3.2"/>`
-                          + `<path d="M${x - 3} 250 l4 4 M${x + 1} 249 l4 4" stroke="${line}" stroke-width="1.2" stroke-linecap="round"/>`;
+      const m = sh.main || cream, t = sh.trim || m;
+      const sole = lum(m) > 0.75 && lum(t) > 0.75 ? '#d9d2c6' : t, lace = lum(m) > 0.5 ? '#3a2f28' : cream;
+      switch (sh.look) {
+        case 'boots': return fp(`M${x - 9} 226 H${x + 9} V250 Q${x + 17} 251 ${x + 17} 259 V265 H${x - 10} Z`, m) + `<path d="M${x - 10} 262 H${x + 17}" stroke="${shade(m, -0.35)}" stroke-width="3"/>`;
+        case 'flats': return fp(`M${x - 10} 255 Q${x - 10} 250 ${x - 3} 250 H${x + 5} Q${x + 15} 252 ${x + 16} 262 V265 H${x - 10} Z`, m, ` stroke="${shade(m, -0.4)}" stroke-width=".8"`)
+          + `<path d="M${x - 8} 251 Q${x - 1} 246 ${x + 6} 251" fill="none" stroke="${shade(m, -0.3)}" stroke-width="1.6"/><circle cx="${x + 5}" cy="251" r="1.1" fill="${gd}"/>`;
+        default: return fp(`M${x - 11} 254 Q${x - 11} 246 ${x - 3} 246 H${x + 5} Q${x + 15} 248 ${x + 17} 259 V266 H${x - 12} Z`, m, ` stroke="${shade(m, -0.45)}" stroke-width=".9"`)
+          + (t !== m ? `<path d="M${x + 7} 248.5 Q${x + 15} 250 ${x + 17} 259 V262 H${x + 5} Q${x + 4} 254 ${x + 7} 248.5 Z" fill="${t}"/>` : '')
+          + `<path d="M${x - 12} 262 H${x + 17}" stroke="${sole}" stroke-width="3.2"/>`
+          + `<path d="M${x - 3} 250 l4 4 M${x + 1} 249 l4 4" stroke="${lace}" stroke-width="1.2" stroke-linecap="round"/>`;
       }
     };
     const shoes = `<g transform="translate(174 0) scale(-1 1)">${shoeR(87)}</g>` + shoeR(113);
 
-    const crownTop = o.style === 'curly-afro' ? h.cy - h.ry * 1.8 : o.style === 'bun' ? h.cy - h.ry * 0.82 : h.cy - h.ry * 1.1;   // in front of a top bun, not over it
-    const extras = (o.crown ? `<path d="M84 ${crownTop} l3 -15 l6.5 8 l6.5 -12 l6.5 12 l6.5 -8 l3 15 z" fill="#c8952a" stroke="#8a6414" stroke-width="1"/>` : '')
-      + (o.bow ? (bx => `<path d="M${bx} 40 l13 -8 v17z M${bx} 40 l-13 -8 v17z" fill="${o.bowC || '#e07fa8'}"/><circle cx="${bx}" cy="40" r="3.6" fill="${o.bowC || '#e07fa8'}" stroke="rgba(0,0,0,.2)"/>`)(122) : '')
-      + (o.glasses ? `<g fill="none" stroke="#1f1d1b" stroke-width="2"><circle cx="87.5" cy="72" r="8.5"/><circle cx="112.5" cy="72" r="8.5"/><path d="M96 72 h8"/></g>` : '');
+    // 09 Accessories
+    const hatTop = style === 'short-curls' ? 30 : 26;
+    const accL = (acc.has('hat') ? `<path d="M72 ${hatTop + 18} Q72 ${hatTop - 6} 100 ${hatTop - 8} Q128 ${hatTop - 6} 128 ${hatTop + 18} Z" fill="#1f1d1b"/><path d="M72 ${hatTop + 18} Q72 ${hatTop - 6} 100 ${hatTop - 8} Q128 ${hatTop - 6} 128 ${hatTop + 18} Z" fill="${K}"/><ellipse cx="100" cy="${hatTop + 19}" rx="40" ry="7" fill="#2b2826"/><path d="M73 ${hatTop + 13} H127" stroke="${gd}" stroke-width="2"/>` : '')
+      + (acc.has('bow') ? `<path d="M122 40 l13 -8 v17z M122 40 l-13 -8 v17z" fill="#e07fa8"/><circle cx="122" cy="40" r="3.6" fill="#e07fa8" stroke="rgba(0,0,0,.2)"/>` : '')
+      + (acc.has('glasses') ? `<g fill="none" stroke="#1f1d1b" stroke-width="2"><circle cx="87.5" cy="72" r="8.5"/><circle cx="112.5" cy="72" r="8.5"/><path d="M96 72 h8"/></g>` : '')
+      + (acc.has('jewelry') ? `<g fill="none" stroke="${gd}" stroke-width="1.6"><circle cx="66" cy="82" r="4.5"/><circle cx="134" cy="82" r="4.5"/></g><path d="M89 110 Q100 126 111 110" fill="none" stroke="${gd}" stroke-width="1.2"/><circle cx="100" cy="122" r="2.2" fill="${gd}"/>` : '')
+      + (acc.has('bag') ? `<path d="M78 113 L126 174" stroke="#8a5a32" stroke-width="2.6" stroke-linecap="round"/><rect x="116" y="168" width="22" height="18" rx="3" fill="#b07a45"/><path d="M116 171 Q127 180 138 171 V168 H116 Z" fill="#8a5a32"/><circle cx="127" cy="176" r="1.6" fill="${gd}"/>` : '')
+      + (acc.has('crown') && o.crownSrc ? `<image href="${o.crownSrc}" x="76" y="${hatTop - 22}" width="48" height="30" preserveAspectRatio="xMidYMax meet"/>` : '');
 
-    return defs(id, h, c1, o.hair2)
-      + H.back
-      + limb(87, 186, 87, 252, 17, S) + limb(113, 186, 113, 252, 17, S)                 // legs
-      + limb(73, 120, 63, 188, 14, S) + limb(127, 120, 137, 188, 14, S)                 // arms
-      + ball(62, 193, 8, S) + ball(138, 193, 8, S)                                         // hands
-      + `<rect x="91" y="94" width="18" height="20" rx="4" fill="${S}"/>`
-      + bottoms + fp(T, topC) + over + sleeves + neckline + emblem
-      + shoes
-      + ball(67, 72, 6, S) + ball(133, 72, 6, S)                                           // ears
+    return defs(id, h, c1, o.hair2) + (pdefs ? `<defs>${pdefs}</defs>` : '')
+      + H.back                                                                        // 04 hair behind
+      + limb(87, 186, 87, 252, 17, S) + limb(113, 186, 113, 252, 17, S)                 // 02 legs
+      + limb(73, 120, 63, 188, 14, S) + limb(127, 120, 137, 188, 14, S)                 //    arms
+      + `<rect x="91" y="94" width="18" height="20" rx="4" fill="${S}"/>`               //    neck
+      + bottomL + topL                                                                 // 05, 06 (+10)
+      + ball(62, 193, 8, S) + ball(138, 193, 8, S)                                     //    hands, over the cuffs
+      + shoes                                                                           // 07
+      + ball(67, 72, 6, S) + ball(133, 72, 6, S)                                       //    ears
       + `<ellipse cx="${h.cx}" cy="${h.cy}" rx="${h.rx}" ry="${h.ry}" fill="${S}"/><ellipse cx="${h.cx}" cy="${h.cy}" rx="${h.rx}" ry="${h.ry}" fill="${K}"/>`
-      + face(h, S)
-      + H.over + H.front + extras;
+      + face(h, S, o.base !== 'boy')
+      + H.over + H.front                                                               // 08 hair in front
+      + accL;                                                                           // 09
+  }
+
+  /* A close crop of one part of the doll, for an option's thumbnail. */
+  const CROPS = { top: '56 98 88 100', bottom: '54 176 92 84', shoes: '64 236 72 34', head: '50 8 100 104',
+    bag: '66 104 84 96', glasses: '62 44 76 56', hat: '50 0 100 80', bow: '66 18 76 60', jewelry: '58 58 84 74', crown: '50 0 100 80' };
+  function crop(part) { return CROPS[part] || '0 0 200 290'; }
+
+  /* The reveal: the finished doll set in a scene, for a 300×380 viewBox.
+     Settings are drawn environment only; no crown or mark is drawn into
+     them (Crown Heirs marks are placed from their source files by the page). */
+  function reveal(o, bg, id) {
+    id = id || 'rv';
+    const doll = `<g transform="translate(50 62)">${render(o, id)}</g>`;
+    const shadow = `<ellipse cx="150" cy="329" rx="54" ry="7" fill="rgba(0,0,0,.2)"/>`;
+    if (bg === 'neutral') {
+      return `<defs><radialGradient id="${id}-glow" cx=".5" cy=".42" r=".6"><stop offset="0" stop-color="#fbf3e2"/><stop offset="1" stop-color="#e8d7b8"/></radialGradient></defs>`
+        + `<rect width="300" height="380" fill="url(#${id}-glow)"/>`
+        + `<path d="M58 318 V128 Q58 40 150 40 Q242 40 242 128 V318" fill="none" stroke="#c8952a" stroke-width="1.6" opacity=".7"/>`
+        + `<path d="M66 318 V130 Q66 50 150 50 Q234 50 234 130 V318" fill="none" stroke="#c8952a" stroke-width=".7" opacity=".5"/>`
+        + `<rect y="318" width="300" height="62" fill="#d9c4a0"/><path d="M0 318 H300" stroke="#c8952a" stroke-width="1"/>` + shadow + doll;
+    }
+    const G = `url(#${id}-gold)`, V = `url(#${id}-tuft)`;
+    const post = x => `<rect x="${x - 7}" y="72" width="14" height="258" rx="3" fill="${G}"/><circle cx="${x}" cy="66" r="8" fill="${G}"/><path d="M${x - 3} 60 L${x} 44 L${x + 3} 60 Z" fill="${G}"/>`
+      + [120, 190, 260].map(y => `<rect x="${x - 9}" y="${y}" width="18" height="6" rx="2" fill="${G}"/>`).join('');
+    const arm = side => { const x = 150 + side * 86; return `<path d="M${x} 206 Q${x + side * 26} 200 ${x + side * 30} 222 Q${x + side * 30} 238 ${x + side * 14} 238 L${x} 238 Z" fill="${G}"/><circle cx="${x + side * 24}" cy="224" r="9" fill="${G}" stroke="#8a6414" stroke-width="1"/><circle cx="${x + side * 24}" cy="224" r="4" fill="none" stroke="#8a6414" stroke-width="1"/>`; };
+    return `<defs>
+        <linearGradient id="${id}-gold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f6dc8c"/><stop offset=".45" stop-color="#d4a640"/><stop offset="1" stop-color="#9c7020"/></linearGradient>
+        <linearGradient id="${id}-wall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f4ead8"/><stop offset="1" stop-color="#e2cfae"/></linearGradient>
+        <linearGradient id="${id}-floor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7a4e2c"/><stop offset="1" stop-color="#4f2f19"/></linearGradient>
+        <pattern id="${id}-tuft" width="16" height="16" patternUnits="userSpaceOnUse"><rect width="16" height="16" fill="#2b1c17"/><path d="M0 8 L8 0 L16 8 L8 16 Z" fill="none" stroke="#1d120e" stroke-width="1"/><circle cx="8" cy="8" r="1.4" fill="#4a332a"/></pattern>
+      </defs>`
+      + `<rect width="300" height="320" fill="url(#${id}-wall)"/>`
+      + `<rect x="0" width="26" height="320" fill="#efe2c9"/><rect x="274" width="26" height="320" fill="#efe2c9"/><path d="M26 0 V320 M274 0 V320" stroke="#d9c39c" stroke-width="2"/>`
+      + `<rect y="312" width="300" height="68" fill="url(#${id}-floor)"/>`
+      + `<ellipse cx="150" cy="338" rx="124" ry="22" fill="#7a1f2b"/><ellipse cx="150" cy="338" rx="116" ry="18" fill="none" stroke="#c8952a" stroke-width="1.4"/>`
+      + `<path d="M68 310 V100 Q68 36 150 22 Q232 36 232 100 V310 Z" fill="${G}"/>`
+      + `<path d="M82 304 V106 Q82 52 150 40 Q218 52 218 106 V304 Z" fill="${V}"/>`
+      + `<ellipse cx="150" cy="24" rx="15" ry="10" fill="${G}" stroke="#8a6414" stroke-width="1"/><path d="M135 26 q-12 -10 -22 2 M165 26 q12 -10 22 2" fill="none" stroke="#9c7020" stroke-width="2.2" stroke-linecap="round"/>`
+      + post(62) + post(238) + arm(-1) + arm(1)
+      + `<rect x="74" y="236" width="152" height="22" rx="8" fill="#3a2620"/>`
+      + `<path d="M70 256 H230 V276 Q190 288 150 280 Q110 288 70 276 Z" fill="${G}"/><path d="M84 266 q8 8 16 0 q8 8 16 0 M184 266 q8 8 16 0 q8 8 16 0" fill="none" stroke="#8a6414" stroke-width="1.2"/>`
+      + `<rect x="80" y="278" width="14" height="44" rx="3" fill="${G}"/><rect x="206" y="278" width="14" height="44" rx="3" fill="${G}"/>`
+      + shadow + doll;
   }
 
   function tile(style, hair1, hair2, skin, id) {
-    const h = { cx: 30, cy: 30, rx: 12.5, ry: 13.6 }, S = skin || '#c4986c';
-    const c1 = hair1 || '#2a1d17', P = `url(#${id}-hair)`, Q = hair2 ? `url(#${id}-hl)` : null, K = `url(#${id}-knit)`;
-    const H = hair(style, P, Q, h, c1, K, id);
+    const h = { cx: 30, cy: 30, rx: 12.5, ry: 13.6 }, S = skin || '#7d4a2c';
+    const c1 = hair1 || '#1b1b1b', P = `url(#${id}-hair)`, Q = hair2 ? `url(#${id}-hl)` : null, K = `url(#${id}-knit)`;
+    const H = hair(style, P, Q, h, c1, K, id, S);
     const er = 1.7;
     return defs(id, h, c1, hair2) + H.back
       + `<rect x="26.5" y="40" width="7" height="12" rx="2" fill="${S}"/>`
@@ -241,5 +366,5 @@
       + H.over + H.front;
   }
 
-  root.DollArt = { render, tile, shade };
+  root.DollArt = { render, reveal, tile, crop, shade };
 })(typeof window !== 'undefined' ? window : globalThis);

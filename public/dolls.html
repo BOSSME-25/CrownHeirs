@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Build Your Doll — Crown Heirs Hair Den</title>
-<meta name="description" content="Build your Crown Heirs doll: pick the yarn shade, the hair colour and style, and tell us your outfit wishes. We make it at the Den.">
+<title>Build Your Crown Heir — Crown Heirs Doll Maker</title>
+<meta name="description" content="Build your Crown Heir: choose a base, a complexion and a crown of hair, style the look, then take your seat on the throne. Handmade yarn dolls from Crown Heirs in Phoenix.">
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -13,18 +13,21 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #ece8e2; --paper: #f3efe8; --surface: #ffffff; --char: #1c1a18;
-  --terra: #a0624a; --terra-hi: #b8714f; --gold: #c8952a; --gold-hi: #e0aa35;
-  --ink: #1a1816; --ink-mid: #4a4540; --ink-dim: #8a837a;
-  --border: rgba(26,24,22,0.12); --border-mid: rgba(26,24,22,0.22); --ok: #3d7a45; --err: #a03228;
+  --bg: #ece8e2; --paper: #f3efe8; --surface: #ffffff; --char: #1c1a18; --cream: #f6efe3;
+  --terra: #a0624a; --terra-hi: #b8714f; --gold: #c8952a; --gold-hi: #e0aa35; --brown: #4a2c1e;
+  --ink: #1a1816; --ink-mid: #4a4540; --ink-dim: #6b645b;
+  --border: rgba(26,24,22,0.12); --border-mid: rgba(26,24,22,0.24); --ok: #3d7a45; --err: #a03228;
   --font-ui: 'Jost', sans-serif; --font-serif: 'Cormorant Garamond', serif;
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body { background: var(--paper); color: var(--ink); font-family: var(--font-ui); font-weight: 300; font-size: 16px; }
-button { font-family: var(--font-ui); cursor: pointer; }
-input, textarea, select { font-family: var(--font-ui); font-size: 16px; font-weight: 300; color: var(--ink); width: 100%; padding: 13px 14px; border: 1px solid var(--border); background: var(--surface); }
-input:focus, textarea:focus, select:focus { outline: 2px solid var(--terra); outline-offset: -1px; }
-label { display: block; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-dim); margin: 16px 0 6px; }
+button { font-family: var(--font-ui); cursor: pointer; color: inherit; }
+:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+input, textarea { font-family: var(--font-ui); font-size: 16px; font-weight: 300; color: var(--ink); width: 100%; padding: 13px 14px; border: 1px solid var(--border-mid); background: var(--surface); }
+input:focus-visible, textarea:focus-visible { outline: 3px solid var(--gold); outline-offset: 0; }
+label, .lbl { display: block; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-dim); margin: 16px 0 6px; font-weight: 400; }
+.hidden { display: none !important; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
 .site-header { background: var(--char); height: 72px; padding: 0 40px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
 .site-logo img { height: 44px; display: block; }
@@ -35,41 +38,134 @@ label { display: block; font-size: 13px; letter-spacing: 0.08em; text-transform:
 .site-nav .nav-cta:hover { background: var(--gold-hi); color: var(--char); }
 @media (max-width: 640px) { .site-header { padding: 0 18px; height: 64px; } .site-nav { gap: 16px; } .site-nav a:not(.nav-cta) { display: none; } .site-nav .nav-cta { padding: 10px 18px; } }
 
+/* 1. Welcome: short, so the doll is in view quickly. */
 .hero { background: var(--char) url('/images/dolls/dolls-poster-v1.jpg') center 55% / cover no-repeat; color: #fff; text-align: center; position: relative; overflow: hidden; isolation: isolate;
-  min-height: clamp(500px, 80vh, 740px); display: flex; flex-direction: column; justify-content: flex-end; align-items: center; padding: 120px 24px 40px; }
+  min-height: clamp(380px, 58vh, 560px); display: flex; flex-direction: column; justify-content: flex-end; align-items: center; padding: 100px 24px 36px; }
 .hero-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 55%; z-index: -2; opacity: 0; transition: opacity 0.8s ease; }
 .hero-video.on { opacity: 1; }
-.hero::before { content: ''; position: absolute; inset: 0; z-index: -1; background: linear-gradient(to bottom, rgba(28,26,24,0.05) 0%, rgba(28,26,24,0.12) 50%, rgba(28,26,24,0.78) 74%, rgba(28,26,24,0.94) 100%); }
+.hero::before { content: ''; position: absolute; inset: 0; z-index: -1; background: linear-gradient(to bottom, rgba(28,26,24,0.05) 0%, rgba(28,26,24,0.15) 45%, rgba(28,26,24,0.82) 74%, rgba(28,26,24,0.95) 100%); }
 .hero h1, .hero p { text-shadow: 0 2px 14px rgba(0,0,0,0.45); }
-/* Phones: the video sits above the words instead of under them. */
 @media (max-width: 640px) {
-  .hero { min-height: 0; padding: 262px 18px 30px; background: var(--char) url('/images/dolls/dolls-poster-v1.jpg') center top / auto 290px no-repeat; }
-  .hero-video { height: 290px; bottom: auto; }
-  .hero::before { bottom: auto; height: 292px; background: linear-gradient(to bottom, rgba(28,26,24,0) 62%, rgba(28,26,24,1) 100%); }
+  .hero { min-height: 0; padding: 232px 18px 26px; background: var(--char) url('/images/dolls/dolls-poster-v1.jpg') center top / auto 260px no-repeat; }
+  .hero-video { height: 260px; bottom: auto; }
+  .hero::before { bottom: auto; height: 262px; background: linear-gradient(to bottom, rgba(28,26,24,0) 62%, rgba(28,26,24,1) 100%); }
 }
-.hero .eyebrow { font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.6); margin-bottom: 10px; }
-.hero h1 { font-family: var(--font-serif); font-weight: 400; font-size: clamp(2.2rem, 5vw, 3.4rem); line-height: 1.05; }
-.hero p { max-width: 560px; margin: 14px auto 0; color: rgba(255,255,255,0.8); line-height: 1.6; font-size: 1.02rem; }
+.hero .eyebrow { font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.75); margin-bottom: 10px; }
+.hero h1 { font-family: var(--font-serif); font-weight: 400; font-size: clamp(2.3rem, 5vw, 3.5rem); line-height: 1.05; }
+.hero p { max-width: 560px; margin: 12px auto 0; color: rgba(255,255,255,0.88); line-height: 1.6; font-size: 1.02rem; }
+.hero .cta { margin-top: 20px; }
+.hero .by { margin-top: 14px; font-size: 0.88rem; color: rgba(255,255,255,0.8); }
+.hero .by a { color: #fff; border-bottom: 1px solid rgba(255,255,255,0.45); text-decoration: none; }
 
-.wrap { max-width: 1100px; margin: 0 auto; padding: 36px 24px 80px; display: grid; grid-template-columns: 380px 1fr; gap: 36px; align-items: start; }
-.preview { position: sticky; top: 92px; background: var(--surface); box-shadow: 0 10px 30px rgba(0,0,0,0.07); padding: 22px; text-align: center; }
-.preview svg { width: 100%; max-width: 300px; height: auto; display: block; margin: 0 auto; }
-.preview .sum { font-family: var(--font-serif); font-size: 1.35rem; margin-top: 12px; line-height: 1.3; }
-.preview .sub { font-size: 0.85rem; color: var(--ink-dim); margin-top: 4px; line-height: 1.45; }
-.preview .tag { font-size: 0.66rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--terra); margin-bottom: 6px; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid var(--terra); background: var(--terra); color: #fff; padding: 14px 28px; font-size: 0.95rem; letter-spacing: 0.03em; text-decoration: none; min-height: 48px; }
+.btn:hover { background: var(--terra-hi); } .btn:disabled { background: #c8a898; border-color: #c8a898; cursor: default; }
+.btn-gold { background: var(--gold); border-color: var(--gold); color: var(--char); font-weight: 500; } .btn-gold:hover { background: var(--gold-hi); }
+.btn-ghost { background: transparent; color: var(--ink); border-color: var(--ink); } .btn-ghost:hover { background: var(--ink); color: #fff; }
+.link { background: none; border: none; color: var(--terra); text-decoration: underline; text-underline-offset: 3px; font-size: 0.92rem; padding: 4px 0; }
+
+/* The builder: the doll on the left, one step at a time on the right. */
+.build { max-width: 1160px; margin: 0 auto; padding: 32px 24px 8px; display: grid; grid-template-columns: 400px 1fr; gap: 36px; align-items: start; }
+.build > div:last-child { padding-bottom: 120px; }   /* room under the panel, so the pinned doll never slides under the header */
+.stage { position: sticky; top: 92px; background: var(--surface); box-shadow: 0 10px 30px rgba(0,0,0,0.07); padding: 20px 22px 22px; text-align: center; }
+.stage svg { width: 100%; max-width: 320px; height: auto; display: block; margin: 0 auto; }
+.stage .tag { font-size: 0.66rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--terra); margin: 6px 0 4px; }
+.stage .sum { font-family: var(--font-serif); font-size: 1.3rem; line-height: 1.3; }
+.stage .sub { font-size: 0.85rem; color: var(--ink-dim); margin-top: 4px; line-height: 1.45; }
 #doll.pop { animation: pop 0.35s ease; }
-@keyframes pop { 0% { transform: scale(1); } 40% { transform: scale(1.04) translateY(-3px); } 100% { transform: scale(1); } }
+@keyframes pop { 0% { transform: scale(1); } 40% { transform: scale(1.035) translateY(-3px); } 100% { transform: scale(1); } }
 @media (prefers-reduced-motion: reduce) { #doll.pop { animation: none; } }
-/* Phones: the preview pins under the header as a slim bar, so the doll stays in view while choosing. */
+
+.steps { display: flex; gap: 4px; list-style: none; margin-bottom: 16px; overflow-x: auto; scrollbar-width: none; }
+.steps::-webkit-scrollbar { display: none; }
+.steps button { border: none; background: none; padding: 8px 12px 10px; font-size: 0.84rem; color: var(--ink-dim); border-bottom: 2px solid var(--border); white-space: nowrap; }
+.steps button b { font-weight: 500; color: var(--terra); margin-right: 6px; }
+.steps button[aria-current="step"] { color: var(--ink); border-bottom-color: var(--terra); font-weight: 400; }
+.panel { background: var(--surface); box-shadow: 0 10px 30px rgba(0,0,0,0.06); padding: 28px; }
+.panel h2 { font-family: var(--font-serif); font-weight: 400; font-size: 2rem; line-height: 1.1; margin-bottom: 6px; }
+.panel h2:focus { outline: none; }
+.panel .hint { color: var(--ink-dim); font-size: 15px; line-height: 1.55; margin-bottom: 16px; }
+.panel h3 { font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-dim); font-weight: 400; margin: 24px 0 10px; }
+.notice { background: rgba(200,149,42,0.14); border-left: 3px solid var(--gold); padding: 12px 14px; font-size: 14.5px; line-height: 1.5; margin: 0 0 16px; }
+.nav { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 26px; padding-top: 18px; border-top: 1px solid var(--border); }
+
+/* option cards */
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+.cards.big { grid-template-columns: repeat(2, 1fr); }
+.cards.hair { grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); }
+.opt { position: relative; background: var(--paper); border: 1px solid var(--border); padding: 12px 10px 12px; text-align: center; font-size: 0.92rem; color: var(--ink-mid); line-height: 1.3; display: flex; flex-direction: column; align-items: center; gap: 8px; min-height: 48px; }
+.opt svg { display: block; width: 100%; height: auto; }
+.cards.hair .opt svg { width: 84px; height: 84px; }
+.cards.big .opt svg { max-width: 160px; }
+.opt .t { font-weight: 400; color: var(--ink); }
+.opt .d { font-size: 0.8rem; color: var(--ink-dim); }
+.opt[aria-checked="true"], .opt[aria-pressed="true"] { background: #fff; border-color: var(--ink); box-shadow: 0 0 0 1px var(--ink); color: var(--ink); }
+.opt[aria-checked="true"]::after, .opt[aria-pressed="true"]::after { content: '✓'; position: absolute; top: 6px; right: 8px; width: 22px; height: 22px; border-radius: 50%; background: var(--ink); color: #fff; font-size: 13px; line-height: 22px; }
+.opt[aria-disabled="true"] { opacity: 0.55; cursor: not-allowed; }
+.skin { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+.skin .opt { padding: 14px 6px 12px; }
+.skin .dot { width: 56px; height: 56px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.12); }
+@media (max-width: 560px) { .skin { grid-template-columns: repeat(3, 1fr); } }
+.colors { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--border-mid); background: #fff; padding: 8px 12px 8px 8px; font-size: 0.88rem; min-height: 44px; }
+.chip i { width: 26px; height: 26px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.15); }
+.chip[aria-checked="true"] { border-color: var(--ink); box-shadow: 0 0 0 1px var(--ink); font-weight: 400; }
+.chip[aria-disabled="true"] { opacity: 0.35; cursor: not-allowed; }
+.seg { display: inline-flex; border: 1px solid var(--border-mid); margin: 0 0 14px; }
+.seg button { border: none; background: #fff; padding: 11px 18px; font-size: 0.92rem; min-height: 44px; }
+.seg button[aria-checked="true"] { background: var(--char); color: #fff; }
+.tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--border); margin-bottom: 16px; overflow-x: auto; }
+.tabs button { border: none; background: none; padding: 12px 16px; font-size: 0.95rem; color: var(--ink-dim); border-bottom: 2px solid transparent; margin-bottom: -1px; min-height: 44px; }
+.tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--terra); font-weight: 400; }
+.review { display: grid; grid-template-columns: auto 1fr auto; gap: 0; border-top: 1px solid var(--border); }
+.review > * { padding: 12px 0; border-bottom: 1px solid var(--border); }
+.review dt { font-size: 12.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-dim); padding-right: 16px; }
+.review dd { color: var(--ink); }
+.review .link { justify-self: end; padding-left: 12px; }
+
+/* Phones: the doll pins under the header; Back/Next sit at the bottom, in thumb reach. */
 @media (max-width: 900px) {
-  .wrap { display: block; padding: 0 16px 60px; }
-  .preview { top: 64px; z-index: 30; margin: 0 -16px 18px; padding: 10px 16px; display: grid; grid-template-columns: 92px 1fr; gap: 14px; align-items: center; text-align: left; box-shadow: 0 6px 18px rgba(0,0,0,0.1); }
-  .preview svg { max-width: 92px; }
-  .preview .sum { font-size: 1.1rem; margin-top: 0; }
-  .preview .sub { font-size: 0.8rem; }
-  .preview .tag { margin-bottom: 2px; }
-  .card { margin-top: 0; }
+  .build { display: block; padding: 0 16px 24px; } .build > div:last-child { padding-bottom: 0; }
+  .stage { top: 64px; z-index: 30; margin: 0 -16px 14px; padding: 8px 16px; display: grid; grid-template-columns: 96px 1fr; gap: 12px; align-items: center; text-align: left; box-shadow: 0 6px 18px rgba(0,0,0,0.1); }
+  .stage svg { max-width: 96px; }
+  .stage .sum { font-size: 1.05rem; } .stage .sub { font-size: 0.78rem; } .stage .tag { margin: 0 0 2px; }
+  .panel { padding: 20px 16px; }
+  .panel h2 { font-size: 1.7rem; }
+  .cards.hair { grid-auto-flow: column; grid-template-columns: none; grid-auto-columns: 128px; overflow-x: auto; padding-bottom: 6px; scroll-snap-type: x mandatory; }
+  .cards.hair .opt { scroll-snap-align: start; }
+  .cards { grid-template-columns: repeat(2, 1fr); }
+  .nav { position: sticky; bottom: 0; background: var(--surface); margin: 20px -16px -20px; padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); box-shadow: 0 -6px 18px rgba(0,0,0,0.08); z-index: 20; }
+  .nav .btn { flex: 1; padding: 12px 14px; }
+  .review { grid-template-columns: 1fr auto; } .review dt { grid-column: 1 / -1; padding-bottom: 0; border-bottom: none; }
 }
+
+/* 7. The reveal */
+.reveal { max-width: 1060px; margin: 0 auto; padding: 36px 24px 80px; display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 40px; align-items: start; }
+.scene { background: var(--surface); box-shadow: 0 14px 40px rgba(0,0,0,0.12); }
+.scene svg { display: block; width: 100%; height: auto; }
+.reveal-side .mark { width: 128px; height: auto; display: block; margin-bottom: 10px; }
+.reveal-side h2 { font-family: var(--font-serif); font-weight: 400; font-size: clamp(2.2rem, 4vw, 3rem); line-height: 1.05; }
+.reveal-side h2:focus { outline: none; }
+.reveal-side .lede { color: var(--ink-mid); line-height: 1.6; margin: 10px 0 18px; }
+.recap { list-style: none; border-top: 1px solid var(--border); margin-bottom: 18px; }
+.recap li { display: flex; justify-content: space-between; gap: 16px; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 0.95rem; }
+.recap li span:first-child { color: var(--ink-dim); font-size: 0.8rem; letter-spacing: 0.08em; text-transform: uppercase; padding-top: 2px; }
+.recap li span:last-child { text-align: right; }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 16px 0 10px; }
+.sharebox { display: flex; gap: 8px; margin-top: 10px; } .sharebox input { font-size: 14px; padding: 10px 12px; }
+.small { font-size: 0.86rem; color: var(--ink-dim); line-height: 1.5; }
+@media (max-width: 860px) { .reveal { grid-template-columns: 1fr; gap: 22px; padding: 20px 16px 60px; } .reveal-side .mark { width: 96px; } }
+
+/* 8. Bring them home */
+.home { background: var(--surface); box-shadow: 0 10px 30px rgba(0,0,0,0.06); padding: 26px; margin-top: 18px; grid-column: 1 / -1; }
+.home h2 { font-family: var(--font-serif); font-weight: 400; font-size: 2rem; margin-bottom: 4px; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 14px; }
+@media (max-width: 520px) { .grid2 { grid-template-columns: 1fr; } }
+.terms { background: rgba(200,149,42,0.12); border-left: 3px solid var(--gold); padding: 12px 14px; font-size: 14.5px; line-height: 1.55; margin: 14px 0 4px; }
+.qty { display: inline-flex; align-items: center; border: 1px solid var(--border-mid); background: #fff; }
+.qty button { width: 46px; height: 46px; border: none; background: none; font-size: 1.2rem; } .qty b { width: 40px; text-align: center; font-weight: 400; }
+.err { color: var(--err); font-size: 14px; margin-top: 10px; min-height: 18px; }
+.done { text-align: center; } .done .code { font-family: var(--font-serif); font-size: 34px; letter-spacing: 0.12em; color: var(--terra); margin: 10px 0; }
+.done p { color: var(--ink-mid); line-height: 1.65; max-width: 540px; margin: 8px auto; }
 
 /* meet the maker */
 .maker { background: var(--surface); border-top: 1px solid var(--border); padding: 64px 24px; }
@@ -80,13 +176,6 @@ label { display: block; font-size: 13px; letter-spacing: 0.08em; text-transform:
 .maker-badge img { display: block; width: 100%; height: auto; border-radius: 50%; }
 .maker-badge:hover { transform: rotate(-6deg) scale(1.04); }
 @media (prefers-reduced-motion: reduce) { .maker-badge, .maker-badge:hover { transition: none; transform: none; } }
-.maker-mark { aspect-ratio: 1 / 1; background: #1f3a6b; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; box-shadow: 0 14px 30px rgba(0,0,0,0.12); }
-.maker-mark b { font-family: var(--font-serif); font-weight: 400; font-size: 4rem; line-height: 1; letter-spacing: 0.04em; }
-.maker-mark span { font-size: 0.7rem; letter-spacing: 0.22em; text-transform: uppercase; margin-top: 12px; color: rgba(255,255,255,0.8); }
-.maker-mark img { width: 100%; height: 100%; object-fit: cover; }
-.maker-mark.logo { background: transparent; box-shadow: none; padding: 0; transition: transform 0.4s ease; }
-.maker-mark.logo:hover { transform: rotate(-3deg) scale(1.02); }
-@media (prefers-reduced-motion: reduce) { .maker-mark.logo, .maker-mark.logo:hover { transition: none; transform: none; } }
 .maker .eyebrow { font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--terra); margin-bottom: 8px; }
 .maker h2 { font-family: var(--font-serif); font-weight: 400; font-size: clamp(2rem, 4vw, 2.8rem); line-height: 1.05; }
 .maker .brand { font-size: 0.95rem; color: var(--ink-mid); margin: 8px 0 18px; }
@@ -96,145 +185,97 @@ label { display: block; font-size: 13px; letter-spacing: 0.08em; text-transform:
 .maker blockquote cite { display: block; font-family: var(--font-ui); font-style: normal; font-size: 0.8rem; letter-spacing: 0.08em; color: var(--ink-dim); margin-top: 10px; }
 .maker .links { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
 @media (max-width: 760px) { .maker { padding: 44px 18px; } .maker-inner { grid-template-columns: 1fr; gap: 28px; } .maker-photo { max-width: 280px; margin: 0 auto; } }
-.hero .by { margin-top: 18px; font-size: 0.9rem; color: rgba(255,255,255,0.7); }
-.hero .by a { color: #fff; border-bottom: 1px solid rgba(255,255,255,0.4); text-decoration: none; }
-.card { background: var(--surface); box-shadow: 0 10px 30px rgba(0,0,0,0.06); padding: 26px; margin-bottom: 18px; }
-.card h2 { font-family: var(--font-serif); font-weight: 400; font-size: 28px; margin-bottom: 4px; }
-.card .hint { color: var(--ink-dim); font-size: 14.5px; margin-bottom: 10px; line-height: 1.5; }
-.step { font-size: 0.68rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--terra); margin-bottom: 4px; }
-.swatches { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 6px; }
-.sw { width: 56px; height: 56px; border: 2px solid transparent; padding: 0; position: relative; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.08); transition: transform 0.15s; }
-.sw:hover { transform: scale(1.06); }
-.sw.on { border-color: var(--ink); box-shadow: 0 0 0 2px #fff inset; }
-.sw span { position: absolute; left: 0; right: 0; bottom: -20px; font-size: 0.62rem; color: var(--ink-dim); letter-spacing: 0.04em; white-space: nowrap; text-align: center; }
-.swatches.labeled { margin-bottom: 28px; gap: 30px 12px; }
-.tone { display: inline-flex; border: 1px solid var(--border-mid); margin: 4px 0 16px; }
-.tone-b { border: none; background: #fff; padding: 10px 18px; font-size: 0.9rem; color: var(--ink-mid); }
-.tone-b.on { background: var(--char); color: #fff; }
-.sw.off { opacity: .25; pointer-events: none; }
-.styles { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 10px; margin-top: 6px; }
-.st { background: var(--paper); border: 1px solid var(--border); padding: 12px 8px 10px; text-align: center; font-size: 0.86rem; color: var(--ink-mid); }
-.st svg { width: 54px; height: 54px; display: block; margin: 0 auto 6px; }
-.st.on { border-color: var(--ink); background: #fff; color: var(--ink); box-shadow: 0 0 0 1px var(--ink); }
-.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 14px; }
-@media (max-width: 520px) { .grid2 { grid-template-columns: 1fr; } }
-.note { background: rgba(200,149,42,0.12); border-left: 3px solid var(--gold); padding: 12px 14px; font-size: 14.5px; line-height: 1.5; margin: 14px 0 4px; }
-.qty { display: inline-flex; align-items: center; border: 1px solid var(--border); background: #fff; }
-.qty button { width: 44px; height: 44px; border: none; background: none; font-size: 1.2rem; color: var(--ink); } .qty b { width: 40px; text-align: center; font-weight: 400; }
-.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid var(--terra); background: var(--terra); color: #fff; padding: 14px 30px; font-size: 0.95rem; letter-spacing: 0.03em; text-decoration: none; }
-.btn:hover { background: var(--terra-hi); } .btn:disabled { background: #c8a898; border-color: #c8a898; cursor: default; }
-.btn-ghost { background: transparent; color: var(--ink); border-color: var(--ink); } .btn-ghost:hover { background: var(--ink); color: #fff; }
-.err { color: var(--err); font-size: 14px; margin-top: 10px; min-height: 18px; }
-.hidden { display: none !important; }
-.done { text-align: center; padding: 10px 0 0; }
-.done .code { font-family: var(--font-serif); font-size: 34px; letter-spacing: 0.12em; color: var(--terra); margin: 10px 0; }
-.done p { color: var(--ink-mid); line-height: 1.65; max-width: 520px; margin: 8px auto; }
-.site-footer { background: var(--char); color: rgba(255,255,255,0.7); text-align: center; padding: 48px 24px 36px; font-size: 0.88rem; line-height: 1.8; }
-.site-footer a { color: #fff; text-decoration: none; border-bottom: 1px solid rgba(255,255,255,0.25); }
+.site-footer { background: var(--char); color: rgba(255,255,255,0.75); text-align: center; padding: 48px 24px 36px; font-size: 0.88rem; line-height: 1.8; }
+.site-footer a { color: #fff; text-decoration: none; border-bottom: 1px solid rgba(255,255,255,0.3); }
 .site-footer .foot-mark { height: 52px; margin-bottom: 8px; } .site-footer .foot-name { font-family: var(--font-serif); font-size: 1.4rem; color: #fff; margin-bottom: 6px; }
 </style>
 </head>
 <body>
 <header class="site-header">
   <a class="site-logo" href="/" aria-label="Crown Heirs Hair Den, home"><img src="/images/logo-ch-light.png" alt=""></a>
-  <nav class="site-nav">
+  <nav class="site-nav" aria-label="Site">
     <a href="/">Home</a>
     <a href="/#services">Services</a>
-    <a href="/dolls">Dolls</a>
+    <a href="/dolls" aria-current="page">Dolls</a>
     <a href="/#visit">Visit</a>
     <a href="/book" class="nav-cta">Book Now</a>
   </nav>
 </header>
 
-<section class="hero">
+<section class="hero" id="welcome">
   <video class="hero-video" id="heroVideo" muted loop playsinline preload="none" aria-hidden="true" tabindex="-1"
          data-webm="/images/dolls/dolls-loop-v1.webm" data-mp4="/images/dolls/dolls-loop-v1.mp4"></video>
-  <p class="eyebrow">Crown Heirs Dolls</p>
-  <h1>Build your doll</h1>
-  <p>Pick the yarn shade, the hair and the outfit, and watch your doll take shape as you choose. We'll text you a quote and a timeline.</p>
+  <p class="eyebrow">Crown Heirs Doll Maker</p>
+  <h1>Build Your Crown Heir</h1>
+  <p>Choose a base, a complexion and a crown of hair, style the look, then take your seat on the throne. Every Crown Heir is a handmade yarn doll.</p>
+  <a class="btn btn-gold cta" href="#build" onclick="startBuilding(event)">Build Your Crown Heir</a>
   <p class="by">Crocheted by <a href="#maker">Coletta Peterson of A Touch of BLU</a></p>
 </section>
 
-<div class="wrap">
-  <aside class="preview" aria-live="polite">
-    <svg id="doll" viewBox="0 0 200 290" role="img" aria-label="Your doll"></svg>
-    <div><div class="tag">Your doll</div>
-    <div class="sum" id="sum">Pick a shade to begin</div>
+<main>
+<div class="build" id="build">
+  <aside class="stage" aria-label="Your Crown Heir">
+    <svg id="doll" viewBox="0 0 200 290" role="img" aria-label="Your Crown Heir"></svg>
+    <div><div class="tag">Your Crown Heir</div>
+    <div class="sum" id="sum" aria-live="polite"></div>
     <div class="sub" id="sub"></div></div>
   </aside>
 
-  <div id="form">
-    <section class="card">
-      <div class="step">Step 1</div>
-      <h2>Yarn shade</h2>
-      <div class="hint">The doll's skin. Pick the one that feels right.</div>
-      <div class="swatches labeled" id="shades"></div>
-    </section>
-
-    <section class="card">
-      <div class="step">Step 2</div>
-      <h2>Hair colour</h2>
-      <div class="hint">One colour, or a main colour with highlights: whole strands of a second colour mixed through.</div>
-      <div class="tone" role="group" aria-label="How many hair colours">
-        <button type="button" class="tone-b on" id="toneOne" onclick="setTone(1)" aria-pressed="true">One colour</button>
-        <button type="button" class="tone-b" id="toneTwo" onclick="setTone(2)" aria-pressed="false">With highlights</button>
-      </div>
-      <label id="c1Label" class="hidden">Main colour</label>
-      <div class="swatches labeled" id="colors"></div>
-      <div id="color2Wrap" class="hidden">
-        <label>Highlights</label>
-        <div class="swatches labeled" id="colors2"></div>
-        <div class="hint">Want more or fewer highlights, or the colour only at the ends? Say so in the notes.</div>
-      </div>
-    </section>
-
-    <section class="card">
-      <div class="step">Step 3</div>
-      <h2>Hair style</h2>
-      <div class="styles" id="styles"></div>
-    </section>
-
-    <section class="card">
-      <div class="step">Step 4</div>
-      <h2>Outfit wishes</h2>
-      <div class="hint">Colours, a skirt, pants or a dress, the kind of shoes. We'll consider every wish, but outfits depend on what we have, so they can't be guaranteed.</div>
-      <div class="grid2">
-        <div><label>Top or dress</label><input id="oTop" placeholder="e.g. yellow dress"></div>
-        <div><label>Bottoms</label><input id="oBottom" placeholder="e.g. denim skirt"></div>
-        <div><label>Shoes</label><input id="oShoes" placeholder="e.g. white sneakers"></div>
-        <div><label>Colours you love</label><input id="oColors" placeholder="e.g. pink and gold"></div>
-      </div>
-      <label>Anything else? <span style="text-transform:none;letter-spacing:0;">(optional)</span></label>
-      <textarea id="notes" rows="2" placeholder="Glasses, a bow, a name on the shirt…"></textarea>
-      <div class="note">Outfit wishes are considered but can't be guaranteed. The yarn shade, hair colour and style are yours to choose.</div>
-    </section>
-
-    <section class="card">
-      <div class="step">Step 5</div>
-      <h2>Who it's for, and you</h2>
-      <div class="grid2">
-        <div><label>Who's it for? <span style="text-transform:none;letter-spacing:0;">(optional)</span></label><input id="forWhom" placeholder="e.g. my daughter Ava, turning 6"></div>
-        <div><label>How many</label><div class="qty"><button type="button" onclick="qty(-1)" aria-label="Fewer">−</button><b id="qtyN">1</b><button type="button" onclick="qty(1)" aria-label="More">+</button></div></div>
-        <div><label>Your name</label><input id="fName" autocomplete="name" placeholder="First and last name"></div>
-        <div><label>Mobile number</label><input id="fPhone" type="tel" autocomplete="tel" inputmode="tel" placeholder="(602) 555-0100"></div>
-      </div>
-      <label>Email <span style="text-transform:none;letter-spacing:0;">(optional, for your confirmation)</span></label><input id="fEmail" type="email" autocomplete="email" placeholder="you@example.com">
-      <div class="err" id="err"></div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;align-items:center;">
-        <button class="btn" id="go" onclick="send()">Send my doll request</button>
-        <span style="color:var(--ink-dim);font-size:14px;">No payment now. We'll text you a quote first.</span>
-      </div>
-    </section>
-  </div>
-
-  <div id="thanks" class="card done hidden">
-    <h2>Your doll is on our list.</h2>
-    <div class="code" id="doneCode"></div>
-    <p id="doneSum"></p>
-    <p>We'll text <b id="donePhone"></b> with a quote and a timeline. Outfit wishes are considered but can't be guaranteed. Pick-up is at the Den.</p>
-    <p><a class="btn btn-ghost" href="/dolls">Build another</a> <a class="btn" href="/" style="margin-left:8px">Back to the Den</a></p>
+  <div>
+    <nav aria-label="Doll Maker steps"><ol class="steps" id="steps"></ol></nav>
+    <section class="panel" id="panel" aria-labelledby="panelTitle"></section>
   </div>
 </div>
+
+<div class="reveal hidden" id="reveal">
+  <div class="scene"><svg id="scene" viewBox="0 0 300 380" role="img" aria-label="Your Crown Heir on the throne"></svg></div>
+  <div class="reveal-side">
+    <img class="mark" src="/doll-maker/brand-source/brand_source_logo_primary_web.png" alt="Crown Heirs, est. 2021, Phoenix, AZ" width="600" height="618">
+    <h2 id="revealTitle" tabindex="-1">Your Crown Heir Is Ready</h2>
+    <p class="lede" id="revealLede"></p>
+    <div class="lbl" id="bgLbl">Setting</div>
+    <div class="seg" role="radiogroup" aria-labelledby="bgLbl" id="bgs"></div>
+    <ul class="recap" id="recap"></ul>
+    <div class="actions">
+      <button class="btn btn-gold" id="homeBtn" onclick="bringHome()">Bring Them Home</button>
+      <button class="btn btn-ghost" id="shareBtn" onclick="saveShare()">Save &amp; Share</button>
+    </div>
+    <div id="shareOut" class="hidden">
+      <p class="small" id="shareMsg"></p>
+      <div class="sharebox"><input id="shareLink" readonly aria-label="Link to this Crown Heir"><button class="btn btn-ghost" onclick="copyLink()">Copy</button></div>
+    </div>
+    <p style="margin-top:12px;display:flex;gap:18px;flex-wrap:wrap;"><button class="link" onclick="goTo('review')">Edit my Crown Heir</button><button class="link" onclick="startOver()">Start Over</button></p>
+  </div>
+
+  <section class="home hidden" id="home" aria-labelledby="homeTitle">
+    <div id="form">
+      <h2 id="homeTitle" tabindex="-1">Bring Them Home</h2>
+      <div class="terms"><b>Every Crown Heir is handmade to order</b> by Coletta Peterson, so no two are exactly alike. We match your look as closely as our yarn allows. Price and turnaround depend on the look, so we text you a quote and a timeline before anything is made. No payment now. Anything extra you ask for in the notes is considered, but can't be guaranteed.</div>
+      <div class="grid2">
+        <div><label for="forWhom">Who's it for? <span style="text-transform:none;letter-spacing:0;">(optional)</span></label><input id="forWhom" placeholder="e.g. my daughter Ava, turning 6"></div>
+        <div><span class="lbl" id="qtyLbl">How many</span><div class="qty" role="group" aria-labelledby="qtyLbl"><button type="button" onclick="qty(-1)" aria-label="One fewer">−</button><b id="qtyN" aria-live="polite">1</b><button type="button" onclick="qty(1)" aria-label="One more">+</button></div></div>
+        <div><label for="fName">Your name</label><input id="fName" autocomplete="name" placeholder="First and last name"></div>
+        <div><label for="fPhone">Mobile number</label><input id="fPhone" type="tel" autocomplete="tel" inputmode="tel" placeholder="(602) 555-0100"></div>
+      </div>
+      <label for="fEmail">Email <span style="text-transform:none;letter-spacing:0;">(optional, for your confirmation)</span></label><input id="fEmail" type="email" autocomplete="email" placeholder="you@example.com">
+      <label for="notes">Anything else? <span style="text-transform:none;letter-spacing:0;">(optional)</span></label>
+      <textarea id="notes" rows="2" placeholder="A name on the shirt, a favourite colour, a birthday date…"></textarea>
+      <div class="err" id="err" role="alert"></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;align-items:center;">
+        <button class="btn" id="go" onclick="send()">Send my request</button>
+        <span class="small">We'll text you a quote first.</span>
+      </div>
+    </div>
+    <div id="thanks" class="done hidden">
+      <h2 tabindex="-1" id="thanksTitle">Your Crown Heir is on our list.</h2>
+      <div class="code" id="doneCode"></div>
+      <p id="doneSum"></p>
+      <p>We'll text <b id="donePhone"></b> with a quote and a timeline. Pick-up is at the Den.</p>
+      <p><button class="btn btn-ghost" onclick="startOver()">Build another</button> <a class="btn" href="/" style="margin-left:8px">Back to the Den</a></p>
+    </div>
+  </section>
+</div>
+</main>
 
 <section class="maker" id="maker">
   <div class="maker-inner">
@@ -247,7 +288,7 @@ label { display: block; font-size: 13px; letter-spacing: 0.08em; text-transform:
       <h2>Coletta Peterson</h2>
       <p class="brand">Crochet designer and maker behind <b>A Touch of BLU Designs</b>: <i>&ldquo;Black and Brown dolls for Black and Brown people.&rdquo;</i></p>
       <p class="body">Coletta picked up crochet to beat the boredom that set in after losing a job she loved. She mastered the basics with endless hats, dish towels and scarves, then made her first bespoke doll for an expectant friend.</p>
-      <p class="body">She puts a small piece of herself into every doll, and sees each one as &ldquo;a showcase for the beauty and style of an all too often underrepresented people.&rdquo; Every Crown Heirs doll you build here is made by her hand.</p>
+      <p class="body">She puts a small piece of herself into every doll, and sees each one as &ldquo;a showcase for the beauty and style of an all too often underrepresented people.&rdquo; Every Crown Heir you build here is made by her hand.</p>
       <blockquote>&ldquo;Doll making gives me the freedom to be all of the things that kid me wanted to grow up to be: a ballerina doctor who is also a firefighter and a veterinarian.&rdquo;<cite>Coletta Peterson</cite></blockquote>
       <div class="links">
         <a class="btn btn-ghost" href="https://atouchofbludesigns.wixsite.com/home" target="_blank" rel="noopener">Visit A Touch of BLU</a>
@@ -267,99 +308,328 @@ label { display: block; font-size: 13px; letter-spacing: 0.08em; text-transform:
 <script>
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const CH_MARK = '/doll-maker/brand-source/brand_source_ch_monogram.png';
+const LOGO = '/doll-maker/brand-source/brand_source_logo_primary_web.png';
 let OPT = null;
-const D = { shade: null, hairColor: null, hairColor2: null, tone: 1, hairStyle: null, quantity: 1 };
 
-/* ── the doll is drawn by /doll-art.js, modelled on Coletta's dolls ── */
-/* What was typed, read for the preview. The words decide the garment, the
-   shoes and the colours; anything we can't draw is still sent as written. */
-const COLORS = [
-  ['hot pink', '#e0457b'], ['pink', '#e07fa8'], ['blush', '#efb6c4'], ['red', '#c0392b'], ['burgundy', '#6b1f3a'], ['maroon', '#6b1f3a'], ['wine', '#6b1f3a'],
-  ['orange', '#e07b2e'], ['coral', '#ec7e6a'], ['peach', '#f1b48e'], ['yellow', '#e9bf3c'], ['mustard', '#c9962b'], ['gold', '#c8952a'],
-  ['mint', '#9fd3b4'], ['sage', '#9aae8c'], ['olive', '#6b7a3a'], ['green', '#3d8a4f'], ['teal', '#2a8a8a'], ['turquoise', '#3cb7b1'],
-  ['sky blue', '#8cc4ea'], ['light blue', '#8cc4ea'], ['navy', '#22325e'], ['denim', '#4a6a94'], ['jean', '#4a6a94'], ['blue', '#2f6fbf'],
-  ['lavender', '#b49ad8'], ['lilac', '#b49ad8'], ['purple', '#6a3fa0'], ['violet', '#6a3fa0'],
-  ['white', '#f7f4ee'], ['ivory', '#f1e8d6'], ['cream', '#eadcc4'], ['beige', '#d8c3a0'], ['tan', '#c4a074'], ['khaki', '#b8a06e'],
-  ['brown', '#6b4a32'], ['black', '#1f1d1b'], ['grey', '#8a8a8a'], ['gray', '#8a8a8a'], ['silver', '#bfc3c7'], ['rainbow', 'url(#rainbow)']
+/* ── state: what the guest has chosen; the URL carries it, so a link reopens the same Crown Heir ── */
+const STEPS = [
+  { id: 'base', label: 'Base', title: 'Choose Your Base' },
+  { id: 'complexion', label: 'Complexion', title: 'Choose Your Complexion' },
+  { id: 'crown', label: 'Crown', title: 'Choose Your Crown' },
+  { id: 'look', label: 'Look', title: 'Style Your Look' },
+  { id: 'review', label: 'Review', title: 'Your Crown Heir' }
 ];
-const colorsIn = t => { const w = ' ' + String(t || '').toLowerCase() + ' '; const hits = []; for (const [k, v] of COLORS) { const i = w.search(new RegExp('[^a-z]' + k + 's?[^a-z]')); if (i >= 0 && !hits.some(h => h.v === v || h.k.includes(k))) hits.push({ k, v, i }); } return hits.sort((a, b) => a.i - b.i); };
-const firstColor = t => (colorsIn(t)[0] || {}).v;
-const nameOf = v => (COLORS.find(c => c[1] === v) || [''])[0];
-function readOutfit() {
-  const top = $('oTop').value, bottom = $('oBottom').value, shoes = $('oShoes').value, colors = $('oColors').value, notes = $('notes').value;
-  const T = top.toLowerCase(), B = bottom.toLowerCase(), S = shoes.toLowerCase(), N = notes.toLowerCase();
-  const loves = colorsIn(colors).map(c => c.v);
-  let kind = 'pants';                                  // her dolls mostly wear a top and pants
-  if (/dress|gown|romper|jumpsuit|tutu/.test(T)) kind = /tutu/.test(T) ? 'tutu' : 'dress';
-  else if (/tutu/.test(B)) kind = 'tutu';
-  else if (/skirt/.test(B)) kind = 'skirt';
-  else if (/short/.test(B)) kind = 'shorts';
-  else if (/pant|jean|legging|trouser|overall|jogger|sweats/.test(B)) kind = 'pants';
-  else if (T.trim() || B.trim()) kind = 'pants';
-  const topC = firstColor(top) || loves[0] || '#a0624a';
-  const botC = firstColor(bottom) || (kind === 'pants' && /jean|denim/.test(B) ? '#4a6a94' : null) || loves[1] || (kind === 'pants' ? '#4a6a94' : kind === 'shorts' ? '#4a6a94' : topC);
-  const shoe = /sneaker|tennis|trainer|kicks|jordan|air force/.test(S) ? 'sneakers' : /boot/.test(S) ? 'boots' : /sandal|slide|flip/.test(S) ? 'sandals' : /heel|wedge/.test(S) ? 'heels' : /mary|flat|ballet|dress shoe/.test(S) ? 'flats' : 'sneakers';   // chunky white sneakers, like hers
-  const shoeC = firstColor(shoes) || (shoe === 'sneakers' ? '#f7f4ee' : shoe === 'boots' ? '#6b4a32' : '#1f1d1b');
-  return { kind, topC, botC, shoe, shoeC, bow: /bow|ribbon/.test(N + ' ' + T), glasses: /glasses|spectacles/.test(N), crown: /crown|tiara|princess/.test(N + ' ' + T),
-    bowC: firstColor(N.replace(/.*?(\w+\s+)?bow.*/, '$1bow')) || loves[0] || '#e07fa8',
-    words: { top: top.trim(), bottom: bottom.trim(), shoes: shoes.trim() } };
+const TABS = [{ id: 'tops', label: 'Tops' }, { id: 'bottoms', label: 'Bottoms' }, { id: 'shoes', label: 'Shoes' }, { id: 'accessories', label: 'Accessories' }];
+const fresh = () => ({ base: 'girl', shade: 'warm-brown', hairStyle: null, hairColor: null, hairColor2: null, tone: 1, top: null, topColor: null, bottom: null, bottomColor: null, shoes: null, shoesColor: null, accessories: [], bg: 'throne' });
+let D = fresh(), touched = new Set(), STEP = 'base', TAB = 'tops', NOTES = [], QTY = 1;
+
+const byId = (list, id) => (list || []).find(x => x.id === id);
+const hexOf = id => (byId(OPT.garmentColors, id) || {}).hex;
+const colorName = id => (byId(OPT.garmentColors, id) || {}).name || '';
+function itemName(key, id, color) {
+  const it = byId(OPT[key], id); if (!it) return '';
+  const c = color || (it.colors || [])[0];
+  const n = it.name.replace('{c}', c ? colorName(c).toLowerCase() : '').trim();
+  return n.charAt(0).toUpperCase() + n.slice(1);
 }
+// A base's look fills in whatever the guest hasn't picked themselves.
+function applyDefaults() {
+  const b = byId(OPT.bases, D.base) || OPT.bases[0];
+  for (const [k, v] of Object.entries(b.defaults)) if (!touched.has(k)) D[k] = v;
+  for (const k of ['topColor', 'shoesColor']) if (!touched.has(k)) D[k] = null;
+}
+const garment = (key, id, color) => { const it = byId(OPT[key], id) || OPT[key][0]; const hex = hexOf(color || (it.colors || [])[0]); return { look: it.look, color: hex, brand: !!it.brand, main: it.main || hex, trim: it.trim || it.main || hex }; };
+function dollOf(extra) {
+  const hc = byId(OPT.hairColors, D.hairColor), hc2 = D.tone === 2 ? byId(OPT.hairColors, D.hairColor2) : null;
+  return Object.assign({ base: D.base, skin: (byId(OPT.shades, D.shade) || OPT.shades[2]).hex, hair1: hc ? hc.hex : '#1b1b1b', hair2: hc2 ? hc2.hex : null, style: D.hairStyle || 'locs',
+    top: garment('tops', D.top, D.topColor), bottom: garment('bottoms', D.bottom, D.bottomColor), shoes: garment('shoes', D.shoes, D.shoesColor), accessories: D.accessories, brandSrc: CH_MARK }, extra || {});
+}
+const lc = t => t ? t.charAt(0).toLowerCase() + t.slice(1) : '';
+// Words for the summary, the alt text and the reveal.
+function words() {
+  const b = byId(OPT.bases, D.base), sh = byId(OPT.shades, D.shade), hs = byId(OPT.hairStyles, D.hairStyle), hc = byId(OPT.hairColors, D.hairColor);
+  const hc2 = D.tone === 2 ? byId(OPT.hairColors, D.hairColor2) : null;
+  const hair = `${hc ? hc.name.toLowerCase() : ''} ${hs ? hs.name.toLowerCase() : ''}`.trim() + (hc2 ? ` with ${hc2.name.toLowerCase()} highlights` : '');
+  const top = itemName('tops', D.top, D.topColor), bottom = itemName('bottoms', D.bottom, D.bottomColor), shoes = itemName('shoes', D.shoes, D.shoesColor);
+  const acc = D.accessories.map(a => (byId(OPT.accessories, a) || {}).name).filter(Boolean);
+  return { base: b ? b.name : '', complexion: sh ? sh.name : '', hair, top, bottom, shoes, acc,
+    short: `${sh ? sh.name : ''} ${b ? b.name.toLowerCase() : ''}, ${hair}`,
+    alt: `A ${b ? b.name.toLowerCase() : ''} Crown Heir doll with ${sh ? sh.name : ''} complexion and ${hair}, wearing a ${lc(top)}, ${lc(bottom)} and ${lc(shoes)}${acc.length ? ', with ' + acc.map(lc).join(', ') : ''}.` };
+}
+
+/* ── the URL ── */
+function query() {
+  const q = new URLSearchParams();
+  // Garments always carry their colour, so a link shows exactly what was on screen.
+  const gc = (id, c, list) => { const it = byId(OPT[list], id); const col = c || (it && it.colors ? it.colors[0] : ''); return id + (col ? '.' + col : ''); };
+  q.set('b', D.base); q.set('c', D.shade); q.set('h', D.hairStyle); q.set('hc', D.hairColor);
+  if (D.tone === 2 && D.hairColor2) q.set('hl', D.hairColor2);
+  q.set('t', gc(D.top, D.topColor, 'tops')); q.set('p', gc(D.bottom, D.bottomColor, 'bottoms')); q.set('s', gc(D.shoes, D.shoesColor, 'shoes'));
+  if (D.accessories.length) q.set('a', D.accessories.join(','));
+  if (D.bg !== 'throne') q.set('bg', D.bg);
+  return q.toString().replace(/%2C/g, ',');          // ids never hold commas; keep links readable
+}
+const urlFor = step => location.pathname + '?' + query() + (step ? '&step=' + step : '') + '#build';
+// Read a look from the URL. Anything no longer offered is dropped and named,
+// and the rest of the look is kept.
+function readUrl() {
+  const q = new URLSearchParams(location.search); NOTES = [];
+  if (!q.has('b')) return null;
+  D = fresh(); touched = new Set();
+  const take = (key, list, id, what, step, tab) => {
+    if (!id) return;
+    if (byId(OPT[list], id) && (byId(OPT[list], id).available !== false)) { D[key] = id; touched.add(key); }
+    else NOTES.push({ key, what, step, tab });
+  };
+  take('base', 'bases', q.get('b'), 'base', 'base');
+  take('shade', 'shades', q.get('c'), 'complexion', 'complexion');
+  take('hairStyle', 'hairStyles', q.get('h'), 'hair style', 'crown');
+  take('hairColor', 'hairColors', q.get('hc'), 'hair colour', 'crown');
+  if (q.get('hl')) { take('hairColor2', 'hairColors', q.get('hl'), 'highlight colour', 'crown'); if (D.hairColor2 && D.hairColor2 !== D.hairColor) D.tone = 2; else D.hairColor2 = null; }
+  for (const [p, key, list, what, tab] of [['t', 'top', 'tops', 'top', 'tops'], ['p', 'bottom', 'bottoms', 'bottoms', 'bottoms'], ['s', 'shoes', 'shoes', 'shoes', 'shoes']]) {
+    const [id, color] = String(q.get(p) || '').split('.');
+    if (!id) continue;
+    const it = byId(OPT[list], id);
+    if (!it) { NOTES.push({ key, what, step: 'look', tab }); continue; }
+    D[key] = id; touched.add(key);
+    if (color) { if ((it.colors || []).includes(color)) { D[key + 'Color'] = color; touched.add(key + 'Color'); } else NOTES.push({ key, what: what + ' colour', step: 'look', tab }); }
+  }
+  for (const a of String(q.get('a') || '').split(',').filter(Boolean)) {
+    const it = byId(OPT.accessories, a);
+    if (it && it.available !== false && !(it.clashes || []).includes(D.hairStyle)) D.accessories.push(a);
+    else if (it && it.available !== false) NOTES.push({ clash: true, step: 'look', tab: 'accessories', msg: `The ${it.name.toLowerCase()} can't sit on ${(byId(OPT.hairStyles, D.hairStyle) || { name: 'this style' }).name.toLowerCase()}, so we left it off. Everything else is as you saved it.` });
+    else NOTES.push({ key: 'accessories', what: it ? it.name.toLowerCase() : 'accessory', step: 'look', tab: 'accessories' });
+  }
+  if (byId(OPT.backgrounds, q.get('bg'))) D.bg = q.get('bg');
+  applyDefaults();
+  // Something had to change: open on that step, so the guest sees why and picks again.
+  if (NOTES.length) { if (NOTES[0].tab) TAB = NOTES[0].tab; return NOTES[0].step; }
+  const step = q.get('step');
+  return step === 'reveal' || STEPS.some(s => s.id === step) ? step : 'review';
+}
+
+/* ── drawing ── */
 let LAST = '';
 function draw() {
-  const shade = OPT && OPT.shades.find(s => s.id === D.shade);
-  const hc = OPT && OPT.hairColors.find(c => c.id === D.hairColor);
-  const hc2 = D.tone === 2 && OPT ? OPT.hairColors.find(c => c.id === D.hairColor2) : null;
-  const hs = OPT && OPT.hairStyles.find(s => s.id === D.hairStyle);
-  const o = readOutfit();
   const el = $('doll');
-  el.innerHTML = DollArt.render({ skin: shade ? shade.hex : '#d9c7b3', hair1: hc ? hc.hex : '#2a1d17', hair2: hc2 ? hc2.hex : null, style: D.hairStyle || 'locs', ...o }, 'pv');
-  const key = [D.shade, D.hairColor, D.hairColor2, D.tone, D.hairStyle, o.kind, o.topC, o.botC, o.shoe, o.shoeC, o.bow, o.glasses, o.crown].join('|');
+  el.innerHTML = DollArt.render(dollOf(), 'pv');
+  const w = words();
+  el.setAttribute('aria-label', w.alt);
+  const key = query();
   if (LAST && key !== LAST) { el.classList.remove('pop'); void el.getBoundingClientRect(); el.classList.add('pop'); }
   LAST = key;
-  const hairName = [hc && hc.name.toLowerCase(), hs && hs.name.toLowerCase()].filter(Boolean).join(' ') + (hc2 ? ' with ' + hc2.name.toLowerCase() + ' highlights' : '');
-  $('sum').textContent = shade ? `${shade.name} yarn${hairName ? ', ' + hairName : ''}` : 'Pick a shade to begin';
-  const garment = { dress: 'dress', tutu: 'tutu', skirt: 'top and skirt', shorts: 'top and shorts', pants: 'top and pants' }[o.kind];
-  const wore = o.words.top || o.words.bottom || o.words.shoes
-    ? [nameOf(o.topC) && nameOf(o.topC) + ' ' + garment.split(' ')[0], o.kind !== 'dress' && o.kind !== 'tutu' && nameOf(o.botC) ? nameOf(o.botC) + ' ' + garment.split(' ').pop() : '', o.words.shoes && (nameOf(o.shoeC) ? nameOf(o.shoeC) + ' ' : '') + o.shoe].filter(Boolean).join(', ')
-    : '';
-  $('sub').textContent = (D.quantity > 1 ? `${D.quantity} dolls. ` : '') + (wore ? 'Wearing ' + wore + '.' : (shade && hc && hs ? 'Now tell us about the outfit.' : !shade ? 'Your doll changes as you choose.' : ''));
+  $('sum').textContent = w.short;
+  $('sub').textContent = [w.top, w.bottom, w.shoes].join(' · ') + (w.acc.length ? ' · ' + w.acc.join(', ') : '');
 }
 
-/* ── choices ── */
-function pick(k, v) { D[k] = v; if (k === 'hairColor' && D.hairColor2 === v) D.hairColor2 = null; render(); }
-function setTone(n) { D.tone = n; if (n === 1) D.hairColor2 = null; render(); }
-function render() {
-  if (!OPT) return;
-  const sw = (list, key, skip) => list.map(c => `<button type="button" class="sw ${D[key] === c.id ? 'on' : ''} ${skip === c.id ? 'off' : ''}" style="background:${c.hex}" onclick="pick('${key}','${c.id}')" aria-label="${esc(c.name)}" aria-pressed="${D[key] === c.id}"><span>${esc(c.name)}</span></button>`).join('');
-  $('shades').innerHTML = sw(OPT.shades, 'shade');
-  $('colors').innerHTML = sw(OPT.hairColors, 'hairColor');
-  $('colors2').innerHTML = sw(OPT.hairColors, 'hairColor2', D.hairColor);
-  $('toneOne').classList.toggle('on', D.tone === 1); $('toneTwo').classList.toggle('on', D.tone === 2);
-  $('toneOne').setAttribute('aria-pressed', D.tone === 1); $('toneTwo').setAttribute('aria-pressed', D.tone === 2);
-  $('color2Wrap').classList.toggle('hidden', D.tone !== 2); $('c1Label').classList.toggle('hidden', D.tone !== 2);
-  const hcol = OPT.hairColors.find(c => c.id === D.hairColor), hcol2 = D.tone === 2 ? OPT.hairColors.find(c => c.id === D.hairColor2) : null;
-  const sk = (OPT.shades.find(x => x.id === D.shade) || {}).hex || '#c4986c';
-  $('styles').innerHTML = OPT.hairStyles.map((s, i) => `<button type="button" class="st ${D.hairStyle === s.id ? 'on' : ''}" onclick="pick('hairStyle','${s.id}')" aria-pressed="${D.hairStyle === s.id}"><svg viewBox="0 0 60 60">${DollArt.tile(s.id, hcol ? hcol.hex : '#2a1d17', hcol2 ? hcol2.hex : null, sk, 'st' + i)}</svg>${esc(s.name)}</button>`).join('');
-  $('qtyN').textContent = D.quantity;
-  draw();
+/* ── the steps ── */
+function renderSteps() {
+  $('steps').innerHTML = STEPS.map((s, i) => `<li><button type="button" onclick="goTo('${s.id}')" ${s.id === STEP ? 'aria-current="step"' : ''}><b>${i + 1}</b>${s.label}</button></li>`).join('');
 }
-function qty(n) { D.quantity = Math.max(1, Math.min(OPT ? OPT.maxQuantity : 5, D.quantity + n)); render(); }
-['oTop', 'oBottom', 'oShoes', 'oColors', 'notes'].forEach(id => $(id).addEventListener('input', draw));
+// A radio group of option cards. Arrow keys move through it.
+const radio = (key, id, on, inner, extra) => `<button type="button" class="opt" role="radio" aria-checked="${on}" tabindex="${on ? 0 : -1}" data-key="${key}" data-id="${esc(id)}" onclick="choose('${key}','${esc(id)}')" ${extra || ''}>${inner}</button>`;
+const chip = (key, id, on, hex, name, disabled) => `<button type="button" class="chip" role="radio" aria-checked="${on}" tabindex="${on ? 0 : -1}" ${disabled ? 'aria-disabled="true"' : ''} onclick="${disabled ? '' : `choose('${key}','${id}')`}"><i style="background:${hex}"></i>${esc(name)}</button>`;
+function noticeFor(step, tab) {
+  const n = NOTES.filter(x => x.step === step && (!tab || !x.tab || x.tab === tab));
+  const lost = n.filter(x => !x.clash), moved = n.filter(x => x.clash);
+  return (lost.length ? `<div class="notice" role="status">The ${lost.map(x => esc(x.what)).join(' and ')} in this link ${lost.length > 1 ? "aren't" : "isn't"} offered any more, so we kept everything else. Pick a new one below.</div>` : '')
+    + moved.map(x => `<div class="notice" role="status">${esc(x.msg)}</div>`).join('');
+}
+function panel() {
+  const s = STEPS.find(x => x.id === STEP), i = STEPS.indexOf(s);
+  let body = '';
+  if (STEP === 'base') {
+    body = `<p class="hint">Start with a girl or a boy. You can change anything later without losing the rest.</p>
+      <div class="cards big" role="radiogroup" aria-label="Base" data-g="base">${OPT.bases.map(b => {
+        const look = Object.assign({}, D, b.defaults, { base: b.id, hairColor2: null, tone: 1 });
+        const keep = D; D = look; const svg = DollArt.render(dollOf(), 'base-' + b.id); D = keep;
+        return radio('base', b.id, D.base === b.id, `<svg viewBox="0 0 200 290" aria-hidden="true">${svg}</svg><span class="t">${esc(b.name)}</span>`);
+      }).join('')}</div>`;
+  } else if (STEP === 'complexion') {
+    body = `<p class="hint">The yarn for your Crown Heir's skin.</p>
+      <div class="skin" role="radiogroup" aria-label="Complexion" data-g="shade">${OPT.shades.map(c => radio('shade', c.id, D.shade === c.id, `<span class="dot" style="background:${c.hex}"></span><span class="t">${esc(c.name)}</span>`)).join('')}</div>`;
+  } else if (STEP === 'crown') {
+    const sk = (byId(OPT.shades, D.shade) || {}).hex, hc = (byId(OPT.hairColors, D.hairColor) || {}).hex, hc2 = D.tone === 2 ? (byId(OPT.hairColors, D.hairColor2) || {}).hex : null;
+    body = `<p class="hint">Textured, handmade yarn hair. Pick the style, then the colour.</p>
+      <div class="cards hair" role="radiogroup" aria-label="Hair style" data-g="hairStyle">${OPT.hairStyles.map((h, n) => radio('hairStyle', h.id, D.hairStyle === h.id, `<svg viewBox="0 0 60 60" aria-hidden="true">${DollArt.tile(h.id, hc, hc2, sk, 'st' + n)}</svg><span class="t">${esc(h.name)}</span>`)).join('')}</div>
+      <h3 id="hcLbl">Hair colour</h3>
+      <div class="seg" role="radiogroup" aria-label="One colour or with highlights" data-g="tone">
+        <button type="button" role="radio" aria-checked="${D.tone === 1}" onclick="setTone(1)">One colour</button>
+        <button type="button" role="radio" aria-checked="${D.tone === 2}" onclick="setTone(2)">With highlights</button>
+      </div>
+      ${D.tone === 2 ? '<p class="hint" style="margin:0 0 8px">Main colour, with whole strands of a second colour mixed through.</p>' : ''}
+      <div class="colors" role="radiogroup" aria-labelledby="hcLbl" data-g="hairColor">${OPT.hairColors.map(c => chip('hairColor', c.id, D.hairColor === c.id, c.hex, c.name)).join('')}</div>
+      ${D.tone === 2 ? `<h3 id="hlLbl">Highlights</h3><div class="colors" role="radiogroup" aria-labelledby="hlLbl" data-g="hairColor2">${OPT.hairColors.map(c => chip('hairColor2', c.id, D.hairColor2 === c.id, c.hex, c.name, c.id === D.hairColor)).join('')}</div>` : ''}`;
+  } else if (STEP === 'look') {
+    const tabs = `<div class="tabs" role="tablist" aria-label="The look" data-g="tabs">${TABS.map(t => `<button type="button" role="tab" id="tab-${t.id}" aria-controls="tabpanel" aria-selected="${TAB === t.id}" tabindex="${TAB === t.id ? 0 : -1}" onclick="setTab('${t.id}')">${t.label}</button>`).join('')}</div>`;
+    let list = '';
+    if (TAB === 'accessories') {
+      list = `<p class="hint">Pick as many as you like.</p><div class="cards" role="group" aria-label="Accessories">${OPT.accessories.map(a => {
+        const off = a.available === false, clash = (a.clashes || []).includes(D.hairStyle);
+        const why = off ? a.note : clash ? `Not with ${(byId(OPT.hairStyles, D.hairStyle) || {}).name.toLowerCase()}` : '';
+        const on = D.accessories.includes(a.id);
+        const svg = off ? '' : `<svg viewBox="${DollArt.crop(a.id)}" aria-hidden="true" style="aspect-ratio:${DollArt.crop(a.id).split(' ').slice(2).join('/')}">${DollArt.render(dollOf({ accessories: [a.id] }), 'ac-' + a.id)}</svg>`;
+        return `<button type="button" class="opt" data-acc="${a.id}" aria-pressed="${on}" ${off || clash ? 'aria-disabled="true"' : ''} onclick="${off || clash ? '' : `toggleAcc('${a.id}')`}">${svg}<span class="t">${esc(a.name)}</span>${why ? `<span class="d">${esc(why)}</span>` : ''}</button>`;
+      }).join('')}</div>`;
+    } else {
+      const key = { tops: 'top', bottoms: 'bottom', shoes: 'shoes' }[TAB], part = { tops: 'top', bottoms: 'bottom', shoes: 'shoes' }[TAB];
+      list = `<div class="cards" role="radiogroup" aria-label="${TABS.find(t => t.id === TAB).label}" data-g="${key}">${OPT[TAB].map(it => {
+        const on = D[key] === it.id, color = on ? D[key + 'Color'] : null;
+        const thumb = DollArt.render(dollOf({ style: 'none', accessories: [], [key]: garment(TAB, it.id, color) }), 'th-' + it.id);
+        const [, , w, h] = DollArt.crop(part).split(' ');
+        return radio(key, it.id, on, `<svg viewBox="${DollArt.crop(part)}" aria-hidden="true" style="aspect-ratio:${w}/${h}">${thumb}</svg><span class="t">${esc(itemName(TAB, it.id, color))}</span>${it.group ? `<span class="d">${esc(it.group)}</span>` : ''}`);
+      }).join('')}</div>`;
+      const cur = byId(OPT[TAB], D[key]);
+      if (cur && (cur.colors || []).length > 1) {
+        const sel = D[key + 'Color'] || cur.colors[0];
+        list += `<h3 id="gcLbl">Colour</h3><div class="colors" role="radiogroup" aria-labelledby="gcLbl" data-g="${key}Color">${cur.colors.map(c => chip(key + 'Color', c, sel === c, hexOf(c), colorName(c))).join('')}</div>`;
+      }
+    }
+    body = `<p class="hint">Every outfit is crocheted to match. Tap a category, then pick.</p>${tabs}<div role="tabpanel" id="tabpanel" aria-labelledby="tab-${TAB}">${noticeFor('look', TAB)}${list}</div>`;
+  } else if (STEP === 'review') {
+    const w = words();
+    const row = (k, v, step, tab) => `<dt>${k}</dt><dd>${esc(v)}</dd><button type="button" class="link" onclick="goTo('${step}'${tab ? `,'${tab}'` : ''})" aria-label="Edit ${k.toLowerCase()}">Edit</button>`;
+    body = `<p class="hint">Check everything over. Edit anything without losing the rest, then take your seat.</p>
+      <dl class="review">${row('Base', w.base, 'base')}${row('Complexion', w.complexion, 'complexion')}${row('Crown', w.hair.charAt(0).toUpperCase() + w.hair.slice(1), 'crown')}${row('Top', w.top, 'look', 'tops')}${row('Bottoms', w.bottom, 'look', 'bottoms')}${row('Shoes', w.shoes, 'look', 'shoes')}${row('Accessories', w.acc.join(', ') || 'None', 'look', 'accessories')}</dl>`;
+  }
+  const back = i > 0 ? `<button type="button" class="btn btn-ghost" onclick="goTo('${STEPS[i - 1].id}')">Back</button>` : '<span></span>';
+  const next = STEP === 'review' ? `<button type="button" class="btn btn-gold" onclick="goTo('reveal')">Take Your Seat</button>` : `<button type="button" class="btn" onclick="goTo('${STEPS[i + 1].id}')">Next: ${STEPS[i + 1].label}</button>`;
+  $('panel').innerHTML = `<h2 id="panelTitle" tabindex="-1">${s.title}</h2>${STEP !== 'look' ? noticeFor(STEP) : ''}${body}<div class="nav">${back}${next}</div>`;
+}
+function render() { if (!OPT) return; renderSteps(); panel(); draw(); }
 
+/* ── choosing ── */
+function choose(key, id) {
+  NOTES = NOTES.filter(n => !n.clash && n.key !== key);
+  D[key] = id; touched.add(key);
+  if (key === 'base') applyDefaults();
+  if (key === 'hairColor' && D.hairColor2 === id) D.hairColor2 = null;
+  if (key === 'top' || key === 'bottom' || key === 'shoes') { D[key + 'Color'] = null; touched.delete(key + 'Color'); }
+  if (key === 'hairStyle') {
+    // An accessory that can't sit on the new style comes off; say so, keep the rest.
+    const off = D.accessories.map(a => byId(OPT.accessories, a)).filter(a => a && (a.clashes || []).includes(id));
+    if (off.length) {
+      D.accessories = D.accessories.filter(a => !off.some(o => o.id === a));
+      const msg = `The ${off.map(a => a.name.toLowerCase()).join(' and ')} came off, since it can't sit on ${byId(OPT.hairStyles, id).name.toLowerCase()}. Pick another accessory under Look if you like.`;
+      NOTES.push({ clash: true, step: 'crown', msg }, { clash: true, step: 'look', tab: 'accessories', msg });
+    }
+  }
+  history.replaceState(null, '', urlFor(STEP));
+  refresh();
+}
+// Redraw the step and put the keyboard back on the group it was in.
+function refresh() {
+  const a = document.activeElement, g = a && a.closest && a.closest('[data-g]'), gid = g && g.dataset.g;
+  panel(); draw(); renderSteps();
+  if (gid) { const el = document.querySelector(`[data-g="${gid}"] [aria-checked="true"], [data-g="${gid}"] [aria-selected="true"]`) || document.querySelector(`[data-g="${gid}"] button`); if (el) el.focus(); }
+}
+function setTone(n) { D.tone = n; if (n === 1) D.hairColor2 = null; history.replaceState(null, '', urlFor(STEP)); refresh(); }
+function toggleAcc(id) {
+  D.accessories = D.accessories.includes(id) ? D.accessories.filter(a => a !== id) : D.accessories.concat(id);
+  NOTES = NOTES.filter(n => n.tab !== 'accessories' && n.step !== 'crown');
+  history.replaceState(null, '', urlFor(STEP)); panel(); draw();
+  const b = document.querySelector(`#panel [data-acc="${id}"]`); if (b) b.focus();
+}
+function setTab(t) { TAB = t; panel(); const b = $('tab-' + t); if (b) b.focus(); }
+
+// Arrow keys inside radio groups and the tab list.
+document.addEventListener('keydown', e => {
+  if (!['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) return;
+  const g = e.target.closest('[role="radiogroup"], [role="tablist"]'); if (!g) return;
+  const items = [...g.querySelectorAll('[role="radio"]:not([aria-disabled="true"]), [role="tab"]')]; const i = items.indexOf(e.target); if (i < 0) return;
+  e.preventDefault();
+  const j = (i + (e.key === 'ArrowRight' || e.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length;
+  items[j].focus(); items[j].click();
+});
+
+/* ── moving between steps: each one is a page in the browser's history ── */
+function goTo(step, tab, opts) {
+  opts = opts || {};
+  if (tab) TAB = tab;
+  const was = STEP; STEP = step;
+  if (!opts.fromHistory) { const u = urlFor(step); if (location.pathname + location.search + location.hash === u) history.replaceState(null, '', u); else history.pushState(null, '', u); }
+  if (step === 'reveal') { showReveal(); return; }
+  $('reveal').classList.add('hidden'); $('build').classList.remove('hidden');
+  render();
+  if (!opts.quiet) { const t = $('panelTitle'); if (t) t.focus({ preventScroll: true }); const top = $('build').getBoundingClientRect().top + scrollY - (innerWidth <= 900 ? 64 : 80); if (scrollY > top || was === 'reveal') scrollTo({ top, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); }
+}
+addEventListener('popstate', () => { if (!OPT) return; const step = readUrl(); goTo(step || 'base', null, { fromHistory: true }); });
+function startBuilding(e) { e.preventDefault(); if (OPT) goTo(STEP === 'reveal' ? 'base' : STEP); $('build').scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); }
+function startOver() {
+  D = fresh(); touched = new Set(); NOTES = []; TAB = 'tops'; QTY = 1; applyDefaults();
+  $('form').classList.remove('hidden'); $('thanks').classList.add('hidden'); $('home').classList.add('hidden'); $('shareOut').classList.add('hidden');
+  goTo('base');
+}
+
+/* ── 7. the reveal ── */
+function showReveal() {
+  $('build').classList.add('hidden'); $('reveal').classList.remove('hidden');
+  const w = words();
+  $('scene').innerHTML = DollArt.reveal(dollOf(), D.bg, 'rv');
+  $('scene').setAttribute('aria-label', w.alt + (D.bg === 'throne' ? ' Standing before a gold throne.' : ''));
+  $('revealLede').textContent = `A ${w.complexion} ${w.base.toLowerCase()} with ${w.hair}. Handmade to order, just for you.`;
+  $('bgs').innerHTML = OPT.backgrounds.map(b => `<button type="button" role="radio" aria-checked="${D.bg === b.id}" onclick="setBg('${b.id}')">${esc(b.name)}</button>`).join('');
+  $('recap').innerHTML = [['Base', w.base], ['Complexion', w.complexion], ['Crown', w.hair.charAt(0).toUpperCase() + w.hair.slice(1)], ['Top', w.top], ['Bottoms', w.bottom], ['Shoes', w.shoes], ['Accessories', w.acc.join(', ') || 'None']]
+    .map(([k, v]) => `<li><span>${k}</span><span>${esc(v)}</span></li>`).join('');
+  scrollTo({ top: $('reveal').getBoundingClientRect().top + scrollY - (innerWidth <= 900 ? 64 : 80) });
+  $('revealTitle').focus({ preventScroll: true });
+}
+function setBg(id) { D.bg = id; history.replaceState(null, '', urlFor('reveal')); showReveal(); const b = [...$('bgs').children].find(x => x.getAttribute('aria-checked') === 'true'); if (b) b.focus(); }
+
+/* Save & Share: a picture of the Crown Heir with the Crown Heirs logo placed
+   from its source file, and a link that reopens this exact look. */
+const loadImg = src => new Promise((ok, no) => { const i = new Image(); i.onload = () => ok(i); i.onerror = no; i.src = src; });
+const asDataUrl = async src => { const b = await (await fetch(src)).blob(); return new Promise(ok => { const r = new FileReader(); r.onload = () => ok(r.result); r.readAsDataURL(b); }); };
+const shareUrl = () => location.origin + location.pathname + '?' + query() + '&step=reveal';
+async function saveShare() {
+  const btn = $('shareBtn'); btn.disabled = true; btn.textContent = 'Making your card…';
+  try {
+    const w = words(), link = shareUrl();
+    const [ch, logo] = await Promise.all([asDataUrl(CH_MARK), loadImg(LOGO)]);
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 380" width="1500" height="1900">${DollArt.reveal(dollOf({ brandSrc: ch }), D.bg, 'sc')}</svg>`;
+    const scene = await loadImg('data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg));
+    await Promise.all([document.fonts.load('400 60px "Cormorant Garamond"'), document.fonts.load('300 28px "Jost"')]).catch(() => {});
+    const c = document.createElement('canvas'); c.width = 1080; c.height = 1350; const x = c.getContext('2d');
+    x.fillStyle = '#f6efe3'; x.fillRect(0, 0, 1080, 1350);
+    x.drawImage(scene, 162, 186, 756, 958);
+    const lw = 156, lh = lw * logo.naturalHeight / logo.naturalWidth; x.drawImage(logo, 540 - lw / 2, 18, lw, lh);   // the source logo, as supplied
+    x.textAlign = 'center'; x.fillStyle = '#1a1816'; x.font = '400 58px "Cormorant Garamond", serif'; x.fillText('Your Crown Heir Is Ready', 540, 1208);
+    x.fillStyle = '#4a4540'; x.font = '300 28px Jost, sans-serif';
+    const lines = [], parts = w.short.split(' '); let line = '';
+    for (const word of parts) { const t = line ? line + ' ' + word : word; if (x.measureText(t).width > 900 && line) { lines.push(line); line = word; } else line = t; }
+    lines.push(line); lines.slice(0, 2).forEach((l, i) => x.fillText(l, 540, 1252 + i * 34));
+    x.fillStyle = '#a0624a'; x.font = '400 22px Jost, sans-serif'; x.fillText('Build yours at ' + location.host + '/dolls', 540, 1330);
+    const blob = await new Promise(ok => c.toBlob(ok, 'image/png'));
+    const file = new File([blob], 'my-crown-heir.png', { type: 'image/png' });
+    $('shareLink').value = link; $('shareOut').classList.remove('hidden');
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      try { await navigator.share({ files: [file], title: 'My Crown Heir', text: `Meet my Crown Heir: ${w.short}. ${link}` }); $('shareMsg').textContent = 'Shared. Here is your link too:'; return; } catch (e) { if (e.name === 'AbortError') { $('shareMsg').textContent = 'Here is your link to come back to this Crown Heir:'; return; } }
+    }
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'my-crown-heir.png'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+    $('shareMsg').textContent = 'Your picture is saved. This link reopens your Crown Heir:';
+  } catch (e) { $('shareOut').classList.remove('hidden'); $('shareLink').value = shareUrl(); $('shareMsg').textContent = "We couldn't make the picture on this device, but this link reopens your Crown Heir:"; }
+  finally { btn.disabled = false; btn.textContent = 'Save & Share'; }
+}
+async function copyLink() { const i = $('shareLink'); try { await navigator.clipboard.writeText(i.value); $('shareMsg').textContent = 'Link copied.'; } catch (e) { i.select(); document.execCommand && document.execCommand('copy'); } }
+
+/* ── 8. bring them home ── */
+function bringHome() { $('home').classList.remove('hidden'); $('homeTitle').focus({ preventScroll: true }); $('home').scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' }); }
+function qty(n) { QTY = Math.max(1, Math.min(OPT ? OPT.maxQuantity : 5, QTY + n)); $('qtyN').textContent = QTY; }
 async function send() {
   $('err').textContent = ''; $('go').disabled = true;
   try {
     if (D.tone === 2 && !D.hairColor2) throw new Error('Pick the highlight colour, or switch back to one colour');
-    const notes = $('notes').value.trim();
-    const body = { name: $('fName').value, phone: $('fPhone').value, email: $('fEmail').value, shade: D.shade, hairColor: D.hairColor, hairColor2: D.tone === 2 ? D.hairColor2 : null, hairStyle: D.hairStyle, quantity: D.quantity,
-      outfit: { top: $('oTop').value, bottom: $('oBottom').value, shoes: $('oShoes').value, colors: $('oColors').value }, notes, forWhom: $('forWhom').value };
+    const body = { name: $('fName').value, phone: $('fPhone').value, email: $('fEmail').value, base: D.base, shade: D.shade, hairColor: D.hairColor, hairColor2: D.tone === 2 ? D.hairColor2 : null, hairStyle: D.hairStyle,
+      top: D.top, topColor: D.topColor, bottom: D.bottom, bottomColor: D.bottomColor, shoes: D.shoes, shoesColor: D.shoesColor, accessories: D.accessories, look: query(),
+      quantity: QTY, notes: $('notes').value.trim(), forWhom: $('forWhom').value };
     const r = await fetch('/api/dolls', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
     const j = await r.json().catch(() => ({}));
     if (!r.ok) throw new Error(j.error || 'Could not send your request');
     $('form').classList.add('hidden'); $('thanks').classList.remove('hidden');
-    $('doneCode').textContent = j.code; $('doneSum').textContent = (j.quantity > 1 ? j.quantity + ' dolls: ' : '') + j.summary + '. Outfit wishes: ' + j.wishes + '.';
+    $('doneCode').textContent = j.code; $('doneSum').textContent = (j.quantity > 1 ? j.quantity + ' dolls: ' : '') + j.summary + '. ' + j.wishes + '.';
     $('donePhone').textContent = $('fPhone').value;
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    $('thanksTitle').focus({ preventScroll: true });
   } catch (e) { $('err').textContent = e.message; }
   finally { $('go').disabled = false; }
 }
@@ -379,7 +649,14 @@ async function send() {
   if (document.readyState === 'complete') setTimeout(start, 0); else addEventListener('load', () => setTimeout(start, 0), { once: true });
 })();
 
-fetch('/api/dolls').then(r => r.json()).then(o => { OPT = o; render(); }).catch(() => { $('err').textContent = 'Could not load the choices. Please refresh.'; });
+fetch('/api/dolls').then(r => r.json()).then(o => {
+  OPT = o;
+  const step = readUrl();
+  if (!step) applyDefaults();
+  STEP = step || 'base';
+  history.replaceState(null, '', step ? urlFor(STEP) : location.pathname + location.hash);
+  if (STEP === 'reveal') showReveal(); else render();
+}).catch(() => { $('panel').innerHTML = '<p class="err">Could not load the Doll Maker. Please refresh.</p>'; });
 </script>
 </body>
 </html>
