@@ -7,7 +7,7 @@ const fs = require('fs');
 const path = require('path');
 const { build, text, OUT } = require('../scripts/build-doll-manifest');
 
-test('manifest is current with lib/dolls.js (run scripts/build-doll-manifest.js)', () => {
+test('manifest is current with lib/doll-catalog.js (run scripts/build-doll-manifest.js)', () => {
   assert.equal(fs.readFileSync(OUT, 'utf8'), text(build()));
 });
 
@@ -28,7 +28,7 @@ test('no Crown Heirs crown or mark is drawn: marks are placed from their source 
   require('../public/doll-art.js'); const A = globalThis.DollArt;
   const src = fs.readFileSync(path.join(__dirname, '..', 'public', 'doll-art.js'), 'utf8');
   assert.ok(!/l1\.8 -9 l4 5|l3 -15 l6\.5 8/.test(src), 'the old drawn crowns are gone');
-  const D = require('../lib/dolls');
+  const D = require('../lib/doll-catalog');
   const MONO = '/doll-maker/brand-source/brand_source_ch_monogram.png', CROWN = '/doll-maker/brand-source/brand_source_crown_original.png';
   const hrefs = svg => (svg.match(/<image [^>]*>/g) || []).map(i => i.match(/href="([^"]+)"/)[1]);
   for (const t of D.TOPS) for (const acc of [[], ['crown'], D.ACCESSORIES.map(a => a.id).filter(a => a !== 'crown')]) {
@@ -36,4 +36,12 @@ test('no Crown Heirs crown or mark is drawn: marks are placed from their source 
     assert.deepEqual(got, [...(t.brand ? [MONO] : []), ...(acc.includes('crown') ? [CROWN] : [])], `${t.id} with ${acc.join(',') || 'nothing'}`);
   }
   for (const bg of ['throne', 'neutral']) assert.equal(hrefs(A.reveal({}, bg, 'z')).length, 0, bg + ': settings carry no marks');
+});
+
+test('the catalog loads on its own, with no server code, so the scripts and preview run anywhere', () => {
+  const { execFileSync } = require('child_process');
+  const out = execFileSync(process.execPath, ['-e', `require(${JSON.stringify(path.join(__dirname, '..', 'lib', 'doll-catalog.js'))});
+    console.log(JSON.stringify(Object.keys(require.cache).map(k => require('path').basename(k))))`], { encoding: 'utf8' });
+  assert.deepEqual(JSON.parse(out), ['doll-catalog.js']);
+  assert.deepEqual(require('../lib/doll-catalog').options(), require('../lib/dolls').options(), 'the API serves the same choices');
 });

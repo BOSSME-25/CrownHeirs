@@ -323,7 +323,7 @@ a download elsewhere) and a link. **Bring Them Home** opens the request form:
 who it's for, how many (up to five), name, number, email and notes. No payment
 is taken: the request gets a code (`DL-XXXXX`), the client is texted that a
 quote is coming (price is by quote; turnaround is 4–6 weeks, set as
-`TURNAROUND` in `lib/dolls.js` and shown on the page and in every message),
+`TURNAROUND` in `lib/doll-catalog.js` and shown on the page and in every message),
 and the salon is texted and emailed.
 
 **State and links.** The whole look lives in the URL (`?b=girl&c=caramel&h=locs&hc=black&hl=honey-blonde&t=tee.red&p=jeans.denim&s=boots.brown&a=bag,glasses&bg=throne&step=reveal`),
@@ -357,7 +357,9 @@ every option id and display name and the layer file each will need
 (`chd_[base]_[category]_[option]_[variant]_v##.webp` on a 2400 × 3200 master
 canvas). It is generated from the catalog: run
 `node scripts/build-doll-manifest.js` after changing options in
-`lib/dolls.js`, where all the choices live.
+`lib/doll-catalog.js`, where all the choices live. It is plain data with no
+server code, so the scripts and the API read the same list;
+`lib/dolls.js` holds the request logic (checks, storing, texts).
 
 The desk's **Dolls** tab moves each request along, new → quoted (the quote is
 typed in and texted to the client) → making → ready (the client is texted to

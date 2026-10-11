@@ -1,5 +1,5 @@
 {
- "about": "Crown Heirs Doll Maker layer manifest, generated from lib/dolls.js by scripts/build-doll-manifest.js. Do not edit by hand.",
+ "about": "Crown Heirs Doll Maker layer manifest, generated from lib/doll-catalog.js by scripts/build-doll-manifest.js. Do not edit by hand.",
  "canvas": {
   "master": "2400 x 3200 px PNG, transparent, sRGB",
   "web": "1200 x 1600 px WebP (keep the PNG masters)",
