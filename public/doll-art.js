@@ -236,7 +236,8 @@
     const longS = (p, cuff) => limb(73, 119, 64, 180, 17.5, p) + limb(127, 119, 136, 180, 17.5, p) + (cuff ? limb(64.6, 177, 63.8, 183, 18, cuff) + limb(135.4, 177, 136.2, 183, 18, cuff) : '');
     const shortS = p => limb(73, 119, 69, 141, 18.5, p) + limb(127, 119, 131, 141, 18.5, p);
     const scoop = fp('M91 108 Q100 120 109 108 Z', S);
-    const mark = (x, y, w) => `<image href="${logo}" x="${x}" y="${y}" width="${w}" height="${f(w * 449 / 202)}" preserveAspectRatio="xMidYMid meet"/>`;
+    let brandL = '';                                                       // 10 brand overlay: the CH mark, placed from its file
+    const mark = (x, y, w) => { brandL += `<image href="${logo}" x="${x}" y="${y}" width="${w}" height="${f(w * 449 / 202)}" preserveAspectRatio="xMidYMid meet"/>`; return ''; };
     const tops = {
       hoodie: () => fp(T, tc) + longS(tc, tdk)
         + `<path d="M82 111 Q100 128 118 111 Q114 103 100 104 Q86 103 82 111 Z" fill="${tdk}"/>`
@@ -298,19 +299,23 @@
       // The crown sits on the head, its band over the crown of the hair, tipped the way it's drawn.
       + (acc.has('crown') ? `<image href="${crownSrc}" x="76" y="${hatTop - 21}" width="50" height="50.1" preserveAspectRatio="xMidYMid meet"/>` : '');
 
+    // Each layer is a named group, so an exported SVG opens with real layers in a design tool.
+    const L = (name, z, body) => body ? `<g id="${id}-${name}" data-layer="${z}">${body}</g>` : '';
     return defs(id, h, c1, o.hair2) + (pdefs ? `<defs>${pdefs}</defs>` : '')
-      + H.back                                                                        // 04 hair behind
-      + limb(87, 186, 87, 252, 17, S) + limb(113, 186, 113, 252, 17, S)                 // 02 legs
-      + limb(73, 120, 63, 188, 14, S) + limb(127, 120, 137, 188, 14, S)                 //    arms
-      + `<rect x="91" y="94" width="18" height="20" rx="4" fill="${S}"/>`               //    neck
-      + bottomL + topL                                                                 // 05, 06 (+10)
-      + ball(62, 193, 8, S) + ball(138, 193, 8, S)                                     //    hands, over the cuffs
-      + shoes                                                                           // 07
-      + ball(67, 72, 6, S) + ball(133, 72, 6, S)                                       //    ears
-      + `<ellipse cx="${h.cx}" cy="${h.cy}" rx="${h.rx}" ry="${h.ry}" fill="${S}"/><ellipse cx="${h.cx}" cy="${h.cy}" rx="${h.rx}" ry="${h.ry}" fill="${K}"/>`
-      + face(h, S, o.base !== 'boy')
-      + H.over + H.front                                                               // 08 hair in front
-      + accL;                                                                           // 09
+      + L('hair-back', '04 hair back', H.back)
+      + L('body', '02 base body', limb(87, 186, 87, 252, 17, S) + limb(113, 186, 113, 252, 17, S)   // legs
+          + limb(73, 120, 63, 188, 14, S) + limb(127, 120, 137, 188, 14, S)                         // arms
+          + `<rect x="91" y="94" width="18" height="20" rx="4" fill="${S}"/>`)                      // neck
+      + L('bottom', '05 bottom', bottomL)
+      + L('top', '06 top', topL)
+      + L('brand', '10 brand overlay', brandL)
+      + L('hands', '02 base body: hands', ball(62, 193, 8, S) + ball(138, 193, 8, S))                // over the cuffs
+      + L('shoes', '07 shoes', shoes)
+      + L('head', '02 base body: head and face', ball(67, 72, 6, S) + ball(133, 72, 6, S)
+          + `<ellipse cx="${h.cx}" cy="${h.cy}" rx="${h.rx}" ry="${h.ry}" fill="${S}"/><ellipse cx="${h.cx}" cy="${h.cy}" rx="${h.rx}" ry="${h.ry}" fill="${K}"/>`
+          + face(h, S, o.base !== 'boy'))
+      + L('hair-front', '08 hair front', H.over + H.front)
+      + L('accessories', '09 accessories', accL);
   }
 
   /* A close crop of one part of the doll, for an option's thumbnail. */
@@ -323,14 +328,14 @@
      them (Crown Heirs marks are placed from their source files by the page). */
   function reveal(o, bg, id) {
     id = id || 'rv';
-    const doll = `<g transform="translate(50 62)">${render(o, id)}</g>`;
+    const doll = `<g id="${id}-doll" transform="translate(50 62)">${render(o, id)}</g>`;
     const shadow = `<ellipse cx="150" cy="329" rx="54" ry="7" fill="rgba(0,0,0,.2)"/>`;
     if (bg === 'neutral') {
       return `<defs><radialGradient id="${id}-glow" cx=".5" cy=".42" r=".6"><stop offset="0" stop-color="#fbf3e2"/><stop offset="1" stop-color="#e8d7b8"/></radialGradient></defs>`
-        + `<rect width="300" height="380" fill="url(#${id}-glow)"/>`
+        + `<g id="${id}-background" data-layer="01 background"><rect width="300" height="380" fill="url(#${id}-glow)"/>`
         + `<path d="M58 318 V128 Q58 40 150 40 Q242 40 242 128 V318" fill="none" stroke="#c8952a" stroke-width="1.6" opacity=".7"/>`
         + `<path d="M66 318 V130 Q66 50 150 50 Q234 50 234 130 V318" fill="none" stroke="#c8952a" stroke-width=".7" opacity=".5"/>`
-        + `<rect y="318" width="300" height="62" fill="#d9c4a0"/><path d="M0 318 H300" stroke="#c8952a" stroke-width="1"/>` + shadow + doll;
+        + `<rect y="318" width="300" height="62" fill="#d9c4a0"/><path d="M0 318 H300" stroke="#c8952a" stroke-width="1"/>` + shadow + '</g>' + doll;
     }
     const G = `url(#${id}-gold)`, V = `url(#${id}-tuft)`;
     const post = x => `<rect x="${x - 7}" y="72" width="14" height="258" rx="3" fill="${G}"/><circle cx="${x}" cy="66" r="8" fill="${G}"/><path d="M${x - 3} 60 L${x} 44 L${x + 3} 60 Z" fill="${G}"/>`
@@ -342,7 +347,7 @@
         <linearGradient id="${id}-floor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7a4e2c"/><stop offset="1" stop-color="#4f2f19"/></linearGradient>
         <pattern id="${id}-tuft" width="16" height="16" patternUnits="userSpaceOnUse"><rect width="16" height="16" fill="#2b1c17"/><path d="M0 8 L8 0 L16 8 L8 16 Z" fill="none" stroke="#1d120e" stroke-width="1"/><circle cx="8" cy="8" r="1.4" fill="#4a332a"/></pattern>
       </defs>`
-      + `<rect width="300" height="320" fill="url(#${id}-wall)"/>`
+      + `<g id="${id}-background" data-layer="01 background"><rect width="300" height="320" fill="url(#${id}-wall)"/>`
       + `<rect x="0" width="26" height="320" fill="#efe2c9"/><rect x="274" width="26" height="320" fill="#efe2c9"/><path d="M26 0 V320 M274 0 V320" stroke="#d9c39c" stroke-width="2"/>`
       + `<rect y="312" width="300" height="68" fill="url(#${id}-floor)"/>`
       + `<ellipse cx="150" cy="338" rx="124" ry="22" fill="#7a1f2b"/><ellipse cx="150" cy="338" rx="116" ry="18" fill="none" stroke="#c8952a" stroke-width="1.4"/>`
@@ -353,7 +358,7 @@
       + `<rect x="74" y="236" width="152" height="22" rx="8" fill="#3a2620"/>`
       + `<path d="M70 256 H230 V276 Q190 288 150 280 Q110 288 70 276 Z" fill="${G}"/><path d="M84 266 q8 8 16 0 q8 8 16 0 M184 266 q8 8 16 0 q8 8 16 0" fill="none" stroke="#8a6414" stroke-width="1.2"/>`
       + `<rect x="80" y="278" width="14" height="44" rx="3" fill="${G}"/><rect x="206" y="278" width="14" height="44" rx="3" fill="${G}"/>`
-      + shadow + doll;
+      + shadow + '</g>' + doll;
   }
 
   function tile(style, hair1, hair2, skin, id) {
