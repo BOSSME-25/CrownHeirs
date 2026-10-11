@@ -322,7 +322,9 @@ throne or the plain Crown Heirs setting, with the primary logo and a summary.
 a download elsewhere) and a link. **Bring Them Home** opens the request form:
 who it's for, how many (up to five), name, number, email and notes. No payment
 is taken: the request gets a code (`DL-XXXXX`), the client is texted that a
-quote and timeline are coming, and the salon is texted and emailed.
+quote is coming (price is by quote; turnaround is 4–6 weeks, set as
+`TURNAROUND` in `lib/dolls.js` and shown on the page and in every message),
+and the salon is texted and emailed.
 
 **State and links.** The whole look lives in the URL (`?b=girl&c=caramel&h=locs&hc=black&hl=honey-blonde&t=tee.red&p=jeans.denim&s=boots.brown&a=bag,glasses&bg=throne&step=reveal`),
 so every step is a page in the browser's history (Back and Forward keep the
