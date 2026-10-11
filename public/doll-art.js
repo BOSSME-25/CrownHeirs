@@ -31,7 +31,10 @@
     const grad = (gid, c) => `<linearGradient id="${gid}" gradientUnits="userSpaceOnUse" x1="0" y1="${f(top)}" x2="0" y2="${f(bot)}"><stop offset="0" stop-color="${shade(c, 0.06)}"/><stop offset="1" stop-color="${shade(c, -0.14)}"/></linearGradient>`;
     const k = h.ry / 36;
     return `<defs>
-      <pattern id="${id}-knit" width="${f(5 * k)}" height="${f(4 * k)}" patternUnits="userSpaceOnUse"><path d="M0 ${f(.8 * k)}l${f(1.25 * k)} ${f(1.7 * k)} ${f(1.25 * k)} ${f(-1.7 * k)}M${f(2.5 * k)} ${f(.8 * k)}l${f(1.25 * k)} ${f(1.7 * k)} ${f(1.25 * k)} ${f(-1.7 * k)}" fill="none" stroke="rgba(0,0,0,.14)" stroke-width="${f(.6 * k)}"/></pattern>
+      <pattern id="${id}-knit" width="${f(3 * k)}" height="${f(2.2 * k)}" patternUnits="userSpaceOnUse">
+        <path d="M-.4 .6 Q.3 1.8 1.1 .7 Q1.8 -.1 2.5 .8 M1.1 1.8 Q1.8 3 2.6 1.9" fill="none" stroke="#120b08" stroke-opacity=".24" stroke-width="${f(.38 * k)}"/>
+        <path d="M0 .35 Q.5 1.15 1 .45 M1.6 1.5 Q2.1 2.3 2.6 1.6" fill="none" stroke="#fff4da" stroke-opacity=".19" stroke-width="${f(.3 * k)}"/>
+      </pattern>
       ${grad(`${id}-hair`, c1)}${c2 ? grad(`${id}-hl`, c2) : ''}
     </defs>`;
   }
@@ -45,6 +48,7 @@
     const dark = shade(c1, -0.35);
     const hl = i => Q && i % 3 === 1;                              // every third strand is a highlight
     const line = (d, w, paint, tex) => `<path d="${d}" fill="none" stroke="${paint}" stroke-width="${f(w)}" stroke-linecap="round" stroke-linejoin="round"/>`
+      + `<path d="${d}" fill="none" stroke="${shade(c1, .18)}" stroke-opacity=".55" stroke-width="${f(w * .22)}" stroke-linecap="round"/>`
       + (tex ? `<path d="${d}" fill="none" stroke="${tex.c}" stroke-width="${f(w * tex.w)}" stroke-dasharray="${tex.d}" stroke-linecap="round"/>` : '');
     const strand = (x0, y0, x1, y1, w, bend, tex, paint) =>
       line(`M${f(x0)} ${f(y0)}Q${f((x0 + x1) / 2 + bend)} ${f((y0 + y1) / 2)} ${f(x1)} ${f(y1)}`, w, paint || P, tex);
@@ -72,7 +76,16 @@
       for (let k = 0; k < frontEach; k++) for (const side of [-1, 1]) {
         const x0 = cx + side * rx * (0.88 - k * 0.1), y0 = cy - ry * (0.3 - k * 0.1);
         const x1 = cx + side * rx * (0.96 + k * 0.16), y1 = cy + ry * (frontLen - k * 0.2);
-        over += draw(x0, y0, x1, y1, w, side * 3 * s, tex, hl(k + (side > 0 ? 1 : 0)) ? Q : P);
+        const paint = hl(k + (side > 0 ? 1 : 0)) ? Q : P;
+        if (draw === strand) {
+          // A single yarn path runs from the crown, around the temple, to the tip.
+          // Starting at the temple made the hanging hair look attached separately.
+          const rootX = cx + side * (4 + k * 6) * s, rootY = cy - ry * (1.04 - k * .06);
+          const d = `M${f(rootX)} ${f(rootY)}C${f(cx + side * rx * .76)} ${f(rootY - 5 * s)} ${f(x0)} ${f(y0 - 14 * s)} ${f(x0)} ${f(y0)}Q${f((x0 + x1) / 2 + side * 3 * s)} ${f((y0 + y1) / 2)} ${f(x1)} ${f(y1)}`;
+          over += line(d, w, paint, tex);
+        } else {
+          over += draw(x0, y0, x1, y1, w, side * 3 * s, tex, paint);
+        }
       }
       return { back, over };
     };
@@ -92,7 +105,15 @@
       }
       return `<clipPath id="${id}-cap"><path d="${capD}"/></clipPath><g clip-path="url(#${id}-cap)">${line(d, w, Q)}</g>`;
     };
-    const cap = (n, w) => `<path d="${capD}" fill="${P}"/>` + capHl(n || 13, w || 4.2 * s) + `<path d="${capD}" fill="${K}"/>`;
+    const cap = (n, w) => {
+      let yarn = '';
+      for (let i = 0; i < 15; i++) {
+        const u = i / 14 * 2 - 1;
+        const d = `M${f(cx + u * rx * .22)} ${f(cy - ry * 1.22)} Q${f(cx + u * rx * 1.05)} ${f(cy - ry * .97)} ${f(cx + u * rx * 1.1)} ${f(cy + ry * .15)}`;
+        yarn += line(d, 3.3 * s, shade(c1, -.15)) + line(d, 1.2 * s, shade(c1, .12));
+      }
+      return `<path d="${capD}" fill="${P}"/><clipPath id="${id}-cap-yarn"><path d="${capD}"/></clipPath><g clip-path="url(#${id}-cap-yarn)">${yarn}</g>` + capHl(n || 13, w || 4.2 * s);
+    };
     const blob = (x, y, r, paint) => `<circle cx="${f(x)}" cy="${f(y)}" r="${f(r)}" fill="${paint || P}"/><circle cx="${f(x)}" cy="${f(y)}" r="${f(r)}" fill="${K}"/>`;
     const ring = (x, y, r, n, br) => Array.from({ length: n }, (_, i) => { const a = (i / n) * Math.PI * 2; return blob(x + Math.cos(a) * r, y + Math.sin(a) * r, br, hl(i) ? Q : P); }).join('');
     const tie = (x, y, r) => `<circle cx="${f(x)}" cy="${f(y)}" r="${f(r)}" fill="none" stroke="#c8952a" stroke-width="${f(2.2 * s)}"/>`;
@@ -101,8 +122,8 @@
       + (Q ? `<clipPath id="${id}-${key}"><path d="${d}"/></clipPath><g clip-path="url(#${id}-${key})">${line(paths, w, Q)}</g>` : '')
       + `<path d="${d}" fill="${K}"/>`;
     switch (style) {
-      case 'locs': { const H = hang(19, 7.6 * s, cy + ry * 3.4, 1.78, { c: 'rgba(0,0,0,.22)', w: .5, d: `${f(2.2 * s)} ${f(2.6 * s)}` }, 3, 3.0); return { back: H.back, over: H.over, front: cap(11, 6 * s) }; }
-      case 'box-braids': { const H = hang(27, 4.8 * s, cy + ry * 3.55, 1.72, { c: 'rgba(255,255,255,.22)', w: .45, d: `${f(1.8 * s)} ${f(1.6 * s)}` }, 4, 3.1); return { back: H.back, over: H.over, front: cap(16, 3.6 * s) }; }
+      case 'locs': { const H = hang(19, 7.6 * s, cy + ry * 5.3, 1.42, { c: 'rgba(0,0,0,.22)', w: .5, d: `${f(2.2 * s)} ${f(2.6 * s)}` }, 3, 4.7); return { back: H.back, over: H.over, front: cap(11, 6 * s) }; }
+      case 'box-braids': { const H = hang(27, 4.8 * s, cy + ry * 5.0, 1.4, { c: 'rgba(255,255,255,.22)', w: .45, d: `${f(1.8 * s)} ${f(1.6 * s)}` }, 4, 4.5); return { back: H.back, over: H.over, front: cap(16, 3.6 * s) }; }
       case 'twists': { const H = hang(21, 5.8 * s, cy + ry * 2.75, 1.75, { c: 'rgba(0,0,0,.3)', w: .6, d: `${f(1.5 * s)} ${f(2.2 * s)}` }, 3, 2.3); return { back: H.back, over: H.over, front: cap(13, 4.6 * s) }; }
       case 'loose-curls': {
         const draw = (x0, y0, x1, y1, w, bend, tex, paint) => curl(x0, y0, x1, y1, w, 4.6 * s, 17 * s, tex, paint);
@@ -181,15 +202,13 @@
     }
   }
 
-  function face(h, S, lashes) {
-    const { cx, cy, rx, ry } = h; const s = ry / 36;
-    const ex = rx * 0.38, ey = cy + ry * 0.16, er = 4.3 * s;
-    const eye = x => `<circle cx="${f(x)}" cy="${f(ey)}" r="${f(er)}" fill="#141210"/><circle cx="${f(x + er * 0.32)}" cy="${f(ey - er * 0.36)}" r="${f(er * 0.3)}" fill="#fff"/>`;
-    const brow = x => `<path d="M${f(x - 5 * s)} ${f(ey - 9 * s)}q${f(5 * s)} ${f(-3 * s)} ${f(10 * s)} 0" fill="none" stroke="#2a1d17" stroke-width="${f(1.5 * s)}" stroke-linecap="round"/>`;
-    const lash = (x, side) => `<path d="M${f(x + side * er * 0.7)} ${f(ey - er * 0.7)}l${f(side * 2.2 * s)} ${f(-1.6 * s)}" stroke="#141210" stroke-width="${f(1.1 * s)}" stroke-linecap="round"/>`;
-    return eye(cx - ex) + eye(cx + ex) + brow(cx - ex) + brow(cx + ex) + (lashes ? lash(cx - ex, -1) + lash(cx + ex, 1) : '')
-      + `<ellipse cx="${cx}" cy="${f(cy + ry * 0.44)}" rx="${f(3.8 * s)}" ry="${f(3.1 * s)}" fill="${shade(S, -0.18)}"/>`
-      + `<path d="M${f(cx - 6 * s)} ${f(cy + ry * 0.66)}q${f(6 * s)} ${f(4.5 * s)} ${f(12 * s)} 0" fill="none" stroke="#5a2a22" stroke-width="${f(1.8 * s)}" stroke-linecap="round"/>`;
+  function face(h, S) {
+    const { cx, cy, rx, ry } = h, s = ry / 30;
+    const ex = rx * .48, ey = cy + ry * .02, er = 2.8 * s;
+    const eye = x => `<ellipse cx="${f(x)}" cy="${f(ey + .5)}" rx="${f(er + .9)}" ry="${f(er + 1)}" fill="${shade(S, -.35)}"/><circle cx="${f(x)}" cy="${f(ey)}" r="${f(er)}" fill="#090807"/><circle cx="${f(x - .7 * s)}" cy="${f(ey - .8 * s)}" r="${f(.75 * s)}" fill="#fff"/><circle cx="${f(x + .9 * s)}" cy="${f(ey + .9 * s)}" r="${f(.3 * s)}" fill="#aca59e"/>`;
+    const nose = `<ellipse cx="${cx}" cy="${f(cy + ry * .34)}" rx="${f(5.3 * s)}" ry="${f(3.9 * s)}" fill="${shade(S, -.22)}"/><ellipse cx="${f(cx - .6 * s)}" cy="${f(cy + ry * .3)}" rx="${f(4.4 * s)}" ry="${f(3.2 * s)}" fill="${shade(S, .05)}"/><path d="M${f(cx - 3 * s)} ${f(cy + ry * .3)}q${f(3 * s)} ${f(-1.4 * s)} ${f(6 * s)} 0" fill="none" stroke="${shade(S, .22)}" stroke-width=".5"/>`;
+    return eye(cx - ex) + eye(cx + ex) + nose
+      + `<path d="M${f(cx - 4 * s)} ${f(cy + ry * .58)}q${f(4 * s)} ${f(1.7 * s)} ${f(8 * s)} 0" fill="none" stroke="${shade(S, -.48)}" stroke-width="${f(.8 * s)}" stroke-linecap="round"/>`;
   }
 
   /* The whole doll, in the Doll Maker's layer order: hair that sits behind,
@@ -201,19 +220,29 @@
              shoes: { look, main, trim }, accessories: [ids], brandSrc? } */
   function render(o, id) {
     id = id || 'doll';
-    const S = o.skin || '#7d4a2c', h = { cx: 100, cy: 66, rx: 33, ry: 36 };
+    const S = o.skin || '#7d4a2c', h = { cx: 100, cy: 70, rx: 36, ry: 30 };
     const c1 = o.hair1 || '#1b1b1b', P = `url(#${id}-hair)`, Q = o.hair2 ? `url(#${id}-hl)` : null, K = `url(#${id}-knit)`;
     const style = o.style || 'locs';
     const H = style === 'none' ? { back: '', over: '', front: '' } : hair(style, P, Q, h, c1, K, id, S);
-    const fp = (d, fill, extra) => `<path d="${d}" fill="${fill}"${extra || ''}/><path d="${d}" fill="${K}"/>`;
-    const limb = (x1, y1, x2, y2, w, c) => [c, K].map(p => `<path d="M${x1} ${y1}L${x2} ${y2}" fill="none" stroke="${p}" stroke-width="${w}" stroke-linecap="round"/>`).join('');
-    const ball = (x, y, r, c) => `<circle cx="${x}" cy="${y}" r="${r}" fill="${c}"/><circle cx="${x}" cy="${y}" r="${r}" fill="${K}"/>`;
+    let pdefs = '', materialCount = 0;
+    const paints = new Map();
+    const paint = color => {
+      if (!/^#[0-9a-f]{6}$/i.test(color || '')) return color;
+      if (!paints.has(color)) {
+        const key = `${id}-yarn-${materialCount++}`;
+        pdefs += `<linearGradient id="${key}" x1="0" y1="0" x2="1" y2=".15"><stop offset="0" stop-color="${shade(color, -.32)}"/><stop offset=".32" stop-color="${shade(color, .12)}"/><stop offset=".65" stop-color="${color}"/><stop offset="1" stop-color="${shade(color, -.28)}"/></linearGradient>`;
+        paints.set(color, `url(#${key})`);
+      }
+      return paints.get(color);
+    };
+    const fp = (d, fill, extra) => `<path d="${d}" fill="${paint(fill)}"${extra || ''}/><path d="${d}" fill="${K}"/>`;
+    const limb = (x1, y1, x2, y2, w, c) => [paint(c), K].map(p => `<path d="M${x1} ${y1}Q${(x1 + x2) / 2 - 1.5} ${(y1 + y2) / 2} ${x2} ${y2}" fill="none" stroke="${p}" stroke-width="${w}" stroke-linecap="round"/>`).join('');
+    const ball = (x, y, r, c) => `<circle cx="${x}" cy="${y}" r="${r}" fill="${paint(c)}"/><circle cx="${x}" cy="${y}" r="${r}" fill="${K}"/>`;
     const top = o.top || { look: 'tee', color: '#c0392b' }, bot = o.bottom || { look: 'jeans', color: '#4a6a94' };
     const sh = o.shoes || { look: 'sneakers', main: '#f7f4ee', trim: '#f7f4ee' }, acc = new Set(o.accessories || []);
     const logo = o.brandSrc || '/doll-maker/brand-source/brand_source_ch_monogram.png';   // the approved CH mark, as supplied
     const crownSrc = o.crownSrc || '/doll-maker/brand-source/brand_source_crown_original.png'; // the approved crown, as supplied
     const gd = '#c8952a', cream = '#f7f4ee';
-    let pdefs = '';
 
     // 05 Bottoms
     const bc = bot.color || '#4a6a94', bdk = shade(bc, -0.2);
@@ -231,9 +260,9 @@
     const bottomL = (bottoms[bot.look] || bottoms.jeans)();
 
     // 06 Top, 10 brand overlay
-    const T = 'M71 112 Q100 100 129 112 L132 188 Q100 196 68 188 Z';
+    const T = 'M77 109 Q100 103 123 109 Q133 128 127 148 L130 181 Q100 190 70 181 L73 148 Q67 128 77 109 Z';
     const tc = top.color || '#c0392b', tdk = shade(tc, -0.18);
-    const longS = (p, cuff) => limb(73, 119, 64, 180, 17.5, p) + limb(127, 119, 136, 180, 17.5, p) + (cuff ? limb(64.6, 177, 63.8, 183, 18, cuff) + limb(135.4, 177, 136.2, 183, 18, cuff) : '');
+    const longS = (p, cuff) => limb(73, 119, 62, 174, 16, p) + limb(127, 119, 138, 174, 16, p) + (cuff ? limb(64.6, 177, 63.8, 183, 18, cuff) + limb(135.4, 177, 136.2, 183, 18, cuff) : '');
     const shortS = p => limb(73, 119, 69, 141, 18.5, p) + limb(127, 119, 131, 141, 18.5, p);
     const scoop = fp('M91 108 Q100 120 109 108 Z', S);
     let brandL = '';                                                       // 10 brand overlay: the CH mark, placed from its file
@@ -261,7 +290,7 @@
         const Z = `url(#${id}-fuzz)`;
         return fp(T, cream) + scoop
           + [`M71 112 Q84 106 92 109 L95 193 Q80 193 68 188 Z`, `M129 112 Q116 106 108 109 L105 193 Q120 193 132 188 Z`].map(d => fp(d, tc) + `<path d="${d}" fill="${Z}"/>`).join('')
-          + longS(tc) + limb(73, 119, 64, 180, 17.5, Z) + limb(127, 119, 136, 180, 17.5, Z);
+          + longS(tc) + limb(73, 119, 62, 174, 16, Z) + limb(127, 119, 138, 174, 16, Z);
       },
       flannel: () => {
         pdefs += `<pattern id="${id}-plaid" width="12" height="12" patternUnits="userSpaceOnUse"><rect width="12" height="12" fill="${tc}"/><rect y="4" width="12" height="4" fill="${shade(tc, -0.4)}" opacity=".5"/><rect x="4" width="4" height="12" fill="${shade(tc, -0.4)}" opacity=".5"/><path d="M0 10H12M10 0V12" stroke="${cream}" stroke-width=".7" opacity=".6"/></pattern>`;
@@ -301,20 +330,19 @@
 
     // Each layer is a named group, so an exported SVG opens with real layers in a design tool.
     const L = (name, z, body) => body ? `<g id="${id}-${name}" data-layer="${z}">${body}</g>` : '';
+    const bodyL = limb(87, 186, 87, 252, 17, S) + limb(113, 186, 113, 252, 17, S) + limb(73, 120, 61, 183, 12, S) + limb(127, 120, 139, 183, 12, S) + `<rect x="91" y="94" width="18" height="20" rx="4" fill="${paint(S)}"/>`;
     return defs(id, h, c1, o.hair2) + (pdefs ? `<defs>${pdefs}</defs>` : '')
       + L('hair-back', '04 hair back', H.back)
-      + L('body', '02 base body', limb(87, 186, 87, 252, 17, S) + limb(113, 186, 113, 252, 17, S)   // legs
-          + limb(73, 120, 63, 188, 14, S) + limb(127, 120, 137, 188, 14, S)                         // arms
-          + `<rect x="91" y="94" width="18" height="20" rx="4" fill="${S}"/>`)                      // neck
+      + L('body', '02 base body', bodyL)
       + L('bottom', '05 bottom', bottomL)
       + L('top', '06 top', topL)
       + L('brand', '10 brand overlay', brandL)
-      + L('hands', '02 base body: hands', ball(62, 193, 8, S) + ball(138, 193, 8, S))                // over the cuffs
+      + L('hands', '02 base body: hands', ball(61, 186, 6.8, S) + ball(139, 186, 6.8, S))                // over the cuffs
       + L('shoes', '07 shoes', shoes)
       + L('head', '02 base body: head and face', ball(67, 72, 6, S) + ball(133, 72, 6, S)
-          + `<ellipse cx="${h.cx}" cy="${h.cy}" rx="${h.rx}" ry="${h.ry}" fill="${S}"/><ellipse cx="${h.cx}" cy="${h.cy}" rx="${h.rx}" ry="${h.ry}" fill="${K}"/>`
-          + face(h, S, o.base !== 'boy'))
-      + L('hair-front', '08 hair front', H.over + H.front)
+          + `<ellipse cx="${h.cx}" cy="${h.cy}" rx="${h.rx}" ry="${h.ry}" fill="${paint(S)}"/><ellipse cx="${h.cx}" cy="${h.cy}" rx="${h.rx}" ry="${h.ry}" fill="${K}"/>`
+          + face(h, S))
+      + L('hair-front', '08 hair front', H.front + H.over)
       + L('accessories', '09 accessories', accL);
   }
 
@@ -362,15 +390,15 @@
   }
 
   function tile(style, hair1, hair2, skin, id) {
-    const h = { cx: 30, cy: 30, rx: 12.5, ry: 13.6 }, S = skin || '#7d4a2c';
+    const h = { cx: 30, cy: 30, rx: 13.6, ry: 11.3 }, S = skin || '#7d4a2c';
     const c1 = hair1 || '#1b1b1b', P = `url(#${id}-hair)`, Q = hair2 ? `url(#${id}-hl)` : null, K = `url(#${id}-knit)`;
     const H = hair(style, P, Q, h, c1, K, id, S);
     const er = 1.7;
     return defs(id, h, c1, hair2) + H.back
       + `<rect x="26.5" y="40" width="7" height="12" rx="2" fill="${S}"/>`
       + `<ellipse cx="${h.cx}" cy="${h.cy}" rx="${h.rx}" ry="${h.ry}" fill="${S}"/><ellipse cx="${h.cx}" cy="${h.cy}" rx="${h.rx}" ry="${h.ry}" fill="${K}"/>`
-      + `<circle cx="25.3" cy="32.3" r="${er}" fill="#141210"/><circle cx="34.7" cy="32.3" r="${er}" fill="#141210"/>`
-      + H.over + H.front;
+      + face(h, S)
+      + H.front + H.over;
   }
 
   root.DollArt = { render, reveal, tile, crop, shade };

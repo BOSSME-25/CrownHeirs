@@ -442,3 +442,13 @@ only images selected by the current run, even if the output folder contains
 older exports. `batch.json` records all ZIP names, and limited runs remain
 marked `partial`. Generated libraries are ignored by Git; the current repo
 contains no `samples/option3` output.
+
+### Crochet artwork revision
+
+The Doll Maker preview, hairstyle tiles, reveal, and image exporter share the
+updated `public/doll-art.js` illustration, informed by the supplied salon doll
+video. Rounded faces, small reflective eyes, shaped noses, fine loop stitches,
+yarn strands, and shaded garments replace the earlier flat artwork. This is
+an illustrated configuration preview, not a product photograph. Existing
+exported images must be regenerated with `--no-skip-existing` to use the new
+artwork. Approved brand PNGs are still placed directly from their source files.
