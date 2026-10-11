@@ -1,1 +1,3 @@
 node_modules/
+# Option 3 image library output: millions of files, never committed
+exports/
