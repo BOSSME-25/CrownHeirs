@@ -299,10 +299,10 @@ doll on the page, with a live preview drawn like Coletta's own dolls (in
 `public/doll-art.js`, shared with the home page) that redraws as they choose (it pins
 under the header on phones), including the outfit, shoes and extras read
 from what they type: the yarn shade
-(eight skin tones), the hair colour (one of twelve, or two of them blended from roots to
-ends), the
+(eight skin tones), the hair colour (one of twelve, or a main colour with
+highlights: whole strands of a second colour mixed through), the
 hair style (locs, box braids, twists, cornrows, afro puffs, curly afro,
-Bantu knots, straight, ponytail, top bun), how many (up to five), outfit
+loose curls, Bantu knots, straight, ponytail, top bun), how many (up to five), outfit
 wishes (top or dress, bottoms, shoes, colours) and notes, then their name
 and number. No payment is taken: the request gets a code (`DL-XXXXX`), the
 client is texted that a quote is coming, and the salon is texted and
