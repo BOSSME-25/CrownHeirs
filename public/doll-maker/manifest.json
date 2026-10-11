@@ -1,0 +1,781 @@
+{
+ "about": "Crown Heirs Doll Maker layer manifest, generated from lib/dolls.js by scripts/build-doll-manifest.js. Do not edit by hand.",
+ "canvas": {
+  "master": "2400 x 3200 px PNG, transparent, sRGB",
+  "web": "1200 x 1600 px WebP (keep the PNG masters)",
+  "rule": "Every layer uses the same 3:4 canvas, doll position and anchors. No cropping."
+ },
+ "naming": "chd_[base]_[category]_[option]_[variant]_v##.webp",
+ "layers": [
+  {
+   "z": "01",
+   "name": "background"
+  },
+  {
+   "z": "02",
+   "name": "base body / skin"
+  },
+  {
+   "z": "03",
+   "name": "facial detail (later)"
+  },
+  {
+   "z": "04",
+   "name": "hair back"
+  },
+  {
+   "z": "05",
+   "name": "bottom"
+  },
+  {
+   "z": "06",
+   "name": "top"
+  },
+  {
+   "z": "07",
+   "name": "shoes"
+  },
+  {
+   "z": "08",
+   "name": "hair front"
+  },
+  {
+   "z": "09",
+   "name": "accessories"
+  },
+  {
+   "z": "10",
+   "name": "approved brand overlays"
+  },
+  {
+   "z": "11",
+   "name": "foreground / throne"
+  }
+ ],
+ "brandSource": [
+  {
+   "file": "brand-source/brand_source_logo_primary.png",
+   "status": "supplied",
+   "use": "Reveal page and the Save & Share card"
+  },
+  {
+   "file": "brand-source/brand_source_ch_monogram.png",
+   "status": "supplied",
+   "use": "Crown Heirs branded tops"
+  },
+  {
+   "file": "brand-source/brand_source_crown_original.png",
+   "status": "needed",
+   "use": "The crown accessory (shown as coming soon until this file is supplied)"
+  }
+ ],
+ "bases": [
+  {
+   "id": "girl",
+   "name": "Girl",
+   "defaults": {
+    "hairStyle": "locs",
+    "hairColor": "black",
+    "top": "ch-hoodie",
+    "bottom": "joggers",
+    "bottomColor": "pink",
+    "shoes": "sneakers-pink"
+   }
+  },
+  {
+   "id": "boy",
+   "name": "Boy",
+   "defaults": {
+    "hairStyle": "short-curls",
+    "hairColor": "black",
+    "top": "ch-sweater",
+    "bottom": "jeans",
+    "bottomColor": "denim",
+    "shoes": "sneakers-black"
+   }
+  }
+ ],
+ "complexions": [
+  {
+   "id": "rich-espresso",
+   "name": "Rich Espresso",
+   "hex": "#4a2a1d",
+   "files": [
+    "chd_girl_skin_rich_espresso_v01.webp",
+    "chd_boy_skin_rich_espresso_v01.webp"
+   ]
+  },
+  {
+   "id": "deep-brown",
+   "name": "Deep Brown",
+   "hex": "#5f3722",
+   "files": [
+    "chd_girl_skin_deep_brown_v01.webp",
+    "chd_boy_skin_deep_brown_v01.webp"
+   ]
+  },
+  {
+   "id": "warm-brown",
+   "name": "Warm Brown",
+   "hex": "#7d4a2c",
+   "files": [
+    "chd_girl_skin_warm_brown_v01.webp",
+    "chd_boy_skin_warm_brown_v01.webp"
+   ]
+  },
+  {
+   "id": "golden-brown",
+   "name": "Golden Brown",
+   "hex": "#96603a",
+   "files": [
+    "chd_girl_skin_golden_brown_v01.webp",
+    "chd_boy_skin_golden_brown_v01.webp"
+   ]
+  },
+  {
+   "id": "caramel",
+   "name": "Caramel",
+   "hex": "#b37a4c",
+   "files": [
+    "chd_girl_skin_caramel_v01.webp",
+    "chd_boy_skin_caramel_v01.webp"
+   ]
+  }
+ ],
+ "hair": [
+  {
+   "id": "locs",
+   "name": "Locs",
+   "files": [
+    "chd_girl_hair_locs_back_[colour]_v01.webp",
+    "chd_girl_hair_locs_front_[colour]_v01.webp",
+    "chd_boy_hair_locs_back_[colour]_v01.webp",
+    "chd_boy_hair_locs_front_[colour]_v01.webp"
+   ]
+  },
+  {
+   "id": "box-braids",
+   "name": "Box braids",
+   "files": [
+    "chd_girl_hair_box_braids_back_[colour]_v01.webp",
+    "chd_girl_hair_box_braids_front_[colour]_v01.webp",
+    "chd_boy_hair_box_braids_back_[colour]_v01.webp",
+    "chd_boy_hair_box_braids_front_[colour]_v01.webp"
+   ]
+  },
+  {
+   "id": "afro-puffs",
+   "name": "Afro puffs",
+   "files": [
+    "chd_girl_hair_afro_puffs_back_[colour]_v01.webp",
+    "chd_girl_hair_afro_puffs_front_[colour]_v01.webp",
+    "chd_boy_hair_afro_puffs_back_[colour]_v01.webp",
+    "chd_boy_hair_afro_puffs_front_[colour]_v01.webp"
+   ]
+  },
+  {
+   "id": "twists",
+   "name": "Twists",
+   "files": [
+    "chd_girl_hair_twists_back_[colour]_v01.webp",
+    "chd_girl_hair_twists_front_[colour]_v01.webp",
+    "chd_boy_hair_twists_back_[colour]_v01.webp",
+    "chd_boy_hair_twists_front_[colour]_v01.webp"
+   ]
+  },
+  {
+   "id": "curly-afro",
+   "name": "Curly fro",
+   "files": [
+    "chd_girl_hair_curly_afro_back_[colour]_v01.webp",
+    "chd_girl_hair_curly_afro_front_[colour]_v01.webp",
+    "chd_boy_hair_curly_afro_back_[colour]_v01.webp",
+    "chd_boy_hair_curly_afro_front_[colour]_v01.webp"
+   ]
+  },
+  {
+   "id": "cornrows",
+   "name": "Cornrows",
+   "files": [
+    "chd_girl_hair_cornrows_back_[colour]_v01.webp",
+    "chd_girl_hair_cornrows_front_[colour]_v01.webp",
+    "chd_boy_hair_cornrows_back_[colour]_v01.webp",
+    "chd_boy_hair_cornrows_front_[colour]_v01.webp"
+   ]
+  },
+  {
+   "id": "short-curls",
+   "name": "Short curls / fade",
+   "files": [
+    "chd_girl_hair_short_curls_back_[colour]_v01.webp",
+    "chd_girl_hair_short_curls_front_[colour]_v01.webp",
+    "chd_boy_hair_short_curls_back_[colour]_v01.webp",
+    "chd_boy_hair_short_curls_front_[colour]_v01.webp"
+   ]
+  },
+  {
+   "id": "straight",
+   "name": "Silk press",
+   "files": [
+    "chd_girl_hair_straight_back_[colour]_v01.webp",
+    "chd_girl_hair_straight_front_[colour]_v01.webp",
+    "chd_boy_hair_straight_back_[colour]_v01.webp",
+    "chd_boy_hair_straight_front_[colour]_v01.webp"
+   ]
+  },
+  {
+   "id": "loose-curls",
+   "name": "Loose curls",
+   "files": [
+    "chd_girl_hair_loose_curls_back_[colour]_v01.webp",
+    "chd_girl_hair_loose_curls_front_[colour]_v01.webp",
+    "chd_boy_hair_loose_curls_back_[colour]_v01.webp",
+    "chd_boy_hair_loose_curls_front_[colour]_v01.webp"
+   ]
+  },
+  {
+   "id": "bantu-knots",
+   "name": "Bantu knots",
+   "files": [
+    "chd_girl_hair_bantu_knots_back_[colour]_v01.webp",
+    "chd_girl_hair_bantu_knots_front_[colour]_v01.webp",
+    "chd_boy_hair_bantu_knots_back_[colour]_v01.webp",
+    "chd_boy_hair_bantu_knots_front_[colour]_v01.webp"
+   ]
+  },
+  {
+   "id": "ponytail",
+   "name": "Ponytail",
+   "files": [
+    "chd_girl_hair_ponytail_back_[colour]_v01.webp",
+    "chd_girl_hair_ponytail_front_[colour]_v01.webp",
+    "chd_boy_hair_ponytail_back_[colour]_v01.webp",
+    "chd_boy_hair_ponytail_front_[colour]_v01.webp"
+   ]
+  },
+  {
+   "id": "bun",
+   "name": "Top bun",
+   "files": [
+    "chd_girl_hair_bun_back_[colour]_v01.webp",
+    "chd_girl_hair_bun_front_[colour]_v01.webp",
+    "chd_boy_hair_bun_back_[colour]_v01.webp",
+    "chd_boy_hair_bun_front_[colour]_v01.webp"
+   ]
+  }
+ ],
+ "hairColors": [
+  {
+   "id": "black",
+   "name": "Black",
+   "hex": "#1b1b1b"
+  },
+  {
+   "id": "dark-brown",
+   "name": "Dark brown",
+   "hex": "#3b2418"
+  },
+  {
+   "id": "brown",
+   "name": "Brown",
+   "hex": "#5c3a21"
+  },
+  {
+   "id": "auburn",
+   "name": "Auburn",
+   "hex": "#7a3b1e"
+  },
+  {
+   "id": "honey-blonde",
+   "name": "Honey blonde",
+   "hex": "#c9963e"
+  },
+  {
+   "id": "blonde",
+   "name": "Blonde",
+   "hex": "#e6c87a"
+  },
+  {
+   "id": "burgundy",
+   "name": "Burgundy",
+   "hex": "#6b1f3a"
+  },
+  {
+   "id": "red",
+   "name": "Red",
+   "hex": "#b2321f"
+  },
+  {
+   "id": "blue",
+   "name": "Blue",
+   "hex": "#2f4f9e"
+  },
+  {
+   "id": "purple",
+   "name": "Purple",
+   "hex": "#6a3fa0"
+  },
+  {
+   "id": "pink",
+   "name": "Pink",
+   "hex": "#d26a9a"
+  },
+  {
+   "id": "silver",
+   "name": "Silver",
+   "hex": "#a8a8a8"
+  }
+ ],
+ "highlights": "With highlights, every third strand is drawn in the second hair colour, root to tip.",
+ "tops": [
+  {
+   "id": "ch-hoodie",
+   "name": "Pink Crown Heirs hoodie",
+   "brand": "Crown Heirs mark placed from brand-source/brand_source_ch_monogram.png as its own layer",
+   "colors": [
+    {
+     "id": "pink",
+     "name": "Pink"
+    }
+   ],
+   "files": [
+    "chd_girl_top_ch_hoodie_pink_v01.webp",
+    "chd_boy_top_ch_hoodie_pink_v01.webp"
+   ]
+  },
+  {
+   "id": "ch-sweater",
+   "name": "Royal blue Crown Heirs sweater",
+   "brand": "Crown Heirs mark placed from brand-source/brand_source_ch_monogram.png as its own layer",
+   "colors": [
+    {
+     "id": "royal",
+     "name": "Royal blue"
+    }
+   ],
+   "files": [
+    "chd_girl_top_ch_sweater_royal_v01.webp",
+    "chd_boy_top_ch_sweater_royal_v01.webp"
+   ]
+  },
+  {
+   "id": "tee",
+   "name": "[colour] tee",
+   "colors": [
+    {
+     "id": "red",
+     "name": "Red"
+    },
+    {
+     "id": "white",
+     "name": "White"
+    },
+    {
+     "id": "black",
+     "name": "Black"
+    },
+    {
+     "id": "yellow",
+     "name": "Yellow"
+    },
+    {
+     "id": "lavender",
+     "name": "Lavender"
+    }
+   ],
+   "files": [
+    "chd_girl_top_tee_red_v01.webp",
+    "chd_girl_top_tee_white_v01.webp",
+    "chd_girl_top_tee_black_v01.webp",
+    "chd_girl_top_tee_yellow_v01.webp",
+    "chd_girl_top_tee_lavender_v01.webp",
+    "chd_boy_top_tee_red_v01.webp",
+    "chd_boy_top_tee_white_v01.webp",
+    "chd_boy_top_tee_black_v01.webp",
+    "chd_boy_top_tee_yellow_v01.webp",
+    "chd_boy_top_tee_lavender_v01.webp"
+   ]
+  },
+  {
+   "id": "denim-jacket",
+   "name": "Denim jacket over a [colour] tee",
+   "colors": [
+    {
+     "id": "white",
+     "name": "White"
+    },
+    {
+     "id": "pink",
+     "name": "Pink"
+    },
+    {
+     "id": "black",
+     "name": "Black"
+    }
+   ],
+   "files": [
+    "chd_girl_top_denim_jacket_white_v01.webp",
+    "chd_girl_top_denim_jacket_pink_v01.webp",
+    "chd_girl_top_denim_jacket_black_v01.webp",
+    "chd_boy_top_denim_jacket_white_v01.webp",
+    "chd_boy_top_denim_jacket_pink_v01.webp",
+    "chd_boy_top_denim_jacket_black_v01.webp"
+   ]
+  },
+  {
+   "id": "cardigan",
+   "name": "[colour] fuzzy cardigan",
+   "colors": [
+    {
+     "id": "blush",
+     "name": "Blush"
+    },
+    {
+     "id": "ivory",
+     "name": "Ivory"
+    },
+    {
+     "id": "lavender",
+     "name": "Lavender"
+    }
+   ],
+   "files": [
+    "chd_girl_top_cardigan_blush_v01.webp",
+    "chd_girl_top_cardigan_ivory_v01.webp",
+    "chd_girl_top_cardigan_lavender_v01.webp",
+    "chd_boy_top_cardigan_blush_v01.webp",
+    "chd_boy_top_cardigan_ivory_v01.webp",
+    "chd_boy_top_cardigan_lavender_v01.webp"
+   ]
+  },
+  {
+   "id": "flannel",
+   "name": "[colour] plaid flannel",
+   "colors": [
+    {
+     "id": "red",
+     "name": "Red"
+    },
+    {
+     "id": "sage",
+     "name": "Sage"
+    }
+   ],
+   "files": [
+    "chd_girl_top_flannel_red_v01.webp",
+    "chd_girl_top_flannel_sage_v01.webp",
+    "chd_boy_top_flannel_red_v01.webp",
+    "chd_boy_top_flannel_sage_v01.webp"
+   ]
+  }
+ ],
+ "bottoms": [
+  {
+   "id": "joggers",
+   "name": "[colour] joggers",
+   "colors": [
+    {
+     "id": "pink",
+     "name": "Pink"
+    },
+    {
+     "id": "black",
+     "name": "Black"
+    },
+    {
+     "id": "grey",
+     "name": "Grey"
+    },
+    {
+     "id": "lavender",
+     "name": "Lavender"
+    },
+    {
+     "id": "sage",
+     "name": "Sage"
+    }
+   ],
+   "files": [
+    "chd_girl_bottom_joggers_pink_v01.webp",
+    "chd_girl_bottom_joggers_black_v01.webp",
+    "chd_girl_bottom_joggers_grey_v01.webp",
+    "chd_girl_bottom_joggers_lavender_v01.webp",
+    "chd_girl_bottom_joggers_sage_v01.webp",
+    "chd_boy_bottom_joggers_pink_v01.webp",
+    "chd_boy_bottom_joggers_black_v01.webp",
+    "chd_boy_bottom_joggers_grey_v01.webp",
+    "chd_boy_bottom_joggers_lavender_v01.webp",
+    "chd_boy_bottom_joggers_sage_v01.webp"
+   ]
+  },
+  {
+   "id": "jeans",
+   "name": "[colour] jeans",
+   "colors": [
+    {
+     "id": "denim",
+     "name": "Blue"
+    },
+    {
+     "id": "black",
+     "name": "Black"
+    },
+    {
+     "id": "white",
+     "name": "White"
+    }
+   ],
+   "files": [
+    "chd_girl_bottom_jeans_denim_v01.webp",
+    "chd_girl_bottom_jeans_black_v01.webp",
+    "chd_girl_bottom_jeans_white_v01.webp",
+    "chd_boy_bottom_jeans_denim_v01.webp",
+    "chd_boy_bottom_jeans_black_v01.webp",
+    "chd_boy_bottom_jeans_white_v01.webp"
+   ]
+  },
+  {
+   "id": "shorts",
+   "name": "[colour] shorts",
+   "colors": [
+    {
+     "id": "denim",
+     "name": "Blue"
+    },
+    {
+     "id": "khaki",
+     "name": "Khaki"
+    },
+    {
+     "id": "pink",
+     "name": "Pink"
+    },
+    {
+     "id": "black",
+     "name": "Black"
+    }
+   ],
+   "files": [
+    "chd_girl_bottom_shorts_denim_v01.webp",
+    "chd_girl_bottom_shorts_khaki_v01.webp",
+    "chd_girl_bottom_shorts_pink_v01.webp",
+    "chd_girl_bottom_shorts_black_v01.webp",
+    "chd_boy_bottom_shorts_denim_v01.webp",
+    "chd_boy_bottom_shorts_khaki_v01.webp",
+    "chd_boy_bottom_shorts_pink_v01.webp",
+    "chd_boy_bottom_shorts_black_v01.webp"
+   ]
+  },
+  {
+   "id": "skirt",
+   "name": "[colour] skirt",
+   "colors": [
+    {
+     "id": "black",
+     "name": "Black"
+    },
+    {
+     "id": "pink",
+     "name": "Pink"
+    },
+    {
+     "id": "gold",
+     "name": "Gold"
+    },
+    {
+     "id": "denim",
+     "name": "Blue"
+    }
+   ],
+   "files": [
+    "chd_girl_bottom_skirt_black_v01.webp",
+    "chd_girl_bottom_skirt_pink_v01.webp",
+    "chd_girl_bottom_skirt_gold_v01.webp",
+    "chd_girl_bottom_skirt_denim_v01.webp",
+    "chd_boy_bottom_skirt_black_v01.webp",
+    "chd_boy_bottom_skirt_pink_v01.webp",
+    "chd_boy_bottom_skirt_gold_v01.webp",
+    "chd_boy_bottom_skirt_denim_v01.webp"
+   ]
+  },
+  {
+   "id": "dress-pants",
+   "name": "[colour] dress pants",
+   "colors": [
+    {
+     "id": "black",
+     "name": "Black"
+    },
+    {
+     "id": "ivory",
+     "name": "Ivory"
+    },
+    {
+     "id": "blush",
+     "name": "Blush"
+    }
+   ],
+   "files": [
+    "chd_girl_bottom_dress_pants_black_v01.webp",
+    "chd_girl_bottom_dress_pants_ivory_v01.webp",
+    "chd_girl_bottom_dress_pants_blush_v01.webp",
+    "chd_boy_bottom_dress_pants_black_v01.webp",
+    "chd_boy_bottom_dress_pants_ivory_v01.webp",
+    "chd_boy_bottom_dress_pants_blush_v01.webp"
+   ]
+  }
+ ],
+ "shoes": [
+  {
+   "id": "sneakers-pink",
+   "name": "Pink and white sneakers",
+   "colors": [],
+   "files": [
+    "chd_girl_shoes_sneakers_pink_v01.webp",
+    "chd_boy_shoes_sneakers_pink_v01.webp"
+   ]
+  },
+  {
+   "id": "sneakers-black",
+   "name": "Black and white sneakers",
+   "colors": [],
+   "files": [
+    "chd_girl_shoes_sneakers_black_v01.webp",
+    "chd_boy_shoes_sneakers_black_v01.webp"
+   ]
+  },
+  {
+   "id": "sneakers-white",
+   "name": "White sneakers",
+   "colors": [],
+   "files": [
+    "chd_girl_shoes_sneakers_white_v01.webp",
+    "chd_boy_shoes_sneakers_white_v01.webp"
+   ]
+  },
+  {
+   "id": "boots",
+   "name": "[colour] boots",
+   "colors": [
+    {
+     "id": "brown",
+     "name": "Brown"
+    },
+    {
+     "id": "black",
+     "name": "Black"
+    },
+    {
+     "id": "white",
+     "name": "White"
+    }
+   ],
+   "files": [
+    "chd_girl_shoes_boots_brown_v01.webp",
+    "chd_girl_shoes_boots_black_v01.webp",
+    "chd_girl_shoes_boots_white_v01.webp",
+    "chd_boy_shoes_boots_brown_v01.webp",
+    "chd_boy_shoes_boots_black_v01.webp",
+    "chd_boy_shoes_boots_white_v01.webp"
+   ]
+  },
+  {
+   "id": "dress-shoes",
+   "name": "[colour] dress shoes",
+   "colors": [
+    {
+     "id": "black",
+     "name": "Black"
+    },
+    {
+     "id": "white",
+     "name": "White"
+    },
+    {
+     "id": "pink",
+     "name": "Pink"
+    }
+   ],
+   "files": [
+    "chd_girl_shoes_dress_shoes_black_v01.webp",
+    "chd_girl_shoes_dress_shoes_white_v01.webp",
+    "chd_girl_shoes_dress_shoes_pink_v01.webp",
+    "chd_boy_shoes_dress_shoes_black_v01.webp",
+    "chd_boy_shoes_dress_shoes_white_v01.webp",
+    "chd_boy_shoes_dress_shoes_pink_v01.webp"
+   ]
+  }
+ ],
+ "accessories": [
+  {
+   "id": "bag",
+   "name": "Crossbody bag",
+   "files": [
+    "chd_girl_acc_bag_v01.webp",
+    "chd_boy_acc_bag_v01.webp"
+   ]
+  },
+  {
+   "id": "glasses",
+   "name": "Glasses",
+   "files": [
+    "chd_girl_acc_glasses_v01.webp",
+    "chd_boy_acc_glasses_v01.webp"
+   ]
+  },
+  {
+   "id": "hat",
+   "name": "Bucket hat",
+   "notWith": [
+    "afro-puffs",
+    "curly-afro",
+    "bun",
+    "bantu-knots"
+   ],
+   "files": [
+    "chd_girl_acc_hat_v01.webp",
+    "chd_boy_acc_hat_v01.webp"
+   ]
+  },
+  {
+   "id": "bow",
+   "name": "Hair bow",
+   "files": [
+    "chd_girl_acc_bow_v01.webp",
+    "chd_boy_acc_bow_v01.webp"
+   ]
+  },
+  {
+   "id": "jewelry",
+   "name": "Gold hoops and necklace",
+   "files": [
+    "chd_girl_acc_jewelry_v01.webp",
+    "chd_boy_acc_jewelry_v01.webp"
+   ]
+  },
+  {
+   "id": "crown",
+   "name": "Crown Heirs crown",
+   "status": "coming soon",
+   "files": [
+    "brand-source/brand_source_crown_original.png"
+   ]
+  }
+ ],
+ "backgrounds": [
+  {
+   "id": "throne",
+   "name": "Signature throne",
+   "files": [
+    "chd_all_bg_throne_v01.webp"
+   ]
+  },
+  {
+   "id": "neutral",
+   "name": "Crown Heirs reveal",
+   "files": [
+    "chd_all_bg_neutral_v01.webp"
+   ]
+  }
+ ]
+}

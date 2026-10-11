@@ -1330,10 +1330,10 @@ a.work-item { display: block; aspect-ratio: 1 / 1; text-decoration: none; box-sh
         <svg id="homeDoll" viewBox="0 0 200 290"></svg>
       </div>
       <div class="dolls-text">
-        <p class="eyebrow">Crown Heirs Dolls</p>
+        <p class="eyebrow">Crown Heirs Doll Maker</p>
         <h2>A doll that looks like them.</h2>
-        <p>Crocheted by Coletta Peterson of A Touch of BLU. Pick the yarn shade, the hair colour and the style, tell us the outfit you have in mind, and watch your doll take shape. We'll text you a quote.</p>
-        <a class="btn-solid" href="/dolls">Build your doll</a>
+        <p>Choose a base, a complexion and a crown of hair, style the look, then take your seat on the throne. Every Crown Heir is a handmade yarn doll, crocheted by Coletta Peterson of A Touch of BLU.</p>
+        <a class="btn-solid" href="/dolls">Build Your Crown Heir</a>
       </div>
     </div>
   </section>
@@ -2959,7 +2959,7 @@ function chat(id){
 <script src="/doll-art.js"></script>
 <script>
 /* The home page doll, drawn like Coletta's: brown locs with honey ends, the red crown tee, white sneakers. */
-try { document.getElementById('homeDoll').innerHTML = DollArt.render({ skin: '#8c5c3c', hair1: '#5c3a21', hair2: '#c9963e', style: 'locs', kind: 'pants', topC: '#c0392b', botC: '#1f1d1b', shoe: 'sneakers', shoeC: '#f7f4ee' }, 'home'); } catch (e) {}
+try { document.getElementById('homeDoll').innerHTML = DollArt.render({ base: 'girl', skin: '#5f3722', hair1: '#1b1b1b', hair2: '#c9963e', style: 'locs', top: { look: 'hoodie', color: '#e58fb0', brand: true }, bottom: { look: 'joggers', color: '#e58fb0' }, shoes: { look: 'sneakers', main: '#e58fb0', trim: '#f7f4ee' } }, 'home'); } catch (e) {}
 </script>
 </body>
 </html>

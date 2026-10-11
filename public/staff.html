@@ -144,7 +144,7 @@ h2 { font-family: var(--font-serif); font-weight: 600; font-size: 25px; margin-b
 
   <!-- ═══ DOLLS ═══ -->
   <section id="viewDolls" class="hidden">
-    <div class="hint">Doll requests from <a href="/dolls" target="_blank">/dolls</a>. Quote it, then move it along; the client is texted at each step (Quoted sends the quote). Outfit wishes are considered, never promised.</div>
+    <div class="hint">Requests from the Doll Maker at <a href="/dolls" target="_blank">/dolls</a>. "See the doll" opens the look they built. Quote it, then move it along; the client is texted at each step (Quoted sends the quote). Extra wishes in the notes are considered, never promised.</div>
     <div class="pills" id="dollPills"></div>
     <div id="dollList"><div class="empty">Loading…</div></div>
   </section>
@@ -356,12 +356,14 @@ async function loadDolls() {
   const list = DOLLS.filter(d => DOLL_FILTER === 'all' ? true : DOLL_FILTER === 'open' ? !['done', 'cancelled'].includes(d.status) : d.status === DOLL_FILTER);
   $('dollList').innerHTML = list.length ? list.map(d => {
     const tel = String(d.client.phone || '').replace(/^1(\d{3})(\d{3})(\d{4})$/, '($1) $2-$3');
-    const o = d.outfit || {}; const wishes = [o.top && 'Top/dress: ' + o.top, o.bottom && 'Bottoms: ' + o.bottom, o.shoes && 'Shoes: ' + o.shoes, o.colors && 'Colours: ' + o.colors].filter(Boolean);
+    // Built in the Doll Maker: the picked look, and a link that opens it. Older requests: typed wishes.
+    const o = d.outfit || {}; const wishes = o.base ? [d.wishes] : [o.top && 'Top/dress: ' + o.top, o.bottom && 'Bottoms: ' + o.bottom, o.shoes && 'Shoes: ' + o.shoes, o.colors && 'Colours: ' + o.colors].filter(Boolean);
+    const see = o.look ? ` · <a href="/dolls?${esc(o.look)}&step=reveal" target="_blank" rel="noopener">See the doll</a>` : '';
     const badge = { new: 'staff', quoted: '', making: '', ready: 'ok', done: 'ok', cancelled: 'err' }[d.status];
     return `<div class="appt ${d.status === 'cancelled' ? 'cancelled' : d.status === 'done' ? 'completed' : ''}">
       <div class="t">${esc(d.summary)}${d.quantity > 1 ? ` × ${d.quantity}` : ''}<span class="badge ${badge}">${esc(d.status)}</span></div>
       <div class="m"><b>${esc(d.client.name)}</b> · <a href="tel:+${esc(d.client.phone)}">${esc(tel)}</a>${d.client.email ? ` · ${esc(d.client.email)}` : ''} · <span style="color:var(--ink-dim)">${esc(d.code)} · ${new Date(d.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
-        ${d.forWhom ? `<br>For: ${esc(d.forWhom)}` : ''}${wishes.length ? `<br>${wishes.map(esc).join(' · ')}` : '<br><span style="color:var(--ink-dim)">No outfit wishes</span>'}${d.notes ? `<br><i>${esc(d.notes)}</i>` : ''}${d.quote ? `<br>Quote: <b>${esc(d.quote)}</b>` : ''}</div>
+        ${d.forWhom ? `<br>For: ${esc(d.forWhom)}` : ''}${wishes.length ? `<br>${wishes.map(esc).join(' · ')}${see}` : '<br><span style="color:var(--ink-dim)">No outfit wishes</span>'}${d.notes ? `<br><i>${esc(d.notes)}</i>` : ''}${d.quote ? `<br>Quote: <b>${esc(d.quote)}</b>` : ''}</div>
       <div class="acts">${DOLL_NEXT[d.status].map(n => `<button class="btn ${n === 'cancelled' ? 'btn-danger' : 'btn-ghost'} btn-sm" onclick="dollStatus('${d.code}','${n}')">${{ quoted: 'Send quote…', making: 'Started making', ready: 'Ready for pick-up', done: 'Picked up', cancelled: 'Cancel', new: 'Reopen' }[n]}</button>`).join('')}</div>
     </div>`; }).join('') : '<div class="empty">No doll requests here.</div>';
 }
