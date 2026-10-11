@@ -1,7 +1,7 @@
 // Crown Heirs Dolls.
 //   GET  /api/dolls            → the choices (yarn shades, hair colours, hair styles)
 //   GET  /api/dolls?code=DL-…  → one request's status (the client's own code)
-//   POST /api/dolls            → { name, phone, email?, shade, hairColor, hairStyle, quantity?, outfit:{top,bottom,shoes,colors}, notes?, forWhom? }
+//   POST /api/dolls            → { name, phone, email?, shade, hairColor, hairColor2?, hairStyle, quantity?, outfit:{top,bottom,shoes,colors}, notes?, forWhom? }
 const dolls = require('../lib/dolls');
 const { fail, noStore } = require('./book/_shared');
 

@@ -58,6 +58,21 @@ if (!url) {
     assert.equal((await call(dollsApi, req('GET', { query: { code: 'DL-NOPE1' } }))).statusCode, 404);
   });
 
+  test('two hair colours: a second colour from the same list, never the same one twice', async () => {
+    const o = (await call(dollsApi, req('GET'))).body;
+    assert.ok(!o.hairColors.some(c => c.id === 'mixed'), 'mixed is gone; two colours replace it');
+    const ok = await call(dollsApi, req('POST', { body: { ...base, hairColor: 'burgundy', hairColor2: 'honey-blonde' } }));
+    assert.equal(ok.statusCode, 201, JSON.stringify(ok.body));
+    assert.equal(ok.body.summary, 'Caramel yarn, Burgundy and honey blonde box braids');
+    assert.equal(ok.body.hairColor2, 'honey-blonde');
+    const same = await call(dollsApi, req('POST', { body: { ...base, hairColor: 'burgundy', hairColor2: 'burgundy' } }));
+    assert.equal(same.statusCode, 400); assert.match(same.body.error, /differs/);
+    const bad = await call(dollsApi, req('POST', { body: { ...base, hairColor2: 'neon' } }));
+    assert.equal(bad.statusCode, 400); assert.match(bad.body.error, /second hair colour/);
+    const one = await call(dollsApi, req('POST', { body: { ...base, hairColor2: '' } }));
+    assert.equal(one.body.hairColor2, null); assert.equal(one.body.summary, 'Caramel yarn, Burgundy box braids');
+  });
+
   test('the desk lists requests and moves one along; the client hears about the quote and when it is ready', async () => {
     const l = await call(staffApi, req('GET', { headers: ADMIN, query: { action: 'dolls.list' } }));
     assert.equal(l.statusCode, 200); assert.ok(l.body.dolls.some(d => d.code === CODE)); assert.deepEqual(l.body.statuses, D.STATUSES);

@@ -108,6 +108,10 @@ label { display: block; font-size: 13px; letter-spacing: 0.08em; text-transform:
 .sw.on { border-color: var(--ink); box-shadow: 0 0 0 2px #fff inset; }
 .sw span { position: absolute; left: 0; right: 0; bottom: -20px; font-size: 0.62rem; color: var(--ink-dim); letter-spacing: 0.04em; white-space: nowrap; text-align: center; }
 .swatches.labeled { margin-bottom: 28px; gap: 30px 12px; }
+.tone { display: inline-flex; border: 1px solid var(--border-mid); margin: 4px 0 16px; }
+.tone-b { border: none; background: #fff; padding: 10px 18px; font-size: 0.9rem; color: var(--ink-mid); }
+.tone-b.on { background: var(--char); color: #fff; }
+.sw.off { opacity: .25; pointer-events: none; }
 .styles { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 10px; margin-top: 6px; }
 .st { background: var(--paper); border: 1px solid var(--border); padding: 12px 8px 10px; text-align: center; font-size: 0.86rem; color: var(--ink-mid); }
 .st svg { width: 54px; height: 54px; display: block; margin: 0 auto 6px; }
@@ -153,7 +157,7 @@ label { display: block; font-size: 13px; letter-spacing: 0.08em; text-transform:
 
 <div class="wrap">
   <aside class="preview" aria-live="polite">
-    <svg id="doll" viewBox="0 0 200 260" role="img" aria-label="Your doll"></svg>
+    <svg id="doll" viewBox="0 0 200 290" role="img" aria-label="Your doll"></svg>
     <div><div class="tag">Your doll</div>
     <div class="sum" id="sum">Pick a shade to begin</div>
     <div class="sub" id="sub"></div></div>
@@ -170,8 +174,18 @@ label { display: block; font-size: 13px; letter-spacing: 0.08em; text-transform:
     <section class="card">
       <div class="step">Step 2</div>
       <h2>Hair colour</h2>
+      <div class="hint">One colour, or two blended from the roots to the ends.</div>
+      <div class="tone" role="group" aria-label="How many hair colours">
+        <button type="button" class="tone-b on" id="toneOne" onclick="setTone(1)" aria-pressed="true">One colour</button>
+        <button type="button" class="tone-b" id="toneTwo" onclick="setTone(2)" aria-pressed="false">Two colours</button>
+      </div>
+      <label id="c1Label" class="hidden">Roots</label>
       <div class="swatches labeled" id="colors"></div>
-      <div id="mixedWrap" class="hidden"><label>Tell us the mix</label><input id="mixed" placeholder="e.g. burgundy with honey tips"></div>
+      <div id="color2Wrap" class="hidden">
+        <label>Ends</label>
+        <div class="swatches labeled" id="colors2"></div>
+        <div class="hint">Want them mixed through or in sections instead? Say so in the notes.</div>
+      </div>
     </section>
 
     <section class="card">
@@ -249,36 +263,14 @@ label { display: block; font-size: 13px; letter-spacing: 0.08em; text-transform:
   <p>7625 W. Lower Buckeye Rd., Suite 140, Phoenix, AZ 85043 · <a href="tel:+14804570165">(480) 457-0165</a> (call or text) · <a href="mailto:info@crownheirs.com">info@crownheirs.com</a></p>
 </footer>
 
+<script src="/doll-art.js"></script>
 <script>
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 let OPT = null;
-const D = { shade: null, hairColor: null, hairStyle: null, quantity: 1 };
+const D = { shade: null, hairColor: null, hairColor2: null, tone: 1, hairStyle: null, quantity: 1 };
 
-/* ── the doll, drawn from the choices ── */
-function hairSvg(style, color, head) {
-  // head: { cx, cy, r }. Returns shapes behind and in front of the head.
-  const { cx, cy, r } = head; const c = color; const sw = 'stroke-width';
-  const strands = (n, len, spread, wobble = 0) => Array.from({ length: n }, (_, i) => {
-    const t = n === 1 ? 0 : (i / (n - 1)) * 2 - 1; const x0 = cx + t * spread, y0 = cy - r * 0.2 + Math.abs(t) * r * 0.5;
-    const x1 = x0 + t * 10 + (i % 2 ? wobble : -wobble);
-    return `<path d="M${x0} ${y0} Q${x0 + t * 6} ${y0 + len / 2} ${x1} ${y0 + len}" fill="none" stroke="${c}" ${sw}="7" stroke-linecap="round"/>`;
-  }).join('');
-  const cap = `<path d="M${cx - r} ${cy} a${r} ${r} 0 0 1 ${2 * r} 0 v-${r * 0.1} a${r} ${r * 1.05} 0 0 0 -${2 * r} 0z" fill="${c}"/>`;
-  switch (style) {
-    case 'locs':        return { back: strands(11, 120, r * 1.05, 2), front: cap };
-    case 'box-braids':  return { back: strands(9, 130, r * 1.0, 0) + strands(8, 125, r * 0.85, 0), front: cap + Array.from({ length: 6 }, (_, i) => `<line x1="${cx - r + 8 + i * (2 * r - 16) / 5}" y1="${cy - r * 0.95}" x2="${cx - r + 8 + i * (2 * r - 16) / 5}" y2="${cy - r * 0.15}" stroke="rgba(255,255,255,0.35)" ${sw}="1.5"/>`).join('') };
-    case 'twists':      return { back: strands(10, 110, r * 1.0, 3), front: cap };
-    case 'cornrows':    return { back: strands(5, 70, r * 0.9, 0), front: cap + Array.from({ length: 5 }, (_, i) => `<path d="M${cx - r * 0.8 + i * r * 0.4} ${cy - r * 0.1} Q${cx - r * 0.8 + i * r * 0.4} ${cy - r * 1.1} ${cx} ${cy - r * 1.05}" fill="none" stroke="rgba(255,255,255,0.35)" ${sw}="1.5"/>`).join('') };
-    case 'afro-puffs':  return { back: `<circle cx="${cx - r * 0.95}" cy="${cy - r * 0.85}" r="${r * 0.62}" fill="${c}"/><circle cx="${cx + r * 0.95}" cy="${cy - r * 0.85}" r="${r * 0.62}" fill="${c}"/>`, front: cap };
-    case 'curly-afro':  return { back: `<circle cx="${cx}" cy="${cy - r * 0.25}" r="${r * 1.55}" fill="${c}"/>` + Array.from({ length: 10 }, (_, i) => { const a = (i / 10) * Math.PI * 2; return `<circle cx="${cx + Math.cos(a) * r * 1.45}" cy="${cy - r * 0.25 + Math.sin(a) * r * 1.45}" r="${r * 0.3}" fill="${c}"/>`; }).join(''), front: '' };
-    case 'bantu-knots': return { back: '', front: cap + [[-0.75, -0.95], [-0.25, -1.15], [0.25, -1.15], [0.75, -0.95]].map(([x, y]) => `<circle cx="${cx + x * r}" cy="${cy + y * r}" r="${r * 0.22}" fill="${c}" stroke="rgba(0,0,0,0.15)"/>`).join('') };
-    case 'straight':    return { back: `<path d="M${cx - r * 1.05} ${cy - r * 0.3} v120 q${r * 1.05} 14 ${2 * r * 1.05} 0 v-120z" fill="${c}"/>`, front: cap };
-    case 'ponytail':    return { back: `<path d="M${cx + r * 0.6} ${cy - r * 0.6} q40 10 30 110 q-18 20 -34 0 q6 -70 -8 -95z" fill="${c}"/>`, front: cap + `<circle cx="${cx + r * 0.75}" cy="${cy - r * 0.55}" r="6" fill="#c8952a"/>` };
-    case 'bun':         return { back: '', front: cap + `<circle cx="${cx}" cy="${cy - r * 1.2}" r="${r * 0.45}" fill="${c}"/>` };
-    default:            return { back: '', front: '' };
-  }
-}
+/* ── the doll is drawn by /doll-art.js, modelled on Coletta's dolls ── */
 /* What was typed, read for the preview. The words decide the garment, the
    shoes and the colours; anything we can't draw is still sent as written. */
 const COLORS = [
@@ -297,7 +289,7 @@ function readOutfit() {
   const top = $('oTop').value, bottom = $('oBottom').value, shoes = $('oShoes').value, colors = $('oColors').value, notes = $('notes').value;
   const T = top.toLowerCase(), B = bottom.toLowerCase(), S = shoes.toLowerCase(), N = notes.toLowerCase();
   const loves = colorsIn(colors).map(c => c.v);
-  let kind = 'dress';
+  let kind = 'pants';                                  // her dolls mostly wear a top and pants
   if (/dress|gown|romper|jumpsuit|tutu/.test(T)) kind = /tutu/.test(T) ? 'tutu' : 'dress';
   else if (/tutu/.test(B)) kind = 'tutu';
   else if (/skirt/.test(B)) kind = 'skirt';
@@ -306,66 +298,26 @@ function readOutfit() {
   else if (T.trim() || B.trim()) kind = 'pants';
   const topC = firstColor(top) || loves[0] || '#a0624a';
   const botC = firstColor(bottom) || (kind === 'pants' && /jean|denim/.test(B) ? '#4a6a94' : null) || loves[1] || (kind === 'pants' ? '#4a6a94' : kind === 'shorts' ? '#4a6a94' : topC);
-  const shoe = /sneaker|tennis|trainer|kicks|jordan|air force/.test(S) ? 'sneakers' : /boot/.test(S) ? 'boots' : /sandal|slide|flip/.test(S) ? 'sandals' : /heel|wedge/.test(S) ? 'heels' : /mary|flat|ballet|dress shoe/.test(S) ? 'flats' : 'flats';
+  const shoe = /sneaker|tennis|trainer|kicks|jordan|air force/.test(S) ? 'sneakers' : /boot/.test(S) ? 'boots' : /sandal|slide|flip/.test(S) ? 'sandals' : /heel|wedge/.test(S) ? 'heels' : /mary|flat|ballet|dress shoe/.test(S) ? 'flats' : 'sneakers';   // chunky white sneakers, like hers
   const shoeC = firstColor(shoes) || (shoe === 'sneakers' ? '#f7f4ee' : shoe === 'boots' ? '#6b4a32' : '#1f1d1b');
   return { kind, topC, botC, shoe, shoeC, bow: /bow|ribbon/.test(N + ' ' + T), glasses: /glasses|spectacles/.test(N), crown: /crown|tiara|princess/.test(N + ' ' + T),
     bowC: firstColor(N.replace(/.*?(\w+\s+)?bow.*/, '$1bow')) || loves[0] || '#e07fa8',
     words: { top: top.trim(), bottom: bottom.trim(), shoes: shoes.trim() } };
 }
-function outfitSvg(o, skin) {
-  const legs = `<rect x="76" y="214" width="18" height="34" fill="${skin}"/><rect x="106" y="214" width="18" height="34" fill="${skin}"/>`;
-  const top = `<path d="M64 150 q36 -20 72 0 v40 h-72z" fill="${o.topC}"/>`;
-  let body;
-  switch (o.kind) {
-    case 'skirt':  body = legs + top + `<path d="M64 186 h72 l10 34 q-46 10 -92 0z" fill="${o.botC}"/>`; break;
-    case 'tutu':   body = legs + top + `<path d="M62 186 h76 l16 26 q-54 14 -108 0z" fill="${o.botC}" opacity="0.85"/><path d="M66 188 h68 l12 22 q-46 10 -92 0z" fill="${o.botC}"/>`; break;
-    case 'shorts': body = legs + top + `<path d="M66 186 h68 v28 h-31 v-6 h-6 v6 h-31z" fill="${o.botC}"/>`; break;
-    case 'pants':  body = legs + top + `<path d="M66 186 h68 v60 h-29 v-44 h-10 v44 h-29z" fill="${o.botC}"/>`; break;
-    default:       body = legs + `<path d="M66 150 q34 -20 68 0 l12 74 q-46 12 -92 0z" fill="${o.topC}"/>`;
-  }
-  const shoe = x => {
-    switch (o.shoe) {
-      case 'sneakers': return `<path d="M${x - 4} 244 h27 q5 0 5 6 v6 h-34 q-2 -8 2 -12z" fill="${o.shoeC}" stroke="#1f1d1b" stroke-width="1.2"/><line x1="${x - 5}" y1="253" x2="${x + 28}" y2="253" stroke="#1f1d1b" stroke-width="1.2"/>`;
-      case 'boots':    return `<path d="M${x} 226 h18 v22 h6 q4 0 4 4 v4 h-30z" fill="${o.shoeC}"/>`;
-      case 'sandals':  return `<path d="M${x - 4} 252 h30 v4 h-30z" fill="${o.shoeC}"/><path d="M${x} 247 h18 M${x + 2} 242 l14 8" stroke="${o.shoeC}" stroke-width="2.5"/>`;
-      case 'heels':    return `<path d="M${x - 2} 246 h24 q4 0 4 4 v3 h-28z" fill="${o.shoeC}"/><rect x="${x - 2}" y="253" width="4" height="4" fill="${o.shoeC}"/>`;
-      default:         return `<path d="M${x - 4} 246 h26 q4 0 4 4 v6 h-30z" fill="${o.shoeC}"/><path d="M${x} 247 h18" stroke="rgba(255,255,255,0.35)" stroke-width="1.5"/>`;
-    }
-  };
-  return body + shoe(76) + shoe(106);
-}
 let LAST = '';
 function draw() {
   const shade = OPT && OPT.shades.find(s => s.id === D.shade);
   const hc = OPT && OPT.hairColors.find(c => c.id === D.hairColor);
+  const hc2 = D.tone === 2 && OPT ? OPT.hairColors.find(c => c.id === D.hairColor2) : null;
   const hs = OPT && OPT.hairStyles.find(s => s.id === D.hairStyle);
-  const skin = shade ? shade.hex : '#d9c7b3';
-  const hair = hc ? (hc.id === 'mixed' ? 'url(#mix)' : hc.hex) : '#3a2a22';
-  const head = { cx: 100, cy: 92, r: 40 };
-  const h = hairSvg(D.hairStyle || 'curly-afro', hair, head);
   const o = readOutfit();
-  const extras = (o.crown ? `<path d="M80 ${D.hairStyle === 'curly-afro' || !D.hairStyle ? 22 : 46} l6 -14 l7 10 l7 -14 l7 14 l7 -10 l6 14z" fill="#c8952a" stroke="#8a6414" stroke-width="1"/>` : '')
-    + (o.bow ? `<path d="M118 60 l14 -8 v18z M118 60 l-14 -8 v18z" fill="${o.bowC}"/><circle cx="118" cy="60" r="4" fill="${o.bowC}" stroke="rgba(0,0,0,0.2)"/>` : '')
-    + (o.glasses ? `<g fill="none" stroke="#1f1d1b" stroke-width="2"><circle cx="86" cy="96" r="8"/><circle cx="114" cy="96" r="8"/><path d="M94 96 h12"/></g>` : '');
-  const svg = `
-    <defs><linearGradient id="mix" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6b1f3a"/><stop offset=".5" stop-color="#c9963e"/><stop offset="1" stop-color="#2f4f9e"/></linearGradient>
-      <linearGradient id="rainbow" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c0392b"/><stop offset=".25" stop-color="#e9bf3c"/><stop offset=".5" stop-color="#3d8a4f"/><stop offset=".75" stop-color="#2f6fbf"/><stop offset="1" stop-color="#6a3fa0"/></linearGradient></defs>
-    ${h.back}
-    <rect x="86" y="126" width="28" height="18" fill="${skin}"/>
-    <path d="M62 150 q-14 6 -16 46 q6 8 14 2 l6 -36z" fill="${skin}"/><path d="M138 150 q14 6 16 46 q-6 8 -14 2 l-6 -36z" fill="${skin}"/>
-    ${outfitSvg(o, skin)}
-    <circle cx="${head.cx}" cy="${head.cy}" r="${head.r}" fill="${skin}"/>
-    ${h.front}
-    <circle cx="86" cy="96" r="3.2" fill="#1c1a18"/><circle cx="114" cy="96" r="3.2" fill="#1c1a18"/>
-    <path d="M90 112 q10 8 20 0" fill="none" stroke="#1c1a18" stroke-width="2.4" stroke-linecap="round"/>
-    <circle cx="80" cy="106" r="4" fill="rgba(210,106,154,0.35)"/><circle cx="120" cy="106" r="4" fill="rgba(210,106,154,0.35)"/>
-    ${extras}`;
   const el = $('doll');
-  el.innerHTML = svg;
-  const key = [D.shade, D.hairColor, D.hairStyle, o.kind, o.topC, o.botC, o.shoe, o.shoeC, o.bow, o.glasses, o.crown].join('|');
+  el.innerHTML = DollArt.render({ skin: shade ? shade.hex : '#d9c7b3', hair1: hc ? hc.hex : '#2a1d17', hair2: hc2 ? hc2.hex : null, style: D.hairStyle || 'locs', ...o }, 'pv');
+  const key = [D.shade, D.hairColor, D.hairColor2, D.tone, D.hairStyle, o.kind, o.topC, o.botC, o.shoe, o.shoeC, o.bow, o.glasses, o.crown].join('|');
   if (LAST && key !== LAST) { el.classList.remove('pop'); void el.getBoundingClientRect(); el.classList.add('pop'); }
   LAST = key;
-  $('sum').textContent = shade ? `${shade.name} yarn${hc ? ', ' + hc.name.replace(', tell us', '').toLowerCase() : ''}${hs ? ' ' + hs.name.toLowerCase() : ''}` : 'Pick a shade to begin';
+  const hairName = hc ? hc.name.toLowerCase() + (hc2 ? ' and ' + hc2.name.toLowerCase() : '') : '';
+  $('sum').textContent = shade ? `${shade.name} yarn${hairName ? ', ' + hairName : ''}${hs ? ' ' + hs.name.toLowerCase() : ''}` : 'Pick a shade to begin';
   const garment = { dress: 'dress', tutu: 'tutu', skirt: 'top and skirt', shorts: 'top and shorts', pants: 'top and pants' }[o.kind];
   const wore = o.words.top || o.words.bottom || o.words.shoes
     ? [nameOf(o.topC) && nameOf(o.topC) + ' ' + garment.split(' ')[0], o.kind !== 'dress' && o.kind !== 'tutu' && nameOf(o.botC) ? nameOf(o.botC) + ' ' + garment.split(' ').pop() : '', o.words.shoes && (nameOf(o.shoeC) ? nameOf(o.shoeC) + ' ' : '') + o.shoe].filter(Boolean).join(', ')
@@ -374,14 +326,20 @@ function draw() {
 }
 
 /* ── choices ── */
-function pick(k, v) { D[k] = v; render(); }
+function pick(k, v) { D[k] = v; if (k === 'hairColor' && D.hairColor2 === v) D.hairColor2 = null; render(); }
+function setTone(n) { D.tone = n; if (n === 1) D.hairColor2 = null; render(); }
 function render() {
   if (!OPT) return;
-  $('shades').innerHTML = OPT.shades.map(s => `<button type="button" class="sw ${D.shade === s.id ? 'on' : ''}" style="background:${s.hex}" onclick="pick('shade','${s.id}')" aria-label="${esc(s.name)}" aria-pressed="${D.shade === s.id}"><span>${esc(s.name)}</span></button>`).join('');
-  $('colors').innerHTML = OPT.hairColors.map(c => `<button type="button" class="sw ${D.hairColor === c.id ? 'on' : ''}" style="background:${c.hex}" onclick="pick('hairColor','${c.id}')" aria-label="${esc(c.name)}" aria-pressed="${D.hairColor === c.id}"><span>${esc(c.name.replace(', tell us', ''))}</span></button>`).join('');
-  $('mixedWrap').classList.toggle('hidden', D.hairColor !== 'mixed');
-  $('styles').innerHTML = OPT.hairStyles.map(s => { const hcol = OPT.hairColors.find(c => c.id === D.hairColor); const sk = (OPT.shades.find(x => x.id === D.shade) || {}).hex || '#c4986c';
-    const h = hairSvg(s.id, hcol ? (hcol.id === 'mixed' ? '#6b1f3a' : hcol.hex) : '#2a2a2a', { cx: 30, cy: 26, r: 14 }); return `<button type="button" class="st ${D.hairStyle === s.id ? 'on' : ''}" onclick="pick('hairStyle','${s.id}')" aria-pressed="${D.hairStyle === s.id}"><svg viewBox="0 0 60 60">${h.back}<circle cx="30" cy="26" r="14" fill="${sk}"/>${h.front}</svg>${esc(s.name)}</button>`; }).join('');
+  const sw = (list, key, skip) => list.map(c => `<button type="button" class="sw ${D[key] === c.id ? 'on' : ''} ${skip === c.id ? 'off' : ''}" style="background:${c.hex}" onclick="pick('${key}','${c.id}')" aria-label="${esc(c.name)}" aria-pressed="${D[key] === c.id}"><span>${esc(c.name)}</span></button>`).join('');
+  $('shades').innerHTML = sw(OPT.shades, 'shade');
+  $('colors').innerHTML = sw(OPT.hairColors, 'hairColor');
+  $('colors2').innerHTML = sw(OPT.hairColors, 'hairColor2', D.hairColor);
+  $('toneOne').classList.toggle('on', D.tone === 1); $('toneTwo').classList.toggle('on', D.tone === 2);
+  $('toneOne').setAttribute('aria-pressed', D.tone === 1); $('toneTwo').setAttribute('aria-pressed', D.tone === 2);
+  $('color2Wrap').classList.toggle('hidden', D.tone !== 2); $('c1Label').classList.toggle('hidden', D.tone !== 2);
+  const hcol = OPT.hairColors.find(c => c.id === D.hairColor), hcol2 = D.tone === 2 ? OPT.hairColors.find(c => c.id === D.hairColor2) : null;
+  const sk = (OPT.shades.find(x => x.id === D.shade) || {}).hex || '#c4986c';
+  $('styles').innerHTML = OPT.hairStyles.map((s, i) => `<button type="button" class="st ${D.hairStyle === s.id ? 'on' : ''}" onclick="pick('hairStyle','${s.id}')" aria-pressed="${D.hairStyle === s.id}"><svg viewBox="0 0 60 60">${DollArt.tile(s.id, hcol ? hcol.hex : '#2a1d17', hcol2 ? hcol2.hex : null, sk, 'st' + i)}</svg>${esc(s.name)}</button>`).join('');
   $('qtyN').textContent = D.quantity;
   draw();
 }
@@ -391,8 +349,9 @@ function qty(n) { D.quantity = Math.max(1, Math.min(OPT ? OPT.maxQuantity : 5, D
 async function send() {
   $('err').textContent = ''; $('go').disabled = true;
   try {
-    const notes = [$('notes').value.trim(), D.hairColor === 'mixed' && $('mixed').value.trim() ? 'Hair colour mix: ' + $('mixed').value.trim() : ''].filter(Boolean).join(' · ');
-    const body = { name: $('fName').value, phone: $('fPhone').value, email: $('fEmail').value, shade: D.shade, hairColor: D.hairColor, hairStyle: D.hairStyle, quantity: D.quantity,
+    if (D.tone === 2 && !D.hairColor2) throw new Error('Pick the second hair colour, or switch back to one colour');
+    const notes = $('notes').value.trim();
+    const body = { name: $('fName').value, phone: $('fPhone').value, email: $('fEmail').value, shade: D.shade, hairColor: D.hairColor, hairColor2: D.tone === 2 ? D.hairColor2 : null, hairStyle: D.hairStyle, quantity: D.quantity,
       outfit: { top: $('oTop').value, bottom: $('oBottom').value, shoes: $('oShoes').value, colors: $('oColors').value }, notes, forWhom: $('forWhom').value };
     const r = await fetch('/api/dolls', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
     const j = await r.json().catch(() => ({}));
