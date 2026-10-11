@@ -7,7 +7,7 @@
 //   node scripts/export-doll-svgs.js [outDir]     (default: ./doll-svg-export)
 const fs = require('fs');
 const path = require('path');
-const D = require('../lib/dolls');
+const D = require('../lib/doll-catalog');
 require('../public/doll-art.js');
 const A = globalThis.DollArt;
 

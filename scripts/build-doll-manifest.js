@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Builds public/doll-maker/manifest.json from the Doll Maker's catalog in
-// lib/dolls.js: every option id and display name, and the layer file each
+// lib/doll-catalog.js: every option id and display name, and the layer file each
 // one will need when the drawn doll is replaced by painted layer art, named
 // the way the developer handoff asks (chd_[base]_[category]_[option]_[variant]_v##.webp).
 // The ids are the ones in the code and in share links, so art and code match.
@@ -9,7 +9,7 @@
 //   node scripts/build-doll-manifest.js --check  exit 1 if it is stale
 const fs = require('fs');
 const path = require('path');
-const D = require('../lib/dolls');
+const D = require('../lib/doll-catalog');
 
 const OUT = path.join(__dirname, '..', 'public', 'doll-maker', 'manifest.json');
 const u = s => String(s).replace(/-/g, '_');                       // filenames: lowercase, numbers, underscores only
@@ -28,7 +28,7 @@ function garments(cat, list) {
 
 function build() {
   return {
-    about: 'Crown Heirs Doll Maker layer manifest, generated from lib/dolls.js by scripts/build-doll-manifest.js. Do not edit by hand.',
+    about: 'Crown Heirs Doll Maker layer manifest, generated from lib/doll-catalog.js by scripts/build-doll-manifest.js. Do not edit by hand.',
     canvas: { master: '2400 x 3200 px PNG, transparent, sRGB', web: '1200 x 1600 px WebP (keep the PNG masters)', rule: 'Every layer uses the same 3:4 canvas, doll position and anchors. No cropping.' },
     naming: 'chd_[base]_[category]_[option]_[variant]_v##.webp',
     layers: ['background', 'base body / skin', 'facial detail (later)', 'hair back', 'bottom', 'top', 'shoes', 'hair front', 'accessories', 'approved brand overlays', 'foreground / throne']

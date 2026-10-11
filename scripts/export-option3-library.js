@@ -38,7 +38,7 @@ const { execFile } = require('child_process');
 const { promisify } = require('util');
 const run = promisify(execFile);
 
-const D = require('../lib/dolls');                    // the live catalog
+const D = require('../lib/doll-catalog');             // the live catalog (no server code, runs anywhere)
 require('../public/doll-art.js');
 const A = globalThis.DollArt;
 

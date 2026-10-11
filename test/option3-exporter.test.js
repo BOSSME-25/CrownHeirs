@@ -9,7 +9,7 @@ const os = require('os');
 const path = require('path');
 const { execFileSync } = require('child_process');
 const X = require('../scripts/export-option3-library');
-const D = require('../lib/dolls');
+const D = require('../lib/doll-catalog');
 
 test('every combination is counted: 1,440 batches of 2,565', () => {
   assert.deepEqual([X.TOPS.length, X.BOTTOMS.length, X.SHOES.length, X.PER_BATCH], [15, 19, 9, 2565]);
