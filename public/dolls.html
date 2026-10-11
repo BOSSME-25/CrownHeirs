@@ -406,6 +406,16 @@ function readUrl() {
     else NOTES.push({ key: 'accessories', what: it ? lower(it.name) : 'accessory', step: 'look', tab: 'accessories' });
   }
   if (byId(OPT.backgrounds, q.get('bg'))) D.bg = q.get('bg');
+  // Links created before the earth-tone update contain the original pink preset.
+  // At the starting phase, move that preset to today's defaults; saved later looks stay intact.
+  const oldPinkPreset = q.get('step') === 'base' && D.base === 'girl'
+    && D.top === 'ch-hoodie' && (!D.topColor || D.topColor === 'pink')
+    && D.bottom === 'joggers' && D.bottomColor === 'pink' && D.shoes === 'sneakers-pink';
+  if (oldPinkPreset) {
+    for (const key of ['top', 'topColor', 'bottom', 'bottomColor', 'shoes', 'shoesColor']) {
+      touched.delete(key); D[key] = null;
+    }
+  }
   applyDefaults();
   // Something had to change: open on that step, so the guest sees why and picks again.
   if (NOTES.length) { if (NOTES[0].tab) TAB = NOTES[0].tab; return NOTES[0].step; }
