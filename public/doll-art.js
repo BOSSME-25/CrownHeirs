@@ -122,8 +122,8 @@
       + (Q ? `<clipPath id="${id}-${key}"><path d="${d}"/></clipPath><g clip-path="url(#${id}-${key})">${line(paths, w, Q)}</g>` : '')
       + `<path d="${d}" fill="${K}"/>`;
     switch (style) {
-      case 'locs': { const H = hang(19, 7.6 * s, cy + ry * 5.3, 1.42, { c: 'rgba(0,0,0,.22)', w: .5, d: `${f(2.2 * s)} ${f(2.6 * s)}` }, 3, 4.7); return { back: H.back, over: H.over, front: cap(11, 6 * s) }; }
-      case 'box-braids': { const H = hang(27, 4.8 * s, cy + ry * 5.0, 1.4, { c: 'rgba(255,255,255,.22)', w: .45, d: `${f(1.8 * s)} ${f(1.6 * s)}` }, 4, 4.5); return { back: H.back, over: H.over, front: cap(16, 3.6 * s) }; }
+      case 'locs': { const H = hang(19, 7.6 * s, cy + ry * 3.05, 1.42, { c: 'rgba(0,0,0,.22)', w: .5, d: `${f(2.2 * s)} ${f(2.6 * s)}` }, 3, 2.85); return { back: H.back, over: H.over, front: cap(11, 6 * s) }; }
+      case 'box-braids': { const H = hang(27, 4.8 * s, cy + ry * 3.05, 1.4, { c: 'rgba(255,255,255,.22)', w: .45, d: `${f(1.8 * s)} ${f(1.6 * s)}` }, 4, 2.85); return { back: H.back, over: H.over, front: cap(16, 3.6 * s) }; }
       case 'twists': { const H = hang(21, 5.8 * s, cy + ry * 2.75, 1.75, { c: 'rgba(0,0,0,.3)', w: .6, d: `${f(1.5 * s)} ${f(2.2 * s)}` }, 3, 2.3); return { back: H.back, over: H.over, front: cap(13, 4.6 * s) }; }
       case 'loose-curls': {
         const draw = (x0, y0, x1, y1, w, bend, tex, paint) => curl(x0, y0, x1, y1, w, 4.6 * s, 17 * s, tex, paint);
