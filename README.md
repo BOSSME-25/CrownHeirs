@@ -346,7 +346,11 @@ light logo (the script mark in white under the gold crown),
 **The art.** Until painted layer art arrives, the doll is drawn in SVG by
 `public/doll-art.js` (also used on the home page), in the handoff's layer
 order: hair behind, body, bottoms, top (with any brand overlay), shoes, head
-and face, hair in front, accessories. `public/doll-maker/manifest.json` lists
+and face, hair in front, accessories, each a named group (`data-layer="04 hair back"`
+and so on). `node scripts/export-doll-svgs.js [outDir]` writes standalone SVGs
+of every base, complexion, hair style, garment, shoe, accessory and reveal,
+with the Crown Heirs marks embedded from their source files, for designers to
+open in Illustrator or Figma. `public/doll-maker/manifest.json` lists
 every option id and display name and the layer file each will need
 (`chd_[base]_[category]_[option]_[variant]_v##.webp` on a 2400 × 3200 master
 canvas). It is generated from the catalog: run
