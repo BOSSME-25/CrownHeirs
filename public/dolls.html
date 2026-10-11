@@ -346,6 +346,7 @@ function dollOf(extra) {
     top: garment('tops', D.top, D.topColor), bottom: garment('bottoms', D.bottom, D.bottomColor), shoes: garment('shoes', D.shoes, D.shoesColor), accessories: D.accessories, brandSrc: CH_MARK }, extra || {});
 }
 const lc = t => t ? t.charAt(0).toLowerCase() + t.slice(1) : '';
+const lower = n => String(n || '').toLowerCase().replace(/crown heirs/g, 'Crown Heirs');   // keeps the name's capitals mid-sentence
 // Words for the summary, the alt text and the reveal.
 function words() {
   const b = byId(OPT.bases, D.base), sh = byId(OPT.shades, D.shade), hs = byId(OPT.hairStyles, D.hairStyle), hc = byId(OPT.hairColors, D.hairColor);
@@ -397,9 +398,11 @@ function readUrl() {
   }
   for (const a of String(q.get('a') || '').split(',').filter(Boolean)) {
     const it = byId(OPT.accessories, a);
-    if (it && it.available !== false && !(it.clashes || []).includes(D.hairStyle)) D.accessories.push(a);
-    else if (it && it.available !== false) NOTES.push({ clash: true, step: 'look', tab: 'accessories', msg: `The ${it.name.toLowerCase()} can't sit on ${(byId(OPT.hairStyles, D.hairStyle) || { name: 'this style' }).name.toLowerCase()}, so we left it off. Everything else is as you saved it.` });
-    else NOTES.push({ key: 'accessories', what: it ? it.name.toLowerCase() : 'accessory', step: 'look', tab: 'accessories' });
+    const worn = it && (it.excludes || []).find(x => D.accessories.includes(x));
+    if (worn) NOTES.push({ clash: true, step: 'look', tab: 'accessories', msg: `The ${lower(it.name)} can't be worn with the ${lower(byId(OPT.accessories, worn).name)}, so we kept the ${lower(byId(OPT.accessories, worn).name)}.` });
+    else if (it && it.available !== false && !(it.clashes || []).includes(D.hairStyle)) D.accessories.push(a);
+    else if (it && it.available !== false) NOTES.push({ clash: true, step: 'look', tab: 'accessories', msg: `The ${lower(it.name)} can't sit on ${(byId(OPT.hairStyles, D.hairStyle) || { name: 'this style' }).name.toLowerCase()}, so we left it off. Everything else is as you saved it.` });
+    else NOTES.push({ key: 'accessories', what: it ? lower(it.name) : 'accessory', step: 'look', tab: 'accessories' });
   }
   if (byId(OPT.backgrounds, q.get('bg'))) D.bg = q.get('bg');
   applyDefaults();
@@ -467,7 +470,8 @@ function panel() {
     if (TAB === 'accessories') {
       list = `<p class="hint">Pick as many as you like.</p><div class="cards" role="group" aria-label="Accessories">${OPT.accessories.map(a => {
         const off = a.available === false, clash = (a.clashes || []).includes(D.hairStyle);
-        const why = off ? a.note : clash ? `Not with ${(byId(OPT.hairStyles, D.hairStyle) || {}).name.toLowerCase()}` : '';
+        const swap = !off && !clash && (a.excludes || []).find(x => D.accessories.includes(x));
+        const why = off ? a.note : clash ? `Not with ${(byId(OPT.hairStyles, D.hairStyle) || {}).name.toLowerCase()}` : swap ? `Swaps for the ${lower(byId(OPT.accessories, swap).name)}` : '';
         const on = D.accessories.includes(a.id);
         const svg = off ? '' : `<svg viewBox="${DollArt.crop(a.id)}" aria-hidden="true" style="aspect-ratio:${DollArt.crop(a.id).split(' ').slice(2).join('/')}">${DollArt.render(dollOf({ accessories: [a.id] }), 'ac-' + a.id)}</svg>`;
         return `<button type="button" class="opt" data-acc="${a.id}" aria-pressed="${on}" ${off || clash ? 'aria-disabled="true"' : ''} onclick="${off || clash ? '' : `toggleAcc('${a.id}')`}">${svg}<span class="t">${esc(a.name)}</span>${why ? `<span class="d">${esc(why)}</span>` : ''}</button>`;
@@ -511,7 +515,7 @@ function choose(key, id) {
     const off = D.accessories.map(a => byId(OPT.accessories, a)).filter(a => a && (a.clashes || []).includes(id));
     if (off.length) {
       D.accessories = D.accessories.filter(a => !off.some(o => o.id === a));
-      const msg = `The ${off.map(a => a.name.toLowerCase()).join(' and ')} came off, since it can't sit on ${byId(OPT.hairStyles, id).name.toLowerCase()}. Pick another accessory under Look if you like.`;
+      const msg = `The ${off.map(a => lower(a.name)).join(' and ')} came off, since it can't sit on ${byId(OPT.hairStyles, id).name.toLowerCase()}. Pick another accessory under Look if you like.`;
       NOTES.push({ clash: true, step: 'crown', msg }, { clash: true, step: 'look', tab: 'accessories', msg });
     }
   }
@@ -526,7 +530,9 @@ function refresh() {
 }
 function setTone(n) { D.tone = n; if (n === 1) D.hairColor2 = null; history.replaceState(null, '', urlFor(STEP)); refresh(); }
 function toggleAcc(id) {
-  D.accessories = D.accessories.includes(id) ? D.accessories.filter(a => a !== id) : D.accessories.concat(id);
+  // Putting one on takes off anything it can't be worn with (the crown or the bucket hat).
+  const ex = (byId(OPT.accessories, id) || {}).excludes || [];
+  D.accessories = D.accessories.includes(id) ? D.accessories.filter(a => a !== id) : D.accessories.filter(a => !ex.includes(a)).concat(id);
   NOTES = NOTES.filter(n => n.tab !== 'accessories' && n.step !== 'crown');
   history.replaceState(null, '', urlFor(STEP)); panel(); draw();
   const b = document.querySelector(`#panel [data-acc="${id}"]`); if (b) b.focus();
