@@ -43,5 +43,9 @@ test('the catalog loads on its own, with no server code, so the scripts and prev
   const out = execFileSync(process.execPath, ['-e', `require(${JSON.stringify(path.join(__dirname, '..', 'lib', 'doll-catalog.js'))});
     console.log(JSON.stringify(Object.keys(require.cache).map(k => require('path').basename(k))))`], { encoding: 'utf8' });
   assert.deepEqual(JSON.parse(out), ['doll-catalog.js']);
-  assert.deepEqual(require('../lib/doll-catalog').options(), require('../lib/dolls').options(), 'the API serves the same choices');
+});
+
+// Skipped in the standalone Doll Maker package, which has no database code.
+test('the API serves the catalog\'s choices', { skip: !fs.existsSync(path.join(__dirname, '..', 'lib', 'db.js')) && 'needs the full site repo' }, () => {
+  assert.deepEqual(require('../lib/doll-catalog').options(), require('../lib/dolls').options());
 });
