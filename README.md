@@ -419,3 +419,26 @@ The feed is cached ten minutes.
 
 Per-stylist pricing · reschedule-by-code · refunds pushed back to Square
 (today a refund is recorded on the ticket and issued from the Square app).
+
+### Complete Boy / Caramel / Box braids / Black micro-batch
+
+```sh
+node scripts/export-option3-library.js --base boy --shade caramel --style box-braids --hair-color black --format png --zip --contact-sheet
+```
+
+This exports all 2,565 front-facing transparent PNGs at 1200 × 1740 pixels.
+The approved CH monogram is embedded directly from the source PNG on branded
+clothing. The renderer and garment settings match the Doll Maker preview.
+Do not pass `--background` or `--limit` for the complete transparent batch.
+
+Find the files in `exports/option3/boy/caramel/box-braids/black/`.
+ZIPs are numbered `boy__caramel__box-braids__black__part-001.zip` through
+`part-006.zip`, with at most 500 images in each (change with `--zip-images`).
+Each part includes the complete CSV manifest, batch metadata, and a small
+16-look `contact-sheet.svg` with `contact-sheet.csv` mapping numbers to image
+filenames. Extract all parts into the same folder to assemble the library.
+Image names retain the established Option 3 convention. Archives contain
+only images selected by the current run, even if the output folder contains
+older exports. `batch.json` records all ZIP names, and limited runs remain
+marked `partial`. Generated libraries are ignored by Git; the current repo
+contains no `samples/option3` output.

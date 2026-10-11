@@ -50,7 +50,7 @@ const SITE = process.env.SITE_URL || 'https://crown-heirs.vercel.app';
 
 function parseArgs(argv) {
   const args = { all: false, base: null, shade: null, style: null, hairColor: null, format: 'svg', out: path.resolve('exports', 'option3'),
-    renderer: 'chromium', width: 1200, quality: 0.9, background: null, skipExisting: true, zip: false, dryRun: false, limit: null, concurrency: 4 };
+    renderer: 'chromium', width: 1200, quality: 0.9, background: null, skipExisting: true, zip: false, zipImages: 500, contactSheet: false, dryRun: false, limit: null, concurrency: 4 };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i], next = () => { const v = argv[++i]; if (v == null) throw new Error(`${a} needs a value`); return v; };
     if (a === '--all') args.all = true;
@@ -66,6 +66,8 @@ function parseArgs(argv) {
     else if (a === '--background') args.background = next();
     else if (a === '--no-skip-existing') args.skipExisting = false;
     else if (a === '--resume') args.skipExisting = true;         // kept for the original CLI; skipping is the default
+    else if (a === '--contact-sheet') args.contactSheet = true;
+    else if (a === '--zip-images') { args.zipImages = Number(next()); if (!Number.isSafeInteger(args.zipImages) || args.zipImages < 1) throw new Error('--zip-images must be a positive integer'); }
     else if (a === '--zip') args.zip = true;
     else if (a === '--dry-run') args.dryRun = true;
     else if (a === '--limit') args.limit = Math.max(1, Number(next()) || 1);
@@ -76,7 +78,7 @@ function parseArgs(argv) {
   if (!['svg', 'png', 'webp', 'both'].includes(args.format)) throw new Error('--format must be svg, png, webp or both (svg + webp)');
   if (!['chromium', 'imagemagick'].includes(args.renderer)) throw new Error('--renderer must be chromium or imagemagick');
   if (args.background && !/^(#[0-9a-f]{3}|#[0-9a-f]{6}|[a-z]+)$/i.test(args.background)) throw new Error('--background must be a colour like #ffffff');
-  if (!args.all && !args.base && !args.shade && !args.style && !args.hairColor && !args.dryRun) throw new Error('Pick a slice (--base, --shade, --style, --hair-color), or --all for everything');
+  if (!args.help && !args.all && !args.base && !args.shade && !args.style && !args.hairColor && !args.dryRun) throw new Error('Pick a slice (--base, --shade, --style, --hair-color), or --all for everything');
   return args;
 }
 
@@ -95,7 +97,9 @@ Output:
   --quality <0.1-1>              webp quality, default 0.9
   --background <colour>          raster background, default transparent
   --renderer chromium|imagemagick
-  --zip                          zip each batch when it finishes
+  --zip                          zip each batch in numbered parts (500 images per part)
+  --zip-images <n>               maximum images per ZIP part
+  --contact-sheet                include a 16-look SVG contact sheet
 
 Control:
   --dry-run                      count and show a sample name; writes nothing
@@ -228,7 +232,7 @@ async function exportBatch(batch, args, renderer) {
   await Promise.all(Array.from({ length: Math.min(args.concurrency, rows.length) }, async () => {
     while (i < rows.length) {
       const row = rows[i++], stem = stemOf(row), file = path.join(imagesDir, `${stem}.${ext}`);
-      if (!(args.skipExisting && fs.existsSync(file))) {
+      if (!(args.skipExisting && fs.existsSync(file) && (args.format !== 'both' || fs.existsSync(path.join(imagesDir, `${stem}.svg`))))) {
         const svg = svgOf(row);
         if (args.format === 'svg' || args.format === 'both') await fsp.writeFile(path.join(imagesDir, `${stem}.svg`), svg);
         if (args.format !== 'svg') await renderer.draw(svg, file, ext);
@@ -242,12 +246,27 @@ async function exportBatch(batch, args, renderer) {
   await fsp.writeFile(path.join(dir, 'manifest.csv'), csv(ROW_HEAD, lines));
   const meta = { batchKey: batchKey(batch), ...batch, expectedCount: PER_BATCH, imageCount: lines.length, renderedThisRun: made, format: args.format, width: ext === 'svg' ? null : args.width,
     status: lines.length === PER_BATCH ? 'complete' : 'partial', completedAt: new Date().toISOString() };
+  if (args.contactSheet) {
+    // Evenly spaced looks cover the catalog rather than only the first top.
+    const selected = Array.from({ length: Math.min(16, rows.length) }, (_, n) => rows[Math.round(n * (rows.length - 1) / Math.max(1, Math.min(16, rows.length) - 1))]);
+    const tiles = selected.map((row, n) => {
+      const data = fs.readFileSync(path.join(imagesDir, `${stemOf(row)}.${ext}`)).toString('base64');
+      const mime = ext === 'svg' ? 'image/svg+xml' : `image/${ext}`;
+      return `<g transform="translate(${(n % 4) * 220} ${Math.floor(n / 4) * 320})"><image href="data:${mime};base64,${data}" width="200" height="290"/><text x="100" y="306" text-anchor="middle" font-size="12">${n + 1}</text></g>`;
+    }).join('');
+    await fsp.writeFile(path.join(dir, 'contact-sheet.svg'), `<svg xmlns="http://www.w3.org/2000/svg" width="880" height="1280" viewBox="0 0 880 1280"><rect width="880" height="1280" fill="#f7f4ee"/>${tiles}</svg>`);
+    await fsp.writeFile(path.join(dir, 'contact-sheet.csv'), csv(['number', 'filename'], selected.map((row, n) => [n + 1, `${stemOf(row)}.${ext}`])));
+    meta.contactSheet = 'contact-sheet.svg';
+  }
+  meta.zipFiles = args.zip ? Array.from({ length: Math.ceil(lines.length / args.zipImages) }, (_, n) => `${batchKey(batch)}__part-${String(n + 1).padStart(3, '0')}.zip`) : [];
   await fsp.writeFile(path.join(dir, 'batch.json'), JSON.stringify(meta, null, 2) + '\n');
-  if (args.zip) {
-    const zipFile = `${batchKey(batch)}.zip`;
+  for (const [n, zipFile] of meta.zipFiles.entries()) {
     await fsp.unlink(path.join(dir, zipFile)).catch(() => {});
-    await run('zip', ['-rq', zipFile, 'images', 'manifest.csv', 'batch.json'], { cwd: dir }).catch(e => { throw new Error('--zip needs the zip command: ' + e.message); });
-    meta.zipFile = zipFile;
+    const files = lines.slice(n * args.zipImages, (n + 1) * args.zipImages).flatMap(line => {
+      const file = `images/${line[0]}`;
+      return args.format === 'both' ? [file, file.replace(/\.webp$/, '.svg')] : [file];
+    });
+    await run('zip', ['-q', zipFile, ...files, 'manifest.csv', 'batch.json', ...(args.contactSheet ? ['contact-sheet.svg', 'contact-sheet.csv'] : [])], { cwd: dir }).catch(e => { throw new Error('--zip needs the zip command: ' + e.message); });
   }
   return meta;
 }
@@ -264,7 +283,7 @@ async function writeBatchesCsv(out) {
   found.sort((a, b) => a.batchKey < b.batchKey ? -1 : 1);
   await fsp.mkdir(path.join(out, 'manifests'), { recursive: true });
   await fsp.writeFile(path.join(out, 'manifests', 'batches.csv'), csv(BATCH_HEAD, found.map(m => [m.batchKey, m.base, m.shade, m.style, m.hairColor, m.expectedCount, m.imageCount,
-    fs.existsSync(path.join(batchDir(out, m), `${m.batchKey}.zip`)) ? `${m.batchKey}.zip` : '', m.status, m.completedAt])));
+    (m.zipFiles || (fs.existsSync(path.join(batchDir(out, m), `${m.batchKey}.zip`)) ? [`${m.batchKey}.zip`] : [])).join(';'), m.status, m.completedAt])));
 }
 
 async function main(argv) {
