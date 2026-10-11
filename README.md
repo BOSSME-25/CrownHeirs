@@ -363,6 +363,29 @@ The desk's **Dolls** tab moves each request along, new → quoted (the quote is
 typed in and texted to the client) → making → ready (the client is texted to
 pick up) → done, or cancelled.
 
+### Option 3: a finished image for every combination (store listings)
+
+`scripts/export-option3-library.js` renders one finished doll image per
+base × complexion × hair style × hair colour × top × bottom × shoes (each
+garment colour counts as its own variant; no highlights, accessories or
+reveal settings). In full that is 1,440 batches of 2,565, about 3.7 million
+images (roughly 100 GB as SVG, more as WebP), so run it in slices:
+
+```
+node scripts/export-option3-library.js --dry-run                       # count, write nothing
+node scripts/export-option3-library.js --base girl --shade caramel --style locs --hair-color black --format webp --zip
+```
+
+Each batch (one base, complexion, hair style and colour) gets `images/`,
+a `manifest.csv` with a listing title and a link that reopens the look in the
+Doll Maker for every image, and a `batch.json`; `manifests/batches.csv` lists
+finished batches. Files already on disk are skipped, so a stopped run picks
+up where it left off. WebP/PNG are drawn by headless Chromium (needs
+`playwright-core` or `playwright`, and `CHROME_PATH` if Chromium isn't
+found), or by ImageMagick with `--renderer imagemagick`, at 1200 px wide by
+default with a transparent background (`--width`, `--quality`,
+`--background`). Output goes to `exports/`, which git ignores.
+
 ## From the Den: Instagram
 
 With `INSTAGRAM_ACCESS_TOKEN` set, the home page's *From the Den* shows the
