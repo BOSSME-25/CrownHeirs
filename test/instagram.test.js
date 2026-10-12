@@ -14,7 +14,7 @@ test('categorize: captions and hashtags land in the service categories, primary 
   assert.deepEqual(ig.categorize('Tiny Heirs first cut! #kids'), ['Tiny Heirs', 'Cuts & Styling']);
   assert.deepEqual(ig.categorize('Clean taper fade and beard line up'), ["Barber's Corner"]);
   assert.deepEqual(ig.categorize('Honey blonde color on a sew-in'), ['Weaves & Extensions', 'Color & Chemical']);
-  assert.deepEqual(ig.categorize('Full set of lashes'), ['Beauty']);
+  assert.deepEqual(ig.categorize('Full set of lashes'), ['Aesthetics']);
   assert.deepEqual(ig.categorize('Cute day at the Den'), [], '"cute" is not "cut"');
   assert.deepEqual(ig.categorize(''), []);
   assert.equal(ig.CATEGORIES.length, 8);

@@ -186,7 +186,8 @@ async function enter() {
   $('savebar').style.display = 'flex';
   const r = await fetch('/api/content', { cache: 'no-store' });
   C = await r.json();
-  C.gallery ??= []; C.memberships ??= []; C.products ??= []; C.infoSlides ??= []; C.reviews ??= [];
+  C.gallery ??= []; C.gallery.forEach(g => { if (g.category === 'Beauty') g.category = 'Aesthetics'; });   // renamed; saved as Aesthetics next save
+  C.memberships ??= []; C.products ??= []; C.infoSlides ??= []; C.reviews ??= [];
   C.settings ??= {};
   $('secs').value = C.settings.secondsPerSlide || 9;
   $('igHandle').value = C.settings.instagramHandle ?? 'crownheirs';
@@ -198,7 +199,7 @@ async function enter() {
 function renderAll() { renderPhotos(); renderMembers(); renderReviews(); renderProds(); renderInfos(); }
 
 /* ── Photos ── */
-const WORK_CATS = ['Locs', 'Braids & Twists', 'Cuts & Styling', 'Weaves & Extensions', 'Color & Chemical', 'Tiny Heirs', "Barber's Corner", 'Beauty'];
+const WORK_CATS = ['Locs', 'Braids & Twists', 'Cuts & Styling', 'Weaves & Extensions', 'Color & Chemical', 'Tiny Heirs', "Barber's Corner", 'Aesthetics'];
 const isVideo = g => g.type === 'video' || /\.(mp4|webm|mov)(\?|$)/i.test(g.url);
 
 function renderPhotos() {

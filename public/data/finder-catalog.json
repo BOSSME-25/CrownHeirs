@@ -494,7 +494,7 @@
   },
   "facials": {
    "name": "Facials",
-   "category": "Beauty",
+   "category": "Aesthetics",
    "active": true,
    "from": null,
    "variations": [
@@ -602,7 +602,7 @@
   },
   "foreign-fill": {
    "name": "Foreign Fill",
-   "category": "Beauty",
+   "category": "Aesthetics",
    "active": true,
    "from": null,
    "variations": [
@@ -866,7 +866,7 @@
   },
   "lash-2-3-week-fill": {
    "name": "Lash 2/3 Week Fill",
-   "category": "Beauty",
+   "category": "Aesthetics",
    "active": true,
    "from": null,
    "variations": [
@@ -902,7 +902,7 @@
   },
   "lash-extension-removal": {
    "name": "Lash Extension Removal",
-   "category": "Beauty",
+   "category": "Aesthetics",
    "active": true,
    "from": null,
    "variations": [
@@ -914,7 +914,7 @@
   },
   "lash-extensions-full-sets": {
    "name": "Lash Extensions Full Sets",
-   "category": "Beauty",
+   "category": "Aesthetics",
    "active": true,
    "from": null,
    "variations": [
@@ -942,7 +942,7 @@
   },
   "lash-lift-and-tint": {
    "name": "Lash Lift and Tint",
-   "category": "Beauty",
+   "category": "Aesthetics",
    "active": false,
    "from": null,
    "variations": [
@@ -954,7 +954,7 @@
   },
   "lash-mini-fill": {
    "name": "Lash Mini Fill",
-   "category": "Beauty",
+   "category": "Aesthetics",
    "active": false,
    "from": null,
    "variations": [
@@ -1369,7 +1369,7 @@
   },
   "make-up-full-face": {
    "name": "Make Up: Full Face",
-   "category": "Beauty",
+   "category": "Aesthetics",
    "active": true,
    "from": null,
    "variations": [
@@ -1393,7 +1393,7 @@
   },
   "make-up-half-face": {
    "name": "Make Up: Half Face",
-   "category": "Beauty",
+   "category": "Aesthetics",
    "active": true,
    "from": null,
    "variations": [
@@ -1798,7 +1798,7 @@
   },
   "threading": {
    "name": "Threading",
-   "category": "Beauty",
+   "category": "Aesthetics",
    "active": false,
    "from": null,
    "variations": [
@@ -1838,7 +1838,7 @@
   },
   "tinting-and-lamination-services": {
    "name": "Tinting and Lamination Services",
-   "category": "Beauty",
+   "category": "Aesthetics",
    "active": true,
    "from": null,
    "variations": [
@@ -1878,7 +1878,7 @@
   },
   "waxing-body": {
    "name": "Waxing (Body)",
-   "category": "Beauty",
+   "category": "Aesthetics",
    "active": true,
    "from": null,
    "variations": [
@@ -1906,7 +1906,7 @@
   },
   "waxing-face": {
    "name": "Waxing (Face)",
-   "category": "Beauty",
+   "category": "Aesthetics",
    "active": true,
    "from": null,
    "variations": [
