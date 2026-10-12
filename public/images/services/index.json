@@ -32,7 +32,7 @@
  {
   "slug": "facials",
   "name": "Facials",
-  "category": "Beauty"
+  "category": "Aesthetics"
  },
  {
   "slug": "consultations",
@@ -72,7 +72,7 @@
  {
   "slug": "lash-2-3-week-fill",
   "name": "Lash 2/3 Week Fill",
-  "category": "Beauty"
+  "category": "Aesthetics"
  },
  {
   "slug": "hair-and-scalp-treatments-add-ons",
@@ -102,7 +102,7 @@
  {
   "slug": "lash-extensions-full-sets",
   "name": "Lash Extensions Full Sets",
-  "category": "Beauty"
+  "category": "Aesthetics"
  },
  {
   "slug": "luxury-experience-add-ons",
@@ -132,7 +132,7 @@
  {
   "slug": "make-up-full-face",
   "name": "Make Up: Full Face",
-  "category": "Beauty"
+  "category": "Aesthetics"
  },
  {
   "slug": "sew-in-maintenance-add-on-service",
@@ -157,7 +157,7 @@
  {
   "slug": "make-up-half-face",
   "name": "Make Up: Half Face",
-  "category": "Beauty"
+  "category": "Aesthetics"
  },
  {
   "slug": "mini-twists-two-strands-with-added-hair",
@@ -177,7 +177,7 @@
  {
   "slug": "tinting-and-lamination-services",
   "name": "Tinting and Lamination Services",
-  "category": "Beauty"
+  "category": "Aesthetics"
  },
  {
   "slug": "miracle-knots-braids-natural-braids",
@@ -197,7 +197,7 @@
  {
   "slug": "waxing-body",
   "name": "Waxing (Body)",
-  "category": "Beauty"
+  "category": "Aesthetics"
  },
  {
   "slug": "natural-hair-braiding",
@@ -217,7 +217,7 @@
  {
   "slug": "waxing-face",
   "name": "Waxing (Face)",
-  "category": "Beauty"
+  "category": "Aesthetics"
  },
  {
   "slug": "loc-interlocking",

@@ -1994,7 +1994,7 @@
   {
    "slug": "facials",
    "name": "Facials",
-   "category": "Beauty",
+   "category": "Aesthetics",
    "description": "An intro to establish skincare needs.  Customized to skin type. Signature treatments are beneficial for all skin types, including those who have sensitive skin. The process includes cleansing, gentle exfoliation, massage, mask, and re-hydration. Signature treatments leave your skin feeling refreshed and smooth with a healthy, youthful glow.\nNote: All treatments are customized due to specific need. Spa treatments such as dermaplane, extractions, microdermabrasion, and chemical peels may be recommended and are a separate \u201cadd on\u201d treatment.",
    "variations": [
     {
@@ -2044,7 +2044,7 @@
   {
    "slug": "foreign-fill",
    "name": "Foreign Fill",
-   "category": "Beauty",
+   "category": "Aesthetics",
    "description": "Add-On: Please use this add on (in addition to the style) if filling a set not originally done with same Lash Tech",
    "variations": [
     {
@@ -2064,7 +2064,7 @@
   {
    "slug": "lash-2-3-week-fill",
    "name": "Lash 2/3 Week Fill",
-   "category": "Beauty",
+   "category": "Aesthetics",
    "description": "About 50% of lashes remaining. Routine touch up",
    "variations": [
     {
@@ -2102,7 +2102,7 @@
   {
    "slug": "lash-extension-removal",
    "name": "Lash Extension Removal",
-   "category": "Beauty",
+   "category": "Aesthetics",
    "description": "Professional removal of Lashes",
    "variations": [
     {
@@ -2122,7 +2122,7 @@
   {
    "slug": "lash-extensions-full-sets",
    "name": "Lash Extensions Full Sets",
-   "category": "Beauty",
+   "category": "Aesthetics",
    "description": "Take a nap, or chat through it all. Experience a glam session in a chair as your lashes are transformed one by one.\n\nClassic sets mimic the fullness of your natural lashes. Perfect for wanting to add length. Does not create fuller look\nClassic PLUS sets add a bit of fullness while maintaining a \u201cClassic\u201d look. Perfect for Adding length.\nHybrid Sets add fullness and length to natural lashes. Perfect for those who like fuller lashes but not a lot of drama added.\nVolume Sets add length and maximum fullness.",
    "variations": [
     {
@@ -2166,7 +2166,7 @@
   {
    "slug": "lash-lift-and-tint",
    "name": "Lash Lift and Tint",
-   "category": "Beauty",
+   "category": "Aesthetics",
    "description": "One way to think of a lash lift is like a perm for your eyelashes. Unlike lash extensions, a lash lift simply alters the shape and color of your natural lashes making them curlier and longer!",
    "variations": [
     {
@@ -2186,7 +2186,7 @@
   {
    "slug": "lash-mini-fill",
    "name": "Lash Mini Fill",
-   "category": "Beauty",
+   "category": "Aesthetics",
    "description": "Refresh your Set. Recommended 1 week touch up.",
    "variations": [
     {
@@ -2224,7 +2224,7 @@
   {
    "slug": "make-up-full-face",
    "name": "Make Up: Full Face",
-   "category": "Beauty",
+   "category": "Aesthetics",
    "description": "The whole bag. From Foundation to lashes and the concealer in between.",
    "variations": [
     {
@@ -2262,7 +2262,7 @@
   {
    "slug": "make-up-half-face",
    "name": "Make Up: Half Face",
-   "category": "Beauty",
+   "category": "Aesthetics",
    "description": "Includes Eyebrows, Lashes and Liner",
    "variations": [
     {
@@ -2294,7 +2294,7 @@
   {
    "slug": "threading",
    "name": "Threading",
-   "category": "Beauty",
+   "category": "Aesthetics",
    "description": "Hair removal process that\u00a0removes the entire hair, including the root, rather than cutting it.",
    "variations": [
     {
@@ -2356,7 +2356,7 @@
   {
    "slug": "tinting-and-lamination-services",
    "name": "Tinting and Lamination Services",
-   "category": "Beauty",
+   "category": "Aesthetics",
    "description": "Eyebrow Lamination is a beauty treatment that straightens, and sets eyebrows to create a fuller, and more uniformed look. Tinting of the brows is a semipermanent dye applied to the brows to add a darker and more visible look to the brows. Lamination will last approximately 3-4 weeks, with the tint lasting for 2-3 weeks before needing a retouch . Eyebrow Lamination, and Tinting services include shaping the brows to the clients face using brow mapping. Waxing will be included with our Brow Lamination and Tinting service.",
    "variations": [
     {
@@ -2388,7 +2388,7 @@
   {
    "slug": "waxing-body",
    "name": "Waxing (Body)",
-   "category": "Beauty",
+   "category": "Aesthetics",
    "description": "Hair removal from the root to provide smooth, long lasting results!",
    "variations": [
     {
@@ -2432,7 +2432,7 @@
   {
    "slug": "waxing-face",
    "name": "Waxing (Face)",
-   "category": "Beauty",
+   "category": "Aesthetics",
    "description": "Hair removal from the root to provide smooth, long lasting results!",
    "variations": [
     {

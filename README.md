@@ -394,7 +394,7 @@ With `INSTAGRAM_ACCESS_TOKEN` set, the home page's *From the Den* shows the
 salon's latest Instagram posts, each linking to the post, sorted into the
 same categories as the Services section (Locs, Braids & Twists, Cuts &
 Styling, Weaves & Extensions, Color & Chemical, Tiny Heirs, Barber's
-Corner, Beauty) by the words in the caption and hashtags; pills filter
+Corner, Aesthetics) by the words in the caption and hashtags; pills filter
 them. Without the token it shows the TV gallery from `/admin/tv`, where
 each photo can be given a category.
 
