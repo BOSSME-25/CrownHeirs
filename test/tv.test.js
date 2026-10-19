@@ -90,3 +90,75 @@ test('an empty gallery still gives the text slides', () => {
   const els = loadBuildSlides()({ ...content, gallery: [] });
   assert.ok(els.length >= 11 && els.every((s) => !isPhoto(s)));
 });
+
+// A TV's browser is often years behind a phone's. The page stays on CSS and
+// DOM a 2019 browser knows for anything that decides whether a slide has a
+// size at all, and a clip the browser refuses is skipped, not held black.
+test('the page positions slides with the four offsets, not the newer inset shorthand', () => {
+  const html = fs.readFileSync(TV, 'utf8');
+  assert.ok(!/\binset\s*:/.test(html), 'inset: is unknown to older TV browsers and leaves a photo with no size');
+  assert.ok(/if \(stage\.replaceChildren\) stage\.replaceChildren\(\.\.\.fresh\);/.test(html), 'replaceChildren has a fallback');
+});
+
+test('a clip the browser refuses is skipped: error on the <source>, or no frame after the grace period', () => {
+  const html = fs.readFileSync(TV, 'utf8');
+  assert.ok(/v\.querySelectorAll\('source'\)\.forEach\(s => s\.addEventListener\('error', skip/.test(html), 'the refusal arrives on the <source>');
+  assert.ok(/if \(idx === next && \(v\.error \|\| v\.readyState < 2\)\) skip\(\);/.test(html), 'a clip with no frame is given up on');
+  const grace = Number(html.match(/const VIDEO_GRACE_MS = (\d+);/)[1]);
+  assert.ok(grace >= 3000 && grace <= 8000, 'long enough for a slow clip to start, short next to the 15-second hold');
+});
+
+test('uploaded photos are shown at screen width through the resizer; a refusal falls back to the original', () => {
+  const buildSlides = loadBuildSlides();
+  const els = buildSlides(content);
+  const still = els.find((s) => /\bphoto\b/.test(s.className) && !/<video/.test(s.innerHTML));
+  assert.match(still.innerHTML, /background-image:url\('\/_vercel\/image\?url=https%3A%2F%2Fblob\.example%2Fgallery%2Fa\.jpg&amp;w=1920&amp;q=80'\)/);
+  const ig = els.find((s) => /\bigpost\b/.test(s.className));
+  assert.match(ig.innerHTML, /src="\/_vercel\/image\?url=https%3A%2F%2Fblob\.example%2Fgallery%2Fd\.jpg&amp;w=1920&amp;q=80"/);
+  // The built-in starter photos are local files and already small.
+  const local = buildSlides({ settings: {}, gallery: [{ url: '/images/inspo/silk-press.jpg', caption: 'Silk Press' }] });
+  assert.match(local[1].innerHTML, /background-image:url\('\/images\/inspo\/silk-press\.jpg'\)/);
+  const html = fs.readFileSync(TV, 'utf8');
+  assert.ok(/im\.onerror = \(\) => \{ unresized\.add\(g\.url\); res\(\); \};/.test(html), 'a refusal marks the photo to be shown unresized');
+  const cfg = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'vercel.json'), 'utf8'));
+  assert.deepEqual(cfg.images.sizes, [1920]);
+  assert.ok(cfg.images.qualities.includes(80));
+  assert.ok(cfg.images.remotePatterns.some((p) => /public\.blob\.vercel-storage\.com$/.test(p.hostname)), 'the Blob store is allowed');
+});
+
+test('notes from clients take a turn in the loop, one review at a time, dealing the next each time round', () => {
+  const buildSlides = loadBuildSlides();
+  const reviews = [
+    { text: 'Treats you like <royalty>', name: 'Keith H.', stars: '5' },
+    { text: 'Hair is a journey', name: 'Izaiah L.', stars: '4' },
+    { text: 'The shop feels like home', name: 'Elizabeth W.' },
+    { text: '   ', name: 'blank' },
+  ];
+  const els = buildSlides({ ...content, reviews });
+  const seats = els.filter((s) => /\breview\b/.test(s.className));
+  assert.equal(seats.length, 2, 'three or more reviews: two seats in the loop');
+  assert.match(seats[0].innerHTML, /Notes from clients/);
+  assert.match(seats[0].innerHTML, /Treats you like &lt;royalty&gt;/, 'the words are escaped');
+  assert.match(seats[0].innerHTML, /★★★★★/);
+  assert.match(seats[0].innerHTML, /Keith H\./);
+  assert.match(seats[1].innerHTML, /Hair is a journey/, 'the second seat deals the next review');
+  assert.match(seats[1].innerHTML, /★★★★(?!★)/);
+  seats[0].refresh();
+  assert.match(seats[0].innerHTML, /feels like home/, 'next time round, the next review');
+  assert.doesNotMatch(seats[0].innerHTML, /★|blank/, 'no stars when none were given; a blank note is never shown');
+  seats[0].refresh();
+  assert.match(seats[0].innerHTML, /royalty/, 'and round again');
+  // One seat with fewer than three; none without any.
+  assert.equal(buildSlides({ ...content, reviews: reviews.slice(0, 2) }).filter((s) => /\breview\b/.test(s.className)).length, 1);
+  assert.equal(buildSlides(content).filter((s) => /\breview\b/.test(s.className)).length, 0);
+  // The seat sits among the text slides, with its two photos before it.
+  const at = els.indexOf(seats[0]);
+  assert.ok(isPhoto(els[at - 1]) && isPhoto(els[at - 2]));
+});
+
+test('the preload warms photos only, and no one photo can hold the show back', () => {
+  const html = fs.readFileSync(TV, 'utf8');
+  assert.ok(/\.filter\(g => !isVideo\(g\)\)\.map\(g => new Promise\(res => \{\s*const im = new Image\(\);[\s\S]{0,300}?setTimeout\(res, PRELOAD_CAP_MS\);/.test(html), 'clips are not preloaded as images, and each wait is capped');
+  const cap = Number(html.match(/const PRELOAD_CAP_MS = (\d+);/)[1]);
+  assert.ok(cap >= 3000 && cap <= 15000);
+});
