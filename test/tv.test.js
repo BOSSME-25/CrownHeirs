@@ -80,6 +80,17 @@ test('a video comes round once per loop; a photo may come round again', () => {
   assert.ok(stills.length > 3, 'the three stills come round more than once');
 });
 
+test('the follow-us slide names Instagram and TikTok, one handle for both', () => {
+  const els = loadBuildSlides()(content);
+  const follow = els.find((s) => /\bfollow\b/.test(s.className));
+  assert.match(follow.innerHTML, /Find us on Instagram &amp; TikTok/);
+  assert.match(follow.innerHTML, /<h1>@crownheirs<\/h1>/);
+  assert.match(follow.innerHTML, /<span><svg[^>]*>[\s\S]*?<\/svg>Instagram<\/span>/);
+  assert.match(follow.innerHTML, /<span><svg[^>]*>[\s\S]*?<\/svg>TikTok<\/span>/);
+  assert.equal((follow.innerHTML.match(/@crownheirs/g) || []).length, 1, 'the handle is written once; both marks share it');
+  assert.equal(loadBuildSlides()({ ...content, settings: {} }).filter((s) => /\bfollow\b/.test(s.className)).length, 0, 'no handle, no slide');
+});
+
 test('with no text slides the photos play once each', () => {
   const els = loadBuildSlides()({ settings: {}, gallery: content.gallery });
   assert.equal(els.length, 1 + content.gallery.length);
