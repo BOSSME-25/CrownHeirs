@@ -90,3 +90,27 @@ test('an empty gallery still gives the text slides', () => {
   const els = loadBuildSlides()({ ...content, gallery: [] });
   assert.ok(els.length >= 11 && els.every((s) => !isPhoto(s)));
 });
+
+// A TV's browser is often years behind a phone's. The page stays on CSS and
+// DOM a 2019 browser knows for anything that decides whether a slide has a
+// size at all, and a clip the browser refuses is skipped, not held black.
+test('the page positions slides with the four offsets, not the newer inset shorthand', () => {
+  const html = fs.readFileSync(TV, 'utf8');
+  assert.ok(!/\binset\s*:/.test(html), 'inset: is unknown to older TV browsers and leaves a photo with no size');
+  assert.ok(/if \(stage\.replaceChildren\) stage\.replaceChildren\(\.\.\.fresh\);/.test(html), 'replaceChildren has a fallback');
+});
+
+test('a clip the browser refuses is skipped: error on the <source>, or no frame after the grace period', () => {
+  const html = fs.readFileSync(TV, 'utf8');
+  assert.ok(/v\.querySelectorAll\('source'\)\.forEach\(s => s\.addEventListener\('error', skip/.test(html), 'the refusal arrives on the <source>');
+  assert.ok(/if \(idx === next && \(v\.error \|\| v\.readyState < 2\)\) skip\(\);/.test(html), 'a clip with no frame is given up on');
+  const grace = Number(html.match(/const VIDEO_GRACE_MS = (\d+);/)[1]);
+  assert.ok(grace >= 3000 && grace <= 8000, 'long enough for a slow clip to start, short next to the 15-second hold');
+});
+
+test('the preload warms photos only, and no one photo can hold the show back', () => {
+  const html = fs.readFileSync(TV, 'utf8');
+  assert.ok(/\.filter\(g => !isVideo\(g\)\)\.map\(g => new Promise\(res => \{\s*const im = new Image\(\);[^}]*setTimeout\(res, PRELOAD_CAP_MS\);/.test(html), 'clips are not preloaded as images, and each wait is capped');
+  const cap = Number(html.match(/const PRELOAD_CAP_MS = (\d+);/)[1]);
+  assert.ok(cap >= 3000 && cap <= 15000);
+});

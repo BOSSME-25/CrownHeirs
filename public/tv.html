@@ -30,9 +30,9 @@
 html, body { height: 100%; overflow: hidden; background: var(--ink); color: var(--paper); font-family: var(--font-ui); cursor: none; }
 
 /* ── Slide stage ─────────────────────────── */
-#stage { position: fixed; inset: 0; }
+#stage { position: fixed; top: 0; right: 0; bottom: 0; left: 0; }
 .slide {
-  position: absolute; inset: 0;
+  position: absolute; top: 0; right: 0; bottom: 0; left: 0;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   opacity: 0; visibility: hidden;
   transition: opacity 1.4s ease, visibility 1.4s;
@@ -44,7 +44,7 @@ html, body { height: 100%; overflow: hidden; background: var(--ink); color: var(
 /* ── Photo slides (full bleed + Ken Burns) ── */
 .slide.photo { padding: 0; }
 .slide.photo .img {
-  position: absolute; inset: 0;
+  position: absolute; top: 0; right: 0; bottom: 0; left: 0;
   background-size: cover; background-position: center 30%;
 }
 .slide.on .img { animation: kenburns 14s ease-out forwards; }
@@ -53,7 +53,7 @@ html, body { height: 100%; overflow: hidden; background: var(--ink); color: var(
   to   { transform: scale(1.12); }
 }
 .slide.photo::after {
-  content: ''; position: absolute; inset: 0;
+  content: ''; position: absolute; top: 0; right: 0; bottom: 0; left: 0;
   background: linear-gradient(to top, rgba(20,18,15,0.75) 0%, rgba(20,18,15,0) 32%),
               linear-gradient(to bottom, rgba(20,18,15,0.4) 0%, rgba(20,18,15,0) 18%);
 }
@@ -68,7 +68,7 @@ html, body { height: 100%; overflow: hidden; background: var(--ink); color: var(
   background: var(--gold); margin: 0 auto 2vh;
 }
 .slide.photo video.media {
-  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+  position: absolute; top: 0; right: 0; bottom: 0; left: 0; width: 100%; height: 100%; object-fit: cover;
 }
 
 /* ── Instagram-style post slides ─────────── */
@@ -262,6 +262,8 @@ let SERVICES = [], svcAt = 0;   // /images/services/index.json — services with
 let THEME = null, themeKey = '';   // today's theme day, from /api/book/themes?date=
 
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const isVideo = g => g.type === 'video' || /\.(mp4|webm|mov)(\?|$)/i.test(g.url);
+const PRELOAD_CAP_MS = 8000;
 
 function buildSlides(c) {
   const els = [];
@@ -279,7 +281,6 @@ function buildSlides(c) {
      <div class="tag">Your throne awaits.</div>`));
 
   const handle = String(c.settings?.instagramHandle || '').replace(/^@/, '').trim();
-  const isVideo = g => g.type === 'video' || /\.(mp4|webm|mov)(\?|$)/i.test(g.url);
   const IG_ICONS = `
     <svg viewBox="0 0 24 24"><path d="M20.8 4.6c-2-2-5.3-2-7.3 0L12 6.1l-1.5-1.5c-2-2-5.3-2-7.3 0s-2 5.3 0 7.3L12 20.7l8.8-8.8c2-2 2-5.3 0-7.3z"/></svg>
     <svg viewBox="0 0 24 24"><path d="M21 11.5c0 4.7-4 8.5-9 8.5-1 0-2-.1-2.9-.4L3 21l1.6-4.8C3.6 14.9 3 13.3 3 11.5 3 6.8 7 3 12 3s9 3.8 9 8.5z"/></svg>
@@ -478,12 +479,21 @@ function show(next) {
   if (!(isFinite(v.duration) && v.duration > 1)) {
     v.addEventListener('loadedmetadata', () => { if (idx === next) hold(v.duration); }, { once: true });
   }
-  v.addEventListener('error', () => {
+  // A clip the browser refuses is a black screen for the whole hold unless
+  // it is skipped. The refusal is reported on the <source>, not the <video>
+  // (the video only says "no source"), so listen there too — and, for a TV
+  // that reports nothing at all, give up on a clip that has shown no frame
+  // after a few seconds.
+  const skip = () => {
     if (idx !== next) return;
     clearTimeout(timer);
     timer = setTimeout(advance, 1500);
-  }, { once: true });
+  };
+  v.addEventListener('error', skip, { once: true });
+  v.querySelectorAll('source').forEach(s => s.addEventListener('error', skip, { once: true }));
+  setTimeout(() => { if (idx === next && (v.error || v.readyState < 2)) skip(); }, VIDEO_GRACE_MS);
 }
+const VIDEO_GRACE_MS = 5000;
 
 async function load(first) {
   try {
@@ -504,13 +514,18 @@ async function load(first) {
     window.__secs = Math.max(4, Number(c.settings?.secondsPerSlide) || 9);
     window.__tz = c.settings?.timeZone || 'America/Phoenix';
     tick();
-    // Preload photos before swapping so nothing flashes
-    await Promise.all((c.gallery || []).map(g => new Promise(res => {
+    // Preload photos before swapping so nothing flashes. Clips are not
+    // images and are left to the <video> elements; and no one photo may
+    // hold the whole show back, so each wait is capped.
+    await Promise.all((c.gallery || []).filter(g => !isVideo(g)).map(g => new Promise(res => {
       const im = new Image(); im.onload = im.onerror = res; im.src = g.url;
+      setTimeout(res, PRELOAD_CAP_MS);
     })));
     contentRaw = raw;
     const fresh = buildSlides(c);
-    stage.replaceChildren(...fresh);
+    // (replaceChildren is 2020 vintage; a TV's browser may predate it.)
+    if (stage.replaceChildren) stage.replaceChildren(...fresh);
+    else { stage.innerHTML = ''; fresh.forEach(e => stage.appendChild(e)); }
     slides = fresh;
     show(0);
   } catch (e) {
