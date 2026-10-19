@@ -126,6 +126,36 @@ test('uploaded photos are shown at screen width through the resizer; a refusal f
   assert.ok(cfg.images.remotePatterns.some((p) => /public\.blob\.vercel-storage\.com$/.test(p.hostname)), 'the Blob store is allowed');
 });
 
+test('notes from clients take a turn in the loop, one review at a time, dealing the next each time round', () => {
+  const buildSlides = loadBuildSlides();
+  const reviews = [
+    { text: 'Treats you like <royalty>', name: 'Keith H.', stars: '5' },
+    { text: 'Hair is a journey', name: 'Izaiah L.', stars: '4' },
+    { text: 'The shop feels like home', name: 'Elizabeth W.' },
+    { text: '   ', name: 'blank' },
+  ];
+  const els = buildSlides({ ...content, reviews });
+  const seats = els.filter((s) => /\breview\b/.test(s.className));
+  assert.equal(seats.length, 2, 'three or more reviews: two seats in the loop');
+  assert.match(seats[0].innerHTML, /Notes from clients/);
+  assert.match(seats[0].innerHTML, /Treats you like &lt;royalty&gt;/, 'the words are escaped');
+  assert.match(seats[0].innerHTML, /★★★★★/);
+  assert.match(seats[0].innerHTML, /Keith H\./);
+  assert.match(seats[1].innerHTML, /Hair is a journey/, 'the second seat deals the next review');
+  assert.match(seats[1].innerHTML, /★★★★(?!★)/);
+  seats[0].refresh();
+  assert.match(seats[0].innerHTML, /feels like home/, 'next time round, the next review');
+  assert.doesNotMatch(seats[0].innerHTML, /★|blank/, 'no stars when none were given; a blank note is never shown');
+  seats[0].refresh();
+  assert.match(seats[0].innerHTML, /royalty/, 'and round again');
+  // One seat with fewer than three; none without any.
+  assert.equal(buildSlides({ ...content, reviews: reviews.slice(0, 2) }).filter((s) => /\breview\b/.test(s.className)).length, 1);
+  assert.equal(buildSlides(content).filter((s) => /\breview\b/.test(s.className)).length, 0);
+  // The seat sits among the text slides, with its two photos before it.
+  const at = els.indexOf(seats[0]);
+  assert.ok(isPhoto(els[at - 1]) && isPhoto(els[at - 2]));
+});
+
 test('the preload warms photos only, and no one photo can hold the show back', () => {
   const html = fs.readFileSync(TV, 'utf8');
   assert.ok(/\.filter\(g => !isVideo\(g\)\)\.map\(g => new Promise\(res => \{\s*const im = new Image\(\);[\s\S]{0,300}?setTimeout\(res, PRELOAD_CAP_MS\);/.test(html), 'clips are not preloaded as images, and each wait is capped');

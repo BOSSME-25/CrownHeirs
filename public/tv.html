@@ -214,6 +214,20 @@ h1 em { font-style: italic; color: var(--terra-hi); }
 .slide.services.on .svc:nth-child(6) { animation-delay: .6s; }
 @keyframes svcIn { from { opacity: 0; transform: translateY(2vh); } to { opacity: 1; transform: none; } }
 
+/* ── Notes from clients ──────────────────── */
+.review .quote {
+  font-family: var(--font-serif); font-weight: 300; font-style: italic;
+  font-size: 4.6vh; line-height: 1.45; color: var(--paper);
+  max-width: 76vw; margin: 0 auto;
+}
+.review .quote::before { content: '\201C'; color: var(--terra-hi); }
+.review .quote::after  { content: '\201D'; color: var(--terra-hi); }
+.review .stars { font-size: 3.2vh; letter-spacing: 0.3em; color: var(--gold-hi); margin-top: 3.5vh; }
+.review .who {
+  font-family: var(--font-display); font-size: 2.3vh; letter-spacing: 0.3em;
+  text-transform: uppercase; color: var(--paper-dim); margin-top: 1.6vh;
+}
+
 /* ── Info slide ──────────────────────────── */
 .slide.theme .kicker { color: var(--gold); }
 .info .body {
@@ -260,6 +274,7 @@ const bar   = document.getElementById('bar');
 let slides = [], idx = -1, timer = null, contentRaw = '';
 let SERVICES = [], svcAt = 0;   // /images/services/index.json — services with a Square photo
 let THEME = null, themeKey = '';   // today's theme day, from /api/book/themes?date=
+let rvAt = 0;                      // which note from a client comes next
 
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const isVideo = g => g.type === 'video' || /\.(mp4|webm|mov)(\?|$)/i.test(g.url);
@@ -383,7 +398,29 @@ function buildSlides(c) {
          </div>`).join('')}</div>`));
   }
 
-  (c.infoSlides || []).forEach(s => {
+  // Notes from clients — the reviews kept in the TV admin, one at a time.
+  // The slide deals the next review each time it comes round, so the whole
+  // set cycles through. With three or more, a second seat in the loop.
+  const reviews = (c.reviews || []).filter(r => r && String(r.text || '').trim());
+  const reviewSlide = () => {
+    const s = mk('review', '');
+    s.refresh = () => {
+      const r = reviews[rvAt++ % reviews.length];
+      const n = Math.min(5, Math.max(0, Math.round(Number(r.stars) || 0)));
+      s.innerHTML =
+        `<div class="kicker">Notes from clients</div>
+         <div class="quote">${esc(String(r.text).trim())}</div>
+         ${n ? `<div class="stars">${'★'.repeat(n)}</div>` : ''}
+         ${r.name ? `<div class="who">${esc(r.name)}</div>` : ''}`;
+    };
+    s.refresh();
+    return s;
+  };
+  if (reviews.length) textSlides.push(reviewSlide());
+
+  (c.infoSlides || []).forEach((s, i) => {
+    // The second seat, halfway through the announcements.
+    if (reviews.length >= 3 && i === Math.ceil((c.infoSlides || []).length / 2)) textSlides.push(reviewSlide());
     const kicker = esc(s.kicker || 'The Den');
     const qr = String(s.qrUrl || '').trim();
     if (!qr) {
