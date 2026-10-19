@@ -265,6 +265,17 @@ const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;
 const isVideo = g => g.type === 'video' || /\.(mp4|webm|mov)(\?|$)/i.test(g.url);
 const PRELOAD_CAP_MS = 8000;
 
+// A phone photo straight off the camera is 12 megapixels and several MB;
+// a TV's browser (a Fire TV has a fraction of a phone's memory) can fail
+// to decode it and shows nothing. Uploaded photos are therefore shown
+// through Vercel's image resizer at screen width (vercel.json "images").
+// A photo the resizer won't serve falls back to the original.
+const SCREEN_W = 1920;
+const unresized = new Set();
+const pic = url => (unresized.has(url) || !/^https:\/\//i.test(url))
+  ? url
+  : `/_vercel/image?url=${encodeURIComponent(url)}&w=${SCREEN_W}&q=80`;
+
 function buildSlides(c) {
   const els = [];
   const mk = (cls, html) => {
@@ -307,13 +318,13 @@ function buildSlides(c) {
                   <div class="ig-sub">Crown Heirs Hair Den</div></div>
              <div class="ig-follow">Follow</div>
            </div>
-           ${media ? media('ig-media') : `<img class="ig-media" src="${esc(g.url)}" alt="">`}
+           ${media ? media('ig-media') : `<img class="ig-media" src="${esc(pic(g.url))}" alt="">`}
            <div class="ig-actions">${IG_ICONS}</div>
            ${g.caption ? `<div class="ig-cap">${handle ? `<b>@${esc(handle)}</b> ` : ''}${esc(g.caption)}</div>` : ''}
          </div>`);
     }
     return mk('photo',
-      `${media ? media('media') : `<div class="img" style="background-image:url('${esc(g.url)}')"></div>`}
+      `${media ? media('media') : `<div class="img" style="background-image:url('${esc(pic(g.url))}')"></div>`}
        ${g.caption ? `<div class="photo-caption">${esc(g.caption)}</div>` : ''}`);
   });
 
@@ -518,7 +529,10 @@ async function load(first) {
     // images and are left to the <video> elements; and no one photo may
     // hold the whole show back, so each wait is capped.
     await Promise.all((c.gallery || []).filter(g => !isVideo(g)).map(g => new Promise(res => {
-      const im = new Image(); im.onload = im.onerror = res; im.src = g.url;
+      const im = new Image();
+      im.onload = res;
+      im.onerror = () => { unresized.add(g.url); res(); }; // the resizer said no: show the original
+      im.src = pic(g.url);
       setTimeout(res, PRELOAD_CAP_MS);
     })));
     contentRaw = raw;

@@ -108,9 +108,27 @@ test('a clip the browser refuses is skipped: error on the <source>, or no frame 
   assert.ok(grace >= 3000 && grace <= 8000, 'long enough for a slow clip to start, short next to the 15-second hold');
 });
 
+test('uploaded photos are shown at screen width through the resizer; a refusal falls back to the original', () => {
+  const buildSlides = loadBuildSlides();
+  const els = buildSlides(content);
+  const still = els.find((s) => /\bphoto\b/.test(s.className) && !/<video/.test(s.innerHTML));
+  assert.match(still.innerHTML, /background-image:url\('\/_vercel\/image\?url=https%3A%2F%2Fblob\.example%2Fgallery%2Fa\.jpg&amp;w=1920&amp;q=80'\)/);
+  const ig = els.find((s) => /\bigpost\b/.test(s.className));
+  assert.match(ig.innerHTML, /src="\/_vercel\/image\?url=https%3A%2F%2Fblob\.example%2Fgallery%2Fd\.jpg&amp;w=1920&amp;q=80"/);
+  // The built-in starter photos are local files and already small.
+  const local = buildSlides({ settings: {}, gallery: [{ url: '/images/inspo/silk-press.jpg', caption: 'Silk Press' }] });
+  assert.match(local[1].innerHTML, /background-image:url\('\/images\/inspo\/silk-press\.jpg'\)/);
+  const html = fs.readFileSync(TV, 'utf8');
+  assert.ok(/im\.onerror = \(\) => \{ unresized\.add\(g\.url\); res\(\); \};/.test(html), 'a refusal marks the photo to be shown unresized');
+  const cfg = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'vercel.json'), 'utf8'));
+  assert.deepEqual(cfg.images.sizes, [1920]);
+  assert.ok(cfg.images.qualities.includes(80));
+  assert.ok(cfg.images.remotePatterns.some((p) => /public\.blob\.vercel-storage\.com$/.test(p.hostname)), 'the Blob store is allowed');
+});
+
 test('the preload warms photos only, and no one photo can hold the show back', () => {
   const html = fs.readFileSync(TV, 'utf8');
-  assert.ok(/\.filter\(g => !isVideo\(g\)\)\.map\(g => new Promise\(res => \{\s*const im = new Image\(\);[^}]*setTimeout\(res, PRELOAD_CAP_MS\);/.test(html), 'clips are not preloaded as images, and each wait is capped');
+  assert.ok(/\.filter\(g => !isVideo\(g\)\)\.map\(g => new Promise\(res => \{\s*const im = new Image\(\);[\s\S]{0,300}?setTimeout\(res, PRELOAD_CAP_MS\);/.test(html), 'clips are not preloaded as images, and each wait is capped');
   const cap = Number(html.match(/const PRELOAD_CAP_MS = (\d+);/)[1]);
   assert.ok(cap >= 3000 && cap <= 15000);
 });

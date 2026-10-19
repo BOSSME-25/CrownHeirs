@@ -2,6 +2,15 @@
   "functions": {
     "api/**/*.js": { "includeFiles": "lib/**" }
   },
+  "images": {
+    "sizes": [1920],
+    "qualities": [80],
+    "formats": ["image/webp"],
+    "minimumCacheTTL": 2592000,
+    "remotePatterns": [
+      { "protocol": "https", "hostname": "0bfkzsb6ouqyxke0.public.blob.vercel-storage.com" }
+    ]
+  },
   "crons": [
     { "path": "/api/book/reminders", "schedule": "0 16 * * *" }
   ],
