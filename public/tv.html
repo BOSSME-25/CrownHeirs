@@ -285,7 +285,11 @@ function buildSlides(c) {
     <svg viewBox="0 0 24 24"><path d="M21 11.5c0 4.7-4 8.5-9 8.5-1 0-2-.1-2.9-.4L3 21l1.6-4.8C3.6 14.9 3 13.3 3 11.5 3 6.8 7 3 12 3s9 3.8 9 8.5z"/></svg>
     <svg viewBox="0 0 24 24"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7"/></svg>`;
 
-  const photos = (c.gallery || []).map(g => {
+  // Each gallery item is a maker, not an element: a photo can come round
+  // several times in one loop, and every showing needs its own element. A
+  // DOM node lives in one place only — the same node pushed into two slots
+  // used to leave the first slot black for the whole hold.
+  const makers = (c.gallery || []).map(g => () => {
     // Declare the source as mp4 regardless of the file's extension: iPhone
     // .mov clips are H.264 in a QuickTime container, which browsers will
     // decode when they aren't told it's video/quicktime (which they refuse).
@@ -405,13 +409,26 @@ function buildSlides(c) {
   }
 
   // Interleave: a couple of photos between each text slide so the loop
-  // always feels alive even with lots of copy.
+  // always feels alive even with lots of copy. With fewer photos than slots
+  // the photos come round again — a fresh element each time. A video comes
+  // round once per loop: a second copy would mean a second download and a
+  // second decoder on a TV that has little of either.
+  const video = (c.gallery || []).map(isVideo);
+  const used = new Set();
   let p = 0;
-  const takePhotos = n => { const out = []; for (let i = 0; i < n && photos.length; i++) out.push(photos[p++ % photos.length]); return out; };
+  const nextPhoto = () => {
+    for (let tries = 0; tries < makers.length; tries++) {
+      const i = p++ % makers.length;
+      if (video[i] && used.has(i)) continue;
+      used.add(i);
+      return makers[i]();
+    }
+    return null;
+  };
+  const takePhotos = n => { const out = []; for (let i = 0; i < n && makers.length; i++) { const e = nextPhoto(); if (e) out.push(e); } return out; };
   textSlides.forEach(t => { els.push(...takePhotos(2), t); });
   // Any photos never shown yet get appended so nothing is skipped.
-  while (p < photos.length) els.push(photos[p++]);
-  if (els.length === 1) els.push(...photos); // welcome only — just play photos
+  makers.forEach((make, i) => { if (!used.has(i)) { used.add(i); els.push(make()); } });
 
   return els;
 }
