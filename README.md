@@ -226,6 +226,55 @@ and the ticket records the tender and reference by hand.
 
 Retail items and the retail tax rate live in `/admin/settings`.
 
+## Referrals and Crown Jewels
+
+A new client can say who referred them: a name, plus a phone and/or email
+if they know it. They can give it on `/book` ("Did someone refer you?"),
+the desk can take it with a phone booking (*New appointment* → "Referred by
+someone?"), or the desk can add it at checkout (the ticket's **Referred
+by** panel, which searches clients here and in Square's customer directory).
+
+After the new client's **first paid checkout**, the referral is
+**connected** to the referrer's client profile. The referrer is matched by
+phone, then email, then a unique full name, first among clients here and
+then in Square's directory (a Square-only referrer becomes a client here,
+linked to their Square profile). If the match isn't certain (two people
+with that name, or a phone that belongs to someone else), the referral
+waits under Front desk → **Referrals → Needs a match** for the desk to pick
+the right person. A person is referred once, a client can't refer
+themselves, and a voided or fully refunded checkout takes the reward back
+(the referral then waits for their next paid checkout).
+
+The reward is **Crown Jewels**. They are kept on the site as a ledger
+(earned, taken back, redeemed), separate from the **Crowns** in Square
+Loyalty, so the two run side by side. The referrer earns
+`referral_jewels` per connected referral (1 by default; change it in
+`/admin/settings` → Referrals & Crown Jewels). Jewels are redeemed for
+merch at the desk: Referrals → look up the client → *Redeem for merch*,
+with a note of the item. The balance can't go below zero. The ticket's
+Referred by panel also shows the client's own balance at checkout.
+
+**In Square.** Checkouts still happen in Square while `BOOKING_MODE` is
+`square`, so `/admin/settings` → **Set up in Square** adds three fields to
+Square customer profiles. If one with the same name was already made in the
+Dashboard, that one is used.
+
+- **Referred by**: staff fill it in at checkout in Square.
+- **Crown Jewels** and **Referrals**: read-only, written from the site so
+  staff can see them in Square.
+
+Every morning (`/api/book/referrals`, the Vercel cron at 07:20 UTC, 00:20
+Phoenix) the site lists Square payments since the last run. For each
+customer with a completed payment and a Referred by value, it records and
+connects the referral, the same way as a checkout here. Only checkouts
+after setup count. *Sync with Square now* runs the same thing on demand.
+
+To ask for it on Square's online booking form too, add the Referred by
+field to the form in Square (Appointments → Settings), on plans that offer
+custom booking-form fields. This needs `SQUARE_ACCESS_TOKEN` (with
+customers and payments read/write) and `SQUARE_LOCATION_ID` on Vercel, plus
+`CRON_SECRET` for the morning run.
+
 ### Read API for integrations — `/api/v1/`
 
 Per-integration tokens with named scopes, created and revoked in

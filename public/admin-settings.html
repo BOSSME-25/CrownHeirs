@@ -122,6 +122,25 @@ table { width:100%; border-collapse:collapse; font-size:14px; margin-top:6px; } 
   </div>
 
   <div class="card">
+    <h2>Referrals &amp; Crown Jewels</h2>
+    <div class="hint">Clients can say who referred them when they book (online or at the desk), and the desk can add it at checkout. After the new client's first paid checkout, the referral is connected to the referrer's profile and the referrer earns Crown Jewels. These are kept separately from the Crowns in Square Loyalty and can be redeemed for merch at the desk (Front desk → Referrals). If a referrer can't be matched for sure, the referral waits under "Needs a match".</div>
+    <div class="status" id="refStatus">Checking…</div>
+    <div style="display:flex;gap:10px;align-items:end;flex-wrap:wrap;">
+      <div><label style="display:block;margin-bottom:4px;">Crown Jewels per referral</label><input id="refJewels" type="number" min="0" max="100" step="1" style="max-width:140px;"></div>
+      <button class="btn btn-terra" onclick="saveReferrals()">Save</button>
+      <span class="status" id="refOut"></span>
+    </div>
+    <h2 style="font-size:20px;margin-top:18px;">In Square</h2>
+    <div class="hint">Checkouts in Square count too. "Set up in Square" adds three fields to Square customer profiles: <b>Referred by</b> (staff fill it in at checkout: a name, phone and/or email), and <b>Crown Jewels</b> and <b>Referrals</b> (kept up to date from here, so staff can see them in Square). Each morning the site reads Referred by for clients who paid in Square the day before and connects them. Only checkouts after setup count. To ask for it on Square's online booking form too, add the Referred by field to the form in Square Dashboard → Appointments → Settings (on Square Appointments plans that include custom booking-form fields).</div>
+    <div class="status" id="refSquare"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-ghost" onclick="refSquareSetup()">Set up in Square</button>
+      <button class="btn btn-ghost" onclick="refSquareSync()">Sync with Square now</button>
+    </div>
+    <div class="status" id="refSquareOut" style="margin-top:10px;"></div>
+  </div>
+
+  <div class="card">
     <h2>Theme days</h2>
     <div class="hint">Family Fridays, Zin Saturdays, Mother's Day Saturday. A theme shows on the booking calendar and the TV. Clients outside its audience see what to expect and must accept that their appointment may be moved. A dated theme can open its date for booking early.</div>
     <div id="themeList"></div>
@@ -327,13 +346,48 @@ function editTheme(id) {
 }
 async function toggleTheme(id) { const t = THEMES.find(x => x.id === id); try { await post({ action: 'theme.save', ...t, active: !t.active }); loadThemes(); } catch (e) { alert(e.message); } }
 async function removeTheme(id) { if (!confirm('Delete this theme day?')) return; try { await post({ action: 'theme.remove', id }); loadThemes(); } catch (e) { alert(e.message); } }
+const when = iso => iso ? new Date(iso).toLocaleString('en-US', { timeZone: 'America/Phoenix', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : '';
+const plural = (n, w) => `${n} ${w}${n === 1 ? '' : 's'}`;
+async function loadReferrals() {
+  try {
+    const s = await get({ action: 'referrals.status' });
+    if ($('refJewels').value === '') $('refJewels').value = s.jewelsPerReferral;
+    const c = s.counts;
+    $('refStatus').className = 'status';
+    $('refStatus').innerHTML = `${plural(c.connected, 'referral')} connected · ${c.pending} waiting for checkout · ${c.needs_match ? `<b style="color:var(--err)">${c.needs_match} need${c.needs_match === 1 ? 's' : ''} a match</b>` : '0 need a match'} · ${plural(c.jewels_outstanding, 'Crown Jewel')} unspent`;
+    const q = s.square;
+    const f = q.fields || {};
+    const last = q.last ? ` Last sync ${when(q.last.at)}: ${plural(q.last.customers, 'paying customer')}, ${q.last.connected} connected, ${q.last.needsMatch} need a match${q.last.errors ? `, ${q.last.errors} couldn't be read` : ''}.` : '';
+    $('refSquare').className = 'status ' + (q.connected && f.referredBy ? 'ok' : '');
+    $('refSquare').innerHTML = !q.connected ? 'Square is <b>not connected</b> to the site: add <code>SQUARE_ACCESS_TOKEN</code> and <code>SQUARE_LOCATION_ID</code> in Vercel.'
+      : !f.referredBy ? 'Square is connected. Not set up yet: press "Set up in Square".'
+      : `Set up. Counting Square checkouts since ${when(q.since)}.${last}`;
+  } catch (e) { $('refStatus').className = 'status err'; $('refStatus').textContent = e.message; }
+}
+async function saveReferrals() {
+  try { const j = await post({ action: 'settings.save', referral_jewels: $('refJewels').value }); $('refOut').textContent = `Saved: ${plural(j.referral_jewels, 'Crown Jewel')} per referral, from the next one connected.`; loadReferrals(); }
+  catch (e) { $('refOut').textContent = e.message; }
+}
+async function refSquareSetup() {
+  $('refSquareOut').textContent = 'Setting up…';
+  try { const j = await post({ action: 'referrals.square.setup' }); $('refSquareOut').textContent = (j.made.length ? `Added to Square customer profiles: ${j.made.join(', ')}.` : '') + (j.found.length ? ` Already there: ${j.found.join(', ')}.` : ''); loadReferrals(); }
+  catch (e) { $('refSquareOut').textContent = e.message; }
+}
+async function refSquareSync() {
+  $('refSquareOut').textContent = 'Reading Square…';
+  try {
+    const j = await post({ action: 'referrals.square.sync' });
+    $('refSquareOut').textContent = `${plural(j.customers, 'paying customer')} since the last sync: ${j.connected} referral${j.connected === 1 ? '' : 's'} connected, ${j.needsMatch} need${j.needsMatch === 1 ? 's' : ''} a match, ${j.noReferral} with no referral.` + (j.errors.length ? ` Couldn't read: ${j.errors.join('; ')}` : '');
+    loadReferrals();
+  } catch (e) { $('refSquareOut').textContent = e.message; }
+}
 async function runReminders() {
   $('remStatus').textContent = 'Running…';
   const r = await fetch('/api/book/reminders', { headers: { 'x-admin-key': KEY } });
   const j = await r.json().catch(() => ({}));
   $('remStatus').textContent = r.ok ? `Sent ${j.count} reminder(s).` : (j.error || 'Failed');
 }
-AdminShell.requireAuth().then(k => { KEY = k; $("app").classList.remove("hidden"); modeStatus(); bookingStatus(); hubStatus(); loadTill(); loadTerminal(); loadTokens(); loadThemes(); loadPolicy(); });
+AdminShell.requireAuth().then(k => { KEY = k; $("app").classList.remove("hidden"); modeStatus(); bookingStatus(); hubStatus(); loadTill(); loadTerminal(); loadTokens(); loadThemes(); loadPolicy(); loadReferrals(); });
 </script>
 </body>
 </html>

@@ -106,9 +106,14 @@ DO $$ BEGIN
 END $$;
 ALTER TABLE clients ADD COLUMN IF NOT EXISTS relationship text NOT NULL DEFAULT '';   -- "daughter", "son", "partner"…
 ALTER TABLE clients ADD COLUMN IF NOT EXISTS birth_year integer;
+-- A client is identified by their phone, their household (a dependent), or
+-- their Square customer profile (a Square customer may have no phone).
+ALTER TABLE clients ADD COLUMN IF NOT EXISTS square_customer_id text;
+CREATE UNIQUE INDEX IF NOT EXISTS clients_square_customer_idx ON clients (square_customer_id) WHERE square_customer_id IS NOT NULL;
+ALTER TABLE clients DROP CONSTRAINT IF EXISTS clients_phone_or_household;
 DO $$ BEGIN
-  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'clients_phone_or_household') THEN
-    ALTER TABLE clients ADD CONSTRAINT clients_phone_or_household CHECK (phone IS NOT NULL OR household_id IS NOT NULL);
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'clients_identity') THEN
+    ALTER TABLE clients ADD CONSTRAINT clients_identity CHECK (phone IS NOT NULL OR household_id IS NOT NULL OR square_customer_id IS NOT NULL);
   END IF;
 END $$;
 CREATE INDEX IF NOT EXISTS clients_household_idx ON clients (household_id);
@@ -354,4 +359,51 @@ INSERT INTO settings (key, value) VALUES
   ('cancel_window_hours','24'),  -- cancelling inside this window forfeits the deposit
   ('late_grace_min',     '15'),  -- after this many minutes late, the desk may mark a no-show
   ('policy_text',        '')     -- optional wording shown above the booking checkbox
+ON CONFLICT (key) DO NOTHING;
+
+-- ── Referrals and Crown Jewels ──────────────────────────────────────────────
+-- A client says who referred them (name, phone and/or email) when they book,
+-- the desk adds it at checkout, or it is typed into the "Referred by" field
+-- on their Square profile. After their first paid checkout the referral is
+-- connected to the referring client's profile, and that client earns Crown
+-- Jewels: a referral reward kept apart from Crowns (loyalty points) and
+-- redeemable for merch at the desk. A person is referred once.
+CREATE TABLE IF NOT EXISTS referrals (
+  id                 serial PRIMARY KEY,
+  referred_client_id integer NOT NULL REFERENCES clients(id) ON DELETE CASCADE,
+  given_name         text NOT NULL DEFAULT '',              -- who referred them, as typed
+  given_phone        text,                                  -- normalised digits
+  given_email        text,
+  referrer_client_id integer REFERENCES clients(id) ON DELETE SET NULL,   -- set once matched (or picked)
+  source             text NOT NULL CHECK (source IN ('online', 'desk', 'checkout', 'square')),
+  status             text NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'needs_match', 'connected', 'void')),
+  appointment_id     integer REFERENCES appointments(id) ON DELETE SET NULL,
+  visit_id           integer REFERENCES visits(id) ON DELETE SET NULL,
+  ticket_id          integer REFERENCES tickets(id) ON DELETE SET NULL,   -- the paid checkout that connected it
+  square_payment_id  text,                                                 -- or the Square payment that did
+  jewels             integer NOT NULL DEFAULT 0,                           -- Crown Jewels the referrer earned
+  note               text NOT NULL DEFAULT '',
+  created_at         timestamptz NOT NULL DEFAULT now(),
+  updated_at         timestamptz NOT NULL DEFAULT now(),
+  connected_at       timestamptz,
+  CHECK (referrer_client_id IS NULL OR referrer_client_id <> referred_client_id)
+);
+CREATE UNIQUE INDEX IF NOT EXISTS referrals_one_per_client ON referrals (referred_client_id) WHERE status <> 'void';
+CREATE INDEX IF NOT EXISTS referrals_referrer_idx ON referrals (referrer_client_id);
+CREATE INDEX IF NOT EXISTS referrals_status_idx ON referrals (status, updated_at DESC);
+
+-- Crown Jewels: a ledger, so every jewel earned, reversed or spent on merch is on record.
+CREATE TABLE IF NOT EXISTS crown_jewels (
+  id          serial PRIMARY KEY,
+  client_id   integer NOT NULL REFERENCES clients(id) ON DELETE CASCADE,
+  delta       integer NOT NULL CHECK (delta <> 0),
+  reason      text NOT NULL CHECK (reason IN ('referral', 'reversed', 'redeemed', 'adjusted')),
+  referral_id integer REFERENCES referrals(id) ON DELETE SET NULL,
+  note        text NOT NULL DEFAULT '',
+  created_by  text,
+  created_at  timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS crown_jewels_client_idx ON crown_jewels (client_id, created_at DESC);
+INSERT INTO settings (key, value) VALUES
+  ('referral_jewels', '1')   -- Crown Jewels a referrer earns for each connected referral
 ON CONFLICT (key) DO NOTHING;

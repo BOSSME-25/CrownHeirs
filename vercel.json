@@ -12,7 +12,8 @@
     ]
   },
   "crons": [
-    { "path": "/api/book/reminders", "schedule": "0 16 * * *" }
+    { "path": "/api/book/reminders", "schedule": "0 16 * * *" },
+    { "path": "/api/book/referrals", "schedule": "20 7 * * *" }
   ],
   "rewrites": [
     { "source": "/tv", "destination": "/tv.html" },
