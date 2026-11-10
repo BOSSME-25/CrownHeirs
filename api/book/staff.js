@@ -20,6 +20,12 @@
 //   POST { action: 'terminal.pair', name } / { action: 'terminal.use', deviceId, name } / { action: 'terminal.forget' }
 //   GET  ?action=dolls.list[&status=] / POST { action: 'doll.status', code, status, quote?, tell? }   Crown Heirs Dolls
 //   POST { action: 'ticket.terminal.start', code } / { action: 'ticket.terminal.cancel', code }; GET ?action=ticket.terminal.status&code=
+//   Referrals & Crown Jewels:
+//   GET  ?action=clients.search&q=   clients here and in Square's directory
+//   GET  ?action=referral.client&id= / ?action=referrals.list[&status=] / ?action=referrals.status
+//   POST { action: 'referral.set', code, referrerClientId? | referrerSquareId? | given? }   at checkout
+//   POST { action: 'referral.pick', id, referrerClientId? | referrerSquareId? } / { action: 'referral.clear', clientId }
+//   POST { action: 'jewels.redeem', clientId, jewels, note } / { action: 'referrals.square.setup' } / { action: 'referrals.square.sync' }
 const staff = require('../../lib/staff');
 const family = require('../../lib/family');
 const dolls = require('../../lib/dolls');
@@ -27,6 +33,7 @@ const { BookingError } = require('../../lib/booking');
 const themes = require('../../lib/themes');
 const tickets = require('../../lib/tickets');
 const tokens = require('../../lib/api-tokens');
+const referrals = require('../../lib/referrals');
 const { availability, createAppointment } = require('../../lib/booking');
 const { query, getSettings } = require('../../lib/db');
 const { fail, noStore, isAdmin } = require('./_shared');
@@ -59,6 +66,10 @@ module.exports = async (req, res) => {
         }
         case 'ticket.terminal.status': return res.status(200).json(await tickets.terminalStatus(q.code));
         case 'dolls.list':   return res.status(200).json({ dolls: await dolls.list({ status: q.status || null }), statuses: dolls.STATUSES });
+        case 'clients.search':   return res.status(200).json({ clients: await referrals.searchClients(q.q || '') });
+        case 'referral.client':  return res.status(200).json(await referrals.profile(q.id));
+        case 'referrals.list':   return res.status(200).json({ referrals: await referrals.list({ status: q.status || null }) });
+        case 'referrals.status': return res.status(200).json(await referrals.status());
         case 'availability': return res.status(200).json(await availability({
           serviceSlug: q.service, variationId: q.variation || null, date: q.date, stylistSlug: q.stylist || null, staff: true
         }));
@@ -78,10 +89,10 @@ module.exports = async (req, res) => {
       switch (b.action) {
         case 'book': return res.status(201).json(await createAppointment({
           serviceSlug: b.service, variationId: b.variation ?? null, stylistSlug: b.stylist || 'any',
-          startAt: b.startAt, client: b.client, notes: b.notes, staff: true
+          startAt: b.startAt, client: b.client, notes: b.notes, referrer: b.referrer || null, staff: true
         }));
         case 'visit.book': return res.status(201).json(await family.create({
-          holder: b.holder, people: b.people, notes: b.notes, mode: b.mode || 'together', themeAck: Boolean(b.themeAck), staff: true
+          holder: b.holder, people: b.people, notes: b.notes, mode: b.mode || 'together', themeAck: Boolean(b.themeAck), referrer: b.referrer || null, staff: true
         }));
         case 'status':         return res.status(200).json(await staff.setStatus(b.code, b.status));
         case 'move':           return res.status(200).json(await staff.move(b.code, b));
@@ -127,9 +138,17 @@ module.exports = async (req, res) => {
           const win = num('cancel_window_hours', 0, 240, 'Cancellation window'); if (win !== null) { await put('cancel_window_hours', win); out.cancel_window_hours = win; }
           const grace = num('late_grace_min', 0, 120, 'Late grace'); if (grace !== null) { await put('late_grace_min', grace); out.late_grace_min = grace; }
           if (b.policy_text !== undefined) { await put('policy_text', String(b.policy_text).slice(0, 600)); out.policy_text = String(b.policy_text).slice(0, 600); }
+          const jw = num('referral_jewels', 0, 100, 'Crown Jewels per referral'); if (jw !== null) { if (!Number.isInteger(jw)) throw new BookingError(400, 'Crown Jewels per referral must be a whole number'); await put('referral_jewels', jw); out.referral_jewels = jw; }
           return res.status(200).json(out);
         }
         case 'deposit.mark':   return res.status(200).json(await staff.markDeposit(b.code, b));
+        // ── referrals & Crown Jewels ──
+        case 'referral.set':   return res.status(200).json(await referrals.setForTicket(b.code, { referrerClientId: b.referrerClientId || null, referrerSquareId: b.referrerSquareId || null, given: b.given || null }));
+        case 'referral.pick':  return res.status(200).json(await referrals.pick(b.id, { referrerClientId: b.referrerClientId || null, referrerSquareId: b.referrerSquareId || null }, 'desk'));
+        case 'referral.clear': return res.status(200).json(await referrals.clear(b.clientId));
+        case 'jewels.redeem':  return res.status(200).json(await referrals.redeem(b.clientId, { jewels: b.jewels, note: b.note, by: 'desk' }));
+        case 'referrals.square.setup': return res.status(200).json(await referrals.setupSquare());
+        case 'referrals.square.sync':  return res.status(200).json(await referrals.syncSquare());
         case 'client.waive':   return res.status(200).json(await staff.waiveFees(b.phone, b.waived));
         case 'token.create':   return res.status(201).json(await tokens.create(b));
         case 'token.revoke':   return res.status(200).json(await tokens.revoke(b.id));

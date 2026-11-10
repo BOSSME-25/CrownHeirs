@@ -102,6 +102,25 @@ h2 { font-family: var(--font-serif); font-weight: 600; font-size: 25px; margin-b
 .vopt .t { font-family: var(--font-serif); font-size: 18px; font-weight: 600; color: var(--ink); }
 .vopt.on { border-color: var(--terra); box-shadow: 0 0 0 2px var(--terra) inset; }
 @media (max-width: 520px) { .person .leg { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 480px) { .tab { padding: 10px 4px; font-size: 13px; } }
+/* referrals */
+.refbox { border: 1px solid var(--border); border-left: 4px solid var(--gold); border-radius: 12px; padding: 10px 12px; margin-top: 12px; background: var(--surface-dim); font-size: 14px; color: var(--ink-mid); line-height: 1.5; }
+.refbox .h { font-family: var(--font-display); font-size: 11px; letter-spacing: .15em; text-transform: uppercase; color: var(--gold); margin-bottom: 2px; }
+.refbox b { font-weight: 500; color: var(--ink); }
+.cp-r { margin-top: 6px; }
+.cp-o { display: flex; justify-content: space-between; align-items: center; gap: 8px; width: 100%; text-align: left; border: 1px solid var(--border); border-radius: 10px; padding: 8px 12px; margin-top: 6px; background: var(--surface); font-size: 14px; color: var(--ink-mid); }
+.cp-o b { font-weight: 500; color: var(--ink); }
+.cp-o:hover { border-color: var(--terra); }
+.ref-row { border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px; margin-top: 8px; background: var(--surface-dim); font-size: 14px; color: var(--ink-mid); line-height: 1.5; }
+.ref-row .n { font-family: var(--font-serif); font-size: 18px; font-weight: 600; color: var(--ink); }
+.jewels { font-family: var(--font-ui); font-size: 38px; font-weight: 400; line-height: 1; color: var(--ink); font-variant-numeric: lining-nums tabular-nums; }
+.jewels small { font-family: var(--font-ui); font-size: 14px; font-weight: 300; color: var(--ink-dim); margin-left: 6px; }
+.hist { width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 6px; }
+.hist td { padding: 6px 4px; border-top: 1px solid var(--border); vertical-align: top; }
+.hist td.d { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+details.nref { margin-top: 12px; border: 1px dashed var(--border); border-radius: 12px; padding: 0 12px; }
+details.nref summary { cursor: pointer; padding: 10px 0; font-size: 14px; color: var(--ink-mid); }
+details.nref[open] { padding-bottom: 12px; }
 </style>
 </head>
 <body>
@@ -112,6 +131,7 @@ h2 { font-family: var(--font-serif); font-weight: 600; font-size: 25px; margin-b
     <button class="tab on" id="tabBook" onclick="showTab('book')">Book</button>
     <button class="tab" id="tabTix" onclick="showTab('tix')">Tickets</button>
     <button class="tab" id="tabDolls" onclick="showTab('dolls')">CH Dolls</button>
+    <button class="tab" id="tabRefs" onclick="showTab('refs')">Referrals</button>
     <button class="tab" id="tabTeam" onclick="showTab('team')">Team</button>
   </div>
 
@@ -147,6 +167,31 @@ h2 { font-family: var(--font-serif); font-weight: 600; font-size: 25px; margin-b
     <div class="hint">Requests from the Doll Maker at <a href="/dolls" target="_blank">/dolls</a>. "See the doll" opens the look they built. Quote it, then move it along; the client is texted at each step (Quoted sends the quote). Extra wishes in the notes are considered, never promised.</div>
     <div class="pills" id="dollPills"></div>
     <div id="dollList"><div class="empty">Loading…</div></div>
+  </section>
+
+  <!-- ═══ REFERRALS ═══ -->
+  <section id="viewRefs" class="hidden">
+    <div class="hint">Who referred whom, and Crown Jewels. A referral is connected to the referrer's profile after the new client's first paid checkout (here or in Square), and the referrer earns Crown Jewels to spend on merch. Crown Jewels run alongside the Crowns in Square Loyalty.</div>
+    <div class="card" id="refNeedCard">
+      <h2>Needs a match <span id="refNeedN"></span></h2>
+      <div class="hint">These clients have paid, but who referred them couldn't be matched for sure (no one with that phone or email, or more than one person with that name). Pick the right client and the referral connects.</div>
+      <div id="refNeed"><div class="empty">Loading…</div></div>
+    </div>
+    <div class="card">
+      <h2>Clients</h2>
+      <div class="hint">Look up anyone (here or in Square) to see who referred them, whom they've referred, and their Crown Jewels, and to redeem jewels for merch.</div>
+      <div id="refFind"></div>
+      <div id="refProfile"></div>
+    </div>
+    <div class="card">
+      <h2>Waiting for checkout</h2>
+      <div class="hint">Referrals given at booking. Each connects after that client's first paid checkout.</div>
+      <div id="refPending"><div class="empty">Loading…</div></div>
+    </div>
+    <div class="card">
+      <h2>Recently connected</h2>
+      <div id="refDone"><div class="empty">Loading…</div></div>
+    </div>
   </section>
 
   <!-- ═══ TEAM ═══ -->
@@ -204,6 +249,15 @@ h2 { font-family: var(--font-serif); font-weight: 600; font-size: 25px; margin-b
     </div>
     <label>Email (optional)</label><input id="nEmail" type="email">
     <label>Notes</label><textarea id="nNotes" rows="2"></textarea>
+    <details class="nref" id="nRefBox">
+      <summary>Referred by someone? (optional)</summary>
+      <div class="hint" style="margin:0;">Their name, and a phone or email if the client knows it. It connects to that client's profile after this client's first paid checkout.</div>
+      <label>Their name</label><input id="nRefName" autocomplete="off">
+      <div class="grid2">
+        <div><label>Their mobile</label><input id="nRefPhone" type="tel" inputmode="tel" autocomplete="off"></div>
+        <div><label>Their email</label><input id="nRefEmail" type="email" autocomplete="off"></div>
+      </div>
+    </details>
     <div class="err" id="nErr"></div>
     <div class="row" style="justify-content:space-between;margin-top:12px;">
       <button class="btn btn-ghost" onclick="closeModal('mNew')">Cancel</button>
@@ -246,6 +300,7 @@ h2 { font-family: var(--font-serif); font-weight: 600; font-size: 25px; margin-b
       <div class="row" style="margin-top:8px;"><button class="btn btn-ghost btn-sm" onclick="tAddLine()">＋ Add line</button></div>
     </div>
     <div id="tTotals" class="sum" style="margin-top:12px;"></div>
+    <div id="tReferral" class="refbox hidden"></div>
     <div id="tTerm" class="hidden" style="margin-top:12px;border:1px solid var(--gold);background:rgba(200,149,42,.1);border-radius:12px;padding:12px 14px;">
       <div style="font-family:var(--font-serif);font-size:19px;font-weight:600;" id="tTermTitle">Waiting on the Terminal…</div>
       <div class="hint" id="tTermHint" style="margin:4px 0 8px;"></div>
@@ -336,14 +391,178 @@ async function enter() {
   } catch (e) { $('dayErr').textContent = e.message; }
   try { TERMINAL = await api('GET', { action: 'terminal.status' }); } catch (e) { TERMINAL = null; }
   DATE = today(); renderDates(); loadDay();
-  if (new URLSearchParams(location.search).get('tab') === 'team') showTab('team');
+  const startTab = new URLSearchParams(location.search).get('tab');
+  if (startTab === 'team' || startTab === 'refs') showTab(startTab);
 }
 function showTab(t) {
-  for (const [k, v] of [['book', 'viewBook'], ['tix', 'viewTix'], ['dolls', 'viewDolls'], ['team', 'viewTeam']]) $(v).classList.toggle('hidden', t !== k);
-  for (const [k, v] of [['book', 'tabBook'], ['tix', 'tabTix'], ['dolls', 'tabDolls'], ['team', 'tabTeam']]) $(v).classList.toggle('on', t === k);
+  for (const [k, v] of [['book', 'viewBook'], ['tix', 'viewTix'], ['dolls', 'viewDolls'], ['refs', 'viewRefs'], ['team', 'viewTeam']]) $(v).classList.toggle('hidden', t !== k);
+  for (const [k, v] of [['book', 'tabBook'], ['tix', 'tabTix'], ['dolls', 'tabDolls'], ['refs', 'tabRefs'], ['team', 'tabTeam']]) $(v).classList.toggle('on', t === k);
   if (t === 'team') renderTeam();
   if (t === 'tix') loadTickets();
   if (t === 'dolls') loadDolls();
+  if (t === 'refs') loadRefs();
+}
+
+/* ── referrals & Crown Jewels ── */
+const fmtPhone = p => String(p || '').replace(/^1?(\d{3})(\d{3})(\d{4})$/, '($1) $2-$3');
+const plural = (n, w) => `${n} ${w}${n === 1 ? '' : 's'}`;
+const jewelsText = n => plural(n, 'Crown Jewel');
+const fmtDay = iso => iso ? new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: TZ }) : '';
+const givenText = g => [g.name, fmtPhone(g.phone), g.email].filter(Boolean).map(esc).join(' · ') || '—';
+const REF_STATUS = { pending: 'waiting for checkout', needs_match: 'needs a match', connected: 'connected' };
+const REF_SOURCE = { online: 'Booked online', desk: 'Desk booking', checkout: 'At checkout', square: 'Square' };
+
+// A search box over clients here and in Square's directory. onPick gets the
+// chosen { id, squareCustomerId, name, phone, from }.
+function clientPicker(el, onPick, placeholder = 'Search by name, phone or email') {
+  el.innerHTML = `<input class="cp-q" placeholder="${esc(placeholder)}" autocomplete="off"><div class="cp-r"></div>`;
+  const q = el.querySelector('.cp-q'), out = el.querySelector('.cp-r');
+  let seq = 0, timer = null;
+  q.oninput = () => {
+    clearTimeout(timer);
+    timer = setTimeout(async () => {
+      const mine = ++seq, text = q.value.trim();
+      if (text.length < 2) { out.innerHTML = ''; return; }
+      out.innerHTML = '<div class="hint" style="margin:6px 0 0;">Searching…</div>';
+      try {
+        const { clients } = await api('GET', { action: 'clients.search', q: text });
+        if (mine !== seq) return;
+        out.innerHTML = clients.length ? clients.map((c, i) => `<button class="cp-o" data-i="${i}"><span><b>${esc(c.name)}</b>${c.phone ? ' · ' + fmtPhone(c.phone) : ''}${c.email ? ' · ' + esc(c.email) : ''}</span><span class="badge ${c.from === 'square' ? 'staff' : ''}">${c.from === 'square' ? 'Square' : 'Client'}</span></button>`).join('')
+          : '<div class="hint" style="margin:6px 0 0;">No one found.</div>';
+        out.querySelectorAll('.cp-o').forEach(b => { b.onclick = () => onPick(clients[Number(b.dataset.i)]); });
+      } catch (e) { out.innerHTML = `<div class="err">${esc(e.message)}</div>`; }
+    }, 250);
+  };
+  setTimeout(() => q.focus(), 0);
+}
+const pickIds = c => ({ referrerClientId: c.id || null, referrerSquareId: c.id ? null : c.squareCustomerId });
+
+// The till: who referred this ticket's client. Connected after the checkout is paid.
+let T_REF = null, T_REF_EDIT = false, T_REF_KEY = '';
+// Reload only when the ticket, its client or its status changes, so adding a line doesn't wipe a search in progress.
+function tRefMaybe() {
+  const k = `${TICKET.code}:${TICKET.status}:${TICKET.client ? TICKET.client.id : ''}`;
+  if (k !== T_REF_KEY) { T_REF_KEY = k; T_REF_EDIT = false; tRefRender(); }
+}
+async function tRefRender(reload = true) {
+  const box = $('tReferral'), t = TICKET;
+  box.classList.remove('hidden');
+  if (!t.client) {
+    box.innerHTML = '<div class="h">Referred by</div>No client on this ticket. To credit a referral, the walk-in needs a client record (open the ticket with their name and mobile).';
+    return;
+  }
+  if (reload) {
+    const code = t.code;
+    try { const p = await api('GET', { action: 'referral.client', id: t.client.id }); if (TICKET.code !== code) return; T_REF = p; }
+    catch (e) { box.innerHTML = `<div class="h">Referred by</div><span class="err">${esc(e.message)}</span>`; return; }
+  }
+  const p = T_REF, r = p.referredBy, mine = p.jewels.balance;
+  const who = r ? (r.referrer ? `<b>${esc(r.referrer.name)}</b>${r.referrer.phone ? ' · ' + fmtPhone(r.referrer.phone) : ''}` : givenText(r.given)) : '';
+  let html = '<div class="h">Referred by</div>';
+  if (r && r.status === 'connected') html += `${who} <span class="badge ok">connected</span>`;
+  else if (r) html += `${who} <span class="badge ${r.status === 'needs_match' ? 'err' : ''}">${REF_STATUS[r.status]}</span>`
+    + `<div class="hint" style="margin:2px 0 0;">${r.status === 'needs_match' ? 'Pick the right client below.' : r.referrer ? 'Connects when this ticket is paid.' : 'Matched to a profile when this ticket is paid (or pick them now).'}</div>`;
+  else html += 'No one yet.';
+  if (!(r && r.status === 'connected') && !['voided', 'refunded'].includes(t.status)) {
+    html += T_REF_EDIT ? `<div id="tRefPick" style="margin-top:8px;"></div>
+      <details style="margin-top:8px;"><summary style="cursor:pointer;font-size:13px;">Not found? Type their details</summary>
+        <div class="grid2"><div><label>Name</label><input id="tRefName"></div><div><label>Mobile</label><input id="tRefPhone" type="tel" inputmode="tel"></div></div>
+        <label>Email</label><input id="tRefEmail" type="email">
+        <button class="btn btn-ghost btn-sm" style="margin-top:8px;" onclick="tRefSave()">Save</button>
+      </details>
+      <div class="row" style="margin-top:8px;"><button class="btn btn-ghost btn-sm" onclick="T_REF_EDIT=false;tRefRender(false)">Cancel</button></div>`
+      : `<div class="row" style="margin-top:8px;"><button class="btn btn-ghost btn-sm" onclick="T_REF_EDIT=true;tRefRender(false)">${r ? 'Change' : '＋ Add who referred them'}</button>${r ? '<button class="btn btn-ghost btn-sm" onclick="tRefClear()">Remove</button>' : ''}</div>`;
+  }
+  if (mine) html += `<div style="margin-top:8px;">${esc(t.client.name)} has <b>${jewelsText(mine)}</b> to spend on merch · <a href="#" style="color:var(--terra)" onclick="event.preventDefault();refOpenFromTicket(${t.client.id})">Redeem</a></div>`;
+  box.innerHTML = html;
+  if (T_REF_EDIT && $('tRefPick')) clientPicker($('tRefPick'), c => tRefSet(pickIds(c)), 'Who referred them? Name, phone or email');
+}
+async function tRefSet(body) {
+  $('tErr').textContent = '';
+  try {
+    const r = await api('POST', null, { action: 'referral.set', code: TICKET.code, ...body });
+    T_REF_EDIT = false;
+    if (r && r.status === 'connected') toast(`Referral connected${r.jewels ? ' · +' + jewelsText(r.jewels) : ''}`);
+    else if (r && r.status === 'needs_match') toast('Saved · needs a match under Referrals');
+    else toast('Saved · connects when the ticket is paid');
+    tRefRender();
+  } catch (e) { $('tErr').textContent = e.message; }
+}
+function tRefSave() {
+  const given = { name: $('tRefName').value.trim(), phone: $('tRefPhone').value.trim(), email: $('tRefEmail').value.trim() };
+  if (!given.name && !given.phone && !given.email) { $('tErr').textContent = 'Type their name, phone or email'; return; }
+  tRefSet({ given });
+}
+async function tRefClear() {
+  if (!confirm('Remove who referred this client?')) return;
+  try { await api('POST', null, { action: 'referral.clear', clientId: TICKET.client.id }); T_REF_EDIT = false; tRefRender(); }
+  catch (e) { $('tErr').textContent = e.message; }
+}
+function refOpenFromTicket(clientId) { closeModal('mTicket'); showTab('refs'); refShow(clientId); }
+
+// The Referrals tab.
+async function loadRefs() {
+  if (!$('refFind').firstChild) clientPicker($('refFind'), c => c.id ? refShow(c.id) : refShowSquare(c));
+  let list;
+  try { list = (await api('GET', { action: 'referrals.list' })).referrals; }
+  catch (e) { $('refNeed').innerHTML = `<div class="empty">${esc(e.message)}</div>`; return; }
+  const row = (r, extra = '') => `<div class="ref-row">
+      <div class="row" style="justify-content:space-between;"><a href="#" class="n" style="text-decoration:none;" onclick="event.preventDefault();refShow(${r.referred.id})">${esc(r.referred.name)}</a><span class="badge">${esc(REF_SOURCE[r.source] || r.source)}</span></div>
+      <div>${r.referred.phone ? fmtPhone(r.referred.phone) + ' · ' : ''}${fmtDay(r.createdAt)}</div>
+      <div>Referred by: ${r.referrer ? `<a href="#" style="color:var(--terra)" onclick="event.preventDefault();refShow(${r.referrer.id})">${esc(r.referrer.name)}</a>` : ''}${r.referrer ? '' : 'they said ' + givenText(r.given)}</div>${extra}</div>`;
+  const need = list.filter(r => r.status === 'needs_match'), pending = list.filter(r => r.status === 'pending'), done = list.filter(r => r.status === 'connected').slice(0, 20);
+  $('refNeed').innerHTML = need.length ? need.map(r => row(r, `<div id="refPick${r.id}"></div><div class="acts"><button class="btn btn-terra btn-sm" onclick="refPick(${r.id})">Pick who referred them</button><button class="btn btn-ghost btn-sm" onclick="refClear(${r.referred.id})">Remove</button></div>`)).join('') : '<div class="empty">Nothing to match.</div>';
+  $('refNeedN').textContent = need.length ? `(${need.length})` : '';
+  $('refPending').innerHTML = pending.length ? pending.map(r => row(r, `<div class="acts"><button class="btn btn-ghost btn-sm" onclick="refClear(${r.referred.id})">Remove</button></div>`)).join('') : '<div class="empty">None waiting.</div>';
+  $('refDone').innerHTML = done.length ? done.map(r => row(r, `<div>Connected ${fmtDay(r.connectedAt)}${r.jewels ? ' · +' + jewelsText(r.jewels) : ''}</div>`)).join('') : '<div class="empty">None yet.</div>';
+}
+function refPick(id) {
+  clientPicker($('refPick' + id), async c => {
+    try {
+      const r = await api('POST', null, { action: 'referral.pick', id, ...pickIds(c) });
+      toast(r.status === 'connected' ? `Connected to ${c.name}${r.jewels ? ' · +' + jewelsText(r.jewels) : ''}` : `Saved: ${c.name}`);
+      loadRefs();
+    } catch (e) { alert(e.message); }
+  }, 'Who referred them? Name, phone or email');
+}
+async function refClear(clientId) {
+  if (!confirm('Remove this referral? Nobody will be credited for it.')) return;
+  try { await api('POST', null, { action: 'referral.clear', clientId }); loadRefs(); } catch (e) { alert(e.message); }
+}
+function refShowSquare(c) {
+  $('refProfile').innerHTML = `<div class="ref-row" style="margin-top:12px;"><div class="n">${esc(c.name)}</div><div>${c.phone ? fmtPhone(c.phone) : ''}${c.email ? ' · ' + esc(c.email) : ''}</div>
+    <div style="margin-top:6px;">In Square only, not yet a client here: no referrals or Crown Jewels yet. They become a client here when they refer someone, or when the desk picks them as a referrer.</div></div>`;
+}
+let REF_CLIENT = null;
+async function refShow(clientId) {
+  let p;
+  try { p = await api('GET', { action: 'referral.client', id: clientId }); } catch (e) { $('refProfile').innerHTML = `<div class="err">${esc(e.message)}</div>`; return; }
+  REF_CLIENT = p;
+  const c = p.client, r = p.referredBy;
+  const by = r ? (r.referrer ? `<a href="#" style="color:var(--terra)" onclick="event.preventDefault();refShow(${r.referrer.id})">${esc(r.referrer.name)}</a>` : givenText(r.given)) + ` <span class="badge ${r.status === 'connected' ? 'ok' : r.status === 'needs_match' ? 'err' : ''}">${REF_STATUS[r.status]}</span>` : 'No one';
+  const reason = { referral: 'Referral', reversed: 'Taken back', redeemed: 'Redeemed', adjusted: 'Adjusted' };
+  $('refProfile').innerHTML = `<div class="ref-row" style="margin-top:12px;">
+    <div class="row" style="justify-content:space-between;"><span class="n">${esc(c.name)}</span>${c.squareCustomerId ? '<span class="badge staff">In Square</span>' : ''}</div>
+    <div>${c.phone ? fmtPhone(c.phone) : ''}${c.email ? ' · ' + esc(c.email) : ''}</div>
+    <div style="margin-top:4px;">Referred by: ${by}</div>
+    <div style="margin-top:12px;" class="jewels">${p.jewels.balance}<small>Crown Jewel${p.jewels.balance === 1 ? '' : 's'}</small></div>
+    ${p.jewels.balance > 0 ? `<div class="grid2" style="margin-top:8px;align-items:end;">
+      <div><label>Redeem for</label><input id="rjNote" placeholder="e.g. Crown Heirs tee"></div>
+      <div><label>Crown Jewels</label><input id="rjN" type="number" min="1" max="${p.jewels.balance}" value="1" inputmode="numeric"></div></div>
+      <div class="row" style="margin-top:8px;"><button class="btn btn-terra btn-sm" onclick="refRedeem(${c.id})">Redeem for merch</button><span class="err" id="rjErr"></span></div>` : ''}
+    <div style="margin-top:12px;"><b style="font-weight:500;">Referred ${plural(p.referred.length, 'client')}</b></div>
+    ${p.referred.length ? `<table class="hist">${p.referred.map(x => `<tr><td><a href="#" style="color:var(--terra)" onclick="event.preventDefault();refShow(${x.client.id})">${esc(x.client.name)}</a></td><td>${REF_STATUS[x.status]}${x.connectedAt ? ' ' + fmtDay(x.connectedAt) : ''}</td><td class="d">${x.jewels ? '+' + x.jewels : ''}</td></tr>`).join('')}</table>` : ''}
+    ${p.jewels.history.length ? `<div style="margin-top:12px;"><b style="font-weight:500;">Crown Jewels history</b></div><table class="hist">${p.jewels.history.map(h => `<tr><td>${fmtDay(h.created_at)}</td><td>${reason[h.reason] || esc(h.reason)}${h.note ? ': ' + esc(h.note) : ''}</td><td class="d">${h.delta > 0 ? '+' : ''}${h.delta}</td></tr>`).join('')}</table>` : ''}
+  </div>`;
+  $('refProfile').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+async function refRedeem(clientId) {
+  const n = Number($('rjN').value), note = $('rjNote').value.trim();
+  $('rjErr').textContent = '';
+  if (!note) { $('rjErr').textContent = 'Say what they redeemed it for'; return; }
+  if (!confirm(`Redeem ${jewelsText(n)} for “${note}”?`)) return;
+  try { await api('POST', null, { action: 'jewels.redeem', clientId, jewels: n, note }); toast(`Redeemed ${jewelsText(n)}`); refShow(clientId); }
+  catch (e) { $('rjErr').textContent = e.message; }
 }
 
 /* ── dolls ── */
@@ -466,7 +685,7 @@ async function openWalkIn() {
   catch (e) { alert(e.message); }
 }
 async function openTicket(code) {
-  try { await ensureRetail(); TICKET = await api('GET', { action: 'ticket.get', code }); renderTicket(); openModal('mTicket'); }
+  try { await ensureRetail(); TICKET = await api('GET', { action: 'ticket.get', code }); T_REF_KEY = ''; renderTicket(); openModal('mTicket'); }
   catch (e) { alert(e.message); }
 }
 function provOptions(sel) { return STYLISTS.filter(s => s.active || s.slug === sel).map(s => `<option value="${esc(s.slug)}" ${s.slug === sel ? 'selected' : ''}>${esc(s.name)}</option>`).join(''); }
@@ -497,6 +716,7 @@ function renderTicket() {
   $('tTotals').innerHTML = `Subtotal <b class="money">${money(t.subtotal_cents)}</b> · Discount <b class="money">−${money(t.discount_cents)}</b> · Tax <b class="money">${money(t.tax_cents)}</b><br>
     Total <b class="money">${money(t.total_cents)}</b>${t.deposit_cents ? ` · Deposit already paid <b class="money" style="color:var(--ok)">−${money(t.deposit_cents)}</b> · <b>Due today ${money(Math.max(0, t.total_cents - t.deposit_cents))}</b>` : ''}${t.tip_cents ? ` · Tip <b class="money">${money(t.tip_cents)}</b>` : ''}${t.refunded_cents ? ` · Refunded <b class="money" style="color:var(--err)">${money(t.refunded_cents)}</b>` : ''}${unpriced ? `<br><span style="color:var(--err)">${unpriced} line${unpriced === 1 ? '' : 's'} without a price — enter it before paying.</span>` : ''}`;
   $('tErr').textContent = '';
+  tRefMaybe();
   const live = openT && t.terminal && TERM_LIVE.includes(t.terminal.status);
   const paired = TERMINAL && TERMINAL.configured && TERMINAL.device;
   $('tTerm').classList.toggle('hidden', !live);
@@ -626,7 +846,7 @@ function openNew() {
   if (STYLIST !== 'all') $('nStylist').value = STYLIST;
   $('nDate').value = DATE;
   $('nService').innerHTML = CATS.map(c => `<optgroup label="${esc(c.category)}">${c.services.map(s => `<option value="${esc(s.slug)}">${esc(s.name)}</option>`).join('')}</optgroup>`).join('');
-  ['nName', 'nPhone', 'nEmail', 'nNotes'].forEach(id => $(id).value = ''); $('nErr').textContent = '';
+  ['nName', 'nPhone', 'nEmail', 'nNotes', 'nRefName', 'nRefPhone', 'nRefEmail'].forEach(id => $(id).value = ''); $('nErr').textContent = ''; $('nRefBox').open = false;
   vReset(); nKind('one'); nVariations(); openModal('mNew');
 }
 function nKind(kind) {
@@ -654,12 +874,16 @@ async function nTimes() {
     sel.innerHTML = slots.length ? slots.map(iso => `<option value="${iso}">${fmtT(iso)}</option>`).join('') : '<option value="">No openings — try another day or stylist</option>';
   } catch (e) { sel.innerHTML = `<option value="">${esc(e.message)}</option>`; }
 }
+function nReferrer() {
+  const r = { name: $('nRefName').value.trim(), phone: $('nRefPhone').value.trim(), email: $('nRefEmail').value.trim() };
+  return r.name || r.phone || r.email ? r : null;
+}
 async function nBook() {
   $('nErr').textContent = ''; $('nGo').disabled = true;
   try {
     if (!$('nTime').value) throw new Error('Pick a time');
     const j = await api('POST', null, { action: 'book', service: $('nService').value, variation: Number($('nVariation').value), stylist: $('nStylist').value,
-      startAt: $('nTime').value, client: { name: $('nName').value, phone: $('nPhone').value, email: $('nEmail').value }, notes: $('nNotes').value });
+      startAt: $('nTime').value, client: { name: $('nName').value, phone: $('nPhone').value, email: $('nEmail').value }, notes: $('nNotes').value, referrer: nReferrer() });
     closeModal('mNew'); toast(`Booked · ${j.code}`); DATE = $('nDate').value; renderDates(); loadDay();
   } catch (e) { $('nErr').textContent = e.message; }
   finally { $('nGo').disabled = false; }
@@ -740,7 +964,7 @@ async function vBook() {
   $('nGo').disabled = true;
   try {
     const people = vPayload().map((p, i) => ({ ...p, services: p.services.map((sv, k) => ({ ...sv, stylist: o.people[i].legs[k].stylist.slug, startAt: o.people[i].legs[k].startAt })) }));
-    const j = await api('POST', null, { action: 'visit.book', mode: V.mode, people, notes: $('nNotes').value,
+    const j = await api('POST', null, { action: 'visit.book', mode: V.mode, people, notes: $('nNotes').value, referrer: nReferrer(),
       holder: { name: $('nName').value, phone: $('nPhone').value, email: $('nEmail').value } });
     closeModal('mNew');
     toast(`Booked · ${j.code}` + (j.deposit && j.deposit.cents ? ` · deposit ${money(j.deposit.cents)} due` : ''));

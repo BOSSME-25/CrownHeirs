@@ -86,6 +86,14 @@ h2 { font-family: var(--font-serif); font-weight: 600; font-size: 27px; margin-b
 .sum b { font-weight: 500; }
 .code { font-family: var(--font-display); font-size: 30px; letter-spacing: 0.18em; color: var(--terra); text-align: center; margin: 10px 0; }
 .ok-badge { display: inline-block; background: rgba(61,122,69,0.1); color: var(--ok); border-radius: 100px; padding: 6px 14px; font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; }
+.ref { margin-top: 16px; border: 1px solid var(--border); background: var(--surface-dim); padding: 0 14px; }
+.ref summary { cursor: pointer; padding: 13px 0; font-size: 15px; color: var(--ink); list-style: none; }
+.ref summary::-webkit-details-marker { display: none; }
+.ref summary::before { content: '+'; display: inline-block; width: 18px; color: var(--terra); font-weight: 500; }
+.ref[open] summary::before { content: '–'; }
+.ref summary span { color: var(--ink-dim); font-size: 13px; }
+.ref[open] { padding-bottom: 14px; }
+.ref .hint { margin: 0 0 4px; }
 .consult { background: rgba(200,149,42,0.12); border-left: 3px solid var(--gold); padding: 10px 12px; font-size: 14px; border-radius: 6px; margin-top: 12px; }
 .spin { color: var(--ink-dim); font-size: 14px; padding: 12px 0; }
 /* Theme days */
@@ -245,6 +253,13 @@ h2 { font-weight: 400; font-size: 30px; }
     <label>Mobile number</label><input id="fPhone" type="tel" autocomplete="tel" inputmode="tel" placeholder="(602) 555-0100">
     <label>Email <span style="text-transform:none;letter-spacing:0;">(optional, for your confirmation)</span></label><input id="fEmail" type="email" autocomplete="email" placeholder="you@example.com">
     <label>Anything we should know? <span style="text-transform:none;letter-spacing:0;">(optional)</span></label><textarea id="fNotes" rows="2" placeholder="Hair length, allergies, a photo you’ll bring…"></textarea>
+    <details class="ref" id="refBox">
+      <summary>Did someone refer you? <span>(optional)</span></summary>
+      <div class="hint">Tell us who sent you, and they’ll be thanked with Crown Jewels after your visit. Their name, plus their phone or email if you have it, helps us find them.</div>
+      <label>Their name</label><input id="rName" autocomplete="off" placeholder="First and last name">
+      <label>Their mobile number</label><input id="rPhone" type="tel" autocomplete="off" inputmode="tel" placeholder="(602) 555-0100">
+      <label>Their email</label><input id="rEmail" type="email" autocomplete="off" placeholder="them@example.com">
+    </details>
     <div class="err" id="e4"></div>
     <div class="row">
       <button class="btn btn-ghost" onclick="go(3)">← Back</button>
@@ -477,6 +492,11 @@ function pickTime(iso) {
 }
 
 /* ── 4 · book ── */
+// Who referred them (optional): null when the box is empty.
+function referrer() {
+  const r = { name: $('rName').value.trim(), phone: $('rPhone').value.trim(), email: $('rEmail').value.trim() };
+  return r.name || r.phone || r.email ? r : null;
+}
 async function book() {
   if (isVisit()) return bookFamily();
   if (needAck() || needPolicy()) return;
@@ -487,7 +507,7 @@ async function book() {
       body: JSON.stringify({
         service: SEL.service.slug, variation: SEL.variation.id, stylist: SEL.stylist, startAt: SEL.startAt,
         client: { name: $('fName').value, phone: $('fPhone').value, email: $('fEmail').value },
-        notes: $('fNotes').value, themeAck: themeAck(), policyAck: policyAck()
+        notes: $('fNotes').value, themeAck: themeAck(), policyAck: policyAck(), referrer: referrer()
       })
     });
     const j = await r.json();
@@ -706,7 +726,7 @@ async function bookFamily() {
       services: p.legs.map(l => ({ service: l.service.slug, variation: l.variation.id, stylist: l.stylist.slug, startAt: l.startAt }))
     }));
     const r = await fetch('/api/book/family', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ holder: { name: holderName, phone: $('fPhone').value, email: $('fEmail').value }, people, mode: MODE, notes: $('fNotes').value, themeAck: themeAck(), policyAck: policyAck() }) });
+      body: JSON.stringify({ holder: { name: holderName, phone: $('fPhone').value, email: $('fEmail').value }, people, mode: MODE, notes: $('fNotes').value, themeAck: themeAck(), policyAck: policyAck(), referrer: referrer() }) });
     const j = await r.json();
     if (!r.ok) {
       if (j.needsAck) { showThemeAck(j.theme, j.theme.body); $('themeAck').classList.remove('hidden'); $('e4').textContent = 'Please read the note above and tick the box.'; return; }

@@ -15,7 +15,8 @@ module.exports = async (req, res) => {
     }
     const appt = await createAppointment({
       serviceSlug: b.service, variationId: b.variation ?? null, stylistSlug: b.stylist || 'any',
-      startAt: b.startAt, client: b.client, notes: b.notes, themeAck: Boolean(b.themeAck), policyAck: Boolean(b.policyAck)
+      startAt: b.startAt, client: b.client, notes: b.notes, themeAck: Boolean(b.themeAck), policyAck: Boolean(b.policyAck),
+      referrer: b.referrer || null
     });
     res.status(201).json(appt);
   } catch (e) { fail(res, e); }
